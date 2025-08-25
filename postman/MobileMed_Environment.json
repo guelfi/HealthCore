@@ -1,0 +1,27 @@
+{
+  "id": "mobilemed-env",
+  "name": "MobileMed Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "enabled": true
+    },
+    {
+      "key": "paciente_id",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "exame_id",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

@@ -1,0 +1,145 @@
+// CSS Custom Properties (CSS Variables)
+:root {
+  --primary-color: #0092ff;
+  --secondary-color: #007acc;
+  --surface-color: #ffffff;
+  --background-color: #f4f7fa;
+  --text-primary: #000000;
+  --text-secondary: #555555;
+  --elevation-1: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --elevation-2: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --border-radius: 8px;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+}
+
+// Reset básico
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+// Componente App seguindo metodologia BEM
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: var(--spacing-lg);
+    text-align: center;
+    box-shadow: var(--elevation-1);
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+  }
+
+  &__main {
+    flex: 1;
+    padding: var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+
+    p {
+      margin-bottom: var(--spacing-md);
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// Import responsive utilities
+@import './responsive.scss';
+
+// Responsividade
+@media (max-width: 768px) {
+  .app {
+    &__header {
+      padding: var(--spacing-md);
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+
+    &__main {
+      padding: var(--spacing-md);
+    }
+  }
+}
+
+// Global accessibility improvements
+*:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+// Ensure proper contrast for links
+a {
+  color: var(--primary-color);
+  text-decoration: underline;
+  
+  &:hover, &:focus {
+    text-decoration: none;
+  }
+}
+
+// Improve button accessibility
+button {
+  cursor: pointer;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  :root {
+    --primary-color: #000000;
+    --secondary-color: #000000;
+    --text-primary: #000000;
+    --text-secondary: #000000;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

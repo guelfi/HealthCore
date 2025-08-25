@@ -1,0 +1,169 @@
+// Breakpoints
+$breakpoint-xs: 0px;
+$breakpoint-sm: 600px;
+$breakpoint-md: 900px;
+$breakpoint-lg: 1200px;
+$breakpoint-xl: 1536px;
+
+// Mixins for responsive design
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: #{$breakpoint-sm}) and (max-width: #{$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-only {
+  @media (min-width: #{$breakpoint-md}) {
+    @content;
+  }
+}
+
+@mixin mobile-and-tablet {
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-and-desktop {
+  @media (min-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+// Responsive utilities
+.mobile-only {
+  @include tablet-and-desktop {
+    display: none !important;
+  }
+}
+
+.tablet-only {
+  @include mobile-only {
+    display: none !important;
+  }
+  
+  @include desktop-only {
+    display: none !important;
+  }
+}
+
+.desktop-only {
+  @include mobile-and-tablet {
+    display: none !important;
+  }
+}
+
+.mobile-and-tablet {
+  @include desktop-only {
+    display: none !important;
+  }
+}
+
+.tablet-and-desktop {
+  @include mobile-only {
+    display: none !important;
+  }
+}
+
+// Responsive spacing
+.responsive-padding {
+  padding: 16px;
+  
+  @include tablet-and-desktop {
+    padding: 24px;
+  }
+}
+
+.responsive-margin {
+  margin: 16px;
+  
+  @include tablet-and-desktop {
+    margin: 24px;
+  }
+}
+
+// Responsive grid
+.responsive-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+  
+  @include tablet-only {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include desktop-only {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+}
+
+// Responsive text
+.responsive-text {
+  font-size: 14px;
+  
+  @include tablet-and-desktop {
+    font-size: 16px;
+  }
+}
+
+.responsive-title {
+  font-size: 20px;
+  
+  @include tablet-and-desktop {
+    font-size: 24px;
+  }
+}
+
+// Accessibility utilities
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.focus-visible {
+  &:focus-visible {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border: 2px solid currentColor;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .reduced-motion {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Print styles
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+}

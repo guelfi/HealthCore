@@ -1,0 +1,387 @@
+import React from 'react';
+import {
+  Typography,
+  Card,
+  CardContent,
+  Box,
+  Avatar,
+} from '@mui/material';
+import {
+  People,
+  Assignment,
+  LocalHospital,
+  TrendingUp,
+} from '@mui/icons-material';
+import { mockDashboardMetrics } from '../../../application/stores/mockData';
+
+const AdminDashboard: React.FC = () => {
+  const metrics = mockDashboardMetrics;
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
+        <Typography variant="h4" component="h1">
+          Dashboard Administrativo
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+          Visão geral do sistema e métricas principais
+        </Typography>
+      </Box>
+
+      {/* Cards Superiores - Totais */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1.5, width: '95%' }}>
+          <Card
+            sx={{
+              flex: 1,
+              height: 100,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              boxShadow: '0 3px 12px rgba(102, 126, 234, 0.3)',
+              borderRadius: 2,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 6px 18px rgba(102, 126, 234, 0.4)',
+              }
+            }}
+          >
+            <CardContent sx={{ p: 1.5, height: '100%', display: 'flex', alignItems: 'center' }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography color="rgba(255,255,255,0.8)" variant="caption" fontWeight={500} sx={{ fontSize: '0.75rem', display: 'block' }}>
+                    Total de Médicos
+                  </Typography>
+                  <Typography variant="h4" component="div" fontWeight="bold" sx={{ lineHeight: 1.1, my: 0.3, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+                    {metrics.usuarios.usuariosPorPerfil.medicos}
+                  </Typography>
+                  <Typography variant="caption" color="rgba(255,255,255,0.9)" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                    {metrics.usuarios.usuariosAtivos - metrics.usuarios.usuariosPorPerfil.administradores} ativos
+                  </Typography>
+                </Box>
+                <Avatar sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  width: 40,
+                  height: 40,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  ml: 1
+                }}>
+                  <LocalHospital sx={{ fontSize: 20, color: 'white' }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Card
+            sx={{
+              flex: 1,
+              height: 100,
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              color: 'white',
+              boxShadow: '0 3px 12px rgba(240, 147, 251, 0.3)',
+              borderRadius: 2,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 6px 18px rgba(240, 147, 251, 0.4)',
+              }
+            }}
+          >
+            <CardContent sx={{ p: 1.5, height: '100%', display: 'flex', alignItems: 'center' }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography color="rgba(255,255,255,0.8)" variant="caption" fontWeight={500} sx={{ fontSize: '0.75rem', display: 'block' }}>
+                    Total de Pacientes
+                  </Typography>
+                  <Typography variant="h4" component="div" fontWeight="bold" sx={{ lineHeight: 1.1, my: 0.3, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+                    {metrics.pacientes.totalPacientes}
+                  </Typography>
+                  <Typography variant="caption" color="rgba(255,255,255,0.9)" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                    {metrics.pacientes.novosUltimos30Dias} novos (30 dias)
+                  </Typography>
+                </Box>
+                <Avatar sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  width: 40,
+                  height: 40,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  ml: 1
+                }}>
+                  <People sx={{ fontSize: 20, color: 'white' }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Card
+            sx={{
+              flex: 1,
+              height: 100,
+              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+              color: 'white',
+              boxShadow: '0 3px 12px rgba(79, 172, 254, 0.3)',
+              borderRadius: 2,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 6px 18px rgba(79, 172, 254, 0.4)',
+              }
+            }}
+          >
+            <CardContent sx={{ p: 1.5, height: '100%', display: 'flex', alignItems: 'center' }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography color="rgba(255,255,255,0.8)" variant="caption" fontWeight={500} sx={{ fontSize: '0.75rem', display: 'block' }}>
+                    Total de Exames
+                  </Typography>
+                  <Typography variant="h4" component="div" fontWeight="bold" sx={{ lineHeight: 1.1, my: 0.3, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+                    {metrics.exames.totalExames}
+                  </Typography>
+                  <Typography variant="caption" color="rgba(255,255,255,0.9)" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                    {metrics.exames.examesUltimos30Dias} últimos 30 dias
+                  </Typography>
+                </Box>
+                <Avatar sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  width: 40,
+                  height: 40,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  ml: 1
+                }}>
+                  <Assignment sx={{ fontSize: 20, color: 'white' }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Card
+            sx={{
+              flex: 1,
+              height: 100,
+              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+              color: 'white',
+              boxShadow: '0 3px 12px rgba(250, 112, 154, 0.3)',
+              borderRadius: 2,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 6px 18px rgba(250, 112, 154, 0.4)',
+              }
+            }}
+          >
+            <CardContent sx={{ p: 1.5, height: '100%', display: 'flex', alignItems: 'center' }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography color="rgba(255,255,255,0.8)" variant="caption" fontWeight={500} sx={{ fontSize: '0.75rem', display: 'block' }}>
+                    Crescimento Mensal
+                  </Typography>
+                  <Typography variant="h4" component="div" fontWeight="bold" sx={{ lineHeight: 1.1, my: 0.3, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+                    +{metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 1]?.total -
+                      metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 2]?.total || 0}
+                  </Typography>
+                  <Typography variant="caption" color="rgba(255,255,255,0.9)" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                    novos pacientes
+                  </Typography>
+                </Box>
+                <Avatar sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  width: 40,
+                  height: 40,
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  ml: 1
+                }}>
+                  <TrendingUp sx={{ fontSize: 20, color: 'white' }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+
+      {/* Cards Inferiores - Estatísticas */}
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, width: '95%' }}>
+          <Card sx={{
+            flex: 1,
+            height: 320,
+            boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
+            borderRadius: 3,
+            transition: 'all 0.3s ease-in-out',
+            '&:hover': {
+              transform: 'translateY(-3px)',
+              boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
+            }
+          }}>
+            <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main" sx={{ fontSize: '1rem', mb: 2 }}>
+                Crescimento de Médicos
+              </Typography>
+              <Box sx={{ flex: 1, overflow: 'auto' }}>
+                {metrics.crescimento.usuarios.map((item, index) => (
+                  <Box key={item.mes} display="flex" justifyContent="space-between" alignItems="center"
+                    sx={{
+                      mb: 1.5,
+                      p: 1.2,
+                      borderRadius: 2,
+                      bgcolor: 'grey.50',
+                      transition: 'all 0.2s ease',
+                      '&:hover': { bgcolor: 'primary.50' }
+                    }}>
+                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>{item.mes}</Typography>
+                    <Box display="flex" alignItems="center" gap={0.5}>
+                      <Typography variant="body2" fontWeight="bold" color="primary.main" sx={{ fontSize: '0.85rem' }}>{item.total}</Typography>
+                      {index > 0 && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: item.total > metrics.crescimento.usuarios[index - 1].total ? 'success.main' : 'text.secondary',
+                            fontSize: '1em'
+                          }}
+                        >
+                          {item.total > metrics.crescimento.usuarios[index - 1].total ? '↗' : '→'}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Card sx={{
+            flex: 1,
+            height: 320,
+            boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
+            borderRadius: 3,
+            transition: 'all 0.3s ease-in-out',
+            '&:hover': {
+              transform: 'translateY(-3px)',
+              boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
+            }
+          }}>
+            <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom fontWeight="bold" color="secondary.main" sx={{ fontSize: '1rem', mb: 2 }}>
+                Crescimento de Pacientes e Exames
+              </Typography>
+              <Box sx={{ flex: 1, overflow: 'auto' }}>
+                {metrics.crescimento.pacientes.map((item, index) => (
+                  <Box key={item.mes}
+                    sx={{
+                      mb: 1.5,
+                      p: 1.2,
+                      borderRadius: 2,
+                      bgcolor: 'grey.50',
+                      transition: 'all 0.2s ease',
+                      '&:hover': { bgcolor: 'secondary.50' }
+                    }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>{item.mes}</Typography>
+                    </Box>
+                    <Box display="flex" gap={2}>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Pacientes:</Typography>
+                        <Typography variant="body2" fontWeight="bold" color="success.main" sx={{ fontSize: '0.8rem' }}>{item.total}</Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Exames:</Typography>
+                        <Typography variant="body2" fontWeight="bold" color="info.main" sx={{ fontSize: '0.8rem' }}>
+                          {metrics.crescimento.exames[index]?.total || 0}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Card sx={{
+            flex: 1,
+            height: 320,
+            boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
+            borderRadius: 3,
+            transition: 'all 0.3s ease-in-out',
+            '&:hover': {
+              transform: 'translateY(-3px)',
+              boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
+            }
+          }}>
+            <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom fontWeight="bold" color="warning.main" sx={{ fontSize: '1rem', mb: 2 }}>
+                Últimas Atividades
+              </Typography>
+              <Box sx={{ flex: 1, overflow: 'auto' }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center"
+                  sx={{
+                    mb: 1.5,
+                    p: 1.2,
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                    transition: 'all 0.2s ease',
+                    '&:hover': { bgcolor: 'warning.50' }
+                  }}>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>Novo médico cadastrado</Typography>
+                  <Typography variant="caption" color="success.main" fontWeight={500} sx={{ fontSize: '0.75rem' }}>Hoje</Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center"
+                  sx={{
+                    mb: 1.5,
+                    p: 1.2,
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                    transition: 'all 0.2s ease',
+                    '&:hover': { bgcolor: 'warning.50' }
+                  }}>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>3 novos pacientes</Typography>
+                  <Typography variant="caption" color="info.main" fontWeight={500} sx={{ fontSize: '0.75rem' }}>Ontem</Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center"
+                  sx={{
+                    mb: 1.5,
+                    p: 1.2,
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                    transition: 'all 0.2s ease',
+                    '&:hover': { bgcolor: 'warning.50' }
+                  }}>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>15 exames realizados</Typography>
+                  <Typography variant="caption" color="primary.main" fontWeight={500} sx={{ fontSize: '0.75rem' }}>Ontem</Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center"
+                  sx={{
+                    mb: 1.5,
+                    p: 1.2,
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                    transition: 'all 0.2s ease',
+                    '&:hover': { bgcolor: 'warning.50' }
+                  }}>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>Sistema atualizado</Typography>
+                  <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.75rem' }}>2 dias</Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center"
+                  sx={{
+                    mb: 1,
+                    p: 1.2,
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                    transition: 'all 0.2s ease',
+                    '&:hover': { bgcolor: 'warning.50' }
+                  }}>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>Backup realizado</Typography>
+                  <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.75rem' }}>3 dias</Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default AdminDashboard;

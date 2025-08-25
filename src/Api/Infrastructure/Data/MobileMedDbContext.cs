@@ -1,0 +1,88 @@
+using Microsoft.EntityFrameworkCore;
+using MobileMed.Api.Core.Domain.Entities;
+
+namespace MobileMed.Api.Infrastructure.Data
+{
+    public class MobileMedDbContext : DbContext
+    {
+        public MobileMedDbContext(DbContextOptions<MobileMedDbContext> options) : base(options)
+        {
+        }
+
+        public virtual DbSet<Paciente> Pacientes { get; set; }
+        public virtual DbSet<Exame> Exames { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configuração da entidade Paciente
+            modelBuilder.Entity<Paciente>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+                entity.HasIndex(p => p.Documento).IsUnique();
+                entity.Property(p => p.Nome).IsRequired().HasMaxLength(200);
+                entity.Property(p => p.Documento).IsRequired().HasMaxLength(20);
+                entity.Property(p => p.DataNascimento).IsRequired();
+            });
+
+            // Configuração da entidade Exame
+            modelBuilder.Entity<Exame>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.IdempotencyKey).IsUnique();
+                entity.Property(e => e.IdempotencyKey).IsRequired();
+                entity.Property(e => e.Modalidade).IsRequired();
+                
+                // Relacionamento com Paciente
+                entity.HasOne(e => e.Paciente)
+                    .WithMany(p => p.Exames)
+                    .HasForeignKey(e => e.PacienteId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuração da entidade User
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+                entity.HasIndex(u => u.Username).IsUnique();
+                entity.Property(u => u.Username).IsRequired().HasMaxLength(50);
+                entity.Property(u => u.PasswordHash).IsRequired();
+                entity.Property(u => u.Role).IsRequired();
+                entity.Property(u => u.IsActive).IsRequired().HasDefaultValue(true);
+                entity.Property(u => u.CreatedAt).IsRequired();
+            });
+
+            // Configuração da entidade RefreshToken
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(rt => rt.Id);
+                entity.HasIndex(rt => rt.Token).IsUnique();
+                entity.Property(rt => rt.Token).IsRequired();
+                entity.Property(rt => rt.ExpiresAt).IsRequired();
+                entity.Property(rt => rt.CreatedAt).IsRequired();
+                entity.Property(rt => rt.IsRevoked).IsRequired().HasDefaultValue(false);
+                
+                // Relacionamento com User
+                entity.HasOne(rt => rt.User)
+                    .WithMany()
+                    .HasForeignKey(rt => rt.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuração da entidade BlacklistedToken
+            modelBuilder.Entity<BlacklistedToken>(entity =>
+            {
+                entity.HasKey(bt => bt.Id);
+                entity.HasIndex(bt => bt.TokenId).IsUnique();
+                entity.Property(bt => bt.TokenId).IsRequired().HasMaxLength(100);
+                entity.Property(bt => bt.ExpiresAt).IsRequired();
+                entity.Property(bt => bt.BlacklistedAt).IsRequired();
+                entity.Property(bt => bt.Reason).HasMaxLength(200);
+            });
+        }
+    }
+}
