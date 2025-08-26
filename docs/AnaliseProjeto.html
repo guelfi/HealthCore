@@ -495,6 +495,11 @@
         html { scroll-behavior: smooth; }
 
         /* Estilos específicos para seção Roadmap */
+        #roadmap {
+            max-height: none !important; /* Remover limitação de altura */
+            overflow: visible !important; /* Permitir overflow */
+        }
+        
         #roadmap .card-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -509,210 +514,119 @@
         }
 
         #roadmap .card {
-            padding: 0.9rem;
-            font-size: 0.8rem;
-            min-height: 140px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            min-height: auto; /* Remover altura mínima fixa */
+            height: auto; /* Permitir altura automática */
+            overflow: visible; /* Mostrar todo conteúdo */
         }
 
-        /* Card 1 - aumentar altura (conteúdo maior) */
-        #roadmap .card:nth-child(1) {
-            min-height: 150px;
-            padding: 0.8rem;
-        }
-
-        /* Cards 2 e 3 - manter como estão (ok) */
+        /* Cards específicos - remover limitações de altura */
+        #roadmap .card:nth-child(1),
         #roadmap .card:nth-child(2),
-        #roadmap .card:nth-child(3) {
-            min-height: 120px;
-            padding: 0.8rem;
-        }
-
-        /* Cards 4, 5, 6 com percentuais - diminuir (espaço sobrando) */
+        #roadmap .card:nth-child(3),
         #roadmap .card:nth-child(4),
         #roadmap .card:nth-child(5),
-        #roadmap .card:nth-child(6) {
-            min-height: 160px;
-            padding: 0.9rem;
+        #roadmap .card:nth-child(6),
+        #roadmap .card:nth-child(7),
+        #roadmap .card:nth-child(8) {
+            min-height: auto;
+            height: auto;
+            padding: 1rem;
         }
 
         #roadmap .card h3 {
-            font-size: 0.95rem;
-            margin-bottom: 0.4rem;
-            line-height: 1.2;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
         }
 
         #roadmap .card h4 {
-            font-size: 0.85rem;
-            margin-bottom: 0.3rem;
-            line-height: 1.2;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            line-height: 1.3;
         }
 
         #roadmap .card ul {
-            margin: 0.2rem 0;
-            padding-left: 0.8rem;
-            font-size: 0.8rem;
+            margin: 0.3rem 0;
+            padding-left: 1rem;
+            font-size: 0.85rem;
         }
 
         #roadmap .card li {
-            margin: 0.15rem 0;
-            line-height: 1.2;
+            margin: 0.2rem 0;
+            line-height: 1.4;
         }
 
         #roadmap .card p {
-            margin: 0.2rem 0;
-            line-height: 1.3;
-            font-size: 0.8rem;
-        }
-
-        /* Card 7 (Métricas) - diminuir um pouco */
-        #roadmap .card:nth-child(7) {
-            min-height: 180px;
-            padding: 0.8rem;
-            font-size: 0.75rem;
-        }
-
-        /* Card 8 (Conclusão) - manter altura, ajustar texto */
-        #roadmap .card:nth-child(8) {
-            min-height: 280px;
-            padding: 0.7rem;
-            font-size: 0.7rem;
-        }
-
-        #roadmap .card:nth-child(7) h3 {
-            font-size: 0.9rem;
-            margin-bottom: 0.3rem;
-        }
-
-        #roadmap .card:nth-child(8) h3 {
+            margin: 0.3rem 0;
+            line-height: 1.4;
             font-size: 0.85rem;
-            margin-bottom: 0.2rem;
         }
 
-        #roadmap .card:nth-child(7) h4 {
-            font-size: 0.8rem;
-            margin-bottom: 0.2rem;
-        }
-
-        #roadmap .card:nth-child(8) h4 {
-            font-size: 0.75rem;
-            margin-bottom: 0.15rem;
-        }
-
-        #roadmap .card:nth-child(7) p {
-            font-size: 0.75rem;
-            line-height: 1.2;
-            margin: 0.15rem 0;
-        }
-
-        #roadmap .card:nth-child(8) p {
-            font-size: 0.7rem;
-            line-height: 1.15;
-            margin: 0.1rem 0;
-        }
-
-        #roadmap .card:nth-child(7) ol {
-            font-size: 0.75rem;
-            margin: 0.2rem 0;
-            padding-left: 1rem;
-        }
-
-        #roadmap .card:nth-child(8) ol {
-            font-size: 0.7rem;
-            margin: 0.15rem 0;
-            padding-left: 0.9rem;
-        }
-
-        #roadmap .card:nth-child(7) li {
-            margin: 0.1rem 0;
-            line-height: 1.2;
-        }
-
-        #roadmap .card:nth-child(8) li {
-            margin: 0.08rem 0;
-            line-height: 1.15;
+        #roadmap .card ol {
+            margin: 0.3rem 0;
+            padding-left: 1.2rem;
+            font-size: 0.85rem;
         }
 
         /* Estilo específico para o div interno do card Conclusão */
         #roadmap .card:nth-child(8) div {
-            font-size: 0.65rem;
-            line-height: 1.1;
-            margin: 0.1rem 0;
-            padding: 0.6rem;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            margin: 0.2rem 0;
+            padding: 0.8rem;
         }
 
         /* Mobile responsive para Roadmap */
         @media (max-width: 1366px) {
             #roadmap .card {
-                padding: 0.7rem;
-                font-size: 0.75rem;
-                min-height: auto;
+                padding: 0.8rem;
+                font-size: 0.8rem;
+                min-height: auto; /* Altura automática */
+                height: auto;
             }
 
             #roadmap .card h3 {
-                font-size: 0.85rem;
-                margin-bottom: 0.3rem;
-                line-height: 1.15;
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+                line-height: 1.25;
             }
 
             #roadmap .card h4 {
-                font-size: 0.75rem;
-                margin-bottom: 0.25rem;
-                line-height: 1.15;
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+                line-height: 1.25;
             }
 
             #roadmap .card ul {
-                margin: 0.15rem 0;
-                padding-left: 0.7rem;
-                font-size: 0.7rem;
+                margin: 0.2rem 0;
+                padding-left: 0.8rem;
+                font-size: 0.75rem;
             }
 
             #roadmap .card li {
-                margin: 0.1rem 0;
-                line-height: 1.15;
+                margin: 0.15rem 0;
+                line-height: 1.25;
             }
 
             #roadmap .card p {
-                margin: 0.15rem 0;
-                line-height: 1.2;
-                font-size: 0.7rem;
+                margin: 0.2rem 0;
+                line-height: 1.3;
+                font-size: 0.75rem;
             }
 
-            /* Altura específica dos cards em 13" */
-            #roadmap .card:nth-child(1) {
-                min-height: 120px;
-                padding: 0.6rem;
-            }
-
-            #roadmap .card:nth-child(2),
-            #roadmap .card:nth-child(3) {
-                min-height: 100px;
-                padding: 0.6rem;
-            }
-
-            #roadmap .card:nth-child(4),
-            #roadmap .card:nth-child(5),
-            #roadmap .card:nth-child(6) {
-                min-height: 130px;
-                padding: 0.7rem;
-            }
-
-            #roadmap .card:nth-child(7) {
-                min-height: 140px;
-                padding: 0.6rem;
-                font-size: 0.65rem;
-            }
-
-            #roadmap .card:nth-child(8) {
-                min-height: 220px;
-                padding: 0.5rem;
-                font-size: 0.6rem;
+            #roadmap .card ol {
+                margin: 0.2rem 0;
+                padding-left: 1rem;
+                font-size: 0.75rem;
             }
 
             #roadmap .card:nth-child(8) div {
-                font-size: 0.55rem;
-                line-height: 1.05;
-                margin: 0.05rem 0;
-                padding: 0.4rem;
+                font-size: 0.7rem;
+                line-height: 1.2;
+                margin: 0.15rem 0;
+                padding: 0.6rem;
             }
         }
 
@@ -725,41 +639,51 @@
             
             #roadmap .card {
                 min-height: auto;
-                padding: 0.5rem;
-                font-size: 0.7rem;
+                height: auto;
+                padding: 0.6rem;
+                font-size: 0.75rem;
             }
 
             #roadmap .card h3 {
-                font-size: 0.8rem;
-                margin-bottom: 0.2rem;
+                font-size: 0.85rem;
+                margin-bottom: 0.3rem;
+                line-height: 1.2;
             }
 
             #roadmap .card h4 {
-                font-size: 0.7rem;
-                margin-bottom: 0.15rem;
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
+                line-height: 1.2;
             }
 
             #roadmap .card p {
-                font-size: 0.65rem;
-                line-height: 1.1;
-                margin: 0.1rem 0;
+                font-size: 0.7rem;
+                line-height: 1.25;
+                margin: 0.15rem 0;
             }
 
             #roadmap .card ul {
-                font-size: 0.65rem;
-                padding-left: 0.5rem;
-                margin: 0.1rem 0;
+                font-size: 0.7rem;
+                padding-left: 0.7rem;
+                margin: 0.15rem 0;
             }
 
             #roadmap .card li {
-                margin: 0.05rem 0;
-                line-height: 1.1;
+                margin: 0.1rem 0;
+                line-height: 1.2;
+            }
+
+            #roadmap .card ol {
+                font-size: 0.7rem;
+                padding-left: 0.9rem;
+                margin: 0.15rem 0;
             }
 
             #roadmap .card:nth-child(8) div {
-                font-size: 0.6rem;
-                line-height: 1.05;
-                padding: 0.3rem;
+                font-size: 0.65rem;
+                line-height: 1.15;
+                padding: 0.4rem;
+                margin: 0.1rem 0;
             }
         }
 
