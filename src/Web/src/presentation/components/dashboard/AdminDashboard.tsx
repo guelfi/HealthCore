@@ -5,17 +5,121 @@ import {
   CardContent,
   Box,
   Avatar,
+  CircularProgress,
+  Alert,
+  Skeleton,
 } from '@mui/material';
 import {
   People,
   Assignment,
   LocalHospital,
   TrendingUp,
+  Refresh,
 } from '@mui/icons-material';
-import { mockDashboardMetrics } from '../../../application/stores/mockData';
+import { useMetrics } from '../../hooks/useMetrics';
 
 const AdminDashboard: React.FC = () => {
-  const metrics = mockDashboardMetrics;
+  const { metrics, isLoading, isInitialLoading, error, refreshMetrics } = useMetrics();
+
+  // Component para renderizar skeleton dos cards
+  const MetricCardSkeleton = () => (
+    <Card sx={{ flex: 1, height: 100, borderRadius: 2 }}>
+      <CardContent sx={{ p: 1.5, height: '100%' }}>
+        <Skeleton variant="text" width="60%" height={16} />
+        <Skeleton variant="text" width="40%" height={32} sx={{ my: 0.5 }} />
+        <Skeleton variant="text" width="70%" height={14} />
+      </CardContent>
+    </Card>
+  );
+
+  // Se há erro e não há dados em cache
+  if (error && !metrics) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
+          <Typography variant="h4" component="h1">
+            Dashboard Administrativo
+          </Typography>
+        </Box>
+        <Alert 
+          severity="error" 
+          action={
+            <Refresh 
+              sx={{ cursor: 'pointer' }} 
+              onClick={refreshMetrics}
+            />
+          }
+        >
+          {error} - Clique no ícone para tentar novamente
+        </Alert>
+      </Box>
+    );
+  }
+
+  // Loading inicial
+  if (isInitialLoading) {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
+          <Typography variant="h4" component="h1">
+            Dashboard Administrativo
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+            Carregando métricas do sistema...
+          </Typography>
+        </Box>
+        
+        {/* Skeleton dos cards superiores */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1.5, width: '95%' }}>
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
+          </Box>
+        </Box>
+        
+        {/* Skeleton dos cards inferiores */}
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, width: '95%' }}>
+            <Card sx={{ flex: 1, height: 320, borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} variant="rectangular" height={40} sx={{ mb: 1.5, borderRadius: 2 }} />
+                ))}
+              </CardContent>
+            </Card>
+            <Card sx={{ flex: 1, height: 320, borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Skeleton variant="text" width="60%" height={24} sx={{ mb: 2 }} />
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} variant="rectangular" height={40} sx={{ mb: 1.5, borderRadius: 2 }} />
+                ))}
+              </CardContent>
+            </Card>
+            <Card sx={{ flex: 1, height: 320, borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Skeleton variant="text" width="40%" height={24} sx={{ mb: 2 }} />
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} variant="rectangular" height={40} sx={{ mb: 1.5, borderRadius: 2 }} />
+                ))}
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Se não há métricas ainda
+  if (!metrics) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -26,7 +130,26 @@ const AdminDashboard: React.FC = () => {
         <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
           Visão geral do sistema e métricas principais
         </Typography>
+        {isLoading && (
+          <CircularProgress size={20} sx={{ ml: 2 }} />
+        )}
       </Box>
+      
+      {/* Alerta de erro (se há erro mas dados em cache) */}
+      {error && metrics && (
+        <Alert 
+          severity="warning" 
+          sx={{ mb: 2 }}
+          action={
+            <Refresh 
+              sx={{ cursor: 'pointer' }} 
+              onClick={refreshMetrics}
+            />
+          }
+        >
+          Erro ao atualizar: {error} - Exibindo dados em cache
+        </Alert>
+      )}
 
       {/* Cards Superiores - Totais */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
@@ -56,7 +179,7 @@ const AdminDashboard: React.FC = () => {
                     {metrics.usuarios.usuariosPorPerfil.medicos}
                   </Typography>
                   <Typography variant="caption" color="rgba(255,255,255,0.9)" sx={{ fontSize: '0.7rem', display: 'block' }}>
-                    {metrics.usuarios.usuariosAtivos - metrics.usuarios.usuariosPorPerfil.administradores} ativos
+                    {Math.max(0, metrics.usuarios.usuariosAtivos - metrics.usuarios.usuariosPorPerfil.administradores)} ativos
                   </Typography>
                 </Box>
                 <Avatar sx={{
@@ -179,8 +302,10 @@ const AdminDashboard: React.FC = () => {
                     Crescimento Mensal
                   </Typography>
                   <Typography variant="h4" component="div" fontWeight="bold" sx={{ lineHeight: 1.1, my: 0.3, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-                    +{metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 1]?.total -
-                      metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 2]?.total || 0}
+                    +{Math.max(0, 
+                      (metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 1]?.total || 0) -
+                      (metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 2]?.total || 0)
+                    )}
                   </Typography>
                   <Typography variant="caption" color="rgba(255,255,255,0.9)" sx={{ fontSize: '0.7rem', display: 'block' }}>
                     novos pacientes
