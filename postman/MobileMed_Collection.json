@@ -1,674 +1,512 @@
 {
-  "info": {
-    "name": "MobileMed API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "Authentication",
-      "item": [
-        {
-          "name": "Register User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/register",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "register"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "// Validar parâmetros antes do envio",
-                  "const requestBody = JSON.parse(pm.request.body.raw);",
-                  "",
-                  "if (!requestBody.username) {",
-                  "    pm.expect.fail('Erro: O campo \"username\" é obrigatório para o registro de usuário.');",
-                  "}",
-                  "if (!requestBody.password) {",
-                  "    pm.expect.fail('Erro: O campo \"password\" é obrigatório para o registro de usuário.');",
-                  "}",
-                  "",
-                  "console.log('Todos os campos obrigatórios para Registro de Usuário estão presentes.');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 201 or 409', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
-                  "});",
-                  "if (pm.response.code === 201) {",
-                  "    console.log('Usuário registrado com sucesso.');",
-                  "} else if (pm.response.code === 409) {",
-                  "    console.log('Usuário já existe.');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Login User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "// Validar parâmetros antes do envio",
-                  "const requestBody = JSON.parse(pm.request.body.raw);",
-                  "",
-                  "if (!requestBody.username) {",
-                  "    pm.expect.fail('Erro: O campo \"username\" é obrigatório para o login de usuário.');",
-                  "}",
-                  "if (!requestBody.password) {",
-                  "    pm.expect.fail('Erro: O campo \"password\" é obrigatório para o login de usuário.');",
-                  "}",
-                  "",
-                  "console.log('Todos os campos obrigatórios para Login de Usuário estão presentes.');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "const responseJson = pm.response.json();",
-                  "pm.test('Response has token', function () {",
-                  "    pm.expect(responseJson).to.have.property('token');",
-                  "});",
-                  "pm.environment.set('auth_token', responseJson.token);",
-                  "console.log('Token de Autenticação salvo:', responseJson.token);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Pacientes",
-      "item": [
-        {
-          "name": "Criar Paciente",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"João da Silva\",\n  \"dataNascimento\": \"1990-01-01\",\n  \"documento\": \"12345678901\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/pacientes",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "pacientes"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "console.log('Pre-request script para Criar Paciente');",
-                  "// Validar parâmetros antes do envio",
-                  "const requestBody = JSON.parse(pm.request.body.raw);",
-                  "",
-                  "if (!requestBody.nome) {",
-                  "    pm.expect.fail('Erro: O campo \"nome\" é obrigatório para criar um paciente.');",
-                  "}",
-                  "if (!requestBody.dataNascimento) {",
-                  "    pm.expect.fail('Erro: O campo \"dataNascimento\" é obrigatório para criar um paciente.');",
-                  "}",
-                  "if (!requestBody.documento) {",
-                  "    pm.expect.fail('Erro: O campo \"documento\" é obrigatório para criar um paciente.');",
-                  "}",
-                  "",
-                  "console.log('Todos os campos obrigatórios para Criar Paciente estão presentes.');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "console.log('Post-response script para Criar Paciente');",
-                  "// Analisar o retorno da chamada",
-                  "pm.test('Status code is 201 or 409', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
-                  "});",
-                  "",
-                  "if (pm.response.code === 201) {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.environment.set('paciente_id', responseJson.id);",
-                  "    console.log('ID do paciente salvo no environment:', responseJson.id);",
-                  "    pm.test('Response has required fields', function () {",
-                  "        pm.expect(responseJson).to.have.property('id');",
-                  "        pm.expect(responseJson).to.have.property('nome');",
-                  "        pm.expect(responseJson).to.have.property('dataNascimento');",
-                  "        pm.expect(responseJson).to.have.property('documento');",
-                  "    });",
-                  "} else if (pm.response.code === 409) {",
-                  "    console.log('Paciente com este documento já existe.');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Listar Pacientes",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pacientes?page=1&pageSize=10",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "pacientes"
-              ],
-              "query": [
+	"info": {
+		"_postman_id": "f2c2a8f8-11a1-4e8c-8f8f-3d1d1d1d1d1d",
+		"name": "MobileMed API - Complete",
+		"description": "Collection completa para a API MobileMed, incluindo todos os endpoints e casos de teste.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "[Auth]",
+			"description": "Endpoints para autenticação e gerenciamento de sessão.",
+			"item": [
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const response = pm.response.json();",
+									"pm.environment.set(\"adminToken\", response.token);",
+									"pm.test(\"Admin token saved\", function () {",
+									"    pm.expect(pm.environment.get(\"adminToken\")).to.eql(response.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{adminUser}}\",\n    \"password\": \"{{adminPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Medico",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"const response = pm.response.json();",
+									"pm.environment.set(\"medicoToken\", response.token);",
+									"pm.test(\"Medico token saved\", function () {",
+									"    pm.expect(pm.environment.get(\"medicoToken\")).to.eql(response.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{medicoUser}}\",\n    \"password\": \"{{medicoPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
                 {
-                  "key": "page",
-                  "value": "1"
-                },
+					"name": "(Fail) Login with wrong password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{adminUser}}\",\n    \"password\": \"wrongpassword\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "[Admin - User Management]",
+			"item": [
+				{
+					"name": "Create Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"const response = pm.response.json();",
+									"pm.environment.set(\"newUserId\", response.id);",
+                                    "pm.test(\"Role is Administrador\", function () {",
+                                    "    pm.expect(response.role).to.eql(1);",
+                                    "});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"new_admin_{{$randomInt}}\",\n    \"password\": \"NewAdminPass123!\",\n    \"role\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medico User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"new_medico_{{$randomInt}}\",\n    \"password\": \"NewMedicoPass123!\",\n    \"role\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
                 {
-                  "key": "pageSize",
-                  "value": "10"
+					"name": "(Fail) Create User with existing username",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{adminUser}}\",\n    \"password\": \"anypassword\",\n    \"role\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/usuarios?page=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"usuarios"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/usuarios/{{newUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"usuarios",
+								"{{newUserId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/usuarios/{{newUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"usuarios",
+								"{{newUserId}}"
+							]
+						}
+					},
+					"response": []
+				},
+                {
+					"name": "(Fail) Access Admin endpoint with Medico Token",
+                    "event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{medicoToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+        {
+            "name": "[Pacientes]",
+            "item": [
+                {
+                    "name": "Create Paciente",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{medicoToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nome\": \"Paciente Teste {{$randomInt}}\",\n    \"dataNascimento\": \"1985-05-10T00:00:00\",\n    \"documento\": \"{{$randomInt}}12345\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/pacientes",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["pacientes"]
+                        }
+                    },
+                    "response": []
                 }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "console.log('Pre-request script para Listar Pacientes');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "console.log('Post-response script para Listar Pacientes');",
-                  "// Analisar o retorno da chamada",
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "",
-                  "const responseJson = pm.response.json();",
-                  "pm.test('Response is an array', function () {",
-                  "    pm.expect(responseJson).to.be.an('array');",
-                  "});",
-                  "",
-                  "console.log('Número de pacientes retornados:', responseJson.length);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Atualizar Paciente",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"{{paciente_nome_atualizado}}\",\n  \"dataNascimento\": \"1990-01-01\",\n  \"documento\": \"{{paciente_documento_atualizado}}\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/pacientes/{{paciente_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "pacientes",
-                "{{paciente_id}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "pm.environment.set('paciente_nome_atualizado', 'João da Silva Atualizado');",
-                  "pm.environment.set('paciente_documento_atualizado', '12345678902');",
-                  "",
-                  "// Validar parâmetros antes do envio",
-                  "const requestBody = JSON.parse(pm.request.body.raw);",
-                  "",
-                  "if (!requestBody.nome) {",
-                  "    pm.expect.fail('Erro: O campo \"nome\" é obrigatório para atualizar um paciente.');",
-                  "}",
-                  "if (!requestBody.dataNascimento) {",
-                  "    pm.expect.fail('Erro: O campo \"dataNascimento\" é obrigatório para atualizar um paciente.');",
-                  "}",
-                  "if (!requestBody.documento) {",
-                  "    pm.expect.fail('Erro: O campo \"documento\" é obrigatório para atualizar um paciente.');",
-                  "}",
-                  "",
-                  "console.log('Todos os campos obrigatórios para Atualizar Paciente estão presentes.');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200 or 404 or 409', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404, 409]);",
-                  "});",
-                  "if (pm.response.code === 200) {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.test('Paciente atualizado com sucesso', function () {",
-                  "        pm.expect(responseJson.nome).to.eql(pm.environment.get('paciente_nome_atualizado'));",
-                  "    });",
-                  "} else if (pm.response.code === 404) {",
-                  "    console.log('Paciente não encontrado para atualização.');",
-                  "} else if (pm.response.code === 409) {",
-                  "    console.log('Documento duplicado ao atualizar paciente.');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Excluir Paciente",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pacientes/{{paciente_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "pacientes",
-                "{{paciente_id}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 204 or 404', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
-                  "});",
-                  "if (pm.response.code === 204) {",
-                  "    console.log('Paciente excluído com sucesso.');",
-                  "} else if (pm.response.code === 404) {",
-                  "    console.log('Paciente não encontrado para exclusão.');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            ]
         }
-      ]
-    },
-    {
-      "name": "Exames",
-      "item": [
-        {
-          "name": "Criar Exame",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"idempotencyKey\": \"exame_unico_001\",\n  \"modalidade\": \"CT\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/exames",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "exames"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "console.log('Pre-request script para Criar Exame');",
-                  "// Validar parâmetros antes do envio",
-                  "const requestBody = JSON.parse(pm.request.body.raw);",
-                  "",
-                  "if (!requestBody.pacienteId) {",
-                  "    pm.expect.fail('Erro: O campo \"pacienteId\" é obrigatório para criar um exame.');",
-                  "}",
-                  "if (!requestBody.idempotencyKey) {",
-                  "    pm.expect.fail('Erro: O campo \"idempotencyKey\" é obrigatório para criar um exame.');",
-                  "}",
-                  "if (!requestBody.modalidade) {",
-                  "    pm.expect.fail('Erro: O campo \"modalidade\" é obrigatório para criar um exame.');",
-                  "}",
-                  "",
-                  "console.log('Todos os campos obrigatórios para Criar Exame estão presentes.');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "console.log('Post-response script para Criar Exame');",
-                  "// Analisar o retorno da chamada",
-                  "pm.test('Status code is 200, 201 or 400', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400]);",
-                  "});",
-                  "",
-                  "if (pm.response.code === 201) {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.environment.set('exame_id', responseJson.id);",
-                  "    console.log('ID do exame salvo no environment:', responseJson.id);",
-                  "    pm.test('Response has required fields', function () {",
-                  "        pm.expect(responseJson).to.have.property('id');",
-                  "        pm.expect(responseJson).to.have.property('idempotencyKey');",
-                  "        pm.expect(responseJson).to.have.property('modalidade');",
-                  "        pm.expect(responseJson).to.have.property('dataCriacao');",
-                  "        pm.expect(responseJson).to.have.property('pacienteId');",
-                  "    });",
-                  "} else if (pm.response.code === 200) {",
-                  "    console.log('Exame com esta idempotencyKey já existe.');",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.environment.set('exame_id', responseJson.id);",
-                  "} else if (pm.response.code === 400) {",
-                  "    console.log('Erro ao criar exame:', pm.response.json().message);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Listar Exames",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/exames?page=1&pageSize=10",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "exames"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "pageSize",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "console.log('Pre-request script para Listar Exames');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "console.log('Post-response script para Listar Exames');",
-                  "// Analisar o retorno da chamada",
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "",
-                  "const responseJson = pm.response.json();",
-                  "pm.test('Response is an array', function () {",
-                  "    pm.expect(responseJson).to.be.an('array');",
-                  "});",
-                  "",
-                  "console.log('Número de exames retornados:', responseJson.length);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Atualizar Exame",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"idempotencyKey\": \"exame_unico_001_atualizado\",\n  \"modalidade\": \"MR\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/exames/{{exame_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "exames",
-                "{{exame_id}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "// Validar parâmetros antes do envio",
-                  "const requestBody = JSON.parse(pm.request.body.raw);",
-                  "",
-                  "if (!requestBody.pacienteId) {",
-                  "    pm.expect.fail('Erro: O campo \"pacienteId\" é obrigatório para atualizar um exame.');",
-                  "}",
-                  "if (!requestBody.idempotencyKey) {",
-                  "    pm.expect.fail('Erro: O campo \"idempotencyKey\" é obrigatório para atualizar um exame.');",
-                  "}",
-                  "if (!requestBody.modalidade) {",
-                  "    pm.expect.fail('Erro: O campo \"modalidade\" é obrigatório para atualizar um exame.');",
-                  "}",
-                  "",
-                  "console.log('Todos os campos obrigatórios para Atualizar Exame estão presentes.');"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200 or 400 or 404', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 404]);",
-                  "});",
-                  "if (pm.response.code === 200) {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.test('Exame atualizado com sucesso', function () {",
-                  "        pm.expect(responseJson.idempotencyKey).to.eql('exame_unico_001_atualizado');",
-                  "    });",
-                  "} else if (pm.response.code === 404) {",
-                  "    console.log('Exame não encontrado para atualização.');",
-                  "} else if (pm.response.code === 400) {",
-                  "    console.log('Erro ao atualizar exame:', pm.response.json().message);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Excluir Exame",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/exames/{{exame_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "exames",
-                "{{exame_id}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 204 or 404', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
-                  "});",
-                  "if (pm.response.code === 204) {",
-                  "    console.log('Exame excluído com sucesso.');",
-                  "} else if (pm.response.code === 404) {",
-                  "    console.log('Exame não encontrado para exclusão.');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ]
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{adminToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
 }

@@ -31,3 +31,6 @@ scripts/front.pid
 
 # Kiro IDE configuration
 .kiro/
+
+# Banco de dados
+*.db

@@ -1,27 +1,69 @@
 {
-  "id": "mobilemed-env",
-  "name": "MobileMed Environment",
+  "id": "a9e9b1a2-4f8c-4a4e-b1e0-a3b3a3e3e3e3",
+  "name": "MobileMed API Environment",
   "values": [
     {
       "key": "base_url",
       "value": "http://192.168.15.119:5000",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "medicoToken",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "adminUser",
+      "value": "admin_user",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminPassword",
+      "value": "AdminPassword123!",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "medicoUser",
+      "value": "medico_user",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "medicoPassword",
+      "value": "MedicoPassword123!",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "newUserId",
+      "value": "",
+      "type": "default",
       "enabled": true
     },
     {
       "key": "paciente_id",
       "value": "",
+      "type": "default",
       "enabled": true
     },
     {
       "key": "exame_id",
       "value": "",
-      "enabled": true
-    },
-    {
-      "key": "auth_token",
-      "value": "",
+      "type": "default",
       "enabled": true
     }
   ],
-  "_postman_variable_scope": "environment"
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-08-26T12:00:00.000Z",
+  "_postman_exported_using": "Postman/10.17.4"
 }
