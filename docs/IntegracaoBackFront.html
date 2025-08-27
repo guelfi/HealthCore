@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 Análise de Integração Backend-Frontend - MobileMed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --error: #f87171;
+            --dark: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #334155;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin: 1.5rem 0 0.8rem 0;
+            color: var(--text);
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 1rem 0 0.5rem 0;
+            color: var(--text-dim);
+        }
+
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .priority-high { border-left: 4px solid var(--error); }
+        .priority-medium { border-left: 4px solid var(--warning); }
+        .priority-low { border-left: 4px solid var(--success); }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .code-inline {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table th,
+        table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table th {
+            background: rgba(102, 126, 234, 0.1);
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin: 0.2rem;
+        }
+
+        .badge-high { background: rgba(248, 113, 113, 0.1); color: var(--error); }
+        .badge-medium { background: rgba(251, 191, 36, 0.1); color: var(--warning); }
+        .badge-low { background: rgba(74, 222, 128, 0.1); color: var(--success); }
+
+        .task-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .task-list li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .task-list li:before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: var(--text-dim);
+        }
+
+        .endpoints {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .endpoint {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .method {
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            margin-right: 1rem;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .method-get { background: rgba(74, 222, 128, 0.2); color: var(--success); }
+        .method-post { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .method-put { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+        .method-delete { background: rgba(248, 113, 113, 0.2); color: var(--error); }
+        .method-patch { background: rgba(168, 85, 247, 0.2); color: #a78bfa; }
+
+        .toc {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 1rem;
+        }
+
+        .toc li {
+            margin: 0.3rem 0;
+        }
+
+        .toc a {
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: var(--primary);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .summary-card {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .file-item {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem 0.5rem; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .section { padding: 1rem; margin: 1rem 0; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .file-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Análise de Integração Backend-Frontend - MobileMed</h1>
+
+        <div class="section">
+            <h2>📋 Resumo Executivo</h2>
+            <p>Esta análise identifica os pontos críticos de integração entre o backend .NET Core 8 e o frontend React + Vite do sistema MobileMed. O frontend está bem estruturado seguindo Clean Architecture, mas atualmente utiliza dados mockados que precisam ser substituídos por integrações reais com a API.</p>
+            
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-number">7</div>
+                    <div>Pontos de Integração</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number">15</div>
+                    <div>Endpoints Backend</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number">8</div>
+                    <div>Arquivos Críticos</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number">5</div>
+                    <div>Sprints Planejados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <h3>📖 Índice</h3>
+            <ul>
+                <li><a href="#auth">1. Sistema de Autenticação</a></li>
+                <li><a href="#pacientes">2. Gestão de Pacientes</a></li>
+                <li><a href="#exames">3. Gestão de Exames</a></li>
+                <li><a href="#medicos">4. Gestão de Médicos/Usuários</a></li>
+                <li><a href="#dashboard">5. Dashboard e Métricas</a></li>
+                <li><a href="#api-client">6. Cliente da API</a></li>
+                <li><a href="#inconsistencias">7. Inconsistências</a></li>
+                <li><a href="#plano">8. Plano de Implementação</a></li>
+            </ul>
+        </div>
+
+        <h2>🎯 Pontos de Integração Identificados</h2>
+
+        <div id="auth" class="section priority-high">
+            <h3>1. 🔐 Sistema de Autenticação</h3>
+            <span class="badge badge-high">Alta Prioridade</span>
+            
+            <p><strong>Arquivo:</strong> <span class="code-inline">src/Web/src/application/stores/authStore.ts</span></p>
+            
+            <h4>Estado Atual</h4>
+            <div class="code-block">const mockLogin = async (credentials: LoginDto): Promise&lt;AuthResponse&gt; => {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const user = mockUsers.find(u => u.username === credentials.username);
+  
+  if (!user || credentials.password !== '123456') {
+    throw new Error('Credenciais inválidas');
+  }
+  
+  return {
+    token: 'mock-jwt-token-' + Date.now(),
+    refreshToken: 'mock-refresh-token-' + Date.now(),
+    user,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  };
+};</div>
+
+            <h4>Endpoints Backend</h4>
+            <div class="endpoints">
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <span>/auth/login</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <span>/auth/refresh</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <span>/auth/logout</span>
+                </div>
+            </div>
+
+            <h4>Implementação Sugerida</h4>
+            <div class="code-block">const login = async (credentials: LoginDto) => {
+  const response = await apiClient.post('/auth/login', credentials);
+  return response.data;
+};
+
+const refreshAuth = async () => {
+  const { refreshToken } = get();
+  const response = await apiClient.post('/auth/refresh', { refreshToken });
+  return response.data;
+};
+
+const logout = async () => {
+  await apiClient.post('/auth/logout');
+  // Limpar estado local
+};</div>
+        </div>
+
+        <div id="pacientes" class="section priority-high">
+            <h3>2. 👥 Gestão de Pacientes</h3>
+            <span class="badge badge-high">Alta Prioridade</span>
+            
+            <p><strong>Arquivo:</strong> <span class="code-inline">src/Web/src/presentation/pages/PacientesPage.tsx</span></p>
+            
+            <h4>Estado Atual</h4>
+            <div class="code-block">const [pacientes] = useState&lt;Paciente[]&gt;(mockPacientes);</div>
+
+            <h4>Endpoints Backend</h4>
+            <div class="endpoints">
+                <div class="endpoint">
+                    <span class="method method-get">GET</span>
+                    <span>/pacientes?page={page}&pageSize={pageSize}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <span>/pacientes</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-put">PUT</span>
+                    <span>/pacientes/{id}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-delete">DELETE</span>
+                    <span>/pacientes/{id}</span>
+                </div>
+            </div>
+
+            <h4>Service Necessário</h4>
+            <div class="code-block">const usePacientes = () => {
+  const [pacientes, setPacientes] = useState&lt;Paciente[]&gt;([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchPacientes = async (page: number, pageSize: number) => {
+    setLoading(true);
+    const response = await apiClient.get(`/pacientes?page=${page}&pageSize=${pageSize}`);
+    setPacientes(response.data);
+    setLoading(false);
+  };
+
+  const createPaciente = async (data: CreatePacienteDto) => {
+    const response = await apiClient.post('/pacientes', data);
+    return response.data;
+  };
+
+  // ... outros métodos
+};</div>
+        </div>
+
+        <div id="exames" class="section priority-high">
+            <h3>3. 🔬 Gestão de Exames</h3>
+            <span class="badge badge-high">Alta Prioridade</span>
+            
+            <p><strong>Arquivo:</strong> <span class="code-inline">src/Web/src/presentation/pages/ExamesPage.tsx</span></p>
+            
+            <h4>Estado Atual</h4>
+            <div class="code-block">const [exames] = useState&lt;Exame[]&gt;(mockExames);
+const [pacientes] = useState&lt;Paciente[]&gt;(mockPacientes);</div>
+
+            <h4>Endpoints Backend</h4>
+            <div class="endpoints">
+                <div class="endpoint">
+                    <span class="method method-get">GET</span>
+                    <span>/exames?page={page}&pageSize={pageSize}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <span>/exames</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-put">PUT</span>
+                    <span>/exames/{id}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-delete">DELETE</span>
+                    <span>/exames/{id}</span>
+                </div>
+            </div>
+
+            <h4>Considerações Especiais</h4>
+            <ul>
+                <li><strong>Idempotência:</strong> Gerar <span class="code-inline">idempotencyKey</span> automaticamente se não fornecida</li>
+                <li><strong>Validação:</strong> Verificar se paciente existe antes de criar exame</li>
+                <li><strong>Modalidades DICOM:</strong> Usar enums corretos do backend</li>
+            </ul>
+        </div>
+
+        <div id="medicos" class="section priority-medium">
+            <h3>4. 👨‍⚕️ Gestão de Médicos/Usuários</h3>
+            <span class="badge badge-medium">Média Prioridade</span>
+            
+            <p><strong>Arquivo:</strong> <span class="code-inline">src/Web/src/presentation/pages/MedicosPage.tsx</span></p>
+            
+            <h4>Endpoints Backend</h4>
+            <div class="endpoints">
+                <div class="endpoint">
+                    <span class="method method-get">GET</span>
+                    <span>/admin/usuarios?page={page}&pageSize={pageSize}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <span>/admin/usuarios</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-put">PUT</span>
+                    <span>/admin/usuarios/{id}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-delete">DELETE</span>
+                    <span>/admin/usuarios/{id}</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-patch">PATCH</span>
+                    <span>/admin/usuarios/{id}/ativar</span>
+                </div>
+            </div>
+
+            <h4>Considerações Especiais</h4>
+            <ul>
+                <li><strong>Autorização:</strong> Requer perfil Administrador</li>
+                <li><strong>Filtros:</strong> Filtrar usuários por role no frontend ou backend</li>
+            </ul>
+        </div>
+
+        <div id="dashboard" class="section priority-medium">
+            <h3>5. 📊 Dashboard e Métricas</h3>
+            <span class="badge badge-medium">Média Prioridade</span>
+            
+            <p><strong>Arquivo:</strong> <span class="code-inline">src/Web/src/application/stores/mockData.ts</span></p>
+            
+            <h4>Endpoints Backend</h4>
+            <div class="endpoints">
+                <div class="endpoint">
+                    <span class="method method-get">GET</span>
+                    <span>/admin/metrics</span>
+                    <small>(para administradores)</small>
+                </div>
+                <div class="endpoint">
+                    <span class="method method-get">GET</span>
+                    <span>/medico/metrics</span>
+                    <small>(para médicos)</small>
+                </div>
+            </div>
+        </div>
+
+        <div id="api-client" class="section priority-high">
+            <h3>6. 🔗 Cliente da API - Melhorias</h3>
+            <span class="badge badge-high">Alta Prioridade</span>
+            
+            <p><strong>Arquivo:</strong> <span class="code-inline">src/Web/src/infrastructure/api/client.ts</span></p>
+            
+            <h4>Melhorias Necessárias</h4>
+            <ul>
+                <li>Integração com Auth Store do Zustand</li>
+                <li>Refresh token automático</li>
+                <li>Tratamento robusto de erros</li>
+                <li>Retry de requisições falhadas</li>
+            </ul>
+        </div>
+
+        <div id="inconsistencias" class="section">
+            <h2>⚠️ Inconsistências Identificadas</h2>
+            
+            <h3>1. Nomenclatura de Campos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entidade</th>
+                        <th>Backend</th>
+                        <th>Frontend</th>
+                        <th>Ação Necessária</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Paciente</td>
+                        <td><span class="code-inline">documento</span></td>
+                        <td><span class="code-inline">cpf</span></td>
+                        <td>Padronizar para <span class="code-inline">documento</span></td>
+                    </tr>
+                    <tr>
+                        <td>Paciente</td>
+                        <td><span class="code-inline">DataNascimento</span></td>
+                        <td><span class="code-inline">dataNascimento</span></td>
+                        <td>Manter camelCase no frontend</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2. Modalidades DICOM</h3>
+            <p><strong>Backend:</strong> <span class="code-inline">CR, CT, DX, MG, MR, NM, OT, PT, RF, US, XA</span></p>
+            <p><strong>Frontend:</strong> <span class="code-inline">CT, MR, XR, US, MG, CR, DX, NM</span></p>
+            
+            <h4>Ações:</h4>
+            <ul>
+                <li>Adicionar modalidades faltantes: <span class="code-inline">OT, PT, RF, XA</span></li>
+                <li>Corrigir <span class="code-inline">XR</span> para <span class="code-inline">DX</span> ou <span class="code-inline">CR</span></li>
+                <li>Atualizar enum <span class="code-inline">ModalidadeDicom</span></li>
+            </ul>
+        </div>
+
+        <div id="plano" class="section">
+            <h2>🛠️ Plano de Implementação</h2>
+            
+            <h3>Fase 1: Autenticação (Sprint 1)</h3>
+            <ul class="task-list">
+                <li>Integrar login real</li>
+                <li>Implementar refresh token</li>
+                <li>Configurar interceptadores</li>
+                <li>Testar fluxo completo de auth</li>
+            </ul>
+
+            <h3>Fase 2: CRUD Básico (Sprint 2)</h3>
+            <ul class="task-list">
+                <li>Service de Pacientes</li>
+                <li>Service de Exames com idempotência</li>
+                <li>Formulários funcionais</li>
+                <li>Validações integradas</li>
+            </ul>
+
+            <h3>Fase 3: Administração (Sprint 3)</h3>
+            <ul class="task-list">
+                <li>Service de Usuários</li>
+                <li>Controle de permissões</li>
+                <li>Funcionalidades administrativas</li>
+            </ul>
+
+            <h3>Fase 4: Dashboard e Métricas (Sprint 4)</h3>
+            <ul class="task-list">
+                <li>Integração de métricas</li>
+                <li>Gráficos em tempo real</li>
+                <li>Relatórios específicos por perfil</li>
+            </ul>
+
+            <h3>Fase 5: Refinamentos (Sprint 5)</h3>
+            <ul class="task-list">
+                <li>Tratamento de erros robusto</li>
+                <li>Loading states globais</li>
+                <li>Testes de integração</li>
+                <li>Otimizações de performance</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📁 Arquivos Críticos para Modificação</h2>
+            
+            <h3>🔴 Alta Prioridade</h3>
+            <div class="file-list">
+                <div class="file-item">src/Web/src/application/stores/authStore.ts</div>
+                <div class="file-item">src/Web/src/infrastructure/api/client.ts</div>
+                <div class="file-item">src/Web/src/presentation/pages/PacientesPage.tsx</div>
+                <div class="file-item">src/Web/src/presentation/pages/ExamesPage.tsx</div>
+            </div>
+
+            <h3>🟡 Média Prioridade</h3>
+            <div class="file-list">
+                <div class="file-item">src/Web/src/presentation/pages/MedicosPage.tsx</div>
+                <div class="file-item">src/Web/src/application/stores/mockData.ts</div>
+                <div class="file-item">src/Web/src/domain/entities/</div>
+                <div class="file-item">src/Web/src/domain/enums/ModalidadeDicom.ts</div>
+            </div>
+
+            <h3>🟢 Baixa Prioridade</h3>
+            <div class="file-list">
+                <div class="file-item">Componentes de dashboard</div>
+                <div class="file-item">Testes unitários</div>
+                <div class="file-item">Documentação de APIs</div>
+                <div class="file-item">Otimizações de performance</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Métricas de Sucesso</h2>
+            
+            <h3>Funcionalidades</h3>
+            <ul class="task-list">
+                <li>100% dos dados mock substituídos</li>
+                <li>Autenticação JWT funcional</li>
+                <li>CRUD completo para todas entidades</li>
+                <li>Dashboard com dados reais</li>
+            </ul>
+
+            <h3>Performance</h3>
+            <ul class="task-list">
+                <li>Tempo de carregamento < 2s</li>
+                <li>Refresh token transparente</li>
+                <li>Tratamento de erros consistente</li>
+            </ul>
+
+            <h3>Qualidade</h3>
+            <ul class="task-list">
+                <li>Cobertura de testes > 80%</li>
+                <li>Zero vulnerabilidades críticas</li>
+                <li>Lint sem warnings</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Considerações Técnicas</h2>
+            
+            <h3>Configuração de Ambiente</h3>
+            <div class="code-block"># Variáveis de ambiente necessárias
+VITE_API_BASE_URL=http://localhost:5000
+VITE_APP_VERSION=1.0.0</div>
+
+            <h3>CORS Configuration</h3>
+            <p>O backend já está configurado para aceitar requisições do frontend em:</p>
+            <ul>
+                <li><span class="code-inline">http://localhost:5005</span></li>
+                <li><span class="code-inline">http://127.0.0.1:5005</span></li>
+                <li><span class="code-inline">http://0.0.0.0:5005</span></li>
+                <li><span class="code-inline">http://192.168.15.119:5005</span></li>
+            </ul>
+
+            <h3>JWT Token Management</h3>
+            <ul>
+                <li>Tokens são armazenados no Zustand store</li>
+                <li>Refresh automático implementado nos interceptadores</li>
+                <li>Logout limpa todos os dados de autenticação</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📝 Próximos Passos</h2>
+            <ol>
+                <li><strong>Revisar</strong> esta análise com a equipe</li>
+                <li><strong>Criar tasks</strong> específicas para cada ponto de integração</li>
+                <li><strong>Definir</strong> cronograma de implementação</li>
+                <li><strong>Configurar</strong> ambiente de desenvolvimento integrado</li>
+                <li><strong>Iniciar</strong> pela implementação da autenticação</li>
+            </ol>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem; padding: 2rem; border-top: 1px solid var(--border);">
+            <p><strong>Versão:</strong> 1.0</p>
+        </div>
+    </div>
+</body>
+</html>

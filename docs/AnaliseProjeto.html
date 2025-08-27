@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 MobileMed - Análise Técnica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --error: #f87171;
+            --dark: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #334155;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding-top: 0;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 0.4rem 1rem;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tech-badges {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: 1fr;
+            gap: 0.2rem;
+            margin: 0.3rem auto;
+            max-width: 100vw; /* Usar toda a largura da tela */
+            width: 100%; /* Ocupar toda a largura disponível */
+            padding: 0.4rem 1rem;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .tech-badges img {
+            height: 17.12px; /* 16px + 7% = 17.12px */
+            border-radius: 2px;
+            transition: transform 0.3s ease;
+        }
+
+        .tech-badges img:hover {
+            transform: scale(1.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .nav-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            height: 100%;
+        }
+
+        .header-nav .nav-link {
+            padding: 0.3rem 0.6rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            height: auto;
+        }
+
+        .header-nav .nav-link:hover,
+        .header-nav .nav-link.active {
+            color: var(--text);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            padding-top: 80px; /* Ajustado para header sem card */
+        }
+
+        .hero {
+            background: transparent;
+            border-radius: 0;
+            padding: 2rem 0;
+            margin: 0;
+            text-align: center;
+            color: var(--text);
+            height: calc(100vh - 80px); /* Ocupar exatamente a viewport menos header */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            overflow: hidden; /* Evitar overflow */
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section {
+            margin: 0;
+            scroll-margin-top: 80px; /* Ajustado para header sem card */
+            min-height: calc(100vh - 80px); /* Ocupar toda a viewport menos header */
+            max-height: calc(100vh - 80px); /* Limitar altura à viewport */
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            overflow: auto; /* Permitir scroll interno se necessário */
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-icon {
+            font-size: 1.3rem;
+            margin-right: 0.6rem;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            word-wrap: break-word;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .card ul {
+            margin: 0.2rem 0;
+            padding-left: 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .card li {
+            margin: 0.1rem 0;
+            line-height: 1.2;
+        }
+
+        .card p {
+            margin: 0.2rem 0;
+            line-height: 1.3;
+            font-size: 0.85rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.8rem;
+            overflow: hidden;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            table-layout: fixed;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: rgba(102, 126, 234, 0.1);
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin: 0.2rem;
+        }
+
+        .status.completed { background: rgba(74, 222, 128, 0.1); color: var(--success); }
+        .status.progress { background: rgba(251, 191, 36, 0.1); color: var(--warning); }
+        .status.pending { background: rgba(248, 113, 113, 0.1); color: var(--error); }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+        }
+
+        .code {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .arch-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            background: var(--gradient);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        /* Responsive for 13-inch monitors and smaller (1366px and below) */
+        @media (max-width: 1366px) {
+            .tech-badges {
+                grid-template-columns: repeat(20, 1fr);
+                grid-template-rows: 1fr;
+                gap: 0.15rem;
+                padding: 0.3rem 0.8rem;
+                margin: 0.2rem auto;
+                max-width: 100vw; /* Usar toda a largura da tela */
+                width: 100%; /* Ocupar toda a largura disponível */
+            }
+            .tech-badges img {
+                height: 14.98px; /* 14px + 7% = 14.98px */
+            }
+            .header {
+                min-height: 55px;
+            }
+            .container {
+                padding-top: 70px; /* Ajustado para header sem card */
+            }
+            .section {
+                scroll-margin-top: 70px; /* Ajustado */
+                min-height: calc(100vh - 70px); /* Ocupar toda viewport menos header */
+                max-height: calc(100vh - 70px); /* Limitar altura à viewport */
+                padding: 1.5rem 0;
+                overflow: auto; /* Permitir scroll interno */
+            }
+            .hero {
+                height: calc(100vh - 70px); /* Ocupar exatamente viewport menos header */
+                padding: 1.5rem 0;
+                overflow: hidden;
+            }
+            .card {
+                padding: 0.7rem;
+                font-size: 0.8rem;
+                line-height: 1.3;
+                min-height: auto;
+            }
+            .card h3 {
+                font-size: 0.9rem;
+                margin-bottom: 0.3rem;
+            }
+            .card h4 {
+                font-size: 0.8rem;
+                margin-bottom: 0.25rem;
+            }
+            .card p {
+                font-size: 0.75rem;
+                line-height: 1.2;
+                margin: 0.15rem 0;
+            }
+            .card ul {
+                font-size: 0.75rem;
+                padding-left: 0.7rem;
+                margin: 0.15rem 0;
+            }
+            .card li {
+                line-height: 1.2;
+                margin: 0.1rem 0;
+            }
+            .table th,
+            .table td {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+            .section-title {
+                font-size: 1.4rem;
+            }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* Responsive for tablets and mobile */
+        @media (max-width: 768px) {
+            .nav-toggle { display: block; }
+            .header-nav { 
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--card);
+                flex-direction: column;
+                padding: 1rem;
+                border-radius: 0 0 12px 12px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+            .header-nav.show { display: flex; }
+            .tech-badges {
+                grid-template-columns: repeat(10, 1fr);
+                grid-template-rows: repeat(2, auto);
+                gap: 0.15rem;
+                max-width: 100vw; /* Usar toda a largura da tela */
+                width: 100%; /* Ocupar toda a largura disponível */
+                padding: 0.2rem 0.6rem;
+                margin: 0.15rem auto;
+            }
+            .tech-badges img {
+                height: 12.84px; /* 12px + 7% = 12.84px */
+            }
+            .header {
+                min-height: 50px;
+            }
+            .container {
+                padding-top: 65px; /* Ajustado para mobile sem card */
+            }
+            .section {
+                scroll-margin-top: 65px; /* Ajustado */
+                min-height: calc(100vh - 65px); /* Ocupar toda viewport menos header */
+                max-height: calc(100vh - 65px); /* Limitar altura à viewport */
+                padding: 1.2rem 0;
+                overflow: auto; /* Permitir scroll interno */
+            }
+            .hero h1 { font-size: 1.8rem; }
+            .hero { 
+                height: calc(100vh - 65px); /* Ocupar exatamente viewport menos header */
+                padding: 1.2rem 0;
+                margin: 0;
+                border-radius: 0;
+                overflow: hidden;
+            }
+            .card {
+                padding: 0.6rem;
+                font-size: 0.75rem;
+                margin: 0.4rem 0;
+            }
+            .card h3 {
+                font-size: 0.85rem;
+                margin-bottom: 0.25rem;
+            }
+            .card h4 {
+                font-size: 0.75rem;
+                margin-bottom: 0.2rem;
+            }
+            .card p {
+                font-size: 0.7rem;
+                line-height: 1.15;
+                margin: 0.1rem 0;
+            }
+            .card ul {
+                font-size: 0.7rem;
+                padding-left: 0.6rem;
+                margin: 0.1rem 0;
+            }
+            .card li {
+                line-height: 1.15;
+                margin: 0.05rem 0;
+            }
+            .card-grid { grid-template-columns: 1fr; }
+            .arch-flow { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+            .table th,
+            .table td {
+                padding: 0.4rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        html { scroll-behavior: smooth; }
+
+        /* Estilos específicos para seção Roadmap */
+        #roadmap {
+            max-height: none !important; /* Remover limitação de altura */
+            overflow: visible !important; /* Permitir overflow */
+        }
+        
+        #roadmap .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        #roadmap .card-grid:last-of-type {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 800px;
+            margin: 1rem auto 0;
+        }
+
+        #roadmap .card {
+            padding: 1rem;
+            font-size: 0.85rem;
+            min-height: auto; /* Remover altura mínima fixa */
+            height: auto; /* Permitir altura automática */
+            overflow: visible; /* Mostrar todo conteúdo */
+        }
+
+        /* Cards específicos - remover limitações de altura */
+        #roadmap .card:nth-child(1),
+        #roadmap .card:nth-child(2),
+        #roadmap .card:nth-child(3),
+        #roadmap .card:nth-child(4),
+        #roadmap .card:nth-child(5),
+        #roadmap .card:nth-child(6),
+        #roadmap .card:nth-child(7),
+        #roadmap .card:nth-child(8) {
+            min-height: auto;
+            height: auto;
+            padding: 1rem;
+        }
+
+        #roadmap .card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        #roadmap .card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            line-height: 1.3;
+        }
+
+        #roadmap .card ul {
+            margin: 0.3rem 0;
+            padding-left: 1rem;
+            font-size: 0.85rem;
+        }
+
+        #roadmap .card li {
+            margin: 0.2rem 0;
+            line-height: 1.4;
+        }
+
+        #roadmap .card p {
+            margin: 0.3rem 0;
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+
+        #roadmap .card ol {
+            margin: 0.3rem 0;
+            padding-left: 1.2rem;
+            font-size: 0.85rem;
+        }
+
+        /* Estilo específico para o div interno do card Conclusão */
+        #roadmap .card:nth-child(8) div {
+            font-size: 0.8rem;
+            line-height: 1.3;
+            margin: 0.2rem 0;
+            padding: 0.8rem;
+        }
+
+        /* Mobile responsive para Roadmap */
+        @media (max-width: 1366px) {
+            #roadmap .card {
+                padding: 0.8rem;
+                font-size: 0.8rem;
+                min-height: auto; /* Altura automática */
+                height: auto;
+            }
+
+            #roadmap .card h3 {
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+                line-height: 1.25;
+            }
+
+            #roadmap .card h4 {
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+                line-height: 1.25;
+            }
+
+            #roadmap .card ul {
+                margin: 0.2rem 0;
+                padding-left: 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            #roadmap .card li {
+                margin: 0.15rem 0;
+                line-height: 1.25;
+            }
+
+            #roadmap .card p {
+                margin: 0.2rem 0;
+                line-height: 1.3;
+                font-size: 0.75rem;
+            }
+
+            #roadmap .card ol {
+                margin: 0.2rem 0;
+                padding-left: 1rem;
+                font-size: 0.75rem;
+            }
+
+            #roadmap .card:nth-child(8) div {
+                font-size: 0.7rem;
+                line-height: 1.2;
+                margin: 0.15rem 0;
+                padding: 0.6rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #roadmap .card-grid {
+                grid-template-columns: 1fr !important;
+                max-width: 100% !important;
+                margin: 0.5rem 0 !important;
+            }
+            
+            #roadmap .card {
+                min-height: auto;
+                height: auto;
+                padding: 0.6rem;
+                font-size: 0.75rem;
+            }
+
+            #roadmap .card h3 {
+                font-size: 0.85rem;
+                margin-bottom: 0.3rem;
+                line-height: 1.2;
+            }
+
+            #roadmap .card h4 {
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
+                line-height: 1.2;
+            }
+
+            #roadmap .card p {
+                font-size: 0.7rem;
+                line-height: 1.25;
+                margin: 0.15rem 0;
+            }
+
+            #roadmap .card ul {
+                font-size: 0.7rem;
+                padding-left: 0.7rem;
+                margin: 0.15rem 0;
+            }
+
+            #roadmap .card li {
+                margin: 0.1rem 0;
+                line-height: 1.2;
+            }
+
+            #roadmap .card ol {
+                font-size: 0.7rem;
+                padding-left: 0.9rem;
+                margin: 0.15rem 0;
+            }
+
+            #roadmap .card:nth-child(8) div {
+                font-size: 0.65rem;
+                line-height: 1.15;
+                padding: 0.4rem;
+                margin: 0.1rem 0;
+            }
+        }
+
+        /* Cards com progress bars - tipografia compacta */
+        .card:has(.progress-bar) {
+            padding: 0.9rem;
+            font-size: 0.8rem;
+        }
+
+        .card:has(.progress-bar) h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .card:has(.progress-bar) ul {
+            margin: 0.3rem 0;
+            padding-left: 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .card:has(.progress-bar) li {
+            margin: 0.15rem 0;
+            line-height: 1.2;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 0.3rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="#top" class="logo">🏥 MobileMed</a>
+            <nav class="header-nav" id="headerNav">
+                <a href="#overview" class="nav-link">🎯 Visão Geral</a>
+                <a href="#architecture" class="nav-link">🏗️ Arquitetura</a>
+                <a href="#features" class="nav-link">⚙️ Funcionalidades</a>
+                <a href="#infrastructure" class="nav-link">🛠️ Infraestrutura</a>
+                <a href="#testing" class="nav-link">🧪 Testes</a>
+                <a href="#status" class="nav-link">📊 Status</a>
+                <a href="#differentials" class="nav-link">🎯 Diferenciais</a>
+                <a href="#roadmap" class="nav-link">🔄 Roadmap</a>
+            </nav>
+            <button class="nav-toggle" onclick="toggleNav()">☰</button>
+        </div>
+        <div class="tech-badges">
+            <!-- Primeira linha - Core Technologies -->
+            <img src="https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white" alt="C#">
+            <img src="https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET">
+            <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
+            <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+            <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+            <img src="https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white" alt="Material-UI">
+            <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+            <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
+            <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+            <img src="https://img.shields.io/badge/SASS-CC6699?style=for-the-badge&logo=sass&logoColor=white" alt="SASS">
+            
+            <!-- Segunda linha - Tools & Methodologies -->
+            <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white" alt="Postman">
+            <img src="https://img.shields.io/badge/Cypress-17202C?style=for-the-badge&logo=cypress&logoColor=white" alt="Cypress">
+            <img src="https://img.shields.io/badge/TDD-Test%20Driven-green?style=for-the-badge" alt="TDD">
+            <img src="https://img.shields.io/badge/Clean%20Architecture-0052CC?style=for-the-badge" alt="Clean Architecture">
+            <img src="https://img.shields.io/badge/Clean%20Code-7B68EE?style=for-the-badge" alt="Clean Code">
+            <img src="https://img.shields.io/badge/SOLID-FF6B35?style=for-the-badge" alt="SOLID">
+            <img src="https://img.shields.io/badge/DDD-Domain%20Driven-blue?style=for-the-badge" alt="DDD">
+            <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+            <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git">
+            <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+        </div>
+    </header>
+
+
+    <div class="container" id="top">
+        <section class="hero">
+            <h1>📋 Análise Completa do Projeto MobileMed</h1>
+            <p>Sistema de gestão médica moderno com arquitetura Clean e tecnologias avançadas</p>
+        </section>
+
+        <section id="overview" class="section">
+            <div class="section-header">
+                <div class="section-icon">🎯</div>
+                <h2 class="section-title">Visão Geral Executiva</h2>
+            </div>
+            
+            <div class="card">
+                <h3>Objetivo Principal</h3>
+                <p>O <strong>MobileMed</strong> é um sistema completo de gestão médica desenvolvido como desafio técnico, focado no cadastro e consulta de pacientes e exames médicos. Implementa arquitetura moderna seguindo Clean Architecture e princípios DDD.</p>
+                
+                <h4 style="margin-top: 1.5rem;">🏆 Missão do Sistema</h4>
+                <p>Criar uma plataforma médica segura, consistente e com excelente experiência de navegação, garantindo controle sobre o histórico clínico mesmo em situações de reenvio de requisição ou acessos simultâneos.</p>
+            </div>
+        </section>
+
+        <section id="architecture" class="section">
+            <div class="section-header">
+                <div class="section-icon">🏗️</div>
+                <h2 class="section-title">Arquitetura e Stack</h2>
+            </div>
+
+            <div class="card">
+                <h3>Arquitetura Geral</h3>
+                <div class="arch-flow">
+                    <div class="flow-box">Frontend<br>React + Vite</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Backend<br>.NET Core 8</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">Database<br>SQLite</div>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>🖥️ Backend (.NET 8)</h4>
+                    <table class="table">
+                        <tr><td>Framework</td><td>.NET Core 8.0</td></tr>
+                        <tr><td>Autenticação</td><td>JWT + Blacklist</td></tr>
+                        <tr><td>Banco</td><td>SQLite + EF Core</td></tr>
+                        <tr><td>Logging</td><td>Serilog</td></tr>
+                        <tr><td>Testes</td><td>xUnit + FluentAssertions</td></tr>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h4>💻 Frontend (React)</h4>
+                    <table class="table">
+                        <tr><td>Framework</td><td>React 19.1.1</td></tr>
+                        <tr><td>Linguagem</td><td>TypeScript 5.8.3</td></tr>
+                        <tr><td>Build</td><td>Vite 7.1.2</td></tr>
+                        <tr><td>UI</td><td>Material-UI 7.3.1</td></tr>
+                        <tr><td>Estado</td><td>Zustand 5.0.8</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="section">
+            <div class="section-header">
+                <div class="section-icon">⚙️</div>
+                <h2 class="section-title">Funcionalidades</h2>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>👥 Gestão de Pacientes</h3>
+                    <div class="status completed">✅ CRUD Completo</div>
+                    <div class="status completed">✅ Validação CPF Único</div>
+                    <div class="status completed">✅ Paginação</div>
+                    <div class="status completed">✅ Logging</div>
+                </div>
+
+                <div class="card">
+                    <h3>🧪 Gestão de Exames</h3>
+                    <div class="status completed">✅ CRUD + Idempotência</div>
+                    <div class="status completed">✅ Modalidades DICOM</div>
+                    <div class="status completed">✅ Controle Concorrência</div>
+                    <div class="status completed">✅ Validação Negócio</div>
+                </div>
+
+                <div class="card">
+                    <h3>🔐 Autenticação</h3>
+                    <div class="status completed">✅ JWT + Blacklist</div>
+                    <div class="status completed">✅ Middleware Custom</div>
+                    <div class="status completed">✅ Endpoints Protegidos</div>
+                    <div class="status progress">🚧 Perfis (Admin/Médico)</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="infrastructure" class="section">
+            <div class="section-header">
+                <div class="section-icon">🛠️</div>
+                <h2 class="section-title">Infraestrutura</h2>
+            </div>
+
+            <div class="card">
+                <h3>📜 Scripts de Automação</h3>
+                <table class="table">
+                    <tr><td><code>api.sh</code></td><td>🚀 Gerenciamento API</td></tr>
+                    <tr><td><code>front.sh</code></td><td>🌐 Gerenciamento Frontend</td></tr>
+                    <tr><td><code>servers.sh</code></td><td>🏥 Plataforma Completa</td></tr>
+                    <tr><td><code>test-api.sh</code></td><td>🧪 Execução Testes</td></tr>
+                </table>
+                <p><strong>Características:</strong> Interface colorida, execução em background, configuração automática de rede.</p>
+            </div>
+
+            <div class="card">
+                <h3>🌐 Configuração de Rede</h3>
+                <div class="code">🔧 API: http://0.0.0.0:5000
+🌐 Frontend: http://0.0.0.0:5005  
+📚 Swagger: http://localhost:5000/swagger</div>
+            </div>
+        </section>
+
+        <section id="testing" class="section">
+            <div class="section-header">
+                <div class="section-icon">🧪</div>
+                <h2 class="section-title">Testes e Qualidade</h2>
+            </div>
+
+            <div class="card">
+                <h3>📊 Cobertura Backend: 85%+</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%;"></div>
+                </div>
+                <ul>
+                    <li>✅ PacienteServiceTests - CRUD completo</li>
+                    <li>✅ ExameServiceTests - Idempotência e validações</li>
+                    <li>✅ UserServiceTests - Autenticação</li>
+                    <li>✅ MockDbSet - Implementação robusta</li>
+                    <li>✅ Relatórios Markdown automáticos</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="status" class="section">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <h2 class="section-title">Status do Projeto</h2>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>✅ Backend (100%)</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%;"></div>
+                    </div>
+                    <ul>
+                        <li>✅ API REST completa</li>
+                        <li>✅ Autenticação JWT</li>
+                        <li>✅ CRUD Pacientes/Exames</li>
+                        <li>✅ Testes unitários</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🚧 Frontend (90%)</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%;"></div>
+                    </div>
+                    <ul>
+                        <li>✅ Estrutura configurada</li>
+                        <li>✅ UI/UX 100% implementada</li>
+                        <li>🚧 Integração API (pendente)</li>
+                        <li>✅ Dashboard</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🔴 DevOps (0%)</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <ul>
+                        <li>🐳 Docker</li>
+                        <li>⚙️ CI/CD</li>
+                        <li>📜 Scripts Windows</li>
+                        <li>🌐 Tradução</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="differentials" class="section">
+            <div class="section-header">
+                <div class="section-icon">🎯</div>
+                <h2 class="section-title">Diferenciais Técnicos</h2>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🔑 Sistema de Idempotência</h3>
+                    <div class="code">public class Exame {
+    public string IdempotencyKey { get; set; }
+    // Previne duplicações em requisições simultâneas
+}</div>
+                    <p>Implementação robusta que garante integridade mesmo com requisições concorrentes.</p>
+                </div>
+
+                <div class="card">
+                    <h3>🏛️ Clean Architecture</h3>
+                    <div class="code">🖥️ Presentation  → Controllers
+🚀 Application   → Services/DTOs  
+🏛️ Domain        → Entities/Rules
+🏗️ Infrastructure → Data/External</div>
+                    <p>Separação clara seguindo princípios SOLID e DDD.</p>
+                </div>
+
+                <div class="card">
+                    <h3>📝 Logging Avançado</h3>
+                    <div class="code">Serilog com rotação diária
+Console + Arquivo
+Múltiplos níveis (Debug, Info, Warning, Error)</div>
+                    <p>Sistema estruturado para rastreamento completo.</p>
+                </div>
+
+                <div class="card">
+                    <h3>🎨 Scripts Elegantes</h3>
+                    <div class="code">Interface colorida com ícones
+Detecção automática de IP
+Gerenciamento robusto de processos</div>
+                    <p>Automação com excelente experiência de desenvolvedor.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="section">
+            <div class="section-header">
+                <div class="section-icon">🔄</div>
+                <h2 class="section-title">Roadmap</h2>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🎯 Fase 1: Frontend (2-3 semanas)</h3>
+                    <ul>
+                        <li>🔐 Sistema autenticação frontend</li>
+                        <li>📝 Formulários cadastro</li>
+                        <li>📋 Listagens paginadas</li>
+                        <li>🎨 Layout responsivo MUI</li>
+                        <li>🔗 Integração API completa</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🚀 Fase 2: DevOps (1-2 semanas)</h3>
+                    <ul>
+                        <li>🐳 Docker + docker-compose</li>
+                        <li>⚙️ GitHub Actions CI/CD</li>
+                        <li>🧪 Testes automatizados</li>
+                        <li>🚀 Deploy automático</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🎨 Fase 3: Melhorias (2 semanas)</h3>
+                    <ul>
+                        <li>👥 Perfis Admin/Médico</li>
+                        <li>📊 Dashboard adaptativo</li>
+                        <li>🌐 Tradução português</li>
+                        <li>🔐 Controle acesso granular</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🏥 Frontend (90%)</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%;"></div>
+                    </div>
+                    <ul>
+                        <li>✅ Estrutura configurada</li>
+                        <li>✅ UI/UX 100% implementada</li>
+                        <li>🔄 Integração API (pendente)</li>
+                        <li>✅ Dashboard responsivo</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🔄 DevOps (10%)</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 10%;"></div>
+                    </div>
+                    <ul>
+                        <li>🔄 Docker + docker-compose</li>
+                        <li>🔄 GitHub Actions CI/CD</li>
+                        <li>🔄 Testes automatizados</li>
+                        <li>🔄 Deploy automático</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🛠️ DevOps (0%)</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <ul>
+                        <li>🛠️ Docker</li>
+                        <li>🛠️ CI/CD</li>
+                        <li>🛠️ Scripts Windows</li>
+                        <li>🛠️ Tradução</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>📈 Métricas Atuais</h3>
+                    <table class="table">
+                        <tr><td>Cobertura Testes</td><td><strong>85%+ (Backend)</strong></td></tr>
+                        <tr><td>Linhas de Código</td><td><strong>~15.000</strong></td></tr>
+                        <tr><td>Endpoints API</td><td><strong>12 funcionais</strong></td></tr>
+                        <tr><td>Scripts Automação</td><td><strong>4 bash elegantes</strong></td></tr>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3>🚀 Próximos Passos</h3>
+                    <ol>
+                        <li><strong>Frontend</strong> - Integração API</li>
+                        <li><strong>Integração API</strong> - Conectar EndPoints</li>
+                        <li><strong>Docker</strong> - Deploy automático</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleNav() {
+            document.getElementById('headerNav').classList.toggle('show');
+        }
+
+        // Smooth scrolling para navegação
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                // Mobile: fechar menu após clique
+                if (window.innerWidth <= 768) {
+                    document.getElementById('headerNav').classList.remove('show');
+                }
+            });
+        });
+
+        // Highlight navegação ativa no scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

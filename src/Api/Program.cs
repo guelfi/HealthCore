@@ -78,6 +78,37 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowCredentials();
     });
+    
+    // Política mais flexível para desenvolvimento distribuído
+    options.AddPolicy("AllowDevelopment", policy =>
+    {
+        policy.SetIsOriginAllowed(origin =>
+        {
+            if (string.IsNullOrWhiteSpace(origin)) return false;
+            
+            // Permitir localhost e 127.0.0.1
+            if (origin.StartsWith("http://localhost:") || origin.StartsWith("http://127.0.0.1:"))
+                return true;
+            
+            // Permitir IPs da rede local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+            var uri = new Uri(origin);
+            var host = uri.Host;
+            
+            if (host.StartsWith("192.168.") || 
+                host.StartsWith("10.") || 
+                (host.StartsWith("172.") && 
+                 int.TryParse(host.Split('.')[1], out int second) && 
+                 second >= 16 && second <= 31))
+            {
+                return true;
+            }
+            
+            return false;
+        })
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+    });
 });
 
 builder.WebHost.UseUrls("http://0.0.0.0:5000"); // Configure Kestrel to listen on all interfaces
@@ -94,7 +125,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Use CORS
-app.UseCors("AllowFrontend");
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowDevelopment"); // Política flexível para desenvolvimento
+}
+else
+{
+    app.UseCors("AllowFrontend"); // Política restrita para produção
+}
 
 app.UseAuthentication(); // Use Authentication middleware
 app.UseMiddleware<TokenBlacklistMiddleware>(); // Use Token Blacklist middleware
