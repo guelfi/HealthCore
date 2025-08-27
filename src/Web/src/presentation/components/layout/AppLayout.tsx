@@ -63,9 +63,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         setAnchorEl(null);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         handleUserMenuClose();
-        logout();
+        await logout();
+        navigate('/login');
     };
 
     const menuItems = [

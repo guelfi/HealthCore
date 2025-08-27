@@ -5,8 +5,8 @@ export interface Usuario {
   username: string;
   role: UserProfile;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date; // Opcional pois pode vir como string do backend
+  updatedAt?: Date; // Opcional pois pode vir como string do backend
 }
 
 export interface CreateUsuarioDto {
@@ -27,9 +27,15 @@ export interface LoginDto {
   password: string;
 }
 
+// Interface compatível com LoginResponseDto do backend
 export interface AuthResponse {
   token: string;
   refreshToken: string;
-  user: Usuario;
-  expiresAt: Date;
+  expiresAt: string | Date; // Backend envia como string ISO
+  user: {
+    id: string;
+    username: string;
+    role: number; // Backend envia como número
+    isActive: boolean;
+  };
 }

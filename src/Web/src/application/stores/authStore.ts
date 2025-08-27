@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Usuario, LoginDto, AuthResponse } from '../../domain/entities/Usuario';
+import { UserProfile } from '../../domain/enums/UserProfile';
+import { apiClient } from '../../infrastructure/api/client';
 
 interface AuthState {
   user: Usuario | null;
@@ -24,43 +26,7 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
-// Mock data for development
-const mockUsers = [
-  {
-    id: '1',
-    username: 'admin',
-    role: 'Administrador' as const,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    username: 'medico1',
-    role: 'Médico' as const,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
 
-const mockLogin = async (credentials: LoginDto): Promise<AuthResponse> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  const user = mockUsers.find(u => u.username === credentials.username);
-  
-  if (!user || credentials.password !== '123456') {
-    throw new Error('Credenciais inválidas');
-  }
-  
-  return {
-    token: 'mock-jwt-token-' + Date.now(),
-    refreshToken: 'mock-refresh-token-' + Date.now(),
-    user,
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-  };
-};
 
 export const useAuthStore = create<AuthStore>()(
   persist(
@@ -78,61 +44,105 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true, error: null });
         
         try {
-          const response = await mockLogin(credentials);
+          const response = await apiClient.post('/auth/login', credentials);
+          const authData: AuthResponse = response.data;
+          
+          // Converter dados do backend para formato frontend
+          const user: Usuario = {
+            id: authData.user.id,
+            username: authData.user.username,
+            role: authData.user.role as UserProfile, // Converter número para UserProfile
+            isActive: authData.user.isActive,
+          };
+          
+          const expiresAt = typeof authData.expiresAt === 'string' 
+            ? new Date(authData.expiresAt) 
+            : authData.expiresAt;
           
           set({
-            user: response.user,
-            token: response.token,
-            refreshToken: response.refreshToken,
+            user,
+            token: authData.token,
+            refreshToken: authData.refreshToken,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
-        } catch (error) {
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || 
+                              error.response?.data?.error || 
+                              error.message || 
+                              'Erro de autenticação';
+          
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Erro desconhecido',
+            error: errorMessage,
+            user: null,
+            token: null,
+            refreshToken: null,
+            isAuthenticated: false,
           });
-          throw error;
+          
+          throw new Error(errorMessage);
         }
       },
 
-      logout: () => {
-        set({
-          user: null,
-          token: null,
-          refreshToken: null,
-          isAuthenticated: false,
-          error: null,
-        });
+      logout: async () => {
+        const { token } = get();
+        
+        try {
+          if (token) {
+            // Fazer logout na API para invalidar o token
+            await apiClient.post('/auth/logout');
+          }
+        } catch (error) {
+          console.warn('Erro ao fazer logout na API:', error);
+          // Mesmo com erro na API, limpar dados locais
+        } finally {
+          // Sempre limpar dados locais
+          set({
+            user: null,
+            token: null,
+            refreshToken: null,
+            isAuthenticated: false,
+            error: null,
+          });
+        }
       },
 
       refreshAuth: async () => {
         const { refreshToken } = get();
         
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+          throw new Error('Token de atualização não disponível');
         }
         
         set({ isLoading: true });
         
         try {
-          // Mock refresh token logic
-          await new Promise(resolve => setTimeout(resolve, 500));
+          const response = await apiClient.post('/auth/refresh', {
+            refreshToken
+          });
           
-          const newToken = 'mock-jwt-token-refreshed-' + Date.now();
+          const authData = response.data;
           
           set({
-            token: newToken,
+            token: authData.token,
+            refreshToken: authData.refreshToken || refreshToken, // Manter o mesmo se não retornar um novo
             isLoading: false,
+            error: null,
           });
-        } catch (error) {
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || 
+                              'Falha ao renovar sessão';
+          
           set({
             isLoading: false,
-            error: 'Falha ao renovar sessão',
+            error: errorMessage,
           });
+          
+          // Se falhar o refresh, fazer logout
           get().logout();
-          throw error;
+          throw new Error(errorMessage);
         }
       },
 

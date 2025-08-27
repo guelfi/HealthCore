@@ -96,16 +96,17 @@ const ExamesList: React.FC = () => {
 
   const getModalidadeColor = (modalidade: ModalidadeDicom) => {
     const colors: Record<ModalidadeDicom, 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'> = {
-      [ModalidadeDicom.CT]: 'primary',
-      [ModalidadeDicom.MR]: 'secondary',
-      [ModalidadeDicom.US]: 'success',
-      [ModalidadeDicom.XR]: 'warning',
       [ModalidadeDicom.CR]: 'info',
-      [ModalidadeDicom.DR]: 'error',
+      [ModalidadeDicom.CT]: 'primary',
+      [ModalidadeDicom.DX]: 'warning', // Changed from XR
       [ModalidadeDicom.MG]: 'primary',
+      [ModalidadeDicom.MR]: 'secondary',
       [ModalidadeDicom.NM]: 'secondary',
+      [ModalidadeDicom.OT]: 'error', // New modality
       [ModalidadeDicom.PT]: 'success',
       [ModalidadeDicom.RF]: 'warning',
+      [ModalidadeDicom.US]: 'success',
+      [ModalidadeDicom.XA]: 'info', // New modality
     };
     return colors[modalidade] || 'default';
   };

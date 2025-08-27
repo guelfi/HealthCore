@@ -4,7 +4,7 @@
   "values": [
     {
       "key": "base_url",
-      "value": "http://localhost:5000",
+      "value": "http://192.168.15.119:5000",
       "enabled": true
     },
     {

@@ -124,13 +124,13 @@ const LoginForm: React.FC = () => {
 
           <Box mt={2}>
             <Typography variant="caption" color="text.secondary" display="block">
-              Usuários de teste:
+              Para testar, registre um usuário primeiro usando:
             </Typography>
             <Typography variant="caption" color="text.secondary" display="block">
-              admin / 123456 (Administrador)
+              POST /auth/register via Postman ou API
             </Typography>
             <Typography variant="caption" color="text.secondary" display="block">
-              medico1 / 123456 (Médico)
+              Depois faça login com as credenciais criadas
             </Typography>
           </Box>
         </CardContent>

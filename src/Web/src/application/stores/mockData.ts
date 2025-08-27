@@ -429,8 +429,8 @@ export const mockExames: Exame[] = [
     id: '3',
     pacienteId: '1',
     paciente: mockPacientes[0],
-    modalidade: ModalidadeDicom.XR,
-    descricao: 'Raio-X do tórax',
+    modalidade: ModalidadeDicom.DX,
+    descricao: 'Radiografia digital do tórax',
     dataExame: new Date('2024-02-10'),
     idempotencyKey: 'exam-3-key',
     createdAt: new Date('2024-02-10'),
@@ -508,7 +508,7 @@ export const mockDashboardMetrics: DashboardMetrics = {
     examesPorModalidade: [
       { modalidade: 'CT', total: 2 },
       { modalidade: 'MR', total: 1 },
-      { modalidade: 'XR', total: 1 },
+      { modalidade: 'DX', total: 1 }, // Changed from XR
       { modalidade: 'US', total: 1 },
       { modalidade: 'MG', total: 1 },
     ],

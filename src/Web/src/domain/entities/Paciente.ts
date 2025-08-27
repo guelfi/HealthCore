@@ -1,7 +1,7 @@
 export interface Paciente {
   id: string;
   nome: string;
-  cpf: string;
+  documento: string; // Mudança: era 'cpf', agora 'documento' para corresponder ao backend
   dataNascimento: Date;
   telefone?: string;
   email?: string;
@@ -12,7 +12,7 @@ export interface Paciente {
 
 export interface CreatePacienteDto {
   nome: string;
-  cpf: string;
+  documento: string; // Mudança: era 'cpf', agora 'documento' para corresponder ao backend
   dataNascimento: Date;
   telefone?: string;
   email?: string;
@@ -21,7 +21,7 @@ export interface CreatePacienteDto {
 
 export interface UpdatePacienteDto {
   nome?: string;
-  cpf?: string;
+  documento?: string; // Mudança: era 'cpf', agora 'documento' para corresponder ao backend
   dataNascimento?: Date;
   telefone?: string;
   email?: string;

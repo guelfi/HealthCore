@@ -17,6 +17,13 @@ obj/
 src/api.pid
 src/log/
 
+# Sistema de controle de tarefas - manter arquivos de sessão
+# mas excluir logs temporários
+log/*.log
+!log/tasks/
+log/tasks/*.tmp
+log/tasks/*.bak
+
 tests/Api.Tests/TestResults/
 *.db-shm
 *.db-wal

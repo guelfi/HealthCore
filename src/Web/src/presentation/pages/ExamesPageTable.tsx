@@ -50,14 +50,17 @@ const ExamesPageTable: React.FC = () => {
   const [pageSize] = useState(10);
 
   const modalidadeLabels = {
+    [ModalidadeDicom.CR]: 'Radiografia Computadorizada (CR)',
     [ModalidadeDicom.CT]: 'Tomografia (CT)',
-    [ModalidadeDicom.MR]: 'Ressonância (MR)',
-    [ModalidadeDicom.XR]: 'Raio-X (XR)',
-    [ModalidadeDicom.US]: 'Ultrassom (US)',
-    [ModalidadeDicom.MG]: 'Mamografia (MG)',
-    [ModalidadeDicom.CR]: 'Radiografia Digital (CR)',
     [ModalidadeDicom.DX]: 'Radiografia Digital (DX)',
+    [ModalidadeDicom.MG]: 'Mamografia (MG)',
+    [ModalidadeDicom.MR]: 'Ressonância (MR)',
     [ModalidadeDicom.NM]: 'Medicina Nuclear (NM)',
+    [ModalidadeDicom.OT]: 'Outros (OT)',
+    [ModalidadeDicom.PT]: 'Tomografia por Emissão de Pósitrons (PT)',
+    [ModalidadeDicom.RF]: 'Radiofluoroscopia (RF)',
+    [ModalidadeDicom.US]: 'Ultrassom (US)',
+    [ModalidadeDicom.XA]: 'Angiografia por Raios-X (XA)',
   };
 
   const handleRowClick = (exame: Exame) => {
