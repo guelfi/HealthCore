@@ -121,18 +121,6 @@ const LoginForm: React.FC = () => {
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </Box>
-
-          <Box mt={2}>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Para testar, registre um usuário primeiro usando:
-            </Typography>
-            <Typography variant="caption" color="text.secondary" display="block">
-              POST /auth/register via Postman ou API
-            </Typography>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Depois faça login com as credenciais criadas
-            </Typography>
-          </Box>
         </CardContent>
       </Card>
     </Box>
