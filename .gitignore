@@ -27,7 +27,9 @@ log/tasks/*.bak
 tests/Api.Tests/TestResults/
 *.db-shm
 *.db-wal
-scripts/front.pid
+
+# Arquivos PID dos scripts (gerados automaticamente)
+scripts/*.pid
 
 # Kiro IDE configuration
 .kiro/
