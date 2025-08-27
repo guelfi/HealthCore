@@ -212,8 +212,8 @@ status_front() {
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${PURPLE}║${WHITE}                              Status MobileMed Frontend                      ${PURPLE} ║${NC}"
-    echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}
-"
+    echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
     
     # Verifica se está rodando
     RUNNING_PID=$(is_running)
@@ -264,8 +264,8 @@ stop_front() {
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${PURPLE}║${WHITE}                          Parando MobileMed Frontend                         ${PURPLE} ║${NC}"
-    echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}
-"
+    echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
     
     stop_process
 }
