@@ -30,11 +30,16 @@ import {
   Delete as DeleteIcon,
   Person as PersonIcon,
 } from '@mui/icons-material';
-import { mockPacientes } from '../../application/stores/mockData';
 import type { Paciente } from '../../domain/entities/Paciente';
+import { usePacientes } from '../hooks/usePacientes';
 
 const PacientesPage: React.FC = () => {
-  const [pacientes] = useState<Paciente[]>(mockPacientes);
+  const {
+    pacientes,
+    loading,
+    error,
+    fetchPacientes
+  } = usePacientes();
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
@@ -147,7 +152,7 @@ const PacientesPage: React.FC = () => {
                     }}
                   >
                     <TableCell>{paciente.nome}</TableCell>
-                    <TableCell>{paciente.cpf}</TableCell>
+                    <TableCell>{paciente.documento}</TableCell>
                     <TableCell>{new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')}</TableCell>
                     <TableCell>{paciente.telefone}</TableCell>
                     <TableCell>{paciente.email}</TableCell>
@@ -198,7 +203,7 @@ const PacientesPage: React.FC = () => {
             <TextField
               fullWidth
               label="CPF"
-              defaultValue={selectedPaciente?.cpf || ''}
+              defaultValue={selectedPaciente?.documento || ''}
               variant="outlined"
               size="small"
             />

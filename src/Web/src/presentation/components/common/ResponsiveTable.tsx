@@ -21,7 +21,7 @@ interface Column {
   label: string;
   minWidth?: number;
   align?: 'left' | 'right' | 'center';
-  format?: (value: any) => React.ReactNode;
+  format?: (value: any, row?: any) => React.ReactNode;
   hideOnMobile?: boolean;
 }
 
@@ -66,7 +66,7 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
       <CardContent>
         {columns.map((column) => {
           const value = row[column.id];
-          const formattedValue = column.format ? column.format(value) : value;
+          const formattedValue = column.format ? column.format(value, row) : value;
           
           return (
             <Box key={column.id} mb={1}>
@@ -156,7 +156,7 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
             >
               {visibleColumns.map((column) => {
                 const value = row[column.id];
-                const formattedValue = column.format ? column.format(value) : value;
+                const formattedValue = column.format ? column.format(value, row) : value;
                 
                 return (
                   <TableCell key={column.id} align={column.align}>

@@ -28,27 +28,120 @@ import {
   Delete as DeleteIcon,
   Person as PersonIcon,
 } from '@mui/icons-material';
-import { mockPacientes } from '../../application/stores/mockData';
 import type { Paciente } from '../../domain/entities/Paciente';
+import { usePacientes } from '../hooks/usePacientes';
+import { useUIStore } from '../../application/stores/uiStore';
+import { useAutoDebugger } from '../../utils/AutoDebugger';
+import { 
+  formatCPF, 
+  formatPhone, 
+  formatDateBR,
+  applyCPFMask,
+  applyPhoneMask,
+  unformatCPF,
+  unformatPhone 
+} from '../../utils/formatters';
+import {
+  DeleteConfirmationDialog,
+  SuccessDialog
+} from '../components/common/ConfirmationDialogs';
 
 const PacientesPageTable: React.FC = () => {
+  const debug = useAutoDebugger('PacientesPageTable');
+  debug.info('Componente inicializado!');
+  
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [pacientes] = useState<Paciente[]>(mockPacientes);
+  const { addNotification } = useUIStore();
+  
+  const {
+    pacientes,
+    loading,
+    error,
+    fetchPacientes,
+    createPaciente,
+    updatePaciente,
+    deletePaciente
+  } = usePacientes();
+  
+  debug.debug('Hook usePacientes inicializado:', {
+    pacientes: pacientes.length,
+    loading,
+    error
+  });
+  
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
+  const [saving, setSaving] = useState(false);
+  
+  // Estados para diálogos de confirmação
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
+  
+  // Estados do formulário
+  const [formData, setFormData] = useState({
+    nome: '',
+    documento: '',
+    dataNascimento: '',
+    telefone: '',
+    email: '',
+    endereco: ''
+  });
+  
+  // Monitorar mudanças nos pacientes
+  React.useEffect(() => {
+    debug.info('Pacientes atualizados:', {
+      quantidade: pacientes.length,
+      loading,
+      error,
+      primeiroPaciente: pacientes[0]?.nome || 'nenhum',
+      estruturaPrimeiroPaciente: pacientes[0] ? {
+        id: pacientes[0].id,
+        nome: pacientes[0].nome,
+        documento: pacientes[0].documento,
+        dataNascimento: pacientes[0].dataNascimento,
+        telefone: pacientes[0].telefone,
+        email: pacientes[0].email,
+        createdAt: pacientes[0].createdAt,
+        todasAsPropriedades: Object.keys(pacientes[0])
+      } : null
+    });
+  }, [pacientes, loading, error]);
+  
+  // Forçar carregamento inicial
+  React.useEffect(() => {
+    debug.info('Disparando fetchPacientes inicial...');
+    fetchPacientes({ page: 1, pageSize: 10 });
+  }, [fetchPacientes]);
 
   const handleRowClick = (paciente: Paciente) => {
     setSelectedPaciente(paciente);
+    setFormData({
+      nome: paciente.nome,
+      documento: formatCPF(paciente.documento), // Aplicar máscara do CPF
+      dataNascimento: paciente.dataNascimento ? new Date(paciente.dataNascimento).toISOString().split('T')[0] : '',
+      telefone: paciente.telefone ? formatPhone(paciente.telefone) : '', // Aplicar máscara do telefone
+      email: paciente.email || '',
+      endereco: paciente.endereco || ''
+    });
     setDialogMode('edit');
     setOpenDialog(true);
   };
 
   const handleAddNew = () => {
     setSelectedPaciente(null);
+    setFormData({
+      nome: '',
+      documento: '',
+      dataNascimento: '',
+      telefone: '',
+      email: '',
+      endereco: ''
+    });
     setDialogMode('add');
     setOpenDialog(true);
   };
@@ -56,16 +149,100 @@ const PacientesPageTable: React.FC = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedPaciente(null);
+    setSaving(false);
   };
 
-  const handleSave = () => {
-    // Implementar lógica de salvar
-    handleCloseDialog();
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      debug.info('Salvando paciente:', { dialogMode, formData });
+      
+      const pacienteData = {
+        nome: formData.nome,
+        documento: unformatCPF(formData.documento), // Remove máscara do CPF
+        dataNascimento: new Date(formData.dataNascimento),
+        telefone: formData.telefone ? unformatPhone(formData.telefone) : '', // Remove máscara do telefone
+        email: formData.email,
+        endereco: formData.endereco
+      };
+      
+      if (dialogMode === 'add') {
+        await createPaciente(pacienteData);
+        debug.success('Paciente criado com sucesso!');
+        setSuccessMessage({
+          title: 'Sucesso!',
+          message: `Paciente "${formData.nome}" foi criado com sucesso.`
+        });
+      } else if (selectedPaciente) {
+        await updatePaciente(selectedPaciente.id, pacienteData);
+        debug.success('Paciente atualizado com sucesso!');
+        setSuccessMessage({
+          title: 'Sucesso!',
+          message: `Paciente "${formData.nome}" foi atualizado com sucesso.`
+        });
+      }
+      
+      handleCloseDialog();
+      setShowSuccessDialog(true);
+      fetchPacientes({ page: 1, pageSize: 10 }); // Recarregar lista
+    } catch (error: any) {
+      debug.error('Erro ao salvar:', error);
+      addNotification(error.message || 'Erro ao salvar paciente', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = () => {
-    // Implementar lógica de deletar
-    handleCloseDialog();
+  const handleDelete = async () => {
+    if (!selectedPaciente) return;
+    
+    try {
+      setSaving(true);
+      debug.warning('Excluindo paciente:', selectedPaciente.id);
+      
+      await deletePaciente(selectedPaciente.id);
+      debug.success('Paciente excluído com sucesso!');
+      
+      setSuccessMessage({
+        title: 'Excluído!',
+        message: `Paciente "${selectedPaciente.nome}" foi excluído com sucesso.`
+      });
+      
+      setShowDeleteDialog(false);
+      handleCloseDialog();
+      setShowSuccessDialog(true);
+      fetchPacientes({ page: 1, pageSize: 10 }); // Recarregar lista
+    } catch (error: any) {
+      debug.error('Erro ao excluir:', error);
+      addNotification(error.message || 'Erro ao excluir paciente', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+  
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    let formattedValue = value;
+    
+    // Aplicar máscaras durante a digitação
+    switch (field) {
+      case 'documento':
+        formattedValue = applyCPFMask(value);
+        break;
+      case 'telefone':
+        formattedValue = applyPhoneMask(value);
+        break;
+      default:
+        formattedValue = value;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      [field]: formattedValue
+    }));
   };
 
   const paginatedData = pacientes.slice((page - 1) * pageSize, page * pageSize);
@@ -148,11 +325,25 @@ const PacientesPageTable: React.FC = () => {
                     }}
                   >
                     <TableCell>{paciente.nome}</TableCell>
-                    <TableCell>{paciente.cpf}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{paciente.telefone}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{paciente.email}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{new Date(paciente.createdAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{formatCPF(paciente.documento)}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                      {formatDateBR(paciente.dataNascimento)}
+                    </TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                      {paciente.telefone ? formatPhone(paciente.telefone) : '-'}
+                    </TableCell>
+                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                      {paciente.email || '-'}
+                    </TableCell>
+                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                      {paciente.createdAt ? 
+                        formatDateBR(paciente.createdAt) : 
+                        (paciente.dataCriacao ? 
+                          formatDateBR(paciente.dataCriacao) : 
+                          'N/A'
+                        )
+                      }
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -192,113 +383,121 @@ const PacientesPageTable: React.FC = () => {
             <TextField
               fullWidth
               label="Nome Completo"
-              defaultValue={selectedPaciente?.nome || ''}
+              value={formData.nome}
+              onChange={(e) => handleInputChange('nome', e.target.value)}
               variant="outlined"
               size="small"
+              required
             />
             <TextField
               fullWidth
               label="CPF"
-              defaultValue={selectedPaciente?.cpf || ''}
+              placeholder="000.000.000-00"
+              value={formData.documento}
+              onChange={(e) => handleInputChange('documento', e.target.value)}
               variant="outlined"
               size="small"
+              required
+              inputProps={{ maxLength: 14 }}
             />
             <TextField
               fullWidth
               label="Data de Nascimento"
               type="date"
-              defaultValue={selectedPaciente?.dataNascimento ? 
-                new Date(selectedPaciente.dataNascimento).toISOString().split('T')[0] : ''}
+              value={formData.dataNascimento}
+              onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
               variant="outlined"
               size="small"
               InputLabelProps={{ shrink: true }}
+              required
             />
             <TextField
               fullWidth
               label="Telefone"
-              defaultValue={selectedPaciente?.telefone || ''}
+              placeholder="(11) 99999-9999"
+              value={formData.telefone}
+              onChange={(e) => handleInputChange('telefone', e.target.value)}
               variant="outlined"
               size="small"
+              inputProps={{ maxLength: 15 }}
             />
             <TextField
               fullWidth
               label="Email"
               type="email"
-              defaultValue={selectedPaciente?.email || ''}
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
               variant="outlined"
               size="small"
             />
             <TextField
               fullWidth
               label="Endereço"
-              defaultValue={selectedPaciente?.endereco || ''}
+              value={formData.endereco}
+              onChange={(e) => handleInputChange('endereco', e.target.value)}
               variant="outlined"
               size="small"
               multiline
               rows={2}
             />
-            {selectedPaciente && (
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 0.5, 
-                flexWrap: 'wrap',
-                mt: 0.5
-              }}>
-                <Chip 
-                  label={`Cadastrado: ${new Date(selectedPaciente.createdAt).toLocaleDateString('pt-BR')}`}
-                  variant="outlined"
-                  size="small"
-                  sx={{ fontSize: '0.65rem', height: '20px' }}
-                />
-                <Chip 
-                  label={`Atualizado: ${new Date(selectedPaciente.updatedAt).toLocaleDateString('pt-BR')}`}
-                  variant="outlined"
-                  size="small"
-                  sx={{ fontSize: '0.65rem', height: '20px' }}
-                />
-              </Box>
-            )}
           </Box>
         </DialogContent>
         
-        <DialogActions sx={{ p: 2, gap: 0.5 }}>
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button 
+            onClick={handleCloseDialog}
+            disabled={saving}
+            color="inherit"
+          >
+            Cancelar
+          </Button>
+          
           {dialogMode === 'edit' && (
-            <Button
-              onClick={handleDelete}
+            <Button 
+              onClick={handleDeleteClick}
+              disabled={saving}
               color="error"
               variant="outlined"
               startIcon={<DeleteIcon />}
-              size="small"
-              sx={{ fontSize: '0.75rem' }}
             >
               Excluir
             </Button>
           )}
+          
           <Button 
-            onClick={handleCloseDialog} 
-            color="inherit" 
-            size="small"
-            sx={{ fontSize: '0.75rem' }}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={handleSave} 
+            onClick={handleSave}
+            disabled={saving || !formData.nome || !formData.documento || !formData.dataNascimento}
+            color="primary"
             variant="contained"
-            startIcon={<EditIcon />}
-            size="small"
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-              },
-              fontSize: '0.75rem'
-            }}
+            startIcon={dialogMode === 'add' ? <AddIcon /> : <EditIcon />}
           >
-            {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+            {saving ? 
+              (dialogMode === 'add' ? 'Criando...' : 'Salvando...') : 
+              (dialogMode === 'add' ? 'Criar' : 'Salvar')
+            }
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Diálogo de confirmação de exclusão */}
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        itemName={selectedPaciente?.nome || ''}
+        itemType="o paciente"
+        loading={saving}
+      />
+      
+      {/* Diálogo de sucesso */}
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        title={successMessage.title}
+        message={successMessage.message}
+        autoClose={true}
+        autoCloseDelay={3000}
+      />
     </Box>
   );
 };

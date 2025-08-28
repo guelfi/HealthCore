@@ -14,12 +14,13 @@ import {
 } from '@mui/material';
 import { Save, ArrowBack } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CreatePacienteDto } from '../../../domain/entities/Paciente';
+import type { CreatePacienteDto, UpdatePacienteDto, Paciente } from '../../../domain/entities/Paciente';
 import { useUIStore } from '../../../application/stores/uiStore';
+import { usePacientes } from '../../hooks/usePacientes';
 
 const pacienteSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF deve estar no formato 000.000.000-00'),
+  documento: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF deve estar no formato 000.000.000-00'),
   dataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
   telefone: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
@@ -34,7 +35,16 @@ const PacienteForm: React.FC = () => {
   const { addNotification } = useUIStore();
   const isEditing = Boolean(id);
   
+  const {
+    createPaciente,
+    updatePaciente,
+    getPacienteById,
+    loading: apiLoading,
+    error
+  } = usePacientes();
+  
   const [loading, setLoading] = React.useState(false);
+  const [pacienteData, setPacienteData] = React.useState<Paciente | null>(null);
 
   const {
     register,
@@ -46,29 +56,55 @@ const PacienteForm: React.FC = () => {
   });
 
   React.useEffect(() => {
-    if (isEditing) {
-      // Mock data for editing - in real app, would fetch from API
-      setValue('nome', 'João Silva');
-      setValue('cpf', '123.456.789-01');
-      setValue('dataNascimento', '1985-05-15');
-      setValue('telefone', '(11) 99999-1111');
-      setValue('email', 'joao.silva@email.com');
-      setValue('endereco', 'Rua das Flores, 123 - São Paulo/SP');
+    if (isEditing && id) {
+      const loadPaciente = async () => {
+        try {
+          setLoading(true);
+          const paciente = await getPacienteById(id);
+          setPacienteData(paciente);
+          
+          setValue('nome', paciente.nome);
+          setValue('documento', paciente.documento);
+          setValue('dataNascimento', new Date(paciente.dataNascimento).toISOString().split('T')[0]);
+          setValue('telefone', paciente.telefone || '');
+          setValue('email', paciente.email || '');
+          setValue('endereco', paciente.endereco || '');
+        } catch (error) {
+          addNotification('Erro ao carregar dados do paciente', 'error');
+          navigate('/pacientes');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      loadPaciente();
     }
-  }, [isEditing, setValue]);
+  }, [isEditing, id, setValue, getPacienteById, addNotification, navigate]);
 
   const onSubmit = async (data: PacienteFormData) => {
     setLoading(true);
     
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const pacienteData = {
+        nome: data.nome,
+        documento: data.documento,
+        dataNascimento: new Date(data.dataNascimento),
+        telefone: data.telefone,
+        email: data.email,
+        endereco: data.endereco,
+      };
       
-      const action = isEditing ? 'atualizado' : 'cadastrado';
-      addNotification(`Paciente ${action} com sucesso!`, 'success');
+      if (isEditing && id) {
+        await updatePaciente(id, pacienteData as UpdatePacienteDto);
+        addNotification('Paciente atualizado com sucesso!', 'success');
+      } else {
+        await createPaciente(pacienteData as CreatePacienteDto);
+        addNotification('Paciente cadastrado com sucesso!', 'success');
+      }
+      
       navigate('/pacientes');
-    } catch (error) {
-      addNotification('Erro ao salvar paciente', 'error');
+    } catch (error: any) {
+      addNotification(error.message || 'Erro ao salvar paciente', 'error');
     } finally {
       setLoading(false);
     }
@@ -124,20 +160,20 @@ const PacienteForm: React.FC = () => {
                 label="Nome Completo *"
                 error={!!errors.nome}
                 helperText={errors.nome?.message}
-                disabled={loading}
+                disabled={loading || apiLoading}
               />
 
               <TextField
-                {...register('cpf')}
+                {...register('documento')}
                 fullWidth
                 label="CPF *"
                 placeholder="000.000.000-00"
-                error={!!errors.cpf}
-                helperText={errors.cpf?.message}
-                disabled={loading}
+                error={!!errors.documento}
+                helperText={errors.documento?.message}
+                disabled={loading || apiLoading}
                 onChange={(e) => {
                   const formatted = formatCPF(e.target.value);
-                  setValue('cpf', formatted);
+                  setValue('documento', formatted);
                 }}
               />
 
@@ -149,7 +185,7 @@ const PacienteForm: React.FC = () => {
                 InputLabelProps={{ shrink: true }}
                 error={!!errors.dataNascimento}
                 helperText={errors.dataNascimento?.message}
-                disabled={loading}
+                disabled={loading || apiLoading}
               />
 
               <TextField
@@ -159,7 +195,7 @@ const PacienteForm: React.FC = () => {
                 placeholder="(11) 99999-9999"
                 error={!!errors.telefone}
                 helperText={errors.telefone?.message}
-                disabled={loading}
+                disabled={loading || apiLoading}
                 onChange={(e) => {
                   const formatted = formatPhone(e.target.value);
                   setValue('telefone', formatted);
@@ -174,7 +210,7 @@ const PacienteForm: React.FC = () => {
                 placeholder="paciente@email.com"
                 error={!!errors.email}
                 helperText={errors.email?.message}
-                disabled={loading}
+                disabled={loading || apiLoading}
               />
 
               <TextField
@@ -184,7 +220,7 @@ const PacienteForm: React.FC = () => {
                 placeholder="Rua, número, bairro - Cidade/Estado"
                 error={!!errors.endereco}
                 helperText={errors.endereco?.message}
-                disabled={loading}
+                disabled={loading || apiLoading}
                 multiline
                 rows={2}
               />
@@ -193,7 +229,7 @@ const PacienteForm: React.FC = () => {
                 <Button
                   variant="outlined"
                   onClick={() => navigate('/pacientes')}
-                  disabled={loading}
+                  disabled={loading || apiLoading}
                 >
                   Cancelar
                 </Button>
@@ -201,9 +237,9 @@ const PacienteForm: React.FC = () => {
                   type="submit"
                   variant="contained"
                   startIcon={<Save />}
-                  disabled={loading}
+                  disabled={loading || apiLoading}
                 >
-                  {loading ? 'Salvando...' : 'Salvar'}
+                  {(loading || apiLoading) ? 'Salvando...' : 'Salvar'}
                 </Button>
               </Box>
             </Box>

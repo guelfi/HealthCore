@@ -9,6 +9,8 @@ import {
   InputAdornment,
   Button,
   TablePagination,
+  Alert,
+  Chip,
 } from '@mui/material';
 import {
   Edit,
@@ -16,34 +18,91 @@ import {
   Search,
   Add,
   Person,
+  Refresh,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { mockPacientes } from '../../../application/stores/mockData';
-import { Paciente } from '../../../domain/entities/Paciente';
+import type { Paciente } from '../../../domain/entities/Paciente';
 import { useUIStore } from '../../../application/stores/uiStore';
+import { usePacientes } from '../../hooks/usePacientes';
+import { useDebounce } from '../../hooks/useDebounce';
+import ResponsiveTable from '../common/ResponsiveTable';
+import { TableSkeleton } from '../common/LoadingStates';
+import { useAutoDebugger } from '../../../utils/AutoDebugger';
 
 const PacientesList: React.FC = () => {
+  const debug = useAutoDebugger('PacientesList');
+  debug.info('Componente inicializado!');
+  
   const navigate = useNavigate();
   const { addNotification } = useUIStore();
   
-  const [pacientes] = React.useState<Paciente[]>(mockPacientes);
-  const [filteredPacientes, setFilteredPacientes] = React.useState<Paciente[]>(mockPacientes);
+  const {
+    pacientes,
+    total,
+    currentPage,
+    totalPages,
+    loading,
+    error,
+    fetchPacientes,
+    deletePaciente,
+    clearError
+  } = usePacientes();
+  
   const [searchTerm, setSearchTerm] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [loading] = React.useState(false);
   
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
+  // Load patients on component mount and when filters change
   React.useEffect(() => {
-    const filtered = pacientes.filter(paciente =>
-      paciente.nome.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      paciente.cpf.includes(debouncedSearchTerm) ||
-      paciente.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-    );
-    setFilteredPacientes(filtered);
-    setPage(0);
-  }, [debouncedSearchTerm, pacientes]);
+    debug.info('useEffect disparado com filtros:', {
+      debouncedSearchTerm,
+      page,
+      rowsPerPage
+    });
+    
+    const loadPacientes = () => {
+      const params = {
+        page: page + 1, // API uses 1-based pagination
+        pageSize: rowsPerPage,
+        ...(debouncedSearchTerm && {
+          nome: debouncedSearchTerm,
+          documento: debouncedSearchTerm
+        })
+      };
+      
+      debug.info('Carregando pacientes com parâmetros:', params);
+      debug.debug('Estado atual do hook:', { 
+        pacientes: pacientes.length, 
+        loading, 
+        error, 
+        total 
+      });
+      
+      fetchPacientes(params);
+    };
+    
+    loadPacientes();
+  }, [debouncedSearchTerm, page, rowsPerPage, fetchPacientes]);
+  
+  // Debug: log quando pacientes mudam
+  React.useEffect(() => {
+    debug.info('Lista de pacientes atualizada:', {
+      quantidade: pacientes.length,
+      primeiroPaciente: pacientes[0]?.nome || 'nenhum',
+      loading,
+      error,
+      total
+    });
+  }, [pacientes, loading, error, total]);
+  
+  // Clear errors when component unmounts
+  React.useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -53,9 +112,15 @@ const PacientesList: React.FC = () => {
     navigate(`/pacientes/editar/${paciente.id}`);
   };
 
-  const handleDelete = (paciente: Paciente) => {
-    // Mock delete - in real app, would show confirmation dialog
-    addNotification(`Paciente ${paciente.nome} removido com sucesso`, 'success');
+  const handleDelete = async (paciente: Paciente) => {
+    if (window.confirm(`Tem certeza que deseja excluir o paciente ${paciente.nome}?`)) {
+      try {
+        await deletePaciente(paciente.id);
+        addNotification(`Paciente ${paciente.nome} removido com sucesso`, 'success');
+      } catch (error: any) {
+        addNotification(error.message || 'Erro ao excluir paciente', 'error');
+      }
+    }
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -66,17 +131,23 @@ const PacientesList: React.FC = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  const paginatedPacientes = filteredPacientes.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  
+  const handleRefresh = () => {
+    fetchPacientes({
+      page: page + 1,
+      pageSize: rowsPerPage,
+      ...(debouncedSearchTerm && {
+        nome: debouncedSearchTerm,
+        documento: debouncedSearchTerm
+      })
+    });
+  };
 
   const columns = [
     {
       id: 'nome',
       label: 'Nome',
-      format: (value: string, row: Paciente) => (
+      format: (value: string) => (
         <Box display="flex" alignItems="center" gap={1}>
           <Person color="action" />
           {value}
@@ -84,7 +155,7 @@ const PacientesList: React.FC = () => {
       ),
     },
     {
-      id: 'cpf',
+      id: 'documento',
       label: 'CPF',
     },
     {
@@ -109,7 +180,7 @@ const PacientesList: React.FC = () => {
       id: 'actions',
       label: 'Ações',
       align: 'center' as const,
-      format: (value: any, row: Paciente) => (
+      format: (value: any, row: any) => (
         <Box>
           <IconButton
             size="small"
@@ -141,9 +212,23 @@ const PacientesList: React.FC = () => {
   if (loading) {
     return (
       <Box>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Pacientes
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Pacientes
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Gerencie os pacientes cadastrados no sistema
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => navigate('/pacientes/novo')}
+          >
+            Novo Paciente
+          </Button>
+        </Box>
         <Card>
           <CardContent>
             <TableSkeleton rows={5} columns={6} />
@@ -159,26 +244,56 @@ const PacientesList: React.FC = () => {
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
             Pacientes
+            <Chip 
+              label="API Real" 
+              color="success" 
+              size="small" 
+              sx={{ ml: 2 }} 
+            />
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Gerencie os pacientes cadastrados no sistema
+            Gerencie os pacientes cadastrados no sistema ({total} encontrados)
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => navigate('/pacientes/novo')}
-        >
-          Novo Paciente
-        </Button>
+        <Box display="flex" gap={1}>
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={handleRefresh}
+            disabled={loading}
+          >
+            Atualizar
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => navigate('/pacientes/novo')}
+          >
+            Novo Paciente
+          </Button>
+        </Box>
       </Box>
 
       <Card>
         <CardContent>
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 2 }}
+              action={
+                <Button color="inherit" size="small" onClick={clearError}>
+                  Fechar
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
+          )}
+          
           <Box mb={2}>
             <TextField
               fullWidth
-              placeholder="Buscar por nome, CPF ou email..."
+              placeholder="Buscar por nome ou CPF..."
               value={searchTerm}
               onChange={handleSearchChange}
               aria-label="Buscar pacientes"
@@ -194,22 +309,21 @@ const PacientesList: React.FC = () => {
 
           <ResponsiveTable
             columns={columns}
-            data={paginatedPacientes}
+            data={pacientes}
             keyField="id"
             emptyMessage={searchTerm ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
           />
 
           <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={filteredPacientes.length}
+            count={total}
+            rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Linhas por página:"
-            labelDisplayedRows={({ from, to, count }) =>
-              `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
-            }
+            labelRowsPerPage="Pacientes por página:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`}
           />
         </CardContent>
       </Card>

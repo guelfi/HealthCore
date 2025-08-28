@@ -1,2 +1,0 @@
-PacientesPage.tsx:20 Uncaught SyntaxError: The requested module '/node_modules/.vite/deps/@mui_x-data-grid.js?v=54b057cd' does not provide an export named 'GridColDef' (at PacientesPage.tsx:20:3)
-content.js:208 {}

@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react';
 import { PacienteService, type PacienteQueryParams } from '../../application/services/PacienteService';
-import type { 
-  Paciente, 
-  CreatePacienteDto, 
-  UpdatePacienteDto, 
-  PacienteListResponse 
-} from '../../domain/entities/Paciente';
+import type { Paciente, PacienteListResponse, CreatePacienteDto, UpdatePacienteDto } from '../../domain/entities/Paciente';
+
+// Debug discreto para hooks
+const debug = {
+  log: (message: string, data?: any) => {
+    console.log(`🎣 [usePacientes] ${message}`, data);
+  }
+};
 
 interface UsePacientesState {
   pacientes: Paciente[];
@@ -50,11 +52,14 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
   }, [setError]);
 
   const fetchPacientes = useCallback(async (params: PacienteQueryParams = {}) => {
+    debug.log('Iniciando fetchPacientes com:', params);
     setLoading(true);
     clearError();
     
     try {
+      debug.log('Chamando PacienteService.list...');
       const response: PacienteListResponse = await PacienteService.list(params);
+      debug.log('Resposta recebida:', response);
       
       setState(prev => ({
         ...prev,
@@ -64,7 +69,14 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         totalPages: response.totalPages,
         loading: false,
       }));
+      
+      debug.log('Estado atualizado - pacientes:', response.data.length);
     } catch (error: any) {
+      debug.log('Erro ao buscar pacientes:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error ||
                           error.message || 

@@ -6,6 +6,13 @@ import type {
   PacienteListResponse 
 } from '../../domain/entities/Paciente';
 
+// Debug discreto para serviços - só console.log
+const debug = {
+  log: (message: string, data?: any) => {
+    console.log(`🔗 [PacienteService] ${message}`, data);
+  }
+};
+
 export interface PacienteQueryParams {
   page?: number;
   pageSize?: number;
@@ -18,6 +25,8 @@ export class PacienteService {
    * Lista pacientes com paginação e filtros
    */
   static async list(params: PacienteQueryParams = {}): Promise<PacienteListResponse> {
+    debug.log('Iniciando list() com parâmetros:', params);
+    
     const { page = 1, pageSize = 10, nome, documento } = params;
     
     const searchParams = new URLSearchParams({
@@ -33,8 +42,44 @@ export class PacienteService {
       searchParams.append('documento', documento);
     }
     
-    const response = await apiClient.get(`/pacientes?${searchParams.toString()}`);
-    return response.data;
+    const fullUrl = `/pacientes?${searchParams.toString()}`;
+    debug.log('URL completa da requisição:', fullUrl);
+    debug.log('Base URL do apiClient:', apiClient.defaults.baseURL);
+    debug.log('URL final será:', `${apiClient.defaults.baseURL}${fullUrl}`);
+    
+    try {
+      const response = await apiClient.get(fullUrl);
+      
+      debug.log('Status da resposta:', response.status);
+      debug.log('Dados recebidos:', {
+        tipo: Array.isArray(response.data) ? 'Array' : 'Object',
+        quantidade: Array.isArray(response.data) ? response.data.length : 'N/A',
+        data: response.data
+      });
+      
+      // A API retorna array simples, então precisamos criar a estrutura de paginação
+      const pacientesArray = response.data as Paciente[];
+      
+      const result = {
+        data: pacientesArray,
+        total: pacientesArray.length,
+        page: page,
+        pageSize: pageSize,
+        totalPages: Math.ceil(pacientesArray.length / pageSize)
+      };
+      
+      debug.log('Resultado final:', result);
+      
+      return result;
+    } catch (error: any) {
+      debug.log('Erro na requisição:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      throw error;
+    }
   }
 
   /**
@@ -49,17 +94,19 @@ export class PacienteService {
    * Cria um novo paciente
    */
   static async create(data: CreatePacienteDto): Promise<Paciente> {
-    // Converter CPF para documento para corresponder com o backend
+    // Converter dados para o formato esperado pelo backend
     const pacienteData = {
-      ...data,
-      documento: data.cpf,
-      dataNascimento: data.dataNascimento.toISOString(),
+      nome: data.nome,
+      documento: data.documento, // Backend espera 'documento', não 'cpf'
+      dataNascimento: data.dataNascimento instanceof Date ? 
+        data.dataNascimento.toISOString() : 
+        new Date(data.dataNascimento).toISOString(),
+      telefone: data.telefone || null,
+      email: data.email || null,
+      endereco: data.endereco || null
     };
     
-    // Remover cpf do objeto já que usamos documento
-    const { cpf, ...requestData } = pacienteData;
-    
-    const response = await apiClient.post('/pacientes', requestData);
+    const response = await apiClient.post('/pacientes', pacienteData);
     return response.data;
   }
 
@@ -67,16 +114,19 @@ export class PacienteService {
    * Atualiza um paciente existente
    */
   static async update(id: string, data: UpdatePacienteDto): Promise<Paciente> {
-    // Converter CPF para documento se fornecido
-    const updateData: any = { ...data };
-    
-    if (data.cpf) {
-      updateData.documento = data.cpf;
-      delete updateData.cpf;
-    }
+    // Converter dados para o formato esperado pelo backend
+    const updateData: any = {
+      nome: data.nome,
+      documento: data.documento, // Backend espera 'documento'
+      telefone: data.telefone || null,
+      email: data.email || null,
+      endereco: data.endereco || null
+    };
     
     if (data.dataNascimento) {
-      updateData.dataNascimento = data.dataNascimento.toISOString();
+      updateData.dataNascimento = data.dataNascimento instanceof Date ? 
+        data.dataNascimento.toISOString() : 
+        new Date(data.dataNascimento).toISOString();
     }
     
     const response = await apiClient.put(`/pacientes/${id}`, updateData);
@@ -91,12 +141,10 @@ export class PacienteService {
   }
 
   /**
-   * Busca pacientes por nome (para autocomplete)
+   * Busca pacientes por nome
    */
   static async searchByName(nome: string): Promise<Paciente[]> {
     const response = await apiClient.get(`/pacientes/search?nome=${encodeURIComponent(nome)}`);
     return response.data;
   }
 }
-
-export default PacienteService;
