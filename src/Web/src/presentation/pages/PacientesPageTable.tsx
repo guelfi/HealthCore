@@ -32,14 +32,14 @@ import type { Paciente } from '../../domain/entities/Paciente';
 import { usePacientes } from '../hooks/usePacientes';
 import { useUIStore } from '../../application/stores/uiStore';
 import { useAutoDebugger } from '../../utils/AutoDebugger';
-import { 
-  formatCPF, 
-  formatPhone, 
+import {
+  formatCPF,
+  formatPhone,
   formatDateBR,
   applyCPFMask,
   applyPhoneMask,
   unformatCPF,
-  unformatPhone 
+  unformatPhone
 } from '../../utils/formatters';
 import {
   DeleteConfirmationDialog,
@@ -49,39 +49,41 @@ import {
 const PacientesPageTable: React.FC = () => {
   const debug = useAutoDebugger('PacientesPageTable');
   debug.info('Componente inicializado!');
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { addNotification } = useUIStore();
-  
+
   const {
     pacientes,
     loading,
     error,
+    total,
+    currentPage,
+    totalPages: totalPagesFromHook,
     fetchPacientes,
     createPaciente,
     updatePaciente,
     deletePaciente
   } = usePacientes();
-  
+
   debug.debug('Hook usePacientes inicializado:', {
     pacientes: pacientes.length,
     loading,
     error
   });
-  
+
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
-  const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [saving, setSaving] = useState(false);
-  
+
   // Estados para diálogos de confirmação
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
-  
+
   // Estados do formulário
   const [formData, setFormData] = useState({
     nome: '',
@@ -91,7 +93,7 @@ const PacientesPageTable: React.FC = () => {
     email: '',
     endereco: ''
   });
-  
+
   // Monitorar mudanças nos pacientes
   React.useEffect(() => {
     debug.info('Pacientes atualizados:', {
@@ -111,7 +113,7 @@ const PacientesPageTable: React.FC = () => {
       } : null
     });
   }, [pacientes, loading, error]);
-  
+
   // Forçar carregamento inicial
   React.useEffect(() => {
     debug.info('Disparando fetchPacientes inicial...');
@@ -156,7 +158,7 @@ const PacientesPageTable: React.FC = () => {
     try {
       setSaving(true);
       debug.info('Salvando paciente:', { dialogMode, formData });
-      
+
       const pacienteData = {
         nome: formData.nome,
         documento: unformatCPF(formData.documento), // Remove máscara do CPF
@@ -165,7 +167,7 @@ const PacientesPageTable: React.FC = () => {
         email: formData.email,
         endereco: formData.endereco
       };
-      
+
       if (dialogMode === 'add') {
         await createPaciente(pacienteData);
         debug.success('Paciente criado com sucesso!');
@@ -181,7 +183,7 @@ const PacientesPageTable: React.FC = () => {
           message: `Paciente "${formData.nome}" foi atualizado com sucesso.`
         });
       }
-      
+
       handleCloseDialog();
       setShowSuccessDialog(true);
       fetchPacientes({ page: 1, pageSize: 10 }); // Recarregar lista
@@ -195,19 +197,19 @@ const PacientesPageTable: React.FC = () => {
 
   const handleDelete = async () => {
     if (!selectedPaciente) return;
-    
+
     try {
       setSaving(true);
       debug.warning('Excluindo paciente:', selectedPaciente.id);
-      
+
       await deletePaciente(selectedPaciente.id);
       debug.success('Paciente excluído com sucesso!');
-      
+
       setSuccessMessage({
         title: 'Excluído!',
         message: `Paciente "${selectedPaciente.nome}" foi excluído com sucesso.`
       });
-      
+
       setShowDeleteDialog(false);
       handleCloseDialog();
       setShowSuccessDialog(true);
@@ -219,14 +221,14 @@ const PacientesPageTable: React.FC = () => {
       setSaving(false);
     }
   };
-  
+
   const handleDeleteClick = () => {
     setShowDeleteDialog(true);
   };
 
   const handleInputChange = (field: string, value: string) => {
     let formattedValue = value;
-    
+
     // Aplicar máscaras durante a digitação
     switch (field) {
       case 'documento':
@@ -238,15 +240,15 @@ const PacientesPageTable: React.FC = () => {
       default:
         formattedValue = value;
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [field]: formattedValue
     }));
   };
 
-  const paginatedData = pacientes.slice((page - 1) * pageSize, page * pageSize);
-  const totalPages = Math.ceil(pacientes.length / pageSize);
+  // Os dados já vêm paginados da API, não precisamos paginar localmente
+  const paginatedData = pacientes;
 
   return (
     <Box>
@@ -264,11 +266,11 @@ const PacientesPageTable: React.FC = () => {
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
         <CardContent sx={{ p: { xs: 1, md: 3 } }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 3
           }}>
             <Button
               variant="contained"
@@ -284,15 +286,18 @@ const PacientesPageTable: React.FC = () => {
             >
               Adicionar Paciente
             </Button>
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                Total: {pacientes.length}
+                {total > 0 ? `${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, total)} de ${total}` : '0 de 0'}
               </Typography>
               <Pagination
-                count={totalPages}
-                page={page}
-                onChange={(_, newPage) => setPage(newPage)}
+                count={totalPagesFromHook}
+                page={currentPage}
+                onChange={(_, newPage) => {
+                  debug.info(`Mudando para página ${newPage}`);
+                  fetchPacientes({ page: newPage, pageSize });
+                }}
                 size="small"
                 color="primary"
               />
@@ -314,13 +319,13 @@ const PacientesPageTable: React.FC = () => {
               </TableHead>
               <TableBody>
                 {paginatedData.map((paciente) => (
-                  <TableRow 
+                  <TableRow
                     key={paciente.id}
                     onClick={() => handleRowClick(paciente)}
-                    sx={{ 
+                    sx={{
                       cursor: 'pointer',
-                      '&:hover': { 
-                        backgroundColor: 'rgba(102, 126, 234, 0.04)' 
+                      '&:hover': {
+                        backgroundColor: 'rgba(102, 126, 234, 0.04)'
                       }
                     }}
                   >
@@ -336,12 +341,9 @@ const PacientesPageTable: React.FC = () => {
                       {paciente.email || '-'}
                     </TableCell>
                     <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                      {paciente.createdAt ? 
-                        formatDateBR(paciente.createdAt) : 
-                        (paciente.dataCriacao ? 
-                          formatDateBR(paciente.dataCriacao) : 
-                          'N/A'
-                        )
+                      {paciente.createdAt ?
+                        formatDateBR(paciente.createdAt) :
+                        'N/A'
                       }
                     </TableCell>
                   </TableRow>
@@ -353,8 +355,8 @@ const PacientesPageTable: React.FC = () => {
       </Card>
 
       {/* Dialog de Manutenção */}
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth={false}
         sx={{
@@ -367,9 +369,9 @@ const PacientesPageTable: React.FC = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <DialogTitle sx={{
+          display: 'flex',
+          alignItems: 'center',
           gap: 1,
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white'
@@ -377,7 +379,7 @@ const PacientesPageTable: React.FC = () => {
           <PersonIcon />
           {dialogMode === 'add' ? 'Adicionar Paciente' : 'Editar Paciente'}
         </DialogTitle>
-        
+
         <DialogContent sx={{ pt: 4, px: 3, pb: 2, overflow: 'auto' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField
@@ -442,18 +444,18 @@ const PacientesPageTable: React.FC = () => {
             />
           </Box>
         </DialogContent>
-        
+
         <DialogActions sx={{ p: 3, gap: 1 }}>
-          <Button 
+          <Button
             onClick={handleCloseDialog}
             disabled={saving}
             color="inherit"
           >
             Cancelar
           </Button>
-          
+
           {dialogMode === 'edit' && (
-            <Button 
+            <Button
               onClick={handleDeleteClick}
               disabled={saving}
               color="error"
@@ -463,22 +465,22 @@ const PacientesPageTable: React.FC = () => {
               Excluir
             </Button>
           )}
-          
-          <Button 
+
+          <Button
             onClick={handleSave}
             disabled={saving || !formData.nome || !formData.documento || !formData.dataNascimento}
             color="primary"
             variant="contained"
             startIcon={dialogMode === 'add' ? <AddIcon /> : <EditIcon />}
           >
-            {saving ? 
-              (dialogMode === 'add' ? 'Criando...' : 'Salvando...') : 
+            {saving ?
+              (dialogMode === 'add' ? 'Criando...' : 'Salvando...') :
               (dialogMode === 'add' ? 'Criar' : 'Salvar')
             }
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Diálogo de confirmação de exclusão */}
       <DeleteConfirmationDialog
         open={showDeleteDialog}
@@ -488,7 +490,7 @@ const PacientesPageTable: React.FC = () => {
         itemType="o paciente"
         loading={saving}
       />
-      
+
       {/* Diálogo de sucesso */}
       <SuccessDialog
         open={showSuccessDialog}
