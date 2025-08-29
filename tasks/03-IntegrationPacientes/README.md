@@ -86,7 +86,12 @@ powershell -ExecutionPolicy Bypass -File tasks\IntegrationPacientes\view_pacient
 powershell -ExecutionPolicy Bypass -File tasks\IntegrationPacientes\update_pacientes_task_status.ps1 -TaskId "task_id" -Status "COMPLETE" -Notes "Descrição"
 ```
 
-### **3. Começar Desenvolvimento**
+### **3. Adicionar Mais Pacientes para Teste de Paginação**
+```bash
+python scripts/add-more-patients.py
+```
+
+### **4. Começar Desenvolvimento**
 1. Verificar conectividade com API
 2. Consultar `integration_pacientes_001.json` para próximas tarefas
 3. Implementar uma tarefa por vez

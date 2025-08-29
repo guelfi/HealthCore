@@ -1,0 +1,459 @@
+{
+  "session_info": {
+    "session_id": "integration_medicos_complete_001",
+    "created_at": "2025-08-28T10:15:00.000Z",
+    "last_updated": "2025-08-28T10:15:00.000Z",
+    "description": "Integração completa do módulo Médicos - Nova entidade backend, endpoints, frontend rico e migração de dados",
+    "etapa": "4/4",
+    "api_endpoint": "http://192.168.15.119:5000",
+    "frontend_port": "5005",
+    "complexity": "Alta",
+    "priority": "ALTA",
+    "estimated_hours": "12-15h"
+  },
+  "tasks": [
+    {
+      "id": "validate_all_dependencies_complete",
+      "content": "Validar que todas as etapas anteriores estão 100% concluídas",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Verificar funcionamento de PacienteService, ExameService e UsuarioService",
+      "estimated_time": "20min",
+      "category": "dependency-validation"
+    },
+    {
+      "id": "validate_medicos_endpoints",
+      "content": "Validar endpoints de médicos na API (/medicos) - CRUD completo",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Verificar todos os endpoints: GET, POST, PUT, DELETE, PATCH",
+      "estimated_time": "35min",
+      "category": "backend-validation"
+    },
+    {
+      "id": "test_medico_relationships",
+      "content": "Testar relacionamentos Médico ↔ User e Médico ↔ Exames",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Validar FK UserId, relacionamento com exames realizados",
+      "estimated_time": "30min",
+      "category": "backend-validation"
+    },
+    {
+      "id": "create_medico_entity_backend",
+      "content": "Criar entidade Medico.cs no backend",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Implementar todos os campos e relacionamentos conforme especificação",
+      "estimated_time": "45min",
+      "category": "backend-entity"
+    },
+    {
+      "id": "create_medico_dtos",
+      "content": "Criar DTOs para Médico (Create, Update, Response)",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "CreateMedicoDto, UpdateMedicoDto, MedicoDto",
+      "estimated_time": "40min",
+      "category": "backend-dto"
+    },
+    {
+      "id": "create_medico_service_backend",
+      "content": "Criar MedicoService.cs no backend",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Implementar lógica de negócio para CRUD e relacionamentos",
+      "estimated_time": "90min",
+      "category": "backend-service"
+    },
+    {
+      "id": "create_medico_controller",
+      "content": "Criar MedicoController com todos os endpoints",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Implementar endpoints conforme especificação da API",
+      "estimated_time": "75min",
+      "category": "backend-controller"
+    },
+    {
+      "id": "create_database_migration",
+      "content": "Criar migração do banco de dados para entidade Médico",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "AddMedicoEntity migration com relacionamentos",
+      "estimated_time": "40min",
+      "category": "backend-migration"
+    },
+    {
+      "id": "update_database_context",
+      "content": "Atualizar MobileMedDbContext com DbSet<Medico>",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Adicionar DbSet e configurar relacionamentos",
+      "estimated_time": "25min",
+      "category": "backend-database"
+    },
+    {
+      "id": "create_medico_interface_frontend",
+      "content": "Criar interface Medico.ts no frontend",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Definir estrutura de dados para Médico no frontend",
+      "estimated_time": "20min",
+      "category": "frontend-interface"
+    },
+    {
+      "id": "create_medico_service_frontend",
+      "content": "Criar MedicoService.ts real com todos os métodos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Implementar métodos: list, getById, create, update, delete, activate",
+      "estimated_time": "80min",
+      "category": "frontend-service"
+    },
+    {
+      "id": "create_use_medicos_hook",
+      "content": "Criar hook useMedicos.ts com filtros e cache",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Filtros: nome, CRM, especialidade, status, paginação",
+      "estimated_time": "60min",
+      "category": "frontend-hook"
+    },
+    {
+      "id": "create_medicos_list_component",
+      "content": "Criar componente MedicosList.tsx com interface rica",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Substituir páginas atuais, implementar filtros reais",
+      "estimated_time": "90min",
+      "category": "frontend-component"
+    },
+    {
+      "id": "create_medico_form_component",
+      "content": "Criar componente MedicoForm.tsx com formulário completo",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Formulário com todos os campos e validações",
+      "estimated_time": "100min",
+      "category": "frontend-component"
+    },
+    {
+      "id": "implement_medico_filters",
+      "content": "Implementar filtros avançados para médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Filtros por nome, CRM, especialidade, status",
+      "estimated_time": "50min",
+      "category": "frontend-feature"
+    },
+    {
+      "id": "implement_loading_states_medicos",
+      "content": "Implementar loading states específicos para médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Spinners para CRUD, filtros, skeleton para listas",
+      "estimated_time": "30min",
+      "category": "frontend-ux"
+    },
+    {
+      "id": "implement_error_handling_medicos",
+      "content": "Implementar error handling robusto para médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Tratamento de falhas de validação, relacionamento",
+      "estimated_time": "30min",
+      "category": "frontend-ux"
+    },
+    {
+      "id": "design_medico_ui",
+      "content": "Implementar UI rica para gestão de médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Interface polida, responsiva, intuitiva",
+      "estimated_time": "70min",
+      "category": "frontend-design"
+    },
+    {
+      "id": "remove_mock_data_medicos",
+      "content": "Remover completamente todos os dados mockados de médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Eliminar imports de mockMedicos, componentes mock",
+      "estimated_time": "15min",
+      "category": "frontend-cleanup"
+    },
+    {
+      "id": "add_api_visual_indicators_medicos",
+      "content": "Adicionar indicadores visuais 'API Real' para médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Badges identificando dados reais vs mock",
+      "estimated_time": "20min",
+      "category": "frontend-ux"
+    },
+    {
+      "id": "test_crud_operations_medicos",
+      "content": "Testar todas as operações CRUD de médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Criar, listar, editar, deletar - validar relacionamentos",
+      "estimated_time": "40min",
+      "category": "testing"
+    },
+    {
+      "id": "test_medico_relationships_frontend",
+      "content": "Testar relacionamentos Médico ↔ User e Médico ↔ Exames no frontend",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Verificar exibição de relacionamentos na interface",
+      "estimated_time": "35min",
+      "category": "testing"
+    },
+    {
+      "id": "test_advanced_filters_medicos",
+      "content": "Testar todos os filtros avançados de médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Filtros individuais e combinados, performance",
+      "estimated_time": "30min",
+      "category": "testing"
+    },
+    {
+      "id": "validate_cross_device_medicos",
+      "content": "Validar integração de médicos cross-device",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Testar frontend(Windows) - backend(macOS)",
+      "estimated_time": "20min",
+      "category": "testing"
+    },
+    {
+      "id": "performance_optimization_medicos",
+      "content": "Otimizar performance da interface de médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Cache de filtros, debounce, lazy loading",
+      "estimated_time": "45min",
+      "category": "optimization"
+    },
+    {
+      "id": "create_migration_script",
+      "content": "Criar script de migração de dados legacy",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "MIGRATION_SCRIPT.sql para migração de usuários médicos",
+      "estimated_time": "90min",
+      "category": "migration"
+    },
+    {
+      "id": "test_data_migration",
+      "content": "Testar migração de dados de usuários para médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Validar integridade dos dados migrados",
+      "estimated_time": "60min",
+      "category": "migration"
+    },
+    {
+      "id": "validate_user_medico_relationship",
+      "content": "Validar relacionamento User ↔ Medico após migração",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Verificar FK UserId e acesso aos dados",
+      "estimated_time": "35min",
+      "category": "migration"
+    },
+    {
+      "id": "test_authentication_integration",
+      "content": "Testar integração de autenticação com médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Login com médicos migrados, acesso correto",
+      "estimated_time": "40min",
+      "category": "integration"
+    },
+    {
+      "id": "update_dashboard_metrics",
+      "content": "Atualizar dashboard com métricas reais de médicos",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": "Integrar dados de médicos no dashboard principal",
+      "estimated_time": "50min",
+      "category": "integration"
+    }
+  ],
+  "progress_summary": {
+    "total_tasks": 30,
+    "completed": 0,
+    "in_progress": 0,
+    "pending": 30,
+    "completion_percentage": 0
+  },
+  "files_to_modify": [
+    "src/Api/Core/Domain/Entities/Medico.cs",
+    "src/Api/Core/Application/DTOs/CreateMedicoDto.cs",
+    "src/Api/Core/Application/DTOs/UpdateMedicoDto.cs",
+    "src/Api/Core/Application/DTOs/MedicoDto.cs",
+    "src/Api/Core/Application/Services/MedicoService.cs",
+    "src/Api/Controllers/MedicoController.cs",
+    "src/Api/Infrastructure/Data/MobileMedDbContext.cs",
+    "src/Api/Migrations/AddMedicoEntity.cs",
+    "src/Web/src/domain/entities/Medico.ts",
+    "src/Web/src/application/services/MedicoService.ts",
+    "src/Web/src/presentation/hooks/useMedicos.ts",
+    "src/Web/src/presentation/pages/MedicosPage.tsx",
+    "src/Web/src/presentation/components/medicos/MedicosList.tsx",
+    "src/Web/src/presentation/components/medicos/MedicoForm.tsx",
+    "src/Web/src/presentation/components/medicos/MedicoFilters.tsx",
+    "src/Web/src/application/stores/mockData.ts"
+  ],
+  "validation_checklist": [
+    "✅ Todas as etapas anteriores 100% concluídas",
+    "✅ API endpoints de médicos respondendo corretamente",
+    "✅ CRUD completo funcionando (Create, Read, Update, Delete, Activate)",
+    "✅ Relacionamento Médico ↔ User operacional",
+    "✅ Relacionamento Médico ↔ Exames funcionando",
+    "✅ Filtros avançados funcionando (nome, CRM, especialidade)",
+    "✅ Paginação operacional com filtros",
+    "✅ Loading states visíveis durante todas as operações",
+    "✅ Error handling robusto para todas as falhas",
+    "✅ Formulários com validações completas",
+    "✅ Interface responsiva em diferentes tamanhos",
+    "✅ Zero dados mockados de médicos restantes",
+    "✅ Performance adequada (< 3s para operações normais)",
+    "✅ Indicadores visuais confirmando uso da API real",
+    "✅ Comunicação cross-device funcionando",
+    "✅ Script de migração criado e testado",
+    "✅ Dados legacy migrados corretamente",
+    "✅ Autenticação integrada com médicos",
+    "✅ Dashboard usando dados reais de médicos"
+  ],
+  "next_session_priorities": [
+    "Validar que todas as etapas anteriores estão concluídas",
+    "Verificar endpoints de médicos e relacionamentos",
+    "Implementar entidade Medico.cs e DTOs no backend",
+    "Criar MedicoService e MedicoController",
+    "Criar migração do banco de dados",
+    "Implementar interfaces e services no frontend",
+    "Criar componentes de interface rica",
+    "Implementar filtros avançados",
+    "Testar CRUD completo e relacionamentos",
+    "Criar e testar script de migração",
+    "Integrar autenticação e dashboard"
+  ],
+  "dependencies": {
+    "integration_pacientes_complete": false,
+    "integration_exames_complete": false,
+    "integration_usuarios_complete": false,
+    "paciente_service_working": false,
+    "exame_service_working": false,
+    "usuario_service_working": false,
+    "backend_ready": true,
+    "api_documented": true,
+    "cors_configured": true,
+    "frontend_structure": true
+  },
+  "success_criteria": {
+    "functional": [
+      "CRUD de médicos 100% funcional com API real",
+      "Relacionamentos Médico ↔ User e Médico ↔ Exames operacionais",
+      "Filtros avançados (nome, CRM, especialidade, status)",
+      "Validações frontend/backend robustas",
+      "Autenticação integrada com médicos"
+    ],
+    "technical": [
+      "Zero dados mockados de médicos remanescentes",
+      "Performance < 3s para operações com filtros",
+      "Migração de dados legacy bem-sucedida",
+      "Relacionamentos consistentes no banco",
+      "Logs adequados para debugging"
+    ],
+    "ux": [
+      "Loading states informativos para todas as operações",
+      "Error handling com mensagens amigáveis",
+      "Filtros intuitivos e responsivos",
+      "Interface rica e polida",
+      "Dashboard com métricas reais de médicos"
+    ]
+  },
+  "specific_features": {
+    "entity_structure": {
+      "fields": [
+        "Id (Guid)",
+        "UserId (Guid - FK para Users)",
+        "Nome (string)",
+        "Documento (string - CPF)",
+        "DataNascimento (DateTime)",
+        "Telefone (string)",
+        "Email (string)",
+        "Endereco (string)",
+        "CRM (string)",
+        "Especialidade (string)",
+        "DataCriacao (DateTime)"
+      ],
+      "relationships": [
+        "User (1:1)",
+        "ExamesRealizados (1:N)"
+      ]
+    },
+    "endpoints": {
+      "POST": "/medicos (criar médico completo)",
+      "GET": "/medicos (listar médicos paginado)",
+      "GET": "/medicos/{id} (buscar médico por ID)",
+      "PUT": "/medicos/{id} (atualizar médico)",
+      "DELETE": "/medicos/{id} (desativar médico)",
+      "PATCH": "/medicos/{id}/ativar (ativar médico)",
+      "GET": "/medicos/me (dados do médico logado)"
+    },
+    "form_fields": {
+      "personal_data": [
+        "nome (obrigatório)",
+        "documento (CPF - obrigatório)",
+        "dataNascimento (obrigatório)",
+        "telefone (opcional)",
+        "email (opcional)",
+        "endereco (opcional)"
+      ],
+      "professional_data": [
+        "crm (obrigatório)",
+        "especialidade (opcional)"
+      ],
+      "user_data": [
+        "username (obrigatório)",
+        "password (obrigatório na criação)",
+        "isActive (boolean)"
+      ]
+    }
+  }
+}
