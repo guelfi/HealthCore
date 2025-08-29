@@ -20,7 +20,7 @@ NC='\033[0m' # No Color
 # Configurações
 API_PORT=5000
 FRONTEND_PORT=5005
-API_PID_FILE="src/api.pid"
+API_PID_FILE="$SCRIPT_DIR/api.pid"
 FRONTEND_PID_FILE="$SCRIPT_DIR/front.pid"
 
 # Função para obter IP local
