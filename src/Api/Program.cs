@@ -276,11 +276,11 @@ app.MapPost("/pacientes", async (CreatePacienteDto createPacienteDto, PacienteSe
     }
 });
 
-app.MapGet("/pacientes", async (PacienteService pacienteService, int page, int pageSize, ILogger<Program> logger) =>
+app.MapGet("/pacientes", async (PacienteService pacienteService, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
 {
     logger.LogInformation("Listando pacientes - Página: {Page}, Tamanho da página: {PageSize}", page, pageSize);
     var pacientes = await pacienteService.GetPacientesAsync(page, pageSize);
-    logger.LogInformation("Listagem de pacientes concluída. Número de pacientes retornados: {Count}", pacientes.Count);
+    logger.LogInformation("Listagem de pacientes concluída. Número de pacientes retornados: {Count}", pacientes.Data.Count);
     return Results.Ok(pacientes);
 });
 
