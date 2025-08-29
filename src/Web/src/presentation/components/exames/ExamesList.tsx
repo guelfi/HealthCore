@@ -32,7 +32,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { mockExames } from '../../../application/stores/mockData';
-import { Exame } from '../../../domain/entities/Exame';
+import type { Exame } from '../../../domain/entities/Exame';
 import { ModalidadeDicom, ModalidadeDicomLabels } from '../../../domain/enums/ModalidadeDicom';
 import { useUIStore } from '../../../application/stores/uiStore';
 

@@ -12,9 +12,7 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  Switch,
   Button,
-  Typography,
 } from '@mui/material';
 import { useScreenReader } from '../../hooks/useAccessibility';
 

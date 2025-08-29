@@ -7,7 +7,7 @@ import {
   Avatar,
   Skeleton,
 } from '@mui/material';
-import { SvgIconComponent } from '@mui/icons-material';
+import type { SvgIconComponent } from '@mui/icons-material';
 
 interface MetricCardProps {
   title: string;
