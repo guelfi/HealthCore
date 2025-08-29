@@ -150,7 +150,7 @@ class MetricsService {
    * Adapta dados do backend (MedicoMetricsDto) para o formato frontend (DashboardMetrics)
    */
   private adaptMedicoMetrics(data: MedicoMetricsDto): DashboardMetrics {
-    const agora = new Date();
+    // const agora = new Date(); // Removido: não utilizado
     const examesEsteMes = this.calcularExamesEsteMes(data.examesPorPaciente);
     
     return {
@@ -201,7 +201,7 @@ class MetricsService {
    */
   private formatPeriodo(periodo: string): string {
     if (periodo.includes('-')) {
-      const [ano, mes] = periodo.split('-');
+      const [, mes] = periodo.split('-'); // ano não utilizado
       const meses = [
         'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
