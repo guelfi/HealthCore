@@ -160,8 +160,8 @@ const MedicosPage: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>{new Date(medico.createdAt).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell>{new Date(medico.updatedAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{medico.createdAt ? new Date(medico.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
+                    <TableCell>{medico.updatedAt ? new Date(medico.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

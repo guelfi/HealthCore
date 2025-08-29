@@ -27,7 +27,7 @@ import { useUIStore } from '../../../application/stores/uiStore';
 const usuarioSchema = z.object({
   username: z.string().min(3, 'Username deve ter pelo menos 3 caracteres'),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-  role: z.nativeEnum(UserProfile, { errorMap: () => ({ message: 'Perfil é obrigatório' }) }),
+  role: z.nativeEnum(UserProfile, { message: 'Perfil é obrigatório' }),
   isActive: z.boolean().optional(),
 });
 

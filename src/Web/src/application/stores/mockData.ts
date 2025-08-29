@@ -182,7 +182,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '1',
     nome: 'João Silva',
-    cpf: '123.456.789-01',
+    documento: '123.456.789-01',
     dataNascimento: new Date('1985-05-15'),
     telefone: '(11) 99999-1111',
     email: 'joao.silva@email.com',
@@ -193,7 +193,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '2',
     nome: 'Maria Santos',
-    cpf: '987.654.321-02',
+    documento: '987.654.321-02',
     dataNascimento: new Date('1990-08-22'),
     telefone: '(11) 88888-2222',
     email: 'maria.santos@email.com',
@@ -204,7 +204,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '3',
     nome: 'Pedro Oliveira',
-    cpf: '456.789.123-03',
+    documento: '456.789.123-03',
     dataNascimento: new Date('1978-12-10'),
     telefone: '(11) 77777-3333',
     email: 'pedro.oliveira@email.com',
@@ -215,7 +215,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '4',
     nome: 'Ana Costa',
-    cpf: '789.123.456-04',
+    documento: '789.123.456-04',
     dataNascimento: new Date('1995-03-18'),
     telefone: '(11) 66666-4444',
     email: 'ana.costa@email.com',
@@ -226,7 +226,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '5',
     nome: 'Carlos Ferreira',
-    cpf: '321.654.987-05',
+    documento: '321.654.987-05',
     dataNascimento: new Date('1982-07-25'),
     telefone: '(11) 55555-5555',
     email: 'carlos.ferreira@email.com',
@@ -237,7 +237,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '6',
     nome: 'Fernanda Lima',
-    cpf: '111.222.333-06',
+    documento: '111.222.333-06',
     dataNascimento: new Date('1992-01-01'),
     telefone: '(11) 99999-6666',
     email: 'fernanda.lima@email.com',
@@ -248,7 +248,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '7',
     nome: 'Ricardo Souza',
-    cpf: '444.555.666-07',
+    documento: '444.555.666-07',
     dataNascimento: new Date('1975-11-20'),
     telefone: '(11) 88888-7777',
     email: 'ricardo.souza@email.com',
@@ -259,7 +259,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '8',
     nome: 'Juliana Almeida',
-    cpf: '777.888.999-08',
+    documento: '777.888.999-08',
     dataNascimento: new Date('1988-09-03'),
     telefone: '(11) 77777-8888',
     email: 'juliana.almeida@email.com',
@@ -270,7 +270,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '9',
     nome: 'Gustavo Pereira',
-    cpf: '222.333.444-09',
+    documento: '222.333.444-09',
     dataNascimento: new Date('1998-04-12'),
     telefone: '(11) 66666-9999',
     email: 'gustavo.pereira@email.com',
@@ -281,7 +281,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '10',
     nome: 'Larissa Mendes',
-    cpf: '555.666.777-10',
+    documento: '555.666.777-10',
     dataNascimento: new Date('1980-06-30'),
     telefone: '(11) 55555-0000',
     email: 'larissa.mendes@email.com',
@@ -292,7 +292,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '11',
     nome: 'Felipe Santos',
-    cpf: '888.999.000-11',
+    documento: '888.999.000-11',
     dataNascimento: new Date('1993-02-14'),
     telefone: '(11) 44444-1111',
     email: 'felipe.santos@email.com',
@@ -303,7 +303,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '12',
     nome: 'Beatriz Costa',
-    cpf: '111.000.999-12',
+    documento: '111.000.999-12',
     dataNascimento: new Date('1987-10-05'),
     telefone: '(11) 33333-2222',
     email: 'beatriz.costa@email.com',
@@ -314,7 +314,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '13',
     nome: 'Daniel Oliveira',
-    cpf: '333.222.111-13',
+    documento: '333.222.111-13',
     dataNascimento: new Date('1991-07-07'),
     telefone: '(11) 22222-3333',
     email: 'daniel.oliveira@email.com',
@@ -325,7 +325,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '14',
     nome: 'Camila Rocha',
-    cpf: '666.555.444-14',
+    documento: '666.555.444-14',
     dataNascimento: new Date('1983-08-28'),
     telefone: '(11) 11111-4444',
     email: 'camila.rocha@email.com',
@@ -336,7 +336,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '15',
     nome: 'Eduardo Gomes',
-    cpf: '999.888.777-15',
+    documento: '999.888.777-15',
     dataNascimento: new Date('1996-09-19'),
     telefone: '(11) 00000-5555',
     email: 'eduardo.gomes@email.com',
@@ -347,7 +347,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '16',
     nome: 'Gabriela Dias',
-    cpf: '123.987.654-16',
+    documento: '123.987.654-16',
     dataNascimento: new Date('1989-03-21'),
     telefone: '(11) 98765-4321',
     email: 'gabriela.dias@email.com',
@@ -358,7 +358,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '17',
     nome: 'Henrique Castro',
-    cpf: '456.789.012-17',
+    documento: '456.789.012-17',
     dataNascimento: new Date('1994-05-01'),
     telefone: '(11) 87654-3210',
     email: 'henrique.castro@email.com',
@@ -369,7 +369,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '18',
     nome: 'Isabela Martins',
-    cpf: '789.012.345-18',
+    documento: '789.012.345-18',
     dataNascimento: new Date('1986-12-12'),
     telefone: '(11) 76543-2109',
     email: 'isabela.martins@email.com',
@@ -380,7 +380,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '19',
     nome: 'João Pedro',
-    cpf: '012.345.678-19',
+    documento: '012.345.678-19',
     dataNascimento: new Date('1997-01-23'),
     telefone: '(11) 65432-1098',
     email: 'joao.pedro@email.com',
@@ -391,7 +391,7 @@ export const mockPacientes: Paciente[] = [
   {
     id: '20',
     nome: 'Karen Lima',
-    cpf: '345.678.901-20',
+    documento: '345.678.901-20',
     dataNascimento: new Date('1981-04-04'),
     telefone: '(11) 54321-0987',
     email: 'karen.lima@email.com',
