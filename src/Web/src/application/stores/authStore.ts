@@ -55,9 +55,9 @@ export const useAuthStore = create<AuthStore>()(
             isActive: authData.user.isActive,
           };
           
-          const expiresAt = typeof authData.expiresAt === 'string' 
-            ? new Date(authData.expiresAt) 
-            : authData.expiresAt;
+          // const expiresAt = typeof authData.expiresAt === 'string' 
+          //   ? new Date(authData.expiresAt) 
+          //   : authData.expiresAt; // Removido: não utilizado
           
           set({
             user,

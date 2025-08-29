@@ -51,7 +51,7 @@ const ExamesList: React.FC = () => {
   React.useEffect(() => {
     let filtered = exames.filter(exame =>
       exame.paciente?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exame.paciente?.cpf.includes(searchTerm) ||
+      exame.paciente?.documento.includes(searchTerm) ||
       exame.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
