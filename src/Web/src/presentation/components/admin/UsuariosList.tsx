@@ -19,7 +19,6 @@ import {
   TablePagination,
   Skeleton,
   Switch,
-  FormControlLabel,
 } from '@mui/material';
 import {
   Edit,
@@ -31,7 +30,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { mockUsuarios } from '../../../application/stores/mockData';
-import { Usuario } from '../../../domain/entities/Usuario';
+import type { Usuario } from '../../../domain/entities/Usuario';
 import { UserProfile } from '../../../domain/enums/UserProfile';
 import { useUIStore } from '../../../application/stores/uiStore';
 
@@ -185,7 +184,7 @@ const UsuariosList: React.FC = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      {new Date(usuario.createdAt).toLocaleDateString('pt-BR')}
+                      {usuario.createdAt ? new Date(usuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
                     </TableCell>
                     <TableCell align="center">
                       <Switch

@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { Save, ArrowBack } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CreateExameDto } from '../../../domain/entities/Exame';
+import type { CreateExameDto } from '../../../domain/entities/Exame';
 import { ModalidadeDicom, ModalidadeDicomLabels } from '../../../domain/enums/ModalidadeDicom';
 import { mockPacientes } from '../../../application/stores/mockData';
 import { useUIStore } from '../../../application/stores/uiStore';
