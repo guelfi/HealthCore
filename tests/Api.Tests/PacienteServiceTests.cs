@@ -95,7 +95,11 @@ namespace MobileMed.Api.Tests
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().HaveCount(2);
+            result.Data.Should().HaveCount(2);
+            result.Total.Should().Be(3);
+            result.Page.Should().Be(1);
+            result.PageSize.Should().Be(2);
+            result.TotalPages.Should().Be(2);
         }
 
         [Fact]
