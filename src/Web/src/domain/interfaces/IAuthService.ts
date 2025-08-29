@@ -1,4 +1,4 @@
-import { LoginDto, AuthResponse, Usuario } from '../entities/Usuario';
+import type { LoginDto, AuthResponse, Usuario } from '../entities/Usuario';
 
 export interface IAuthService {
   login(credentials: LoginDto): Promise<AuthResponse>;
