@@ -57,20 +57,27 @@ export class PacienteService {
         data: response.data
       });
       
-      // A API retorna array simples, então precisamos criar a estrutura de paginação
-      const pacientesArray = response.data as Paciente[];
-      
-      const result = {
-        data: pacientesArray,
-        total: pacientesArray.length,
-        page: page,
-        pageSize: pageSize,
-        totalPages: Math.ceil(pacientesArray.length / pageSize)
-      };
-      
-      debug.log('Resultado final:', result);
-      
-      return result;
+      // Verificar se a API retorna a nova estrutura paginada ou a antiga
+      if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+        // Nova estrutura paginada - usar diretamente
+        debug.log('Usando nova estrutura paginada da API');
+        return response.data as PacienteListResponse;
+      } else {
+        // Estrutura antiga (array simples) - converter para nova estrutura
+        debug.log('Convertendo estrutura antiga para nova estrutura paginada');
+        const pacientesArray = response.data as Paciente[];
+        
+        const result = {
+          data: pacientesArray,
+          total: pacientesArray.length,
+          page: page,
+          pageSize: pageSize,
+          totalPages: Math.ceil(pacientesArray.length / pageSize)
+        };
+        
+        debug.log('Resultado final (convertido):', result);
+        return result;
+      }
     } catch (error: any) {
       debug.log('Erro na requisição:', {
         message: error.message,
