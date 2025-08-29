@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using System.Diagnostics;
 
 // Configurar o Serilog
 Log.Logger = new LoggerConfiguration()
@@ -24,6 +25,43 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<MobileMedDbContext>("database")
+    .AddCheck("filesystem", () =>
+    {
+        try
+        {
+            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "../log");
+            if (!Directory.Exists(logPath))
+            {
+                Directory.CreateDirectory(logPath);
+            }
+            
+            var testFile = Path.Combine(logPath, "health-check.tmp");
+            File.WriteAllText(testFile, DateTime.UtcNow.ToString());
+            File.Delete(testFile);
+            
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Filesystem is accessible");
+        }
+        catch (Exception ex)
+        {
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy("Filesystem check failed", ex);
+        }
+    })
+    .AddCheck("memory", () =>
+    {
+        var gc = GC.GetTotalMemory(false);
+        var workingSet = Environment.WorkingSet;
+        
+        if (workingSet > 1024 * 1024 * 1024) // 1GB
+        {
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded($"High memory usage: {workingSet / 1024 / 1024} MB");
+        }
+        
+        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy($"Memory usage: {workingSet / 1024 / 1024} MB");
+    });
 
 // Add Entity Framework
 builder.Services.AddDbContext<MobileMedDbContext>(options =>
@@ -137,6 +175,89 @@ else
 app.UseAuthentication(); // Use Authentication middleware
 app.UseMiddleware<TokenBlacklistMiddleware>(); // Use Token Blacklist middleware
 app.UseAuthorization();   // Use Authorization middleware
+
+// Health Check Endpoints
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        
+        var response = new
+        {
+            status = report.Status.ToString(),
+            timestamp = DateTime.UtcNow,
+            duration = report.TotalDuration,
+            checks = report.Entries.Select(entry => new
+            {
+                name = entry.Key,
+                status = entry.Value.Status.ToString(),
+                duration = entry.Value.Duration,
+                description = entry.Value.Description,
+                exception = entry.Value.Exception?.Message
+            }),
+            system = new
+            {
+                environment = app.Environment.EnvironmentName,
+                machineName = Environment.MachineName,
+                osVersion = Environment.OSVersion.ToString(),
+                processId = Environment.ProcessId,
+                workingSet = $"{Environment.WorkingSet / 1024 / 1024} MB",
+                gcMemory = $"{GC.GetTotalMemory(false) / 1024 / 1024} MB",
+                uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()
+            }
+        };
+        
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response, new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        }));
+    }
+});
+
+// Simple health check endpoint for load balancers
+app.MapGet("/health/ready", () => Results.Ok(new { status = "ready", timestamp = DateTime.UtcNow }));
+
+// Liveness probe endpoint
+app.MapGet("/health/live", () => Results.Ok(new { status = "alive", timestamp = DateTime.UtcNow }));
+
+// Detailed system info endpoint (for monitoring tools)
+app.MapGet("/health/info", () =>
+{
+    var process = Process.GetCurrentProcess();
+    var startTime = process.StartTime.ToUniversalTime();
+    
+    return Results.Ok(new
+    {
+        application = new
+        {
+            name = "MobileMed API",
+            version = "1.0.0",
+            environment = app.Environment.EnvironmentName,
+            startTime = startTime,
+            uptime = DateTime.UtcNow - startTime
+        },
+        system = new
+        {
+            machineName = Environment.MachineName,
+            osVersion = Environment.OSVersion.ToString(),
+            processorCount = Environment.ProcessorCount,
+            is64BitOperatingSystem = Environment.Is64BitOperatingSystem,
+            is64BitProcess = Environment.Is64BitProcess,
+            clrVersion = Environment.Version.ToString()
+        },
+        process = new
+        {
+            id = Environment.ProcessId,
+            workingSet = $"{Environment.WorkingSet / 1024 / 1024} MB",
+            gcMemory = $"{GC.GetTotalMemory(false) / 1024 / 1024} MB",
+            threadCount = process.Threads.Count,
+            handleCount = process.HandleCount
+        },
+        timestamp = DateTime.UtcNow
+    });
+});
 
 // Endpoints para Pacientes
 app.MapPost("/pacientes", async (CreatePacienteDto createPacienteDto, PacienteService pacienteService, ILogger<Program> logger) =>
