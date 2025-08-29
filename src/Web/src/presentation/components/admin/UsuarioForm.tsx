@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { Save, ArrowBack, Visibility, VisibilityOff, Refresh } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { CreateUsuarioDto } from '../../../domain/entities/Usuario';
+// import type { CreateUsuarioDto } from '../../../domain/entities/Usuario'; // Removido: não utilizado
 import { UserProfile } from '../../../domain/enums/UserProfile';
 import { useUIStore } from '../../../application/stores/uiStore';
 

@@ -122,7 +122,7 @@ const ExameForm: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <Autocomplete
                 options={mockPacientes}
-                getOptionLabel={(option) => `${option.nome} - ${option.cpf}`}
+                getOptionLabel={(option) => `${option.nome} - ${option.documento}`}
                 value={selectedPaciente}
                 onChange={handlePacienteChange}
                 disabled={loading}

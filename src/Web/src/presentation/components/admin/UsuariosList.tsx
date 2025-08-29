@@ -49,7 +49,7 @@ const UsuariosList: React.FC = () => {
   React.useEffect(() => {
     const filtered = usuarios.filter(usuario =>
       usuario.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      usuario.role.toLowerCase().includes(searchTerm.toLowerCase())
+      usuario.role.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredUsuarios(filtered);
     setPage(0);
@@ -80,7 +80,7 @@ const UsuariosList: React.FC = () => {
     addNotification(`Usuário ${usuario.username} removido com sucesso`, 'success');
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
