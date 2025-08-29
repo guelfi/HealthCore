@@ -1,16 +1,16 @@
-import { 
+import type { 
   Paciente, 
   CreatePacienteDto, 
   UpdatePacienteDto, 
   PacienteListResponse 
 } from '../entities/Paciente';
-import { 
+import type { 
   Exame, 
   CreateExameDto, 
   UpdateExameDto, 
   ExameListResponse 
 } from '../entities/Exame';
-import { 
+import type { 
   Usuario, 
   CreateUsuarioDto, 
   UpdateUsuarioDto 

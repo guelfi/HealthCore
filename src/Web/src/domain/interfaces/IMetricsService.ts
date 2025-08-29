@@ -1,4 +1,4 @@
-import { DashboardMetrics } from '../entities/Metrics';
+import type { DashboardMetrics } from '../entities/Metrics';
 
 export interface IMetricsService {
   getDashboardMetrics(): Promise<DashboardMetrics>;
