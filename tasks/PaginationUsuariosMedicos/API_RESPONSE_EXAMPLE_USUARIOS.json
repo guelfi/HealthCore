@@ -1,0 +1,15 @@
+{
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "username": "admin",
+      "role": "ADMINISTRADOR",
+      "isActive": true,
+      "createdAt": "2023-01-01T00:00:00Z"
+    }
+  ],
+  "total": 15,
+  "page": 1,
+  "pageSize": 10,
+  "totalPages": 2
+}

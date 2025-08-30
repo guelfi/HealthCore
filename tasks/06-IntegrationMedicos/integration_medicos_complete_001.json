@@ -134,7 +134,7 @@
     },
     {
       "id": "create_medicos_list_component",
-      "content": "Criar componente MedicosList.tsx com interface rica",
+      "content": "Criar componente MedicosPageTable.tsx com interface rica",
       "status": "PENDING",
       "started_at": null,
       "completed_at": null,
@@ -333,7 +333,7 @@
     "src/Web/src/application/services/MedicoService.ts",
     "src/Web/src/presentation/hooks/useMedicos.ts",
     "src/Web/src/presentation/pages/MedicosPage.tsx",
-    "src/Web/src/presentation/components/medicos/MedicosList.tsx",
+    "src/Web/src/presentation/components/medicos/MedicosPageTable.tsx",
     "src/Web/src/presentation/components/medicos/MedicoForm.tsx",
     "src/Web/src/presentation/components/medicos/MedicoFilters.tsx",
     "src/Web/src/application/stores/mockData.ts"

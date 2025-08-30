@@ -94,7 +94,7 @@
     },
     {
       "id": "update_exames_list_component",
-      "content": "Atualizar ExamesList.tsx removendo mock e usando API real",
+      "content": "Atualizar ExamesPageTable.tsx removendo mock e usando API real",
       "status": "PENDING",
       "started_at": null,
       "completed_at": null,
@@ -254,7 +254,7 @@
     "src/Web/src/application/services/ExameService.ts",
     "src/Web/src/presentation/hooks/useExames.ts",
     "src/Web/src/presentation/pages/ExamesPage.tsx",
-    "src/Web/src/presentation/components/exames/ExamesList.tsx",
+    "src/Web/src/presentation/components/exames/ExamesPageTable.tsx",
     "src/Web/src/presentation/components/exames/ExameForm.tsx",
     "src/Web/src/presentation/components/exames/ExameFilters.tsx",
     "src/Web/src/application/stores/mockData.ts"
