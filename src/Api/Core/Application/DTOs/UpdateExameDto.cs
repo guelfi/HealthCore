@@ -1,11 +1,16 @@
-using MobileMed.Api.Core.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace MobileMed.Api.Core.Application.DTOs
 {
     public class UpdateExameDto
     {
+        [Required(ErrorMessage = "PacienteId é obrigatório")]
         public Guid PacienteId { get; set; }
+        
+        [Required(ErrorMessage = "IdempotencyKey é obrigatória")]
         public string IdempotencyKey { get; set; } = string.Empty;
-        public string Modalidade { get; set; } = string.Empty; // Changed to string
+        
+        [Required(ErrorMessage = "Modalidade é obrigatória")]
+        public string Modalidade { get; set; } = string.Empty;
     }
 }

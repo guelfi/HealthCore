@@ -1,3 +1,5 @@
+using MobileMed.Api.Core.Domain.Enums;
+
 namespace MobileMed.Api.Core.Domain.Entities
 {
     public class Exame
@@ -10,20 +12,5 @@ namespace MobileMed.Api.Core.Domain.Entities
         // Relacionamento com Paciente
         public Guid PacienteId { get; set; }
         public Paciente Paciente { get; set; } = null!;
-    }
-    
-    public enum ModalidadeExame
-    {
-        CR, // Computed Radiography
-        CT, // Computed Tomography
-        DX, // Digital Radiography
-        MG, // Mammography
-        MR, // Magnetic Resonance
-        NM, // Nuclear Medicine
-        OT, // Other
-        PT, // Positron Emission Tomography (PET)
-        RF, // Radio Fluoroscopy
-        US, // Ultrasound
-        XA  // X-Ray Angiography
     }
 }
