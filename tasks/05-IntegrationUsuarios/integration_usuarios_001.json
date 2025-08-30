@@ -74,7 +74,7 @@
     },
     {
       "id": "update_usuarios_list_component",
-      "content": "Atualizar UsuariosList.tsx removendo mock e usando API real",
+      "content": "Atualizar UsuariosPageTable.tsx removendo mock e usando API real",
       "status": "PENDING",
       "started_at": null,
       "completed_at": null,
@@ -214,7 +214,7 @@
     "src/Web/src/application/services/UsuarioService.ts",
     "src/Web/src/presentation/hooks/useUsuarios.ts",
     "src/Web/src/presentation/pages/UsuariosPage.tsx",
-    "src/Web/src/presentation/components/usuarios/UsuariosList.tsx",
+    "src/Web/src/presentation/components/usuarios/UsuariosPageTable.tsx",
     "src/Web/src/presentation/components/usuarios/UsuarioForm.tsx",
     "src/Web/src/presentation/components/usuarios/UsuarioFilters.tsx",
     "src/Web/src/application/stores/mockData.ts"
