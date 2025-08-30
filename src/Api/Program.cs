@@ -13,6 +13,7 @@ using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Diagnostics;
+using System.ComponentModel.DataAnnotations;
 
 // Configurar o Serilog
 Log.Logger = new LoggerConfiguration()
@@ -25,6 +26,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add model validation
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+});
 
 // Add Health Checks
 builder.Services.AddHealthChecks()
@@ -153,6 +160,21 @@ builder.WebHost.UseUrls("http://0.0.0.0:5000"); // Configure Kestrel to listen o
 
 var app = builder.Build();
 
+// Helper method for model validation
+static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : class
+{
+    var context = new ValidationContext(model);
+    var results = new List<ValidationResult>();
+    
+    if (!Validator.TryValidateObject(model, context, results, true))
+    {
+        var errors = results.Select(r => r.ErrorMessage).ToList();
+        return (false, Results.BadRequest(new { Message = "Dados inválidos", Errors = errors }));
+    }
+    
+    return (true, null);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -262,6 +284,11 @@ app.MapGet("/health/info", () =>
 // Endpoints para Pacientes
 app.MapPost("/pacientes", async (CreatePacienteDto createPacienteDto, PacienteService pacienteService, ILogger<Program> logger) =>
 {
+    // Validar modelo
+    var (isValid, errorResult) = ValidateModel(createPacienteDto);
+    if (!isValid)
+        return errorResult!;
+
     try
     {
         logger.LogInformation("Iniciando criação de paciente: {Nome}, Documento: {Documento}", createPacienteDto.Nome, createPacienteDto.Documento);
@@ -321,6 +348,11 @@ app.MapDelete("/pacientes/{id:guid}", async (Guid id, PacienteService pacienteSe
 // Endpoints para Exames
 app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameService, ILogger<Program> logger) =>
 {
+    // Validar modelo
+    var (isValid, errorResult) = ValidateModel(createExameDto);
+    if (!isValid)
+        return errorResult!;
+
     try
     {
         logger.LogInformation("Iniciando criação de exame para paciente: {PacienteId}, IdempotencyKey: {IdempotencyKey}", createExameDto.PacienteId, createExameDto.IdempotencyKey);
@@ -333,14 +365,32 @@ app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameS
         logger.LogWarning("Erro ao criar exame. Erro: {Message}", ex.Message);
         return Results.BadRequest(new { Message = ex.Message });
     }
+    catch (ArgumentException ex)
+    {
+        logger.LogWarning("Modalidade inválida no exame. Erro: {Message}", ex.Message);
+        return Results.BadRequest(new { Message = ex.Message });
+    }
 });
 
-app.MapGet("/exames", async (ExameService exameService, int page, int pageSize, ILogger<Program> logger) =>
+app.MapGet("/exames", async (ExameService exameService, int page = 1, int pageSize = 10, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null, ILogger<Program> logger = null!) =>
 {
-    logger.LogInformation("Listando exames - Página: {Page}, Tamanho da página: {PageSize}", page, pageSize);
-    var exames = await exameService.GetExamesAsync(page, pageSize);
-    logger.LogInformation("Listagem de exames concluída. Número de exames retornados: {Count}", exames.Count);
+    logger.LogInformation("Listando exames - Página: {Page}, Tamanho da página: {PageSize}, Modalidade: {Modalidade}, PacienteId: {PacienteId}", page, pageSize, modalidade, pacienteId);
+    var exames = await exameService.GetExamesAsync(page, pageSize, modalidade, pacienteId, dataInicio, dataFim);
+    logger.LogInformation("Listagem de exames concluída. Número de exames retornados: {Count}", exames.Data.Count);
     return Results.Ok(exames);
+});
+
+app.MapGet("/exames/{id:guid}", async (Guid id, ExameService exameService, ILogger<Program> logger) =>
+{
+    logger.LogInformation("Buscando exame com ID: {Id}", id);
+    var exame = await exameService.GetExameByIdAsync(id);
+    if (exame == null)
+    {
+        logger.LogWarning("Exame com ID: {Id} não encontrado.", id);
+        return Results.NotFound(new { Message = $"Exame com ID {id} não encontrado." });
+    }
+    logger.LogInformation("Exame encontrado: {Id}", id);
+    return Results.Ok(exame);
 });
 
 app.MapPut("/exames/{id:guid}", async (Guid id, UpdateExameDto updateExameDto, ExameService exameService, ILogger<Program> logger) =>
@@ -376,6 +426,39 @@ app.MapDelete("/exames/{id:guid}", async (Guid id, ExameService exameService, IL
     logger.LogInformation("Exame com ID: {Id} excluído com sucesso.", id);
     return Results.NoContent();
 });
+
+// Endpoint para listar modalidades disponíveis
+app.MapGet("/exames/modalidades", (ILogger<Program> logger) =>
+{
+    logger.LogInformation("Listando modalidades de exames disponíveis");
+    var modalidades = Enum.GetValues<MobileMed.Api.Core.Domain.Enums.ModalidadeExame>()
+        .Select(m => new { 
+            Value = m.ToString(), 
+            Description = GetModalidadeDescription(m) 
+        })
+        .ToList();
+    
+    return Results.Ok(modalidades);
+});
+
+static string GetModalidadeDescription(MobileMed.Api.Core.Domain.Enums.ModalidadeExame modalidade)
+{
+    return modalidade switch
+    {
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.CR => "Computed Radiography",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.CT => "Computed Tomography",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.DX => "Digital Radiography",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.MG => "Mammography",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.MR => "Magnetic Resonance",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.NM => "Nuclear Medicine",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.OT => "Other",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.PT => "Positron Emission Tomography (PET)",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.RF => "Radio Fluoroscopy",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.US => "Ultrasound",
+        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.XA => "X-Ray Angiography",
+        _ => modalidade.ToString()
+    };
+}
 
 // Authentication Endpoints
 app.MapPost("/auth/register", async (LoginRequestDto registerDto, UserService userService, ILogger<Program> logger) =>

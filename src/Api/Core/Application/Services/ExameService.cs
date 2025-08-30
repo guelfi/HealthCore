@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MobileMed.Api.Core.Application.DTOs;
 using MobileMed.Api.Core.Domain.Entities;
+using MobileMed.Api.Core.Domain.Enums;
 using MobileMed.Api.Infrastructure.Data;
 
 namespace MobileMed.Api.Core.Application.Services
@@ -67,21 +68,58 @@ namespace MobileMed.Api.Core.Application.Services
             };
         }
 
-        public async Task<List<ExameDto>> GetExamesAsync(int page, int pageSize)
+        public async Task<PagedResponseDto<ExameDto>> GetExamesAsync(int page, int pageSize, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
-            var exames = await _context.Exames
+            var query = _context.Exames.AsQueryable();
+
+            // Aplicar filtros
+            if (!string.IsNullOrEmpty(modalidade) && Enum.TryParse(modalidade, true, out ModalidadeExame modalidadeEnum))
+            {
+                query = query.Where(e => e.Modalidade == modalidadeEnum);
+            }
+
+            if (pacienteId.HasValue)
+            {
+                query = query.Where(e => e.PacienteId == pacienteId.Value);
+            }
+
+            if (dataInicio.HasValue)
+            {
+                query = query.Where(e => e.DataCriacao >= dataInicio.Value);
+            }
+
+            if (dataFim.HasValue)
+            {
+                query = query.Where(e => e.DataCriacao <= dataFim.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var exames = await query
+                .Include(e => e.Paciente)
+                .OrderByDescending(e => e.DataCriacao)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            return exames.Select(e => new ExameDto
+            var exameDtos = exames.Select(e => new ExameDto
             {
                 Id = e.Id,
                 PacienteId = e.PacienteId,
                 IdempotencyKey = e.IdempotencyKey,
-                Modalidade = e.Modalidade.ToString(), // Convert enum to string for DTO
+                Modalidade = e.Modalidade.ToString(),
                 DataCriacao = e.DataCriacao
             }).ToList();
+
+            return new PagedResponseDto<ExameDto>
+            {
+                Data = exameDtos,
+                Page = page,
+                PageSize = pageSize,
+                Total = totalCount,
+                TotalPages = totalPages
+            };
         }
 
         public async Task<ExameDto?> UpdateExameAsync(Guid id, UpdateExameDto updateExameDto)
@@ -127,6 +165,27 @@ namespace MobileMed.Api.Core.Application.Services
                 PacienteId = exame.PacienteId,
                 IdempotencyKey = exame.IdempotencyKey,
                 Modalidade = exame.Modalidade.ToString(), // Convert enum to string for DTO
+                DataCriacao = exame.DataCriacao
+            };
+        }
+
+        public async Task<ExameDto?> GetExameByIdAsync(Guid id)
+        {
+            var exame = await _context.Exames
+                .Include(e => e.Paciente)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (exame == null)
+            {
+                return null;
+            }
+
+            return new ExameDto
+            {
+                Id = exame.Id,
+                PacienteId = exame.PacienteId,
+                IdempotencyKey = exame.IdempotencyKey,
+                Modalidade = exame.Modalidade.ToString(),
                 DataCriacao = exame.DataCriacao
             };
         }
