@@ -25,8 +25,7 @@ import {
   Delete,
   Search,
   Add,
-  Person,
-  AdminPanelSettings,
+  Visibility,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { mockUsuarios } from '../../../application/stores/mockData';
@@ -42,7 +41,7 @@ const UsuariosList: React.FC = () => {
   const [filteredUsuarios, setFilteredUsuarios] = React.useState<Usuario[]>(mockUsuarios);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(7);
   const [loading] = React.useState(false);
 
   React.useEffect(() => {
@@ -93,9 +92,7 @@ const UsuariosList: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const getRoleIcon = (role: UserProfile) => {
-    return role === UserProfile.ADMINISTRADOR ? <AdminPanelSettings /> : <Person />;
-  };
+
 
   const getRoleColor = (role: UserProfile) => {
     return role === UserProfile.ADMINISTRADOR ? 'error' : 'primary';
@@ -150,25 +147,37 @@ const UsuariosList: React.FC = () => {
 
           <TableContainer component={Paper} variant="outlined">
             <Table>
-              <TableHead>
+              <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                 <TableRow>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Perfil</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Data de Criação</TableCell>
-                  <TableCell align="center">Ativo</TableCell>
-                  <TableCell align="center">Ações</TableCell>
+                  <TableCell align="center" sx={{ width: 50 }}></TableCell>
+                  <TableCell><strong>Nome</strong></TableCell>
+                  <TableCell><strong>Perfil</strong></TableCell>
+                  <TableCell><strong>Status</strong></TableCell>
+                  <TableCell><strong>Cadastrado em</strong></TableCell>
+                  <TableCell align="center"><strong>Ações</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {paginatedUsuarios.map((usuario) => (
-                  <TableRow key={usuario.id} hover>
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        {getRoleIcon(usuario.role as UserProfile)}
-                        {usuario.username}
-                      </Box>
+                  <TableRow 
+                    key={usuario.id}
+                    onClick={() => navigate(`/admin/usuarios/${usuario.id}`)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { backgroundColor: 'rgba(102, 126, 234, 0.04)' }
+                    }}
+                  >
+                    <TableCell align="center">
+                      <Visibility 
+                        color="action" 
+                        sx={{ 
+                          fontSize: '1.2rem',
+                          cursor: 'pointer',
+                          '&:hover': { color: 'primary.main' }
+                        }} 
+                      />
                     </TableCell>
+                    <TableCell>{usuario.username}</TableCell>
                     <TableCell>
                       <Chip
                         label={usuario.role}
@@ -214,7 +223,7 @@ const UsuariosList: React.FC = () => {
                 ))}
                 {paginatedUsuarios.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                       <Typography variant="body1" color="text.secondary">
                         {searchTerm ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado'}
                       </Typography>

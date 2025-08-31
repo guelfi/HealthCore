@@ -19,6 +19,7 @@ import {
   Add,
   Person,
   Refresh,
+  Visibility,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import type { Paciente } from '../../../domain/entities/Paciente';
@@ -28,6 +29,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import ResponsiveTable from '../common/ResponsiveTable';
 import { TableSkeleton } from '../common/LoadingStates';
 import { useAutoDebugger } from '../../../utils/AutoDebugger';
+import { DeleteConfirmationDialog } from '../common/ConfirmationDialogs';
 
 const PacientesList: React.FC = () => {
   const debug = useAutoDebugger('PacientesList');
@@ -39,8 +41,6 @@ const PacientesList: React.FC = () => {
   const {
     pacientes,
     total,
-    currentPage,
-    totalPages,
     loading,
     error,
     fetchPacientes,
@@ -50,7 +50,9 @@ const PacientesList: React.FC = () => {
   
   const [searchTerm, setSearchTerm] = React.useState('');
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(7);
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  const [pacienteToDelete, setPacienteToDelete] = React.useState<Paciente | null>(null);
   
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -112,18 +114,25 @@ const PacientesList: React.FC = () => {
     navigate(`/pacientes/editar/${paciente.id}`);
   };
 
-  const handleDelete = async (paciente: Paciente) => {
-    if (window.confirm(`Tem certeza que deseja excluir o paciente ${paciente.nome}?`)) {
+  const handleDelete = (paciente: Paciente) => {
+    setPacienteToDelete(paciente);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pacienteToDelete) {
       try {
-        await deletePaciente(paciente.id);
-        addNotification(`Paciente ${paciente.nome} removido com sucesso`, 'success');
+        await deletePaciente(pacienteToDelete.id);
+        addNotification(`Paciente ${pacienteToDelete.nome} removido com sucesso`, 'success');
       } catch (error: any) {
         addNotification(error.message || 'Erro ao excluir paciente', 'error');
       }
     }
+    setShowDeleteDialog(false);
+    setPacienteToDelete(null);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -144,6 +153,22 @@ const PacientesList: React.FC = () => {
   };
 
   const columns = [
+    {
+      id: 'view',
+      label: '',
+      minWidth: 50,
+      align: 'center' as const,
+      format: () => (
+        <Visibility 
+          color="action" 
+          sx={{ 
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            '&:hover': { color: 'primary.main' }
+          }} 
+        />
+      ),
+    },
     {
       id: 'nome',
       label: 'Nome',
@@ -180,7 +205,7 @@ const PacientesList: React.FC = () => {
       id: 'actions',
       label: 'Ações',
       align: 'center' as const,
-      format: (value: any, row: any) => (
+      format: (_: any, row: any) => (
         <Box>
           <IconButton
             size="small"
@@ -327,6 +352,21 @@ const PacientesList: React.FC = () => {
           />
         </CardContent>
       </Card>
+
+      {/* Dialog de confirmação de exclusão */}
+      {pacienteToDelete && (
+        <DeleteConfirmationDialog
+          open={showDeleteDialog}
+          onClose={() => {
+            setShowDeleteDialog(false);
+            setPacienteToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+          itemName={pacienteToDelete.nome}
+          itemType="paciente"
+          loading={loading}
+        />
+      )}
     </Box>
   );
 };

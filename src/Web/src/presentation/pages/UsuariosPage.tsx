@@ -31,6 +31,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Person as UsuarioIcon,
+  Visibility,
 } from '@mui/icons-material';
 import { mockUsuarios } from '../../application/stores/mockData';
 import { UserProfile } from '../../domain/enums/UserProfile';
@@ -42,7 +43,7 @@ const UsuariosPage: React.FC = () => {
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(7);
 
   const profileLabels = {
     [UserProfile.ADMINISTRADOR]: 'Administrador',
@@ -134,6 +135,7 @@ const UsuariosPage: React.FC = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
+                  <TableCell align="center" sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', width: 50 }}></TableCell>
                   <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Nome de Usuário</TableCell>
                   <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', display: { xs: 'none', md: 'table-cell' } }}>Perfil</TableCell>
                   <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Status</TableCell>
@@ -153,6 +155,16 @@ const UsuariosPage: React.FC = () => {
                       },
                     }}
                   >
+                    <TableCell align="center">
+                      <Visibility 
+                        color="action" 
+                        sx={{ 
+                          fontSize: '1.2rem',
+                          cursor: 'pointer',
+                          '&:hover': { color: 'primary.main' }
+                        }} 
+                      />
+                    </TableCell>
                     <TableCell>{usuario.username}</TableCell>
                     <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{profileLabels[usuario.role]}</TableCell>
                     <TableCell>

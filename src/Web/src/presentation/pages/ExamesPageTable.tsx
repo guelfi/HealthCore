@@ -9,15 +9,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  TextField,
-  Chip,
-  Pagination,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Autocomplete,
   Table,
   TableBody,
   TableCell,
@@ -31,25 +22,28 @@ import {
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   Assignment as ExameIcon,
+  Visibility,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import {
   useExames,
   usePacientes,
 } from '../hooks';
-import { ModalidadeDicom, ModalidadeDicomLabels } from '../../domain/enums/ModalidadeDicom';
 import type { Exame } from '../../domain/entities/Exame';
 import type { Paciente } from '../../domain/entities/Paciente';
+import { ModalidadeDicomLabels } from '../../domain/enums/ModalidadeDicom';
 import ExameForm from '../components/exames/ExameForm';
 import CustomPagination from '../components/common/CustomPagination';
+import {
+  DeleteConfirmationDialog,
+  SuccessDialog
+} from '../components/common/ConfirmationDialogs';
+import { useUIStore } from '../../application/stores/uiStore';
 
 const ExamesPageTable: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
+  const { addNotification } = useUIStore();
   
   // Hooks para exames e pacientes
   const {
@@ -65,17 +59,17 @@ const ExamesPageTable: React.FC = () => {
   
   const {
     pacientes: allPacientes,
-    loading: pacientesLoading,
     fetchPacientes,
   } = usePacientes();
 
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedExame, setSelectedExame] = useState<Exame | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [modalidadeFilter, setModalidadeFilter] = useState<string>('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
+  const [saving, setSaving] = useState(false);
+  const [pageSize] = useState(7);
 
   // Carregar exames e pacientes ao montar o componente
   useEffect(() => {
@@ -84,9 +78,21 @@ const ExamesPageTable: React.FC = () => {
   }, [fetchExames, fetchPacientes]);
 
   const handleRowClick = (exame: Exame) => {
-    setSelectedExame(exame);
-    setDialogMode('edit');
-    setOpenDialog(true);
+    // Mostrar loading se já há um exame selecionado (mudança de seleção)
+    if (selectedExame && selectedExame.id !== exame.id) {
+      setSaving(true);
+      // Simular um pequeno delay para mostrar o loading
+      setTimeout(() => {
+        setSelectedExame(exame);
+        setDialogMode('edit');
+        setOpenDialog(true);
+        setSaving(false);
+      }, 300);
+    } else {
+      setSelectedExame(exame);
+      setDialogMode('edit');
+      setOpenDialog(true);
+    }
   };
 
   const handleAddNew = () => {
@@ -101,7 +107,6 @@ const ExamesPageTable: React.FC = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
     fetchExames({ page: newPage, pageSize });
   };
 
@@ -111,13 +116,26 @@ const ExamesPageTable: React.FC = () => {
     fetchExames({ page: currentPage, pageSize });
   };
 
-  const handleDelete = async (exameId: string) => {
+  const handleDelete = async () => {
+    if (!selectedExame) return;
+    
+    setSaving(true);
     try {
-      await deleteExame(exameId);
-      // Recarregar a lista de exames
-      fetchExames({ page: currentPage, pageSize });
-    } catch (err) {
-      console.error('Erro ao deletar exame:', err);
+      await deleteExame(selectedExame.id);
+      const pacienteNome = allPacientes.find(p => p.id === selectedExame.pacienteId)?.nome || 'paciente';
+      setSuccessMessage({
+        title: 'Sucesso!',
+        message: `Exame de ${pacienteNome} foi excluído com sucesso.`
+      });
+      setShowDeleteDialog(false);
+      handleCloseDialog(); // Fechar o dialog principal de edição
+      setShowSuccessDialog(true);
+      fetchExames({ page: currentPage, pageSize }); // Recarregar lista
+    } catch (error: any) {
+      console.error('Erro ao excluir exame:', error);
+      addNotification(error.message || 'Erro ao excluir exame', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -193,15 +211,16 @@ const ExamesPageTable: React.FC = () => {
 
           {/* Tabela de Dados */}
           {!loading && (
-            <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', maxHeight: 450 }}>
+            <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
               <Table size="small">
                 <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                   <TableRow>
-                    <TableCell><strong>Paciente</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Modalidade</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}><strong>Descrição</strong></TableCell>
-                    <TableCell><strong>Data do Exame</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Cadastrado em</strong></TableCell>
+                    <TableCell align="center" sx={{ width: 50, py: 1 }}></TableCell>
+                    <TableCell sx={{ py: 1 }}><strong>Paciente</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}><strong>Modalidade</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' }, py: 1 }}><strong>Descrição</strong></TableCell>
+                    <TableCell sx={{ py: 1 }}><strong>Data do Exame</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}><strong>Cadastrado em</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -211,21 +230,32 @@ const ExamesPageTable: React.FC = () => {
                       onClick={() => handleRowClick(exame)}
                       sx={{ 
                         cursor: 'pointer',
+                        height: 35,
                         '&:hover': { 
                           backgroundColor: 'rgba(102, 126, 234, 0.04)' 
                         }
                       }}
                     >
-                      <TableCell>{getPacienteName(exame.pacienteId)}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{ModalidadeDicomLabels[exame.modalidade] || exame.modalidade}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{exame.descricao || '-'}</TableCell>
-                      <TableCell>{new Date(exame.dataExame).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{new Date(exame.createdAt).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell align="center" sx={{ py: '1px' }}>
+                        <Visibility 
+                          color="action" 
+                          sx={{ 
+                            fontSize: '1.1rem',
+                            cursor: 'pointer',
+                            '&:hover': { color: 'primary.main' }
+                          }} 
+                        />
+                      </TableCell>
+                      <TableCell sx={{ py: '1px' }}>{getPacienteName(exame.pacienteId)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}>{ModalidadeDicomLabels[exame.modalidade] || exame.modalidade}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' }, py: '1px' }}>{exame.descricao || '-'}</TableCell>
+                      <TableCell sx={{ py: '1px' }}>{new Date(exame.dataExame).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}>{new Date(exame.createdAt).toLocaleDateString('pt-BR')}</TableCell>
                     </TableRow>
                   ))}
                   {paginatedData.length === 0 && !loading && (
                     <TableRow>
-                      <TableCell colSpan={5} align="center">
+                      <TableCell colSpan={6} align="center">
                         <Typography variant="body1" color="text.secondary" sx={{ py: 4 }}>
                           Nenhum exame encontrado
                         </Typography>
@@ -268,17 +298,54 @@ const ExamesPageTable: React.FC = () => {
         <DialogContent sx={{ 
           pt: 4.625, 
           px: 3, 
-          pb: 2
+          pb: 2,
+          position: 'relative'
         }}>
+          {saving && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                zIndex: 1000
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
           <ExameForm
             mode={dialogMode}
             initialData={selectedExame}
             onSaveSuccess={handleSaveSuccess}
             onCancel={handleCloseDialog}
-            onDelete={dialogMode === 'edit' && selectedExame ? () => handleDelete(selectedExame.id) : undefined}
+            onDelete={dialogMode === 'edit' && selectedExame ? () => setShowDeleteDialog(true) : undefined}
           />
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de Confirmação de Exclusão */}
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        itemName={selectedExame ? `exame de ${allPacientes.find((p: Paciente) => p.id === selectedExame.pacienteId)?.nome || 'paciente'}` : ''}
+        itemType="o"
+        loading={saving}
+      />
+
+      {/* Diálogo de Sucesso */}
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        title={successMessage.title}
+        message={successMessage.message}
+      />
     </>
   );
 };

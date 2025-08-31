@@ -45,7 +45,7 @@ const ExamesPage: React.FC = () => {
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedExame, setSelectedExame] = useState<Exame | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(7);
 
   const modalidadeLabels = {
     [ModalidadeDicom.CR]: 'Radiografia Computadorizada (CR)',
@@ -302,14 +302,6 @@ const ExamesPage: React.FC = () => {
             </Button>
           )}
           <Button 
-            onClick={handleCloseDialog} 
-            color="inherit"
-            size="small"
-            sx={{ fontSize: '0.75rem' }}
-          >
-            Fechar
-          </Button>
-          <Button 
             onClick={handleSave} 
             variant="contained"
             startIcon={<EditIcon />}
@@ -323,6 +315,14 @@ const ExamesPage: React.FC = () => {
             }}
           >
             {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+          </Button>
+          <Button 
+            onClick={handleCloseDialog} 
+            color="inherit"
+            size="small"
+            sx={{ fontSize: '0.75rem' }}
+          >
+            Fechar
           </Button>
         </DialogActions>
       </Dialog>

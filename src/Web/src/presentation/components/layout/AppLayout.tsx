@@ -127,12 +127,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     ))}
                 </List>
             </Box>
-            {/* Footer no sidebar: sempre no mobile, ou quando não estiver no Dashboard em desktop */}
-            {(isMobile || !isDashboard) && (
-                <Box sx={{ mt: 'auto' }}>
-                    <Footer compact />
-                </Box>
-            )}
+            {/* Footer no sidebar: sempre visível */}
+            <Box sx={{ mt: 'auto' }}>
+                <Footer compact />
+            </Box>
         </Box>
     );
 
@@ -231,20 +229,47 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                         flexGrow: 1,
                         display: 'flex',
                         flexDirection: 'column',
-                        p: 3,
-                        pb: (isDashboard && !isMobile) ? 1 : 3,
                         width: { sm: `calc(100% - ${drawerWidth}px)` },
+                        position: 'fixed',
+                        top: { xs: '56px', sm: '64px' }, // Posição fixa após o header
+                        right: 0,
+                        bottom: 0,
+                        left: { xs: 0, sm: `${drawerWidth}px` }, // Considera o drawer em desktop
+                        overflow: 'hidden', // Remove scroll do container principal
                     }}
                 >
-                    <Toolbar />
-                    <Box sx={{ flex: 1, mb: (isDashboard && !isMobile) ? 2 : 0 }}>
-                        {children}
+                    {/* Container wrapper que inicia logo abaixo do header */}
+                    <Box 
+                        sx={{ 
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: '120vh', // 120% da viewport para comportar todo conteúdo
+                            overflowY: 'auto', // Scroll interno apenas
+                            overflowX: 'hidden', // Remove scroll horizontal
+                            '&::-webkit-scrollbar': {
+                                display: 'none' // Oculta scrollbar no webkit
+                            },
+                            scrollbarWidth: 'none', // Oculta scrollbar no Firefox
+                        }}
+                    >
+                        {/* Container de conteúdo das páginas */}
+                        <Box 
+                            sx={{ 
+                                p: 3,
+                                pb: (isDashboard && !isMobile) ? 1 : 3,
+                                mb: (isDashboard && !isMobile) ? 2 : 0,
+                                minHeight: '100%', // Garante altura mínima
+                            }}
+                        >
+                            {children}
+                        </Box>
                     </Box>
                 </Box>
             </Box>
 
-            {/* Footer na parte inferior apenas no Dashboard em desktop */}
-            {isDashboard && !isMobile && <Footer />}
+            {/* Footer removido da Dashboard - agora aparece apenas no sidebar */}
         </Box>
     );
 };

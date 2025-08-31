@@ -11,7 +11,6 @@ import {
   DialogActions,
   TextField,
   Chip,
-  IconButton,
   Pagination,
 } from '@mui/material';
 import {
@@ -34,16 +33,13 @@ import { usePacientes } from '../hooks/usePacientes';
 
 const PacientesPage: React.FC = () => {
   const {
-    pacientes,
-    loading,
-    error,
-    fetchPacientes
+    pacientes
   } = usePacientes();
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(7);
 
   const handleRowClick = (paciente: Paciente) => {
     setSelectedPaciente(paciente);
@@ -278,14 +274,6 @@ const PacientesPage: React.FC = () => {
             </Button>
           )}
           <Button 
-            onClick={handleCloseDialog} 
-            color="inherit"
-            size="small"
-            sx={{ fontSize: '0.75rem' }}
-          >
-            Fechar
-          </Button>
-          <Button 
             onClick={handleSave} 
             variant="contained"
             startIcon={<EditIcon />}
@@ -299,6 +287,14 @@ const PacientesPage: React.FC = () => {
             }}
           >
             {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+          </Button>
+          <Button 
+            onClick={handleCloseDialog} 
+            color="inherit"
+            size="small"
+            sx={{ fontSize: '0.75rem' }}
+          >
+            Fechar
           </Button>
         </DialogActions>
       </Dialog>

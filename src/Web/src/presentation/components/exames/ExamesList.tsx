@@ -30,6 +30,7 @@ import {
   Search,
   Add,
   Assignment,
+  Visibility,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useExames, usePacientes } from '../../hooks';
@@ -45,8 +46,6 @@ const ExamesList: React.FC = () => {
   const {
     exames,
     total,
-    currentPage,
-    totalPages,
     loading,
     error,
     fetchExames,
@@ -55,14 +54,13 @@ const ExamesList: React.FC = () => {
   
   const {
     pacientes: allPacientes,
-    loading: pacientesLoading,
     fetchPacientes,
   } = usePacientes();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [modalidadeFilter, setModalidadeFilter] = useState<string>('');
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(7);
 
   // Carregar exames e pacientes ao montar o componente
   useEffect(() => {
@@ -106,7 +104,7 @@ const ExamesList: React.FC = () => {
     }
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -222,6 +220,7 @@ const ExamesList: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
+                  <TableCell align="center" sx={{ width: 50 }}></TableCell>
                   <TableCell>Paciente</TableCell>
                   <TableCell>CPF</TableCell>
                   <TableCell>Modalidade</TableCell>
@@ -232,7 +231,17 @@ const ExamesList: React.FC = () => {
               </TableHead>
               <TableBody>
                 {exames.map((exame) => (
-                  <TableRow key={exame.id} hover>
+                  <TableRow key={exame.id} hover sx={{ cursor: 'pointer' }}>
+                    <TableCell align="center">
+                      <Visibility 
+                        color="action" 
+                        sx={{ 
+                          fontSize: '1.2rem',
+                          cursor: 'pointer',
+                          '&:hover': { color: 'primary.main' }
+                        }} 
+                      />
+                    </TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1}>
                         <Assignment color="action" />
