@@ -34,10 +34,10 @@ import { DeleteConfirmationDialog } from '../common/ConfirmationDialogs';
 const PacientesList: React.FC = () => {
   const debug = useAutoDebugger('PacientesList');
   debug.info('Componente inicializado!');
-  
+
   const navigate = useNavigate();
   const { addNotification } = useUIStore();
-  
+
   const {
     pacientes,
     total,
@@ -45,15 +45,16 @@ const PacientesList: React.FC = () => {
     error,
     fetchPacientes,
     deletePaciente,
-    clearError
+    clearError,
   } = usePacientes();
-  
+
   const [searchTerm, setSearchTerm] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(7);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [pacienteToDelete, setPacienteToDelete] = React.useState<Paciente | null>(null);
-  
+  const [pacienteToDelete, setPacienteToDelete] =
+    React.useState<Paciente | null>(null);
+
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Load patients on component mount and when filters change
@@ -61,33 +62,33 @@ const PacientesList: React.FC = () => {
     debug.info('useEffect disparado com filtros:', {
       debouncedSearchTerm,
       page,
-      rowsPerPage
+      rowsPerPage,
     });
-    
+
     const loadPacientes = () => {
       const params = {
         page: page + 1, // API uses 1-based pagination
         pageSize: rowsPerPage,
         ...(debouncedSearchTerm && {
           nome: debouncedSearchTerm,
-          documento: debouncedSearchTerm
-        })
+          documento: debouncedSearchTerm,
+        }),
       };
-      
+
       debug.info('Carregando pacientes com parâmetros:', params);
-      debug.debug('Estado atual do hook:', { 
-        pacientes: pacientes.length, 
-        loading, 
-        error, 
-        total 
+      debug.debug('Estado atual do hook:', {
+        pacientes: pacientes.length,
+        loading,
+        error,
+        total,
       });
-      
+
       fetchPacientes(params);
     };
-    
+
     loadPacientes();
   }, [debouncedSearchTerm, page, rowsPerPage, fetchPacientes]);
-  
+
   // Debug: log quando pacientes mudam
   React.useEffect(() => {
     debug.info('Lista de pacientes atualizada:', {
@@ -95,10 +96,10 @@ const PacientesList: React.FC = () => {
       primeiroPaciente: pacientes[0]?.nome || 'nenhum',
       loading,
       error,
-      total
+      total,
     });
   }, [pacientes, loading, error, total]);
-  
+
   // Clear errors when component unmounts
   React.useEffect(() => {
     return () => {
@@ -123,7 +124,10 @@ const PacientesList: React.FC = () => {
     if (pacienteToDelete) {
       try {
         await deletePaciente(pacienteToDelete.id);
-        addNotification(`Paciente ${pacienteToDelete.nome} removido com sucesso`, 'success');
+        addNotification(
+          `Paciente ${pacienteToDelete.nome} removido com sucesso`,
+          'success'
+        );
       } catch (error: any) {
         addNotification(error.message || 'Erro ao excluir paciente', 'error');
       }
@@ -136,19 +140,21 @@ const PacientesList: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  
+
   const handleRefresh = () => {
     fetchPacientes({
       page: page + 1,
       pageSize: rowsPerPage,
       ...(debouncedSearchTerm && {
         nome: debouncedSearchTerm,
-        documento: debouncedSearchTerm
-      })
+        documento: debouncedSearchTerm,
+      }),
     });
   };
 
@@ -159,13 +165,13 @@ const PacientesList: React.FC = () => {
       minWidth: 50,
       align: 'center' as const,
       format: () => (
-        <Visibility 
-          color="action" 
-          sx={{ 
+        <Visibility
+          color="action"
+          sx={{
             fontSize: '1.2rem',
             cursor: 'pointer',
-            '&:hover': { color: 'primary.main' }
-          }} 
+            '&:hover': { color: 'primary.main' },
+          }}
         />
       ),
     },
@@ -209,7 +215,7 @@ const PacientesList: React.FC = () => {
         <Box>
           <IconButton
             size="small"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleEdit(row);
             }}
@@ -220,7 +226,7 @@ const PacientesList: React.FC = () => {
           </IconButton>
           <IconButton
             size="small"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleDelete(row);
             }}
@@ -237,7 +243,12 @@ const PacientesList: React.FC = () => {
   if (loading) {
     return (
       <Box>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
+        >
           <Box>
             <Typography variant="h4" component="h1" gutterBottom>
               Pacientes
@@ -265,15 +276,20 @@ const PacientesList: React.FC = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
             Pacientes
-            <Chip 
-              label="API Real" 
-              color="success" 
-              size="small" 
-              sx={{ ml: 2 }} 
+            <Chip
+              label="API Real"
+              color="success"
+              size="small"
+              sx={{ ml: 2 }}
             />
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -302,8 +318,8 @@ const PacientesList: React.FC = () => {
       <Card>
         <CardContent>
           {error && (
-            <Alert 
-              severity="error" 
+            <Alert
+              severity="error"
               sx={{ mb: 2 }}
               action={
                 <Button color="inherit" size="small" onClick={clearError}>
@@ -314,7 +330,7 @@ const PacientesList: React.FC = () => {
               {error}
             </Alert>
           )}
-          
+
           <Box mb={2}>
             <TextField
               fullWidth
@@ -336,7 +352,11 @@ const PacientesList: React.FC = () => {
             columns={columns}
             data={pacientes}
             keyField="id"
-            emptyMessage={searchTerm ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
+            emptyMessage={
+              searchTerm
+                ? 'Nenhum paciente encontrado'
+                : 'Nenhum paciente cadastrado'
+            }
           />
 
           <TablePagination
@@ -348,7 +368,9 @@ const PacientesList: React.FC = () => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             labelRowsPerPage="Pacientes por página:"
-            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`}
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+            }
           />
         </CardContent>
       </Card>

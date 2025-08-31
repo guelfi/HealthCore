@@ -25,10 +25,7 @@ import {
   Assignment as ExameIcon,
   Visibility,
 } from '@mui/icons-material';
-import {
-  useExames,
-  usePacientes,
-} from '../hooks';
+import { useExames, usePacientes } from '../hooks';
 import type { Exame } from '../../domain/entities/Exame';
 import type { Paciente } from '../../domain/entities/Paciente';
 import { ModalidadeDicomLabels } from '../../domain/enums/ModalidadeDicom';
@@ -36,7 +33,7 @@ import ExameForm from '../components/exames/ExameForm';
 import CustomPagination from '../components/common/CustomPagination';
 import {
   DeleteConfirmationDialog,
-  SuccessDialog
+  SuccessDialog,
 } from '../components/common/ConfirmationDialogs';
 import { useUIStore } from '../../application/stores/uiStore';
 
@@ -44,7 +41,7 @@ const ExamesPageTable: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { addNotification } = useUIStore();
-  
+
   // Hooks para exames e pacientes
   const {
     exames,
@@ -56,18 +53,18 @@ const ExamesPageTable: React.FC = () => {
     fetchExames,
     deleteExame,
   } = useExames();
-  
-  const {
-    pacientes: allPacientes,
-    fetchPacientes,
-  } = usePacientes();
+
+  const { pacientes: allPacientes, fetchPacientes } = usePacientes();
 
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedExame, setSelectedExame] = useState<Exame | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
+  const [successMessage, setSuccessMessage] = useState({
+    title: '',
+    message: '',
+  });
   const [saving, setSaving] = useState(false);
   const [pageSize] = useState(7);
 
@@ -118,14 +115,16 @@ const ExamesPageTable: React.FC = () => {
 
   const handleDelete = async () => {
     if (!selectedExame) return;
-    
+
     setSaving(true);
     try {
       await deleteExame(selectedExame.id);
-      const pacienteNome = allPacientes.find(p => p.id === selectedExame.pacienteId)?.nome || 'paciente';
+      const pacienteNome =
+        allPacientes.find(p => p.id === selectedExame.pacienteId)?.nome ||
+        'paciente';
       setSuccessMessage({
         title: 'Sucesso!',
-        message: `Exame de ${pacienteNome} foi excluído com sucesso.`
+        message: `Exame de ${pacienteNome} foi excluído com sucesso.`,
       });
       setShowDeleteDialog(false);
       handleCloseDialog(); // Fechar o dialog principal de edição
@@ -155,7 +154,11 @@ const ExamesPageTable: React.FC = () => {
         <Typography variant="h4" component="h1">
           Gestão de Exames
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ display: { xs: 'none', md: 'block' } }}
+        >
           Cadastro e manutenção de exames médicos
         </Typography>
       </Box>
@@ -171,12 +174,14 @@ const ExamesPageTable: React.FC = () => {
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
         <CardContent sx={{ p: 3 }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3 
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+            }}
+          >
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -185,13 +190,14 @@ const ExamesPageTable: React.FC = () => {
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                }
+                  background:
+                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                },
               }}
             >
               Adicionar Exame
             </Button>
-            
+
             <CustomPagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -211,52 +217,108 @@ const ExamesPageTable: React.FC = () => {
 
           {/* Tabela de Dados */}
           {!loading && (
-            <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
+            <TableContainer
+              component={Paper}
+              sx={{
+                boxShadow: 'none',
+                border: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
               <Table size="small">
                 <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                   <TableRow>
-                    <TableCell align="center" sx={{ width: 50, py: 1 }}></TableCell>
-                    <TableCell sx={{ py: 1 }}><strong>Paciente</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}><strong>Modalidade</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' }, py: 1 }}><strong>Descrição</strong></TableCell>
-                    <TableCell sx={{ py: 1 }}><strong>Data do Exame</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}><strong>Cadastrado em</strong></TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{ width: 50, py: 1 }}
+                    ></TableCell>
+                    <TableCell sx={{ py: 1 }}>
+                      <strong>Paciente</strong>
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}
+                    >
+                      <strong>Modalidade</strong>
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', lg: 'table-cell' }, py: 1 }}
+                    >
+                      <strong>Descrição</strong>
+                    </TableCell>
+                    <TableCell sx={{ py: 1 }}>
+                      <strong>Data do Exame</strong>
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}
+                    >
+                      <strong>Cadastrado em</strong>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginatedData.map((exame) => (
-                    <TableRow 
+                  {paginatedData.map(exame => (
+                    <TableRow
                       key={exame.id}
                       onClick={() => handleRowClick(exame)}
-                      sx={{ 
+                      sx={{
                         cursor: 'pointer',
                         height: 35,
-                        '&:hover': { 
-                          backgroundColor: 'rgba(102, 126, 234, 0.04)' 
-                        }
+                        '&:hover': {
+                          backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                        },
                       }}
                     >
                       <TableCell align="center" sx={{ py: '1px' }}>
-                        <Visibility 
-                          color="action" 
-                          sx={{ 
+                        <Visibility
+                          color="action"
+                          sx={{
                             fontSize: '1.1rem',
                             cursor: 'pointer',
-                            '&:hover': { color: 'primary.main' }
-                          }} 
+                            '&:hover': { color: 'primary.main' },
+                          }}
                         />
                       </TableCell>
-                      <TableCell sx={{ py: '1px' }}>{getPacienteName(exame.pacienteId)}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}>{ModalidadeDicomLabels[exame.modalidade] || exame.modalidade}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' }, py: '1px' }}>{exame.descricao || '-'}</TableCell>
-                      <TableCell sx={{ py: '1px' }}>{new Date(exame.dataExame).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}>{new Date(exame.createdAt).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell sx={{ py: '1px' }}>
+                        {getPacienteName(exame.pacienteId)}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          display: { xs: 'none', md: 'table-cell' },
+                          py: '1px',
+                        }}
+                      >
+                        {ModalidadeDicomLabels[exame.modalidade] ||
+                          exame.modalidade}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          display: { xs: 'none', lg: 'table-cell' },
+                          py: '1px',
+                        }}
+                      >
+                        {exame.descricao || '-'}
+                      </TableCell>
+                      <TableCell sx={{ py: '1px' }}>
+                        {new Date(exame.dataExame).toLocaleDateString('pt-BR')}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          display: { xs: 'none', md: 'table-cell' },
+                          py: '1px',
+                        }}
+                      >
+                        {new Date(exame.createdAt).toLocaleDateString('pt-BR')}
+                      </TableCell>
                     </TableRow>
                   ))}
                   {paginatedData.length === 0 && !loading && (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
-                        <Typography variant="body1" color="text.secondary" sx={{ py: 4 }}>
+                        <Typography
+                          variant="body1"
+                          color="text.secondary"
+                          sx={{ py: 4 }}
+                        >
                           Nenhum exame encontrado
                         </Typography>
                       </TableCell>
@@ -270,8 +332,8 @@ const ExamesPageTable: React.FC = () => {
       </Card>
 
       {/* Dialog de Manutenção */}
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth={false}
         fullWidth
@@ -280,27 +342,31 @@ const ExamesPageTable: React.FC = () => {
             width: { xs: '95vw', sm: '550px' },
             maxWidth: '550px',
             margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' }
-          }
+            minHeight: { xs: 'auto', sm: 'auto' },
+          },
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
           <ExameIcon />
           {dialogMode === 'add' ? 'Adicionar Exame' : 'Editar Exame'}
         </DialogTitle>
-        
-        <DialogContent sx={{ 
-          pt: 4.625, 
-          px: 3, 
-          pb: 2,
-          position: 'relative'
-        }}>
+
+        <DialogContent
+          sx={{
+            pt: 4.625,
+            px: 3,
+            pb: 2,
+            position: 'relative',
+          }}
+        >
           {saving && (
             <Box
               sx={{
@@ -313,7 +379,7 @@ const ExamesPageTable: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                zIndex: 1000
+                zIndex: 1000,
               }}
             >
               <CircularProgress />
@@ -324,7 +390,11 @@ const ExamesPageTable: React.FC = () => {
             initialData={selectedExame}
             onSaveSuccess={handleSaveSuccess}
             onCancel={handleCloseDialog}
-            onDelete={dialogMode === 'edit' && selectedExame ? () => setShowDeleteDialog(true) : undefined}
+            onDelete={
+              dialogMode === 'edit' && selectedExame
+                ? () => setShowDeleteDialog(true)
+                : undefined
+            }
           />
         </DialogContent>
       </Dialog>
@@ -334,7 +404,11 @@ const ExamesPageTable: React.FC = () => {
         open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}
-        itemName={selectedExame ? `exame de ${allPacientes.find((p: Paciente) => p.id === selectedExame.pacienteId)?.nome || 'paciente'}` : ''}
+        itemName={
+          selectedExame
+            ? `exame de ${allPacientes.find((p: Paciente) => p.id === selectedExame.pacienteId)?.nome || 'paciente'}`
+            : ''
+        }
         itemType="o"
         loading={saving}
       />

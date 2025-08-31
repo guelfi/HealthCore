@@ -85,7 +85,11 @@ const UsuariosPageTable: React.FC = () => {
         <Typography variant="h4" component="h1">
           Gestão de Usuários
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ display: { xs: 'none', md: 'block' } }}
+        >
           Administração de usuários e perfis do sistema
         </Typography>
       </Box>
@@ -94,12 +98,14 @@ const UsuariosPageTable: React.FC = () => {
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
         <CardContent sx={{ p: 3 }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+            }}
+          >
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -107,15 +113,20 @@ const UsuariosPageTable: React.FC = () => {
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                }
+                  background:
+                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                },
               }}
             >
               Adicionar Usuário
             </Button>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+              >
                 Total: {usuarios.length}
               </Typography>
               <Pagination
@@ -129,42 +140,64 @@ const UsuariosPageTable: React.FC = () => {
           </Box>
 
           {/* Tabela de Dados */}
-          <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', maxHeight: 450 }}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              boxShadow: 'none',
+              border: '1px solid',
+              borderColor: 'divider',
+              maxHeight: 450,
+            }}
+          >
             <Table size="small">
               <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                 <TableRow>
                   <TableCell align="center" sx={{ width: 50 }}></TableCell>
-                  <TableCell><strong>Nome</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Perfil</strong></TableCell>
-                  <TableCell><strong>Status</strong></TableCell>
-                  <TableCell><strong>Cadastrado</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Atualizado</strong></TableCell>
+                  <TableCell>
+                    <strong>Nome</strong>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <strong>Perfil</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Status</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Cadastrado</strong>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <strong>Atualizado</strong>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedData.map((usuario) => (
+                {paginatedData.map(usuario => (
                   <TableRow
                     key={usuario.id}
                     onClick={() => handleRowClick(usuario)}
                     sx={{
                       cursor: 'pointer',
                       '&:hover': {
-                        backgroundColor: 'rgba(102, 126, 234, 0.04)'
-                      }
+                        backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                      },
                     }}
                   >
                     <TableCell align="center">
-                      <Visibility 
-                        color="action" 
-                        sx={{ 
+                      <Visibility
+                        color="action"
+                        sx={{
                           fontSize: '1.2rem',
                           cursor: 'pointer',
-                          '&:hover': { color: 'primary.main' }
-                        }} 
+                          '&:hover': { color: 'primary.main' },
+                        }}
                       />
                     </TableCell>
                     <TableCell>{usuario.username}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{profileLabels[usuario.role]}</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {profileLabels[usuario.role]}
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={usuario.isActive ? 'Ativo' : 'Inativo'}
@@ -173,8 +206,22 @@ const UsuariosPageTable: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>{usuario.createdAt ? new Date(usuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{usuario.updatedAt ? new Date(usuario.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
+                    <TableCell>
+                      {usuario.createdAt
+                        ? new Date(usuario.createdAt).toLocaleDateString(
+                            'pt-BR'
+                          )
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {usuario.updatedAt
+                        ? new Date(usuario.updatedAt).toLocaleDateString(
+                            'pt-BR'
+                          )
+                        : 'N/A'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -193,26 +240,30 @@ const UsuariosPageTable: React.FC = () => {
             width: { xs: '95vw', sm: '500px' },
             maxWidth: '500px',
             margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' }
-          }
+            minHeight: { xs: 'auto', sm: 'auto' },
+          },
         }}
       >
-        <DialogTitle sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
           <UsuarioIcon />
           {dialogMode === 'add' ? 'Adicionar Usuário' : 'Editar Usuário'}
         </DialogTitle>
 
-        <DialogContent sx={{ 
-          pt: 4, 
-          px: 3, 
-          pb: 2
-        }}>
+        <DialogContent
+          sx={{
+            pt: 4,
+            px: 3,
+            pb: 2,
+          }}
+        >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField
               fullWidth
@@ -252,7 +303,11 @@ const UsuariosPageTable: React.FC = () => {
                 type="password"
                 variant="outlined"
                 size="small"
-                placeholder={dialogMode === 'edit' ? 'Deixe em branco para manter atual' : ''}
+                placeholder={
+                  dialogMode === 'edit'
+                    ? 'Deixe em branco para manter atual'
+                    : ''
+                }
               />
               <TextField
                 fullWidth
@@ -263,12 +318,14 @@ const UsuariosPageTable: React.FC = () => {
               />
             </Box>
             {selectedUsuario && (
-              <Box sx={{
-                display: 'flex',
-                gap: 0.5,
-                flexWrap: 'wrap',
-                mt: 0.5
-              }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 0.5,
+                  flexWrap: 'wrap',
+                  mt: 0.5,
+                }}
+              >
                 <Chip
                   label={`ID: ${selectedUsuario.id}`}
                   variant="outlined"
@@ -337,7 +394,7 @@ const UsuariosPageTable: React.FC = () => {
               '&:hover': {
                 background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
               },
-              fontSize: '0.75rem'
+              fontSize: '0.75rem',
             }}
           >
             {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}

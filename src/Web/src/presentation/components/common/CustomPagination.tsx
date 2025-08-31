@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Button,
-  useTheme,
-} from '@mui/material';
+import { Box, Typography, IconButton, Button, useTheme } from '@mui/material';
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,19 +22,19 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
   totalItems,
   itemsPerPage,
   onPageChange,
-  size = 'medium'
+  size = 'medium',
 }) => {
   const theme = useTheme();
-  
+
   // Calcular o range de itens da página atual
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-  
+
   // Gerar array de páginas para mostrar
   const getVisiblePages = () => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5; // Reduzido para mostrar menos páginas
-    
+
     if (totalPages <= maxVisiblePages) {
       // Se temos poucas páginas, mostrar todas
       for (let i = 1; i <= totalPages; i++) {
@@ -71,36 +65,39 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
-  
+
   const visiblePages = getVisiblePages();
-  
-  const buttonSize = size === 'small' ? 'small' : size === 'large' ? 'large' : 'medium';
+
+  const buttonSize =
+    size === 'small' ? 'small' : size === 'large' ? 'large' : 'medium';
   const iconSize = size === 'small' ? 'small' : 'medium';
-  
+
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: 1,
-      flexWrap: 'wrap',
-      justifyContent: 'center'
-    }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}
+    >
       {/* Informação de total */}
-      <Typography 
-        variant={size === 'small' ? 'caption' : 'body2'} 
+      <Typography
+        variant={size === 'small' ? 'caption' : 'body2'}
         color="text.secondary"
-        sx={{ 
+        sx={{
           mr: 2,
           display: { xs: 'none', sm: 'block' },
-          minWidth: 'fit-content'
+          minWidth: 'fit-content',
         }}
       >
         Total: {startItem}-{endItem}/{totalItems}
       </Typography>
-      
+
       {/* Navegação */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         {/* Primeira página */}
@@ -108,54 +105,54 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
           size={buttonSize}
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
-          sx={{ 
+          sx={{
             color: currentPage === 1 ? 'text.disabled' : 'primary.main',
             '&:hover': {
               backgroundColor: 'primary.light',
-              color: 'primary.contrastText'
-            }
+              color: 'primary.contrastText',
+            },
           }}
         >
           <FirstPage fontSize={iconSize} />
         </IconButton>
-        
+
         {/* Página anterior */}
         <IconButton
           size={buttonSize}
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          sx={{ 
+          sx={{
             color: currentPage === 1 ? 'text.disabled' : 'primary.main',
             '&:hover': {
               backgroundColor: 'primary.light',
-              color: 'primary.contrastText'
-            }
+              color: 'primary.contrastText',
+            },
           }}
         >
           <ChevronLeft fontSize={iconSize} />
         </IconButton>
-        
+
         {/* Números das páginas */}
         {visiblePages.map((page, index) => {
           if (page === '...') {
             return (
-              <Typography 
+              <Typography
                 key={`ellipsis-${index}`}
-                variant="body2" 
-                sx={{ 
-                  px: 1, 
+                variant="body2"
+                sx={{
+                  px: 1,
                   color: 'text.secondary',
-                  userSelect: 'none'
+                  userSelect: 'none',
                 }}
               >
                 ...
               </Typography>
             );
           }
-          
+
           const pageNumber = page as number;
           const isCurrentPage = pageNumber === currentPage;
-          
+
           return (
             <Button
               key={pageNumber}
@@ -170,43 +167,49 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
                 backgroundColor: isCurrentPage ? 'primary.main' : 'transparent',
                 color: isCurrentPage ? 'primary.contrastText' : 'text.primary',
                 '&:hover': {
-                  backgroundColor: isCurrentPage ? 'primary.dark' : 'primary.light',
-                  color: isCurrentPage ? 'primary.contrastText' : 'primary.main'
-                }
+                  backgroundColor: isCurrentPage
+                    ? 'primary.dark'
+                    : 'primary.light',
+                  color: isCurrentPage
+                    ? 'primary.contrastText'
+                    : 'primary.main',
+                },
               }}
             >
               {pageNumber}
             </Button>
           );
         })}
-        
+
         {/* Próxima página */}
         <IconButton
           size={buttonSize}
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          sx={{ 
-            color: currentPage === totalPages ? 'text.disabled' : 'primary.main',
+          sx={{
+            color:
+              currentPage === totalPages ? 'text.disabled' : 'primary.main',
             '&:hover': {
               backgroundColor: 'primary.light',
-              color: 'primary.contrastText'
-            }
+              color: 'primary.contrastText',
+            },
           }}
         >
           <ChevronRight fontSize={iconSize} />
         </IconButton>
-        
+
         {/* Última página */}
         <IconButton
           size={buttonSize}
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
-          sx={{ 
-            color: currentPage === totalPages ? 'text.disabled' : 'primary.main',
+          sx={{
+            color:
+              currentPage === totalPages ? 'text.disabled' : 'primary.main',
             '&:hover': {
               backgroundColor: 'primary.light',
-              color: 'primary.contrastText'
-            }
+              color: 'primary.contrastText',
+            },
           }}
         >
           <LastPage fontSize={iconSize} />

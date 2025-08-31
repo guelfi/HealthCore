@@ -59,8 +59,8 @@ class MetricsService {
     } catch (error: any) {
       console.error('Erro ao buscar métricas administrativas:', error);
       throw new Error(
-        error.response?.data?.message || 
-        'Falha ao carregar métricas administrativas'
+        error.response?.data?.message ||
+          'Falha ao carregar métricas administrativas'
       );
     }
   }
@@ -75,8 +75,7 @@ class MetricsService {
     } catch (error: any) {
       console.error('Erro ao buscar métricas do médico:', error);
       throw new Error(
-        error.response?.data?.message || 
-        'Falha ao carregar métricas do médico'
+        error.response?.data?.message || 'Falha ao carregar métricas do médico'
       );
     }
   }
@@ -99,8 +98,9 @@ class MetricsService {
    */
   private adaptAdminMetrics(data: AdminMetricsDto): DashboardMetrics {
     // Calcular últimos 30 dias baseado nos dados de crescimento
-    const ultimoMes = data.crescimentoBaseDados[data.crescimentoBaseDados.length - 1];
-    
+    const ultimoMes =
+      data.crescimentoBaseDados[data.crescimentoBaseDados.length - 1];
+
     return {
       usuarios: {
         totalUsuarios: data.totalUsuarios,
@@ -109,7 +109,8 @@ class MetricsService {
           medicos: data.totalMedicos,
         },
         usuariosAtivos: data.totalMedicos + data.totalAdministradores, // Aproximação
-        usuariosInativos: data.totalUsuarios - (data.totalMedicos + data.totalAdministradores),
+        usuariosInativos:
+          data.totalUsuarios - (data.totalMedicos + data.totalAdministradores),
       },
       pacientes: {
         totalPacientes: data.totalPacientes,
@@ -122,7 +123,9 @@ class MetricsService {
       },
       exames: {
         totalExames: data.totalExames,
-        examesPorModalidade: this.adaptExamesPorModalidade(data.examesPorPeriodo),
+        examesPorModalidade: this.adaptExamesPorModalidade(
+          data.examesPorPeriodo
+        ),
         examesPorPeriodo: data.examesPorPeriodo.map(item => ({
           periodo: this.formatPeriodo(item.periodo),
           total: item.quantidade,
@@ -130,8 +133,14 @@ class MetricsService {
         examesUltimos30Dias: ultimoMes?.novosExames || 0,
       },
       crescimento: {
-        usuarios: this.garantir6MesesDados(data.crescimentoBaseDados, 'usuarios'),
-        pacientes: this.garantir6MesesDados(data.crescimentoBaseDados, 'pacientes'),
+        usuarios: this.garantir6MesesDados(
+          data.crescimentoBaseDados,
+          'usuarios'
+        ),
+        pacientes: this.garantir6MesesDados(
+          data.crescimentoBaseDados,
+          'pacientes'
+        ),
         exames: this.garantir6MesesDados(data.crescimentoBaseDados, 'exames'),
       },
     };
@@ -143,7 +152,7 @@ class MetricsService {
   private adaptMedicoMetrics(data: MedicoMetricsDto): DashboardMetrics {
     // const agora = new Date(); // Removido: não utilizado
     const examesEsteMes = this.calcularExamesEsteMes(data.examesPorPaciente);
-    
+
     return {
       usuarios: {
         totalUsuarios: 0, // Não aplicável para médicos
@@ -156,11 +165,13 @@ class MetricsService {
       },
       pacientes: {
         totalPacientes: data.numeroPacientes,
-        pacientesPorMedico: [{
-          medicoId: 'current-medico',
-          medicoUsername: 'Você',
-          totalPacientes: data.numeroPacientes,
-        }],
+        pacientesPorMedico: [
+          {
+            medicoId: 'current-medico',
+            medicoUsername: 'Você',
+            totalPacientes: data.numeroPacientes,
+          },
+        ],
         novosUltimos30Dias: Math.floor(data.numeroPacientes * 0.3), // Aproximação
       },
       exames: {
@@ -174,7 +185,10 @@ class MetricsService {
       },
       crescimento: {
         usuarios: this.gerarCrescimentoBasico('usuarios', 1),
-        pacientes: this.gerarCrescimentoBasico('pacientes', data.numeroPacientes),
+        pacientes: this.gerarCrescimentoBasico(
+          'pacientes',
+          data.numeroPacientes
+        ),
         exames: this.gerarCrescimentoBasico('exames', data.totalExames),
       },
     };
@@ -194,8 +208,18 @@ class MetricsService {
     if (periodo.includes('-')) {
       const [, mes] = periodo.split('-'); // ano não utilizado
       const meses = [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro',
       ];
       return meses[parseInt(mes) - 1] || periodo;
     }
@@ -205,64 +229,101 @@ class MetricsService {
   /**
    * Adapta dados de exames por período para modalidades (aproximação)
    */
-  private adaptExamesPorModalidade(examesPorPeriodo: ExamesPorPeriodoDto[]): Array<{modalidade: string; total: number}> {
-    const totalExames = examesPorPeriodo.reduce((sum, item) => sum + item.quantidade, 0);
-    
+  private adaptExamesPorModalidade(
+    examesPorPeriodo: ExamesPorPeriodoDto[]
+  ): Array<{ modalidade: string; total: number }> {
+    const totalExames = examesPorPeriodo.reduce(
+      (sum, item) => sum + item.quantidade,
+      0
+    );
+
     // Distribuição aproximada das modalidades DICOM
     const modalidades = ['CT', 'MR', 'DX', 'US', 'MG'];
-    return modalidades.map((modalidade, index) => ({
-      modalidade,
-      total: Math.floor(totalExames * (0.3 - index * 0.05)), // Distribuição decrescente
-    })).filter(item => item.total > 0);
+    return modalidades
+      .map((modalidade, index) => ({
+        modalidade,
+        total: Math.floor(totalExames * (0.3 - index * 0.05)), // Distribuição decrescente
+      }))
+      .filter(item => item.total > 0);
   }
 
   /**
    * Calcula exames realizados no mês atual (aproximação)
    */
-  private calcularExamesEsteMes(examesPorPaciente: ExamesPorPacienteDto[]): number {
-    const totalExames = examesPorPaciente.reduce((sum, item) => sum + item.exames, 0);
+  private calcularExamesEsteMes(
+    examesPorPaciente: ExamesPorPacienteDto[]
+  ): number {
+    const totalExames = examesPorPaciente.reduce(
+      (sum, item) => sum + item.exames,
+      0
+    );
     return Math.floor(totalExames * 0.4); // Aproximação: 40% dos exames no mês atual
   }
 
   /**
    * Gera períodos simulados para médicos (últimos 6 meses, mês atual primeiro)
    */
-  private gerarPeriodosMedico(totalExames: number): Array<{periodo: string; total: number}> {
+  private gerarPeriodosMedico(
+    totalExames: number
+  ): Array<{ periodo: string; total: number }> {
     const meses = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
-    
+
     const agora = new Date();
     const resultado = [];
-    
+
     // Gerar últimos 6 meses, começando pelo atual
     for (let i = 0; i < 6; i++) {
       const data = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
       const mesIndex = data.getMonth();
-      const distribuicao = 0.05 + (Math.random() * 0.15); // Distribuição aleatória entre 5% e 20%
-      
+      const distribuicao = 0.05 + Math.random() * 0.15; // Distribuição aleatória entre 5% e 20%
+
       resultado.push({
         periodo: meses[mesIndex],
         total: Math.floor(totalExames * distribuicao),
       });
     }
-    
+
     return resultado;
   }
 
   /**
    * Garante que sempre tenhamos 6 meses de dados, preenchendo meses faltantes
    */
-  private garantir6MesesDados(crescimentoBaseDados: CrescimentoDto[], tipo: 'usuarios' | 'pacientes' | 'exames'): Array<{mes: string; total: number | string}> {
+  private garantir6MesesDados(
+    crescimentoBaseDados: CrescimentoDto[],
+    tipo: 'usuarios' | 'pacientes' | 'exames'
+  ): Array<{ mes: string; total: number | string }> {
     const meses = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
-    
+
     const agora = new Date();
     const resultado = [];
-    
+
     // Mapear dados do backend por período
     const dadosBackend = new Map<string, number>();
     crescimentoBaseDados.forEach(item => {
@@ -281,55 +342,71 @@ class MetricsService {
       }
       dadosBackend.set(mesFormatado, valor);
     });
-    
+
     // Gerar últimos 6 meses, começando pelo atual
     for (let i = 0; i < 6; i++) {
       const data = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
       const mesIndex = data.getMonth();
       const mesNome = meses[mesIndex];
-      
+
       // Verificar se temos dados para este mês
       const valorBackend = dadosBackend.get(mesNome);
-      
+
       resultado.push({
         mes: mesNome,
-        total: valorBackend !== undefined ? valorBackend : 'Sem informações do período'
+        total:
+          valorBackend !== undefined
+            ? valorBackend
+            : 'Sem informações do período',
       });
     }
-    
+
     return resultado;
   }
 
   /**
    * Gera dados básicos de crescimento para médicos (últimos 6 meses, mês atual primeiro)
    */
-  private gerarCrescimentoBasico(tipo: string, total: number): Array<{mes: string; total: number}> {
+  private gerarCrescimentoBasico(
+    tipo: string,
+    total: number
+  ): Array<{ mes: string; total: number }> {
     const meses = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
-    
+
     const agora = new Date();
     const resultado = [];
-    
+
     // Gerar últimos 6 meses, começando pelo atual
     for (let i = 0; i < 6; i++) {
       const data = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
       const mesIndex = data.getMonth();
-      
+
       let distribuicao;
       if (tipo === 'usuarios') {
-        distribuicao = 0.08 + (Math.random() * 0.04); // Entre 8% e 12% para usuários
+        distribuicao = 0.08 + Math.random() * 0.04; // Entre 8% e 12% para usuários
       } else {
-        distribuicao = 0.05 + (Math.random() * 0.10); // Entre 5% e 15% para pacientes/exames
+        distribuicao = 0.05 + Math.random() * 0.1; // Entre 5% e 15% para pacientes/exames
       }
-      
+
       resultado.push({
         mes: meses[mesIndex],
         total: Math.floor(total * distribuicao),
       });
     }
-    
+
     return resultado;
   }
 }

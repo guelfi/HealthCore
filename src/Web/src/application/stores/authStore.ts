@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Usuario, LoginDto, AuthResponse } from '../../domain/entities/Usuario';
+import type {
+  Usuario,
+  LoginDto,
+  AuthResponse,
+} from '../../domain/entities/Usuario';
 import { UserProfile } from '../../domain/enums/UserProfile';
 import { apiClient } from '../../infrastructure/api/client';
 
@@ -26,8 +30,6 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
-
-
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
@@ -42,11 +44,11 @@ export const useAuthStore = create<AuthStore>()(
       // Actions
       login: async (credentials: LoginDto) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await apiClient.post('/auth/login', credentials);
           const authData: AuthResponse = response.data;
-          
+
           // Converter dados do backend para formato frontend
           const user: Usuario = {
             id: authData.user.id,
@@ -54,11 +56,11 @@ export const useAuthStore = create<AuthStore>()(
             role: authData.user.role as UserProfile, // Converter número para UserProfile
             isActive: authData.user.isActive,
           };
-          
-          // const expiresAt = typeof authData.expiresAt === 'string' 
-          //   ? new Date(authData.expiresAt) 
+
+          // const expiresAt = typeof authData.expiresAt === 'string'
+          //   ? new Date(authData.expiresAt)
           //   : authData.expiresAt; // Removido: não utilizado
-          
+
           set({
             user,
             token: authData.token,
@@ -68,11 +70,12 @@ export const useAuthStore = create<AuthStore>()(
             error: null,
           });
         } catch (error: any) {
-          const errorMessage = error.response?.data?.message || 
-                              error.response?.data?.error || 
-                              error.message || 
-                              'Erro de autenticação';
-          
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            error.message ||
+            'Erro de autenticação';
+
           set({
             isLoading: false,
             error: errorMessage,
@@ -81,14 +84,14 @@ export const useAuthStore = create<AuthStore>()(
             refreshToken: null,
             isAuthenticated: false,
           });
-          
+
           throw new Error(errorMessage);
         }
       },
 
       logout: async () => {
         const { token } = get();
-        
+
         try {
           if (token) {
             // Fazer logout na API para invalidar o token
@@ -111,20 +114,20 @@ export const useAuthStore = create<AuthStore>()(
 
       refreshAuth: async () => {
         const { refreshToken } = get();
-        
+
         if (!refreshToken) {
           throw new Error('Token de atualização não disponível');
         }
-        
+
         set({ isLoading: true });
-        
+
         try {
           const response = await apiClient.post('/auth/refresh', {
-            refreshToken
+            refreshToken,
           });
-          
+
           const authData = response.data;
-          
+
           set({
             token: authData.token,
             refreshToken: authData.refreshToken || refreshToken, // Manter o mesmo se não retornar um novo
@@ -132,14 +135,14 @@ export const useAuthStore = create<AuthStore>()(
             error: null,
           });
         } catch (error: any) {
-          const errorMessage = error.response?.data?.message || 
-                              'Falha ao renovar sessão';
-          
+          const errorMessage =
+            error.response?.data?.message || 'Falha ao renovar sessão';
+
           set({
             isLoading: false,
             error: errorMessage,
           });
-          
+
           // Se falhar o refresh, fazer logout
           get().logout();
           throw new Error(errorMessage);
@@ -147,19 +150,19 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       setUser: (user: Usuario) => set({ user }),
-      
-      setTokens: (token: string, refreshToken: string) => 
+
+      setTokens: (token: string, refreshToken: string) =>
         set({ token, refreshToken }),
-      
+
       setLoading: (loading: boolean) => set({ isLoading: loading }),
-      
+
       setError: (error: string | null) => set({ error }),
-      
+
       clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-store',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         token: state.token,
         refreshToken: state.refreshToken,

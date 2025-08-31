@@ -26,24 +26,20 @@ import { useAutoDebugger } from '../../utils/AutoDebugger';
 
 const MeuComponente: React.FC = () => {
   const debug = useAutoDebugger('MeuComponente');
-  
+
   React.useEffect(() => {
     debug.info('Componente inicializado');
   }, []);
-  
+
   const handleClick = () => {
     debug.success('Botão clicado com sucesso!');
   };
-  
+
   const handleError = (error: any) => {
     debug.error('Erro ao processar:', error);
   };
-  
-  return (
-    <button onClick={handleClick}>
-      Clique aqui
-    </button>
-  );
+
+  return <button onClick={handleClick}>Clique aqui</button>;
 };
 ```
 
@@ -95,6 +91,7 @@ debug.debug('Estado interno:', { state });
 ## Atalhos de Teclado
 
 ### 🎹 **Ctrl + Alt + D** - Toggle AutoDebugger
+
 - **Funcionalidade**: Ativa/desativa o AutoDebugger em tempo de execução
 - **Feedback visual**: Toast notification colorido na tela
 - **Persistência**: Logs continuam sendo capturados mesmo quando oculto
@@ -102,6 +99,7 @@ debug.debug('Estado interno:', { state });
 - **Comportamento**: Inicia oculto por padrão para não interferir na UI
 
 ### Como usar:
+
 1. Abra sua aplicação no navegador
 2. Pressione **Ctrl + Alt + D** para mostrar o painel
 3. Pressione novamente para ocultar
@@ -123,12 +121,12 @@ import { useAutoDebugger } from '../../utils/AutoDebugger';
 const PacientesPageTable: React.FC = () => {
   const debug = useAutoDebugger('PacientesPageTable');
   const { pacientes, loading, error, fetchPacientes } = usePacientes();
-  
+
   React.useEffect(() => {
     debug.info('Componente inicializado');
     debug.debug('Estado inicial:', { pacientes: pacientes.length, loading, error });
   }, []);
-  
+
   React.useEffect(() => {
     debug.info('Pacientes atualizados:', {
       quantidade: pacientes.length,
@@ -137,7 +135,7 @@ const PacientesPageTable: React.FC = () => {
       primeiroPaciente: pacientes[0]?.nome || 'nenhum'
     });
   }, [pacientes, loading, error]);
-  
+
   const handleSave = async () => {
     try {
       debug.info('Iniciando salvamento...');
@@ -147,7 +145,7 @@ const PacientesPageTable: React.FC = () => {
       debug.error('Erro ao salvar paciente:', error);
     }
   };
-  
+
   return (
     // JSX do componente
     // 🎹 Use Ctrl + Alt + D para mostrar/esconder o painel de debug em tempo real!
@@ -156,6 +154,7 @@ const PacientesPageTable: React.FC = () => {
 ```
 
 ### 📝 **Dica de Uso em Tempo Real**:
+
 - Durante desenvolvimento: **Ctrl + Alt + D** para ativar
 - Testando fluxos: Veja logs em tempo real sem afetar o código
 - Debugging remoto: Compartilhe logs via Save button
@@ -166,6 +165,7 @@ const PacientesPageTable: React.FC = () => {
 Para habilitar o salvamento automático na pasta `/logs` do projeto:
 
 ### Windows
+
 ```bash
 # Navegar para a pasta logs
 cd logs
@@ -178,6 +178,7 @@ node save-log-endpoint.js
 ```
 
 ### Linux/macOS
+
 ```bash
 # Navegar para a pasta logs
 cd logs
@@ -190,6 +191,7 @@ chmod +x start-log-server.sh
 ```
 
 ### Como funciona
+
 1. O servidor roda em `http://localhost:3001`
 2. AutoDebugger tenta salvar logs automaticamente via servidor
 3. Se o servidor não estiver disponível, faz download manual
@@ -204,7 +206,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 <AutoDebugger enabled={isDevelopment}>
   <App />
-</AutoDebugger>
+</AutoDebugger>;
 ```
 
 ## Vantagens do AutoDebugger

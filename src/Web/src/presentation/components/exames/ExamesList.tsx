@@ -35,27 +35,21 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useExames, usePacientes } from '../../hooks';
 import type { Exame } from '../../../domain/entities/Exame';
-import { ModalidadeDicom, ModalidadeDicomLabels } from '../../../domain/enums/ModalidadeDicom';
+import {
+  ModalidadeDicom,
+  ModalidadeDicomLabels,
+} from '../../../domain/enums/ModalidadeDicom';
 import { useUIStore } from '../../../application/stores/uiStore';
 
 const ExamesList: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useUIStore();
-  
+
   // Hooks para exames e pacientes
-  const {
-    exames,
-    total,
-    loading,
-    error,
-    fetchExames,
-    deleteExame,
-  } = useExames();
-  
-  const {
-    pacientes: allPacientes,
-    fetchPacientes,
-  } = usePacientes();
+  const { exames, total, loading, error, fetchExames, deleteExame } =
+    useExames();
+
+  const { pacientes: allPacientes, fetchPacientes } = usePacientes();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [modalidadeFilter, setModalidadeFilter] = useState<string>('');
@@ -74,11 +68,11 @@ const ExamesList: React.FC = () => {
       page: page + 1,
       pageSize: rowsPerPage,
     };
-    
+
     if (modalidadeFilter) {
       filters.modalidade = modalidadeFilter;
     }
-    
+
     fetchExames(filters);
   }, [modalidadeFilter, page, rowsPerPage, fetchExames]);
 
@@ -108,13 +102,18 @@ const ExamesList: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   const getModalidadeColor = (modalidade: ModalidadeDicom) => {
-    const colors: Record<ModalidadeDicom, 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'> = {
+    const colors: Record<
+      ModalidadeDicom,
+      'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'
+    > = {
       [ModalidadeDicom.CR]: 'info',
       [ModalidadeDicom.CT]: 'primary',
       [ModalidadeDicom.DX]: 'warning',
@@ -159,7 +158,12 @@ const ExamesList: React.FC = () => {
         </Alert>
       )}
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
             Exames
@@ -201,7 +205,7 @@ const ExamesList: React.FC = () => {
                 label="Modalidade"
               >
                 <MenuItem value="">Todas</MenuItem>
-                {Object.values(ModalidadeDicom).map((modalidade) => (
+                {Object.values(ModalidadeDicom).map(modalidade => (
                   <MenuItem key={modalidade} value={modalidade}>
                     {modalidade} - {ModalidadeDicomLabels[modalidade]}
                   </MenuItem>
@@ -230,16 +234,16 @@ const ExamesList: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {exames.map((exame) => (
+                {exames.map(exame => (
                   <TableRow key={exame.id} hover sx={{ cursor: 'pointer' }}>
                     <TableCell align="center">
-                      <Visibility 
-                        color="action" 
-                        sx={{ 
+                      <Visibility
+                        color="action"
+                        sx={{
                           fontSize: '1.2rem',
                           cursor: 'pointer',
-                          '&:hover': { color: 'primary.main' }
-                        }} 
+                          '&:hover': { color: 'primary.main' },
+                        }}
                       />
                     </TableCell>
                     <TableCell>
@@ -248,10 +252,15 @@ const ExamesList: React.FC = () => {
                         {getPacienteName(exame.pacienteId)}
                       </Box>
                     </TableCell>
-                    <TableCell>{getPacienteDocumento(exame.pacienteId)}</TableCell>
+                    <TableCell>
+                      {getPacienteDocumento(exame.pacienteId)}
+                    </TableCell>
                     <TableCell>
                       <Chip
-                        label={ModalidadeDicomLabels[exame.modalidade] || exame.modalidade}
+                        label={
+                          ModalidadeDicomLabels[exame.modalidade] ||
+                          exame.modalidade
+                        }
                         color={getModalidadeColor(exame.modalidade)}
                         size="small"
                       />

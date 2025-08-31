@@ -30,7 +30,11 @@ const MetricCard: React.FC<MetricCardProps> = ({
     return (
       <Card>
         <CardContent>
-          <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
             <Box>
               <Skeleton variant="text" width={120} height={24} />
               <Skeleton variant="text" width={80} height={40} />

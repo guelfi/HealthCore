@@ -87,7 +87,11 @@ const UsuariosPage: React.FC = () => {
         <Typography variant="h4" component="h1">
           Gestão de Usuários
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ display: { xs: 'none', md: 'block' } }}
+        >
           Administração de usuários e perfis do sistema
         </Typography>
       </Box>
@@ -96,12 +100,14 @@ const UsuariosPage: React.FC = () => {
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
         <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+            }}
+          >
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -109,8 +115,9 @@ const UsuariosPage: React.FC = () => {
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                }
+                  background:
+                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                },
               }}
             >
               Adicionar Usuário
@@ -135,16 +142,60 @@ const UsuariosPage: React.FC = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell align="center" sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', width: 50 }}></TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Nome de Usuário</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', display: { xs: 'none', md: 'table-cell' } }}>Perfil</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Status</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Cadastrado em</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', display: { xs: 'none', md: 'table-cell' } }}>Atualizado em</TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                      width: 50,
+                    }}
+                  ></TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Nome de Usuário
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                      display: { xs: 'none', md: 'table-cell' },
+                    }}
+                  >
+                    Perfil
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Status
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Cadastrado em
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                      display: { xs: 'none', md: 'table-cell' },
+                    }}
+                  >
+                    Atualizado em
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedData.map((usuario) => (
+                {paginatedData.map(usuario => (
                   <TableRow
                     key={usuario.id}
                     onClick={() => handleRowClick(usuario)}
@@ -156,17 +207,21 @@ const UsuariosPage: React.FC = () => {
                     }}
                   >
                     <TableCell align="center">
-                      <Visibility 
-                        color="action" 
-                        sx={{ 
+                      <Visibility
+                        color="action"
+                        sx={{
                           fontSize: '1.2rem',
                           cursor: 'pointer',
-                          '&:hover': { color: 'primary.main' }
-                        }} 
+                          '&:hover': { color: 'primary.main' },
+                        }}
                       />
                     </TableCell>
                     <TableCell>{usuario.username}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{profileLabels[usuario.role]}</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {profileLabels[usuario.role]}
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={usuario.isActive ? 'Ativo' : 'Inativo'}
@@ -175,8 +230,22 @@ const UsuariosPage: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>{usuario.createdAt ? new Date(usuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{usuario.updatedAt ? new Date(usuario.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
+                    <TableCell>
+                      {usuario.createdAt
+                        ? new Date(usuario.createdAt).toLocaleDateString(
+                            'pt-BR'
+                          )
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {usuario.updatedAt
+                        ? new Date(usuario.updatedAt).toLocaleDateString(
+                            'pt-BR'
+                          )
+                        : 'N/A'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -195,27 +264,38 @@ const UsuariosPage: React.FC = () => {
             width: { xs: '95vw', sm: '500px' },
             maxWidth: '500px',
             margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' }
-          }
+            minHeight: { xs: 'auto', sm: 'auto' },
+          },
         }}
       >
-        <DialogTitle sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
           <UsuarioIcon />
           {dialogMode === 'add' ? 'Adicionar Usuário' : 'Editar Usuário'}
         </DialogTitle>
 
-        <DialogContent sx={{
-          pt: 3,
-          px: 2,
-          pb: 1.5
-        }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 }, mt: 2 }}>
+        <DialogContent
+          sx={{
+            pt: 3,
+            px: 2,
+            pb: 1.5,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: { xs: 1.5, sm: 2 },
+              mt: 2,
+            }}
+          >
             <TextField
               fullWidth
               label="Nome de Usuário"
@@ -224,21 +304,26 @@ const UsuariosPage: React.FC = () => {
               size="small"
               sx={{
                 '& .MuiInputBase-root': {
-                  padding: '6px 8px'
+                  padding: '6px 8px',
                 },
                 '& .MuiInputBase-input': {
-                  padding: '6px 0'
-                }
+                  padding: '6px 0',
+                },
               }}
             />
-            <FormControl fullWidth variant="outlined" size="small" sx={{
-              '& .MuiInputBase-root': {
-                padding: '6px 8px'
-              },
-              '& .MuiSelect-select': {
-                padding: '6px 0'
-              }
-            }}>
+            <FormControl
+              fullWidth
+              variant="outlined"
+              size="small"
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '6px 8px',
+                },
+                '& .MuiSelect-select': {
+                  padding: '6px 0',
+                },
+              }}
+            >
               <InputLabel>Perfil</InputLabel>
               <Select
                 defaultValue={selectedUsuario?.role || UserProfile.MEDICO}
@@ -252,17 +337,22 @@ const UsuariosPage: React.FC = () => {
                 </MenuItem>
               </Select>
             </FormControl>
-            <FormControl fullWidth variant="outlined" size="small" sx={{
-              '& .MuiInputBase-root': {
-                padding: '6px 8px'
-              },
-              '& .MuiSelect-select': {
-                padding: '6px 0'
-              }
-            }}>
+            <FormControl
+              fullWidth
+              variant="outlined"
+              size="small"
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '6px 8px',
+                },
+                '& .MuiSelect-select': {
+                  padding: '6px 0',
+                },
+              }}
+            >
               <InputLabel>Status</InputLabel>
               <Select
-                defaultValue={selectedUsuario?.isActive ? "true" : "false"}
+                defaultValue={selectedUsuario?.isActive ? 'true' : 'false'}
                 label="Status"
               >
                 <MenuItem value="true">Ativo</MenuItem>
@@ -276,14 +366,18 @@ const UsuariosPage: React.FC = () => {
                 type="password"
                 variant="outlined"
                 size="small"
-                placeholder={dialogMode === 'edit' ? 'Deixe em branco para manter atual' : ''}
+                placeholder={
+                  dialogMode === 'edit'
+                    ? 'Deixe em branco para manter atual'
+                    : ''
+                }
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '6px 8px'
+                    padding: '6px 8px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '6px 0'
-                  }
+                    padding: '6px 0',
+                  },
                 }}
               />
               <TextField
@@ -294,21 +388,23 @@ const UsuariosPage: React.FC = () => {
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '6px 8px'
+                    padding: '6px 8px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '6px 0'
-                  }
+                    padding: '6px 0',
+                  },
                 }}
               />
             </Box>
             {selectedUsuario && (
-              <Box sx={{
-                display: 'flex',
-                gap: 0.5,
-                flexWrap: 'wrap',
-                mt: 0.5
-              }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 0.5,
+                  flexWrap: 'wrap',
+                  mt: 0.5,
+                }}
+              >
                 <Chip
                   label={`ID: ${selectedUsuario.id}`}
                   variant="outlined"
@@ -377,7 +473,7 @@ const UsuariosPage: React.FC = () => {
               '&:hover': {
                 background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
               },
-              fontSize: '0.75rem'
+              fontSize: '0.75rem',
             }}
           >
             {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}

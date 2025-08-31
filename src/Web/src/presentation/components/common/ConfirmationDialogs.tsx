@@ -29,7 +29,7 @@ const SlideTransition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>;
   },
-  ref: React.Ref<unknown>,
+  ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -55,25 +55,33 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   type = 'warning',
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
-  loading = false
+  loading = false,
 }) => {
   const theme = useTheme();
 
   const getIcon = () => {
     switch (type) {
-      case 'success': return <CheckCircle sx={{ color: '#4CAF50', fontSize: 48 }} />;
-      case 'error': return <Error sx={{ color: '#f44336', fontSize: 48 }} />;
-      case 'warning': return <Warning sx={{ color: '#ff9800', fontSize: 48 }} />;
-      default: return <Info sx={{ color: '#2196f3', fontSize: 48 }} />;
+      case 'success':
+        return <CheckCircle sx={{ color: '#4CAF50', fontSize: 48 }} />;
+      case 'error':
+        return <Error sx={{ color: '#f44336', fontSize: 48 }} />;
+      case 'warning':
+        return <Warning sx={{ color: '#ff9800', fontSize: 48 }} />;
+      default:
+        return <Info sx={{ color: '#2196f3', fontSize: 48 }} />;
     }
   };
 
   const getColors = () => {
     switch (type) {
-      case 'success': return { primary: '#4CAF50', light: '#E8F5E8' };
-      case 'error': return { primary: '#f44336', light: '#FFEBEE' };
-      case 'warning': return { primary: '#ff9800', light: '#FFF3E0' };
-      default: return { primary: '#2196f3', light: '#E3F2FD' };
+      case 'success':
+        return { primary: '#4CAF50', light: '#E8F5E8' };
+      case 'error':
+        return { primary: '#f44336', light: '#FFEBEE' };
+      case 'warning':
+        return { primary: '#ff9800', light: '#FFF3E0' };
+      default:
+        return { primary: '#2196f3', light: '#E3F2FD' };
     }
   };
 
@@ -91,38 +99,36 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           borderRadius: 3,
           overflow: 'visible',
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-        }
+        },
       }}
     >
       <DialogContent sx={{ p: 0 }}>
         <Card elevation={0} sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', p: 4 }}>
             {/* Ícone */}
-            <Box sx={{ mb: 2 }}>
-              {getIcon()}
-            </Box>
-            
+            <Box sx={{ mb: 2 }}>{getIcon()}</Box>
+
             {/* Título */}
-            <Typography 
-              variant="h5" 
-              component="h2" 
+            <Typography
+              variant="h5"
+              component="h2"
               gutterBottom
-              sx={{ 
+              sx={{
                 fontWeight: 600,
                 color: colors.primary,
-                mb: 1
+                mb: 1,
               }}
             >
               {title}
             </Typography>
-            
+
             {/* Mensagem */}
-            <Typography 
-              variant="body1" 
+            <Typography
+              variant="body1"
               color="text.secondary"
-              sx={{ 
+              sx={{
                 mb: 3,
-                lineHeight: 1.6
+                lineHeight: 1.6,
               }}
             >
               {message}
@@ -130,7 +136,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           </CardContent>
         </Card>
       </DialogContent>
-      
+
       <DialogActions sx={{ p: 3, gap: 1 }}>
         <Button
           onClick={onClose}
@@ -141,13 +147,13 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
             color: theme.palette.text.secondary,
             '&:hover': {
               borderColor: theme.palette.grey[400],
-              backgroundColor: theme.palette.grey[50]
-            }
+              backgroundColor: theme.palette.grey[50],
+            },
           }}
         >
           {cancelText}
         </Button>
-        
+
         <Button
           onClick={onConfirm}
           variant="contained"
@@ -156,8 +162,8 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
             backgroundColor: colors.primary,
             '&:hover': {
               backgroundColor: colors.primary,
-              filter: 'brightness(0.9)'
-            }
+              filter: 'brightness(0.9)',
+            },
           }}
         >
           {loading ? 'Processando...' : confirmText}
@@ -177,13 +183,15 @@ interface DeleteConfirmationDialogProps {
   loading?: boolean;
 }
 
-export const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
+export const DeleteConfirmationDialog: React.FC<
+  DeleteConfirmationDialogProps
+> = ({
   open,
   onClose,
   onConfirm,
   itemName,
   itemType = 'item',
-  loading = false
+  loading = false,
 }) => {
   return (
     <ConfirmationDialog
@@ -216,14 +224,14 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({
   title,
   message,
   autoClose = true,
-  autoCloseDelay = 2000
+  autoCloseDelay = 2000,
 }) => {
   React.useEffect(() => {
     if (open && autoClose) {
       const timer = setTimeout(() => {
         onClose();
       }, autoCloseDelay);
-      
+
       return () => clearTimeout(timer);
     }
   }, [open, autoClose, autoCloseDelay, onClose]);
@@ -239,50 +247,53 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({
           borderRadius: 3,
           overflow: 'visible',
           boxShadow: '0 8px 32px rgba(76, 175, 80, 0.2)',
-        }
+        },
       }}
     >
       <DialogContent sx={{ p: 0 }}>
-        <Card elevation={0} sx={{ borderRadius: 3, backgroundColor: '#E8F5E8' }}>
+        <Card
+          elevation={0}
+          sx={{ borderRadius: 3, backgroundColor: '#E8F5E8' }}
+        >
           <CardContent sx={{ textAlign: 'center', p: 4 }}>
             {/* Ícone de sucesso */}
             <Box sx={{ mb: 2 }}>
               <CheckCircle sx={{ color: '#4CAF50', fontSize: 64 }} />
             </Box>
-            
+
             {/* Título */}
-            <Typography 
-              variant="h5" 
-              component="h2" 
+            <Typography
+              variant="h5"
+              component="h2"
               gutterBottom
-              sx={{ 
+              sx={{
                 fontWeight: 600,
                 color: '#2E7D32',
-                mb: 1
+                mb: 1,
               }}
             >
               {title}
             </Typography>
-            
+
             {/* Mensagem */}
-            <Typography 
-              variant="body1" 
-              sx={{ 
+            <Typography
+              variant="body1"
+              sx={{
                 color: '#1B5E20',
-                lineHeight: 1.6
+                lineHeight: 1.6,
               }}
             >
               {message}
             </Typography>
-            
+
             {autoClose && (
-              <Typography 
-                variant="caption" 
-                sx={{ 
+              <Typography
+                variant="caption"
+                sx={{
                   display: 'block',
                   mt: 2,
                   color: '#4CAF50',
-                  fontStyle: 'italic'
+                  fontStyle: 'italic',
                 }}
               >
                 Fechando automaticamente...
@@ -291,7 +302,7 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({
           </CardContent>
         </Card>
       </DialogContent>
-      
+
       {!autoClose && (
         <DialogActions sx={{ p: 3 }}>
           <Button
@@ -300,8 +311,8 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({
             sx={{
               backgroundColor: '#4CAF50',
               '&:hover': {
-                backgroundColor: '#45A049'
-              }
+                backgroundColor: '#45A049',
+              },
             }}
           >
             OK
@@ -315,5 +326,5 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({
 export default {
   ConfirmationDialog,
   DeleteConfirmationDialog,
-  SuccessDialog
+  SuccessDialog,
 };

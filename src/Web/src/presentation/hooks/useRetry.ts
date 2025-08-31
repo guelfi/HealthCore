@@ -32,38 +32,44 @@ export function useRetry<T>(
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const calculateDelay = useCallback((attempt: number): number => {
-    const delay = initialDelay * Math.pow(backoffMultiplier, attempt);
-    return Math.min(delay, maxDelay);
-  }, [initialDelay, backoffMultiplier, maxDelay]);
+  const calculateDelay = useCallback(
+    (attempt: number): number => {
+      const delay = initialDelay * Math.pow(backoffMultiplier, attempt);
+      return Math.min(delay, maxDelay);
+    },
+    [initialDelay, backoffMultiplier, maxDelay]
+  );
 
-  const executeWithRetry = useCallback(async (attempt: number = 0): Promise<void> => {
-    setLoading(true);
-    setError(null);
+  const executeWithRetry = useCallback(
+    async (attempt: number = 0): Promise<void> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const result = await asyncFunction();
-      setData(result);
-      setRetryCount(attempt);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      
-      if (attempt < maxRetries) {
-        const delay = calculateDelay(attempt);
-        
-        setTimeout(() => {
-          executeWithRetry(attempt + 1);
-        }, delay);
-        
-        setRetryCount(attempt + 1);
-      } else {
-        setError(error);
+      try {
+        const result = await asyncFunction();
+        setData(result);
         setRetryCount(attempt);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+
+        if (attempt < maxRetries) {
+          const delay = calculateDelay(attempt);
+
+          setTimeout(() => {
+            executeWithRetry(attempt + 1);
+          }, delay);
+
+          setRetryCount(attempt + 1);
+        } else {
+          setError(error);
+          setRetryCount(attempt);
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [asyncFunction, maxRetries, calculateDelay]);
+    },
+    [asyncFunction, maxRetries, calculateDelay]
+  );
 
   const retry = useCallback(() => {
     return executeWithRetry(0);

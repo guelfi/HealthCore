@@ -20,7 +20,10 @@ interface ErrorBoundaryProps {
   children: React.ReactNode;
 }
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -45,7 +48,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
     // Log error for debugging
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     // In production, you would send this to your error reporting service
     // Example: Sentry.captureException(error, { extra: errorInfo });
   }
@@ -64,13 +67,14 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Box textAlign="center">
             <BugReport sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
-            
+
             <Typography variant="h4" component="h1" gutterBottom>
               Oops! Algo deu errado
             </Typography>
-            
+
             <Typography variant="body1" color="text.secondary" paragraph>
-              Ocorreu um erro inesperado na aplicação. Nossa equipe foi notificada.
+              Ocorreu um erro inesperado na aplicação. Nossa equipe foi
+              notificada.
             </Typography>
 
             <Card sx={{ mt: 3, mb: 3 }}>
@@ -79,31 +83,40 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                   <Typography variant="h6" gutterBottom>
                     Detalhes do Erro
                   </Typography>
-                  <Typography variant="body2" component="pre" sx={{ 
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    fontSize: '0.875rem',
-                  }}>
+                  <Typography
+                    variant="body2"
+                    component="pre"
+                    sx={{
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      fontSize: '0.875rem',
+                    }}
+                  >
                     {this.state.error?.message}
                   </Typography>
                 </Alert>
 
-                {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
-                  <Alert severity="warning">
-                    <Typography variant="h6" gutterBottom>
-                      Stack Trace (Desenvolvimento)
-                    </Typography>
-                    <Typography variant="body2" component="pre" sx={{ 
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                      fontSize: '0.75rem',
-                      maxHeight: 200,
-                      overflow: 'auto',
-                    }}>
-                      {this.state.errorInfo.componentStack}
-                    </Typography>
-                  </Alert>
-                )}
+                {process.env.NODE_ENV === 'development' &&
+                  this.state.errorInfo && (
+                    <Alert severity="warning">
+                      <Typography variant="h6" gutterBottom>
+                        Stack Trace (Desenvolvimento)
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        component="pre"
+                        sx={{
+                          whiteSpace: 'pre-wrap',
+                          wordBreak: 'break-word',
+                          fontSize: '0.75rem',
+                          maxHeight: 200,
+                          overflow: 'auto',
+                        }}
+                      >
+                        {this.state.errorInfo.componentStack}
+                      </Typography>
+                    </Alert>
+                  )}
               </CardContent>
             </Card>
 
@@ -115,7 +128,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               >
                 Recarregar Página
               </Button>
-              
+
               <Button
                 variant="outlined"
                 startIcon={<Home />}
@@ -125,7 +138,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               </Button>
             </Box>
 
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 3, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 3, display: 'block' }}
+            >
               Se o problema persistir, entre em contato com o suporte técnico.
             </Typography>
           </Box>

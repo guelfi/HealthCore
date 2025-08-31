@@ -111,8 +111,11 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { sidebarOpen, setSidebarOpen } = useUIStore();
-  
-  const [expandedItems, setExpandedItems] = React.useState<string[]>(['pacientes', 'exames']);
+
+  const [expandedItems, setExpandedItems] = React.useState<string[]>([
+    'pacientes',
+    'exames',
+  ]);
 
   const handleItemClick = (item: MenuItem) => {
     if (item.path) {
@@ -121,8 +124,8 @@ const Sidebar: React.FC = () => {
         setSidebarOpen(false);
       }
     } else if (item.children) {
-      setExpandedItems(prev => 
-        prev.includes(item.id) 
+      setExpandedItems(prev =>
+        prev.includes(item.id)
           ? prev.filter(id => id !== item.id)
           : [...prev, item.id]
       );
@@ -136,7 +139,9 @@ const Sidebar: React.FC = () => {
 
   const isItemActive = (path?: string): boolean => {
     if (!path) return false;
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    return (
+      location.pathname === path || location.pathname.startsWith(path + '/')
+    );
   };
 
   const renderMenuItem = (item: MenuItem, level = 0) => {
@@ -175,13 +180,11 @@ const Sidebar: React.FC = () => {
             >
               {item.icon}
             </ListItemIcon>
-            
+
             {sidebarOpen && (
               <>
                 <ListItemText primary={item.label} />
-                {hasChildren && (
-                  isExpanded ? <ExpandLess /> : <ExpandMore />
-                )}
+                {hasChildren && (isExpanded ? <ExpandLess /> : <ExpandMore />)}
               </>
             )}
           </ListItemButton>
@@ -221,9 +224,7 @@ const Sidebar: React.FC = () => {
       }}
     >
       <Box sx={{ overflow: 'auto' }}>
-        <List>
-          {menuItems.map(item => renderMenuItem(item))}
-        </List>
+        <List>{menuItems.map(item => renderMenuItem(item))}</List>
       </Box>
     </Drawer>
   );

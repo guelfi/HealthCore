@@ -135,6 +135,14 @@ builder.Services.AddCors(options =>
             if (origin.StartsWith("http://localhost:") || origin.StartsWith("http://127.0.0.1:"))
                 return true;
             
+            // Permitir HTTPS localhost
+            if (origin.StartsWith("https://localhost:") || origin.StartsWith("https://127.0.0.1:"))
+                return true;
+            
+            // Permitir ngrok URLs
+            if (origin.Contains(".ngrok-free.app") || origin.Contains(".ngrok.io") || origin.Contains(".ngrok.app"))
+                return true;
+            
             // Permitir IPs da rede local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
             var uri = new Uri(origin);
             var host = uri.Host;

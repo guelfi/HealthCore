@@ -32,38 +32,46 @@ class AutoDebuggerLogger {
 
   private setupKeyboardListener() {
     if (this.keyboardListenerAttached) return;
-    
+
     this.keyboardHandler = (event: KeyboardEvent) => {
       // Ctrl + Alt + D para toggle do AutoDebugger
       // Verificação mais robusta
-      if (event.ctrlKey && event.altKey && (event.key === 'D' || event.key === 'd' || event.code === 'KeyD')) {
+      if (
+        event.ctrlKey &&
+        event.altKey &&
+        (event.key === 'D' || event.key === 'd' || event.code === 'KeyD')
+      ) {
         event.preventDefault();
         this.toggleDebugger();
       }
     };
-    
+
     document.addEventListener('keydown', this.keyboardHandler);
     this.keyboardListenerAttached = true;
-    
+
     // Adicionar listener para foco da página
     const handleFocus = () => {
       console.log('🎹 AutoDebugger: Página ganhou foco');
     };
-    
+
     window.addEventListener('focus', handleFocus);
-    
+
     // Log de sucesso
     console.log('🎹 AutoDebugger: Listener de teclado adicionado com sucesso');
-    
+
     // Log informativo sobre o atalho
     setTimeout(() => {
-      this.log('info', 'AutoDebugger', '🎹 Atalho ativado: Ctrl + Alt + D para mostrar/esconder');
+      this.log(
+        'info',
+        'AutoDebugger',
+        '🎹 Atalho ativado: Ctrl + Alt + D para mostrar/esconder'
+      );
     }, 1000);
   }
 
   private toggleDebugger() {
     this.isEnabled = !this.isEnabled;
-    
+
     if (this.isEnabled) {
       // Mostrar painel se estiver habilitado
       if (!this.logElement) {
@@ -71,12 +79,20 @@ class AutoDebuggerLogger {
       } else {
         this.showUI();
       }
-      this.log('success', 'AutoDebugger', '🔍 AutoDebugger ATIVADO via teclado (Ctrl+Alt+D)');
+      this.log(
+        'success',
+        'AutoDebugger',
+        '🔍 AutoDebugger ATIVADO via teclado (Ctrl+Alt+D)'
+      );
       this.showToastNotification('🔍 AutoDebugger ATIVADO', '#4CAF50');
     } else {
       // Esconder painel
       this.hideUI();
-      this.log('warning', 'AutoDebugger', '🙈 AutoDebugger DESATIVADO via teclado (Ctrl+Alt+D)');
+      this.log(
+        'warning',
+        'AutoDebugger',
+        '🙈 AutoDebugger DESATIVADO via teclado (Ctrl+Alt+D)'
+      );
       this.showToastNotification('🙈 AutoDebugger DESATIVADO', '#ff9800');
     }
   }
@@ -101,9 +117,9 @@ class AutoDebuggerLogger {
       animation: slideIn 0.3s ease-out;
       pointer-events: none;
     `;
-    
+
     toast.textContent = message;
-    
+
     // Adicionar animação CSS
     const style = document.createElement('style');
     style.textContent = `
@@ -116,10 +132,10 @@ class AutoDebuggerLogger {
         to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
       }
     `;
-    
+
     document.head.appendChild(style);
     document.body.appendChild(toast);
-    
+
     // Remover após 2 segundos
     setTimeout(() => {
       toast.style.animation = 'slideOut 0.3s ease-in';
@@ -154,17 +170,22 @@ class AutoDebuggerLogger {
     this.isVisible = false;
   }
 
-  log(level: 'info' | 'success' | 'warning' | 'error' | 'debug', component: string, message: string, data?: any) {
+  log(
+    level: 'info' | 'success' | 'warning' | 'error' | 'debug',
+    component: string,
+    message: string,
+    data?: any
+  ) {
     const logEntry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
       component,
       message,
-      data
+      data,
     };
 
     this.logs.push(logEntry);
-    
+
     // Manter apenas os últimos logs
     if (this.logs.length > 100) {
       this.logs = this.logs.slice(-100);
@@ -191,15 +212,15 @@ class AutoDebuggerLogger {
 
     // Salvar no localStorage
     this.saveToStorage();
-    
+
     // Enviar para arquivo de log (se possível)
     this.saveToFile();
-    
+
     // Atualizar UI apenas se estiver habilitado
     if (this.isEnabled) {
       this.updateDisplay();
     }
-    
+
     // Notificar listeners
     this.notifyListeners();
   }
@@ -235,21 +256,31 @@ class AutoDebuggerLogger {
 
   private getLogIcon(level: string): string {
     switch (level) {
-      case 'success': return '✅';
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
-      case 'debug': return '🔍';
-      default: return 'ℹ️';
+      case 'success':
+        return '✅';
+      case 'error':
+        return '❌';
+      case 'warning':
+        return '⚠️';
+      case 'debug':
+        return '🔍';
+      default:
+        return 'ℹ️';
     }
   }
 
   private getLogColor(level: string): string {
     switch (level) {
-      case 'success': return '#4CAF50';
-      case 'error': return '#f44336';
-      case 'warning': return '#ff9800';
-      case 'debug': return '#9c27b0';
-      default: return '#2196f3';
+      case 'success':
+        return '#4CAF50';
+      case 'error':
+        return '#f44336';
+      case 'warning':
+        return '#ff9800';
+      case 'debug':
+        return '#9c27b0';
+      default:
+        return '#2196f3';
     }
   }
 
@@ -258,9 +289,9 @@ class AutoDebuggerLogger {
 
     // Mostrar apenas os últimos logs
     const recentLogs = this.logs.slice(-this.maxLogs);
-    
+
     this.logElement.innerHTML = '';
-    
+
     recentLogs.forEach((log, _index) => {
       const logDiv = document.createElement('div');
       logDiv.style.cssText = `
@@ -273,10 +304,12 @@ class AutoDebuggerLogger {
         background: rgba(255,255,255,0.05);
         word-break: break-word;
       `;
-      
+
       const time = new Date(log.timestamp).toLocaleTimeString('pt-BR');
-      const shortData = log.data ? ` | ${JSON.stringify(log.data).substring(0, 50)}...` : '';
-      
+      const shortData = log.data
+        ? ` | ${JSON.stringify(log.data).substring(0, 50)}...`
+        : '';
+
       logDiv.innerHTML = `
         <div style=\"color: ${this.getLogColor(log.level)}; font-weight: bold;\">
           ${this.getLogIcon(log.level)} [${log.component}] ${time}
@@ -285,10 +318,10 @@ class AutoDebuggerLogger {
           ${log.message}${shortData}
         </div>
       `;
-      
+
       this.logElement?.appendChild(logDiv);
     });
-    
+
     // Scroll para o final
     if (this.logElement) {
       this.logElement.scrollTop = this.logElement.scrollHeight;
@@ -375,7 +408,7 @@ class AutoDebuggerLogger {
     const saveButton = document.getElementById('save-debugger');
     const toggleButton = document.getElementById('toggle-debugger');
     const clearButton = document.getElementById('clear-debugger');
-    
+
     saveButton?.addEventListener('click', () => this.downloadLogs());
     toggleButton?.addEventListener('click', () => this.toggle());
     clearButton?.addEventListener('click', () => this.clear());
@@ -396,7 +429,7 @@ class AutoDebuggerLogger {
     if (this.downloadButton) {
       this.downloadButton.style.display = this.isVisible ? 'block' : 'none';
     }
-    
+
     const toggleButton = document.getElementById('toggle-debugger');
     if (toggleButton) {
       toggleButton.textContent = this.isVisible ? '👁️ Hide' : '👁️ Show';
@@ -415,31 +448,39 @@ class AutoDebuggerLogger {
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-      
-      const logContent = this.logs.map(log => {
-        const dataStr = log.data ? `\nData: ${JSON.stringify(log.data, null, 2)}` : '';
-        return `[${log.timestamp}] [${log.level.toUpperCase()}] [${log.component}] ${log.message}${dataStr}`;
-      }).join('\n\n');
-      
+
+      const logContent = this.logs
+        .map(log => {
+          const dataStr = log.data
+            ? `\nData: ${JSON.stringify(log.data, null, 2)}`
+            : '';
+          return `[${log.timestamp}] [${log.level.toUpperCase()}] [${log.component}] ${log.message}${dataStr}`;
+        })
+        .join('\n\n');
+
       // Adicionar cabeçalho informativo
       const header = `# AutoDebugger Log File\n# Generated: ${now.toISOString()}\n# Total Entries: ${this.logs.length}\n# =====================================\n\n`;
       const fullContent = header + logContent;
-      
+
       const blob = new Blob([fullContent], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
       link.download = `auto-debug-${dateStr}-${timeStr}.log`;
       link.style.display = 'none';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       URL.revokeObjectURL(url);
-      
-      this.log('success', 'AutoDebugger', `Logs baixados: auto-debug-${dateStr}-${timeStr}.log`);
+
+      this.log(
+        'success',
+        'AutoDebugger',
+        `Logs baixados: auto-debug-${dateStr}-${timeStr}.log`
+      );
     } catch (error) {
       this.log('error', 'AutoDebugger', 'Erro ao baixar logs:', error);
     }
@@ -470,14 +511,14 @@ class AutoDebuggerLogger {
       document.body.removeChild(this.downloadButton);
       this.downloadButton = null;
     }
-    
+
     // Remover listener de teclado
     if (this.keyboardListenerAttached && this.keyboardHandler) {
       document.removeEventListener('keydown', this.keyboardHandler);
       this.keyboardHandler = null;
       this.keyboardListenerAttached = false;
     }
-    
+
     this.listeners.clear();
   }
 }
@@ -486,13 +527,16 @@ class AutoDebuggerLogger {
 export const useAutoDebugger = (componentName: string) => {
   const debugLogger = React.useMemo(() => AutoDebuggerLogger.getInstance(), []);
 
-  const log = React.useCallback((
-    level: 'info' | 'success' | 'warning' | 'error' | 'debug',
-    message: string,
-    data?: any
-  ) => {
-    debugLogger.log(level, componentName, message, data);
-  }, [debugLogger, componentName]);
+  const log = React.useCallback(
+    (
+      level: 'info' | 'success' | 'warning' | 'error' | 'debug',
+      message: string,
+      data?: any
+    ) => {
+      debugLogger.log(level, componentName, message, data);
+    },
+    [debugLogger, componentName]
+  );
 
   return {
     log,
@@ -514,7 +558,7 @@ interface AutoDebuggerProps {
 export const AutoDebugger: React.FC<AutoDebuggerProps> = ({
   children,
   componentName = 'AutoDebugger',
-  enabled = true
+  enabled = true,
 }) => {
   const debugLogger = useAutoDebugger(componentName);
 
@@ -528,11 +572,7 @@ export const AutoDebugger: React.FC<AutoDebuggerProps> = ({
     return <>{children}</>;
   }
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };
 
 export default AutoDebugger;

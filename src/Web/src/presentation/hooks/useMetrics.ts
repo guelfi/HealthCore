@@ -9,12 +9,12 @@ interface UseMetricsOptions {
    * Se deve buscar dados automaticamente no mount
    */
   autoFetch?: boolean;
-  
+
   /**
    * Tempo de cache em milissegundos (padrão: 5 minutos)
    */
   cacheTime?: number;
-  
+
   /**
    * Se deve refrescar dados quando o componente ganha foco
    */
@@ -26,42 +26,42 @@ interface UseMetricsReturn {
    * Dados das métricas do dashboard
    */
   metrics: DashboardMetrics | null;
-  
+
   /**
    * Estado de carregamento
    */
   isLoading: boolean;
-  
+
   /**
    * Erro caso ocorra algum problema
    */
   error: string | null;
-  
+
   /**
    * Se está carregando pela primeira vez
    */
   isInitialLoading: boolean;
-  
+
   /**
    * Timestamp da última atualização dos dados
    */
   lastUpdated: Date | null;
-  
+
   /**
    * Função para buscar métricas manualmente
    */
   fetchMetrics: () => Promise<void>;
-  
+
   /**
    * Função para refrescar dados (com loading state)
    */
   refreshMetrics: () => Promise<void>;
-  
+
   /**
    * Função para limpar dados e erro
    */
   reset: () => void;
-  
+
   /**
    * Se os dados estão em cache e ainda válidos
    */
@@ -71,7 +71,9 @@ interface UseMetricsReturn {
 /**
  * Hook para gerenciar métricas do dashboard
  */
-export const useMetrics = (options: UseMetricsOptions = {}): UseMetricsReturn => {
+export const useMetrics = (
+  options: UseMetricsOptions = {}
+): UseMetricsReturn => {
   const {
     autoFetch = true,
     cacheTime = 5 * 60 * 1000, // 5 minutos por padrão
@@ -94,7 +96,7 @@ export const useMetrics = (options: UseMetricsOptions = {}): UseMetricsReturn =>
   const isCached = useCallback((): boolean => {
     if (!lastUpdated || !metrics) return false;
     const now = new Date();
-    return (now.getTime() - lastUpdated.getTime()) < cacheTime;
+    return now.getTime() - lastUpdated.getTime() < cacheTime;
   }, [lastUpdated, metrics, cacheTime]);
 
   /**
@@ -136,7 +138,7 @@ export const useMetrics = (options: UseMetricsOptions = {}): UseMetricsReturn =>
     } catch (err: any) {
       console.error('Erro ao carregar métricas:', err);
       setError(err.message || 'Erro ao carregar métricas do dashboard');
-      
+
       // Em caso de erro, manter dados anteriores se existirem
       if (!metrics) {
         setMetrics(null);

@@ -13,7 +13,11 @@ import {
   InputAdornment,
   IconButton,
 } from '@mui/material';
-import { Visibility, VisibilityOff, Login as LoginIcon } from '@mui/icons-material';
+import {
+  Visibility,
+  VisibilityOff,
+  Login as LoginIcon,
+} from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useUIStore } from '../../../application/stores/uiStore';
 
@@ -62,7 +66,11 @@ const LoginForm: React.FC = () => {
       <Card sx={{ maxWidth: 400, width: '100%', mx: 2 }}>
         <CardContent sx={{ p: 4 }}>
           <Box textAlign="center" mb={3}>
-            <img src="/logo.svg" alt="MobileMed Logo" style={{ maxWidth: '200px', marginBottom: '1rem' }} />
+            <img
+              src="/logo.svg"
+              alt="MobileMed Logo"
+              style={{ maxWidth: '200px', marginBottom: '1rem' }}
+            />
             <Typography variant="body1" color="text.secondary">
               Sistema de Gerenciamento Médico
             </Typography>

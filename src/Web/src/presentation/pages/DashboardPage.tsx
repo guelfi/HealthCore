@@ -11,12 +11,12 @@ const DashboardPage: React.FC = () => {
   React.useEffect(() => {
     // Scroll imediato para o topo
     window.scrollTo(0, 0);
-    
+
     // Scroll suave após um pequeno delay para garantir que o componente foi renderizado
     const timer = setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, []);
 

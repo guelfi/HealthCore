@@ -66,6 +66,7 @@ Agora você pode **ativar/desativar** o AutoDebugger em tempo de execução usan
 ## 🎊 **Resultado Final:**
 
 Agora você tem um **sistema de debug profissional** com:
+
 - ✅ Logs em tempo real
 - ✅ Salvamento automático na pasta `/logs`
 - ✅ Atalho de teclado para mostrar/esconder
@@ -76,5 +77,6 @@ Agora você tem um **sistema de debug profissional** com:
 **🔥 Use `Ctrl + Alt + D` e tenha superpoderes de debugging!** 🦸‍♂️
 
 ---
+
 **Criado por**: Marco Guelfi  
 **Data**: 27/08/2025

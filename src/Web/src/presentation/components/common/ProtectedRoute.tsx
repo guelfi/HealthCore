@@ -8,9 +8,9 @@ interface ProtectedRouteProps {
   requiredRoles?: UserProfile[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requiredRoles 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requiredRoles,
 }) => {
   const { isAuthenticated, user } = useAuthStore();
   const location = useLocation();
@@ -19,7 +19,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requiredRoles && user && !requiredRoles.includes(user.role as UserProfile)) {
+  if (
+    requiredRoles &&
+    user &&
+    !requiredRoles.includes(user.role as UserProfile)
+  ) {
     return <Navigate to="/dashboard" replace />;
   }
 

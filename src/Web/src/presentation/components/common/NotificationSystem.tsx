@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  Snackbar,
-  Alert,
-  Slide,
-} from '@mui/material';
+import { Snackbar, Alert, Slide } from '@mui/material';
 import type { AlertProps } from '@mui/material/Alert';
 import { useUIStore } from '../../../application/stores/uiStore';
 
