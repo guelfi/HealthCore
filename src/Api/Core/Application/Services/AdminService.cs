@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MobileMed.Api.Core.Application.DTOs;
 using MobileMed.Api.Core.Application.DTOs.Admin;
 using MobileMed.Api.Core.Domain.Entities;
 using MobileMed.Api.Core.Domain.Enums;
@@ -64,11 +65,17 @@ namespace MobileMed.Api.Core.Application.Services
             }
         }
 
-        public async Task<List<UserResponseDto>> GetUsersAsync(int page = 1, int pageSize = 10)
+        public async Task<PagedResponseDto<UserResponseDto>> GetUsersAsync(int page = 1, int pageSize = 10)
         {
             try
             {
                 _logger.LogInformation("Listando usuários - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+
+                // Calcular o total de usuários
+                var totalUsers = await _context.Users.CountAsync();
+                
+                // Calcular o número total de páginas
+                var totalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
 
                 var users = await _context.Users
                     .OrderBy(u => u.CreatedAt)
@@ -85,7 +92,16 @@ namespace MobileMed.Api.Core.Application.Services
                     .ToListAsync();
 
                 _logger.LogInformation("Listagem concluída. Usuários retornados: {Count}", users.Count);
-                return users;
+                
+                // Retornar resposta paginada
+                return new PagedResponseDto<UserResponseDto>
+                {
+                    Data = users,
+                    Total = totalUsers,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalPages = totalPages
+                };
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   useTheme,
   useMediaQuery,
@@ -25,6 +25,8 @@ import {
   TableHead,
   TableRow,
   Paper,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -33,31 +35,76 @@ import {
   LocalHospital as MedicoIcon,
   Visibility,
 } from '@mui/icons-material';
-import { mockUsuarios } from '../../application/stores/mockData';
-import { UserProfile } from '../../domain/enums/UserProfile';
-import type { Usuario } from '../../domain/entities/Usuario';
+import { useMedicos } from '../hooks/useMedicos';
+import type { Medico, CreateMedicoDto, UpdateMedicoDto } from '../../domain/entities/Medico';
 
 const MedicosPageTable: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [medicos] = useState<Usuario[]>(
-    mockUsuarios.filter(u => u.role === UserProfile.MEDICO)
-  );
+  const {
+    medicos,
+    total,
+    currentPage,
+    totalPages,
+    loading,
+    error,
+    fetchMedicos,
+    createMedico,
+    updateMedico,
+    deleteMedico,
+    clearError,
+  } = useMedicos();
+
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
-  const [selectedMedico, setSelectedMedico] = useState<Usuario | null>(null);
+  const [selectedMedico, setSelectedMedico] = useState<Medico | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(7);
+  const [formData, setFormData] = useState<CreateMedicoDto>({
+    nome: '',
+    documento: '',
+    crm: '',
+    especialidade: '',
+    telefone: '',
+    email: '',
+    username: '',
+    password: '',
+  });
 
-  const handleRowClick = (medico: Usuario) => {
+  // Carregar médicos ao montar o componente
+  useEffect(() => {
+    fetchMedicos({ page, pageSize });
+  }, [fetchMedicos, page, pageSize]);
+
+  const handleRowClick = (medico: Medico) => {
     setSelectedMedico(medico);
+    setFormData({
+      nome: medico.nome,
+      documento: medico.documento,
+      crm: medico.crm,
+      especialidade: medico.especialidade,
+      telefone: medico.telefone || '',
+      email: medico.email || '',
+      username: medico.user?.username || '',
+      password: '', // Não preencher senha na edição
+    });
     setDialogMode('edit');
     setOpenDialog(true);
   };
 
   const handleAddNew = () => {
     setSelectedMedico(null);
+    setFormData({
+      nome: '',
+      documento: '',
+      crm: '',
+      especialidade: '',
+      telefone: '',
+      email: '',
+      username: '',
+      password: '',
+    });
     setDialogMode('add');
     setOpenDialog(true);
   };
@@ -65,20 +112,56 @@ const MedicosPageTable: React.FC = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedMedico(null);
+    clearError();
   };
 
-  const handleSave = () => {
-    // Implementar lógica de salvar
-    handleCloseDialog();
+  const handleSave = async () => {
+    try {
+      if (dialogMode === 'add') {
+        await createMedico(formData);
+      } else if (selectedMedico) {
+        const updateData: UpdateMedicoDto = {
+          nome: formData.nome,
+          documento: formData.documento,
+          crm: formData.crm,
+          especialidade: formData.especialidade,
+          telefone: formData.telefone,
+          email: formData.email,
+        };
+        await updateMedico(selectedMedico.id, updateData);
+      }
+      handleCloseDialog();
+      // Recarregar a lista
+      await fetchMedicos({ page, pageSize });
+    } catch (error) {
+      console.error('Erro ao salvar médico:', error);
+    }
   };
 
-  const handleDelete = () => {
-    // Implementar lógica de deletar
-    handleCloseDialog();
+  const handleDelete = async () => {
+    if (selectedMedico) {
+      try {
+        await deleteMedico(selectedMedico.id);
+        handleCloseDialog();
+        // Recarregar a lista
+        await fetchMedicos({ page, pageSize });
+      } catch (error) {
+        console.error('Erro ao deletar médico:', error);
+      }
+    }
   };
 
-  const paginatedData = medicos.slice((page - 1) * pageSize, page * pageSize);
-  const totalPages = Math.ceil(medicos.length / pageSize);
+  const handleInputChange = (field: keyof CreateMedicoDto, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    fetchMedicos({ page: newPage, pageSize });
+  };
+
+  // Os dados já vêm paginados da API
+  const paginatedData = medicos;
 
   return (
     <Box>
@@ -130,28 +213,43 @@ const MedicosPageTable: React.FC = () => {
                 color="text.secondary"
                 sx={{ display: { xs: 'none', sm: 'block' } }}
               >
-                Total: {medicos.length}
+                Total: {total}
               </Typography>
               <Pagination
                 count={totalPages}
-                page={page}
-                onChange={(_, newPage) => setPage(newPage)}
+                page={currentPage}
+                onChange={(_, newPage) => handlePageChange(newPage)}
                 size="small"
                 color="primary"
               />
             </Box>
           </Box>
 
+          {/* Mensagem de Erro */}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
+              {error}
+            </Alert>
+          )}
+
+          {/* Loading */}
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          )}
+
           {/* Tabela de Dados */}
-          <TableContainer
-            component={Paper}
-            sx={{
-              boxShadow: 'none',
-              border: '1px solid',
-              borderColor: 'divider',
-              maxHeight: 450,
-            }}
-          >
+          {!loading && (
+            <TableContainer
+              component={Paper}
+              sx={{
+                boxShadow: 'none',
+                border: '1px solid',
+                borderColor: 'divider',
+                maxHeight: 450,
+              }}
+            >
             <Table size="small">
               <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                 <TableRow>
@@ -160,16 +258,16 @@ const MedicosPageTable: React.FC = () => {
                     <strong>Nome Médico</strong>
                   </TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    <strong>Perfil</strong>
+                    <strong>CRM</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Situação</strong>
+                    <strong>Especialidade</strong>
                   </TableCell>
-                  <TableCell>
-                    <strong>Cadastrado</strong>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                    <strong>Documento</strong>
                   </TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    <strong>Atualizado</strong>
+                    <strong>Status</strong>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -195,13 +293,21 @@ const MedicosPageTable: React.FC = () => {
                         }}
                       />
                     </TableCell>
-                    <TableCell>{medico.username}</TableCell>
+                    <TableCell>{medico.nome}</TableCell>
                     <TableCell
                       sx={{ display: { xs: 'none', md: 'table-cell' } }}
                     >
-                      Médico
+                      {medico.crm}
                     </TableCell>
-                    <TableCell>
+                    <TableCell>{medico.especialidade}</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', sm: 'table-cell' } }}
+                    >
+                      {medico.documento}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
                       <Chip
                         label={medico.isActive ? 'Ativo' : 'Inativo'}
                         color={medico.isActive ? 'success' : 'error'}
@@ -209,23 +315,12 @@ const MedicosPageTable: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
-                      {medico.createdAt
-                        ? new Date(medico.createdAt).toLocaleDateString('pt-BR')
-                        : '-'}
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                    >
-                      {medico.updatedAt
-                        ? new Date(medico.updatedAt).toLocaleDateString('pt-BR')
-                        : '-'}
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+          )}
         </CardContent>
       </Card>
 
@@ -267,95 +362,96 @@ const MedicosPageTable: React.FC = () => {
           >
             <TextField
               fullWidth
-              label="Nome Médico"
-              defaultValue={selectedMedico?.username || ''}
+              label="Nome Completo"
+              value={formData.nome}
+              onChange={(e) => handleInputChange('nome', e.target.value)}
               variant="outlined"
               size="small"
-              sx={{
-                '& .MuiInputBase-root': {
-                  padding: '4px 6px',
-                },
-                '& .MuiInputBase-input': {
-                  padding: '4px 0',
-                },
-              }}
+              required
             />
             <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
               <TextField
                 fullWidth
-                label="Senha"
-                type="password"
+                label="Documento (CPF)"
+                value={formData.documento}
+                onChange={(e) => handleInputChange('documento', e.target.value)}
                 variant="outlined"
                 size="small"
-                placeholder={
-                  dialogMode === 'edit'
-                    ? 'Deixe em branco para manter atual'
-                    : ''
-                }
-                sx={{
-                  '& .MuiInputBase-root': {
-                    padding: '4px 6px',
-                  },
-                  '& .MuiInputBase-input': {
-                    padding: '4px 0',
-                  },
-                }}
+                required
               />
               <TextField
                 fullWidth
-                label="Confirmar Senha"
-                type="password"
+                label="CRM"
+                value={formData.crm}
+                onChange={(e) => handleInputChange('crm', e.target.value)}
                 variant="outlined"
                 size="small"
-                sx={{
-                  '& .MuiInputBase-root': {
-                    padding: '4px 6px',
-                  },
-                  '& .MuiInputBase-input': {
-                    padding: '4px 0',
-                  },
-                }}
+                required
               />
             </Box>
-            <FormControl
+            <TextField
               fullWidth
+              label="Especialidade"
+              value={formData.especialidade}
+              onChange={(e) => handleInputChange('especialidade', e.target.value)}
               variant="outlined"
               size="small"
-              sx={{
-                '& .MuiInputBase-root': {
-                  padding: '6px 8px',
-                },
-                '& .MuiSelect-select': {
-                  padding: '6px 0',
-                },
-              }}
-            >
-              <InputLabel>Situação</InputLabel>
-              <Select
-                defaultValue={selectedMedico?.isActive ?? true}
-                label="Situação"
-              >
-                <MenuItem value="true">Ativo</MenuItem>
-                <MenuItem value="false">Inativo</MenuItem>
-              </Select>
-            </FormControl>
+              required
+            />
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
+              <TextField
+                fullWidth
+                label="Telefone"
+                value={formData.telefone}
+                onChange={(e) => handleInputChange('telefone', e.target.value)}
+                variant="outlined"
+                size="small"
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                variant="outlined"
+                size="small"
+              />
+            </Box>
+            <TextField
+              fullWidth
+              label="Username"
+              value={formData.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
+              variant="outlined"
+              size="small"
+              required
+              disabled={dialogMode === 'edit'}
+              helperText={dialogMode === 'edit' ? 'Username não pode ser alterado' : ''}
+            />
+            {dialogMode === 'add' && (
+              <TextField
+                fullWidth
+                label="Senha"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                variant="outlined"
+                size="small"
+                required
+              />
+            )}
+            </Box>
             {selectedMedico && (
               <Box
                 sx={{
                   display: 'flex',
                   gap: 0.5,
                   flexWrap: 'wrap',
-                  mt: 0.5,
+                  mt: 1,
                 }}
               >
                 <Chip
-                  label={`Cadastrado: ${selectedMedico.createdAt ? new Date(selectedMedico.createdAt).toLocaleDateString('pt-BR') : '-'}`}
-                  variant="outlined"
-                  size="small"
-                  sx={{ fontSize: '0.65rem', height: '20px' }}
-                />
-                <Chip
-                  label={`Atualizado: ${selectedMedico.updatedAt ? new Date(selectedMedico.updatedAt).toLocaleDateString('pt-BR') : '-'}`}
+                  label={`ID: ${selectedMedico.id}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -381,6 +477,7 @@ const MedicosPageTable: React.FC = () => {
               startIcon={<DeleteIcon />}
               size="small"
               sx={{ fontSize: '0.75rem' }}
+              disabled={loading}
             >
               Excluir
             </Button>
@@ -388,25 +485,23 @@ const MedicosPageTable: React.FC = () => {
           <Button
             onClick={handleCloseDialog}
             color="inherit"
+            variant="outlined"
             size="small"
             sx={{ fontSize: '0.75rem' }}
+            disabled={loading}
           >
-            Fechar
+            Cancelar
           </Button>
           <Button
             onClick={handleSave}
+            color="primary"
             variant="contained"
-            startIcon={<EditIcon />}
+            startIcon={dialogMode === 'add' ? <AddIcon /> : <EditIcon />}
             size="small"
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-              },
-              fontSize: '0.75rem',
-            }}
+            sx={{ fontSize: '0.75rem' }}
+            disabled={loading || !formData.nome || !formData.documento || !formData.crm || !formData.especialidade || !formData.username || (dialogMode === 'add' && !formData.password)}
           >
-            {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+            {loading ? 'Salvando...' : dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
           </Button>
         </DialogActions>
       </Dialog>

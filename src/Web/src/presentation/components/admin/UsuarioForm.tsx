@@ -17,6 +17,7 @@ import {
   IconButton,
   FormControlLabel,
   Switch,
+  Alert,
 } from '@mui/material';
 import {
   Save,
@@ -26,18 +27,33 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
-// import type { CreateUsuarioDto } from '../../../domain/entities/Usuario'; // Removido: não utilizado
+import type { CreateUsuarioDto, UpdateUsuarioDto } from '../../../domain/entities/Usuario';
 import { UserProfile } from '../../../domain/enums/UserProfile';
 import { useUIStore } from '../../../application/stores/uiStore';
+import { useUsuarios } from '../../hooks/useUsuarios';
 
-const usuarioSchema = z.object({
+// Schema base
+const baseUsuarioSchema = {
+  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   username: z.string().min(3, 'Username deve ter pelo menos 3 caracteres'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  email: z.string().email('Email deve ser válido'),
   role: z.nativeEnum(UserProfile, { message: 'Perfil é obrigatório' }),
   isActive: z.boolean().optional(),
+};
+
+// Schema para criação (senha obrigatória)
+const createUsuarioSchema = z.object({
+  ...baseUsuarioSchema,
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
 
-type UsuarioFormData = z.infer<typeof usuarioSchema>;
+// Schema para edição (senha opcional)
+const editUsuarioSchema = z.object({
+  ...baseUsuarioSchema,
+  password: z.string().optional().or(z.string().min(6, 'Senha deve ter pelo menos 6 caracteres')),
+});
+
+type UsuarioFormData = z.infer<typeof createUsuarioSchema>;
 
 const UsuarioForm: React.FC = () => {
   const navigate = useNavigate();
@@ -45,8 +61,17 @@ const UsuarioForm: React.FC = () => {
   const { addNotification } = useUIStore();
   const isEditing = Boolean(id);
 
-  const [loading, setLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
+  const [initialDataLoaded, setInitialDataLoaded] = React.useState(false);
+
+  const {
+    loading,
+    error,
+    createUsuario,
+    updateUsuario,
+    getUsuarioById,
+    clearError,
+  } = useUsuarios();
 
   const {
     register,
@@ -55,36 +80,79 @@ const UsuarioForm: React.FC = () => {
     setValue,
     watch,
   } = useForm<UsuarioFormData>({
-    resolver: zodResolver(usuarioSchema),
+    resolver: zodResolver(isEditing ? editUsuarioSchema : createUsuarioSchema),
     defaultValues: {
       isActive: true,
     },
   });
 
   React.useEffect(() => {
-    if (isEditing) {
-      // Mock data for editing - in real app, would fetch from API
-      setValue('username', 'medico1');
-      setValue('password', '123456');
-      setValue('role', UserProfile.MEDICO);
-      setValue('isActive', true);
-    }
-  }, [isEditing, setValue]);
+    const loadUsuario = async () => {
+      if (isEditing && id && !initialDataLoaded) {
+        try {
+          const usuario = await getUsuarioById(id);
+          setValue('nome', usuario.nome);
+          setValue('username', usuario.username);
+          setValue('email', usuario.email);
+          setValue('password', ''); // Não carregar senha por segurança
+          setValue('role', usuario.role);
+          setValue('isActive', usuario.isActive);
+          setInitialDataLoaded(true);
+        } catch (error: any) {
+          addNotification(
+            error.message || 'Erro ao carregar usuário',
+            'error'
+          );
+          navigate('/admin/usuarios');
+        }
+      }
+    };
 
-  const onSubmit = async (_data: UsuarioFormData) => {
-    setLoading(true);
+    loadUsuario();
+  }, [isEditing, id, initialDataLoaded, getUsuarioById, setValue, addNotification, navigate]);
 
+  const onSubmit = async (data: UsuarioFormData) => {
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const action = isEditing ? 'atualizado' : 'cadastrado';
-      addNotification(`Usuário ${action} com sucesso!`, 'success');
+      clearError();
+      
+      if (isEditing && id) {
+        // Atualizar usuário existente
+        const updateData: UpdateUsuarioDto = {
+          nome: data.nome,
+          username: data.username,
+          email: data.email,
+          role: data.role,
+          isActive: data.isActive ?? true,
+        };
+        
+        // Só incluir senha se foi preenchida
+        if (data.password && data.password.trim()) {
+          updateData.password = data.password;
+        }
+        
+        await updateUsuario(id, updateData);
+        addNotification('Usuário atualizado com sucesso!', 'success');
+      } else {
+        // Criar novo usuário
+        const createData: CreateUsuarioDto = {
+          nome: data.nome,
+          username: data.username,
+          email: data.email,
+          password: data.password!,
+          role: data.role,
+          isActive: data.isActive ?? true,
+        };
+        
+        await createUsuario(createData);
+        addNotification('Usuário cadastrado com sucesso!', 'success');
+      }
+      
       navigate('/admin/usuarios');
-    } catch (error) {
-      addNotification('Erro ao salvar usuário', 'error');
-    } finally {
-      setLoading(false);
+    } catch (error: any) {
+      addNotification(
+        error.message || 'Erro ao salvar usuário',
+        'error'
+      );
     }
   };
 
@@ -125,6 +193,16 @@ const UsuarioForm: React.FC = () => {
         </Box>
       </Box>
 
+      {error && (
+        <Alert 
+          severity="error" 
+          onClose={clearError}
+          sx={{ mb: 2 }}
+        >
+          {error}
+        </Alert>
+      )}
+
       <Card>
         <CardContent sx={{ p: { xs: 1, sm: 1.5 } }}>
           <Box
@@ -144,11 +222,48 @@ const UsuarioForm: React.FC = () => {
               }}
             >
               <TextField
+                {...register('nome')}
+                fullWidth
+                label="Nome Completo *"
+                error={!!errors.nome}
+                helperText={errors.nome?.message}
+                disabled={loading}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0',
+                  },
+                }}
+              />
+
+              <TextField
                 {...register('username')}
                 fullWidth
                 label="Username *"
                 error={!!errors.username}
                 helperText={errors.username?.message}
+                disabled={loading}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0',
+                  },
+                }}
+              />
+
+              <TextField
+                {...register('email')}
+                fullWidth
+                label="Email *"
+                type="email"
+                error={!!errors.email}
+                helperText={errors.email?.message}
                 disabled={loading}
                 size="small"
                 sx={{
@@ -200,10 +315,10 @@ const UsuarioForm: React.FC = () => {
               <TextField
                 {...register('password')}
                 fullWidth
-                label="Senha *"
+                label={isEditing ? "Nova Senha (opcional)" : "Senha *"}
                 type={showPassword ? 'text' : 'password'}
                 error={!!errors.password}
-                helperText={errors.password?.message}
+                helperText={isEditing ? (errors.password?.message || "Deixe em branco para manter a senha atual") : errors.password?.message}
                 disabled={loading}
                 size="small"
                 sx={{
