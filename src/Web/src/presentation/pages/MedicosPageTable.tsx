@@ -31,6 +31,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   LocalHospital as MedicoIcon,
+  Visibility,
 } from '@mui/icons-material';
 import { mockUsuarios } from '../../application/stores/mockData';
 import { UserProfile } from '../../domain/enums/UserProfile';
@@ -47,7 +48,7 @@ const MedicosPageTable: React.FC = () => {
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedMedico, setSelectedMedico] = useState<Usuario | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(7);
 
   const handleRowClick = (medico: Usuario) => {
     setSelectedMedico(medico);
@@ -135,6 +136,7 @@ const MedicosPageTable: React.FC = () => {
             <Table size="small">
               <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                 <TableRow>
+                  <TableCell align="center" sx={{ width: 50 }}></TableCell>
                   <TableCell><strong>Nome Médico</strong></TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Perfil</strong></TableCell>
                   <TableCell><strong>Situação</strong></TableCell>
@@ -154,6 +156,16 @@ const MedicosPageTable: React.FC = () => {
                       }
                     }}
                   >
+                    <TableCell align="center">
+                      <Visibility 
+                        color="action" 
+                        sx={{ 
+                          fontSize: '1.2rem',
+                          cursor: 'pointer',
+                          '&:hover': { color: 'primary.main' }
+                        }} 
+                      />
+                    </TableCell>
                     <TableCell>{medico.username}</TableCell>
                     <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Médico</TableCell>
                     <TableCell>

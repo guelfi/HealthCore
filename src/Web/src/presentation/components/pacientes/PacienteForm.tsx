@@ -291,19 +291,19 @@ const PacienteForm: React.FC = () => {
 
               <Box display="flex" gap={2} justifyContent="flex-end" mt={1}>
                 <Button
-                  variant="outlined"
-                  onClick={() => navigate('/pacientes')}
-                  disabled={loading || apiLoading}
-                >
-                  Fechar
-                </Button>
-                <Button
                   type="submit"
                   variant="contained"
                   startIcon={<Save />}
                   disabled={loading || apiLoading}
                 >
                   {(loading || apiLoading) ? 'Salvando...' : 'Salvar'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate('/pacientes')}
+                  disabled={loading || apiLoading}
+                >
+                  Fechar
                 </Button>
               </Box>
             </Box>

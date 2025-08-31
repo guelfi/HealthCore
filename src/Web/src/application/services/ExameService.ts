@@ -21,7 +21,7 @@ export class ExameService {
    * Lista exames com paginação e filtros
    */
   static async list(params: ExameQueryParams = {}): Promise<ExameListResponse> {
-    const { page = 1, pageSize = 10, pacienteId, modalidade, dataInicio, dataFim } = params;
+    const { page = 1, pageSize = 7, pacienteId, modalidade, dataInicio, dataFim } = params;
     
     const searchParams = new URLSearchParams({
       page: page.toString(),

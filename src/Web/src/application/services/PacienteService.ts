@@ -27,7 +27,7 @@ export class PacienteService {
   static async list(params: PacienteQueryParams = {}): Promise<PacienteListResponse> {
     debug.log('Iniciando list() com parâmetros:', params);
     
-    const { page = 1, pageSize = 10, nome, documento } = params;
+    const { page = 1, pageSize = 7, nome, documento } = params;
     
     const searchParams = new URLSearchParams({
       page: page.toString(),

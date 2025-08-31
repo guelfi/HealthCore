@@ -23,9 +23,9 @@ import {
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
   Person as PersonIcon,
+  Visibility,
 } from '@mui/icons-material';
 import type { Paciente } from '../../domain/entities/Paciente';
 import { usePacientes } from '../hooks/usePacientes';
@@ -60,7 +60,6 @@ const PacientesPageTable: React.FC = () => {
     error,
     total,
     currentPage,
-    totalPages: totalPagesFromHook,
     fetchPacientes,
     createPaciente,
     updatePaciente,
@@ -76,7 +75,7 @@ const PacientesPageTable: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(7);
   const [saving, setSaving] = useState(false);
 
   // Estados para diálogos de confirmação
@@ -306,14 +305,15 @@ const PacientesPageTable: React.FC = () => {
           {/* Tabela de Dados */}
           {!loading && (
             <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
-              <Table>
+              <Table size="small">
                 <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                   <TableRow>
-                    <TableCell><strong>Nome</strong></TableCell>
-                    <TableCell><strong>Documento</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Data de Nascimento</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}><strong>Telefone</strong></TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>E-mail</strong></TableCell>
+                    <TableCell align="center" sx={{ width: 50, py: 1 }}></TableCell>
+                    <TableCell sx={{ py: 1 }}><strong>Nome</strong></TableCell>
+                    <TableCell sx={{ py: 1 }}><strong>Documento</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}><strong>Data de Nascimento</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' }, py: 1 }}><strong>Telefone</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}><strong>E-mail</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -323,16 +323,27 @@ const PacientesPageTable: React.FC = () => {
                       onClick={() => handleRowClick(paciente)}
                       sx={{ 
                         cursor: 'pointer',
+                        height: 35,
                         '&:hover': { 
                           backgroundColor: 'rgba(102, 126, 234, 0.04)' 
                         }
                       }}
                     >
-                      <TableCell>{paciente.nome}</TableCell>
-                      <TableCell>{formatCPF(paciente.documento)}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDateBR(paciente.dataNascimento)}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{formatPhone(paciente.telefone || '')}</TableCell>
-                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{paciente.email || '-'}</TableCell>
+                      <TableCell align="center" sx={{ py: '1px' }}>
+                        <Visibility 
+                          color="action" 
+                          sx={{ 
+                            fontSize: '1.1rem',
+                            cursor: 'pointer',
+                            '&:hover': { color: 'primary.main' }
+                          }} 
+                        />
+                      </TableCell>
+                      <TableCell sx={{ py: '1px' }}>{paciente.nome}</TableCell>
+                      <TableCell sx={{ py: '1px' }}>{formatCPF(paciente.documento)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}>{formatDateBR(paciente.dataNascimento)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' }, py: '1px' }}>{formatPhone(paciente.telefone || '')}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}>{paciente.email || '-'}</TableCell>
                     </TableRow>
                   ))}
                   {pacientes.length === 0 && !loading && (
@@ -508,15 +519,6 @@ const PacientesPageTable: React.FC = () => {
           )}
           
           <Button
-            onClick={handleCloseDialog}
-            disabled={saving}
-            variant="outlined"
-            sx={{ padding: '3px 12px' }}
-          >
-            Fechar
-          </Button>
-          
-          <Button
             onClick={handleSave}
             disabled={saving}
             variant="contained"
@@ -529,6 +531,15 @@ const PacientesPageTable: React.FC = () => {
             }}
           >
             {saving ? 'Salvando...' : 'Salvar'}
+          </Button>
+          
+          <Button
+            onClick={handleCloseDialog}
+            disabled={saving}
+            variant="outlined"
+            sx={{ padding: '3px 12px' }}
+          >
+            Fechar
           </Button>
         </DialogActions>
       </Dialog>

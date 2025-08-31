@@ -29,6 +29,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Person as UsuarioIcon,
+  Visibility,
 } from '@mui/icons-material';
 import { mockUsuarios } from '../../application/stores/mockData';
 import { UserProfile } from '../../domain/enums/UserProfile';
@@ -40,7 +41,7 @@ const UsuariosPageTable: React.FC = () => {
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(7);
 
   const profileLabels = {
     [UserProfile.ADMINISTRADOR]: 'Administrador',
@@ -132,6 +133,7 @@ const UsuariosPageTable: React.FC = () => {
             <Table size="small">
               <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                 <TableRow>
+                  <TableCell align="center" sx={{ width: 50 }}></TableCell>
                   <TableCell><strong>Nome</strong></TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Perfil</strong></TableCell>
                   <TableCell><strong>Status</strong></TableCell>
@@ -151,6 +153,16 @@ const UsuariosPageTable: React.FC = () => {
                       }
                     }}
                   >
+                    <TableCell align="center">
+                      <Visibility 
+                        color="action" 
+                        sx={{ 
+                          fontSize: '1.2rem',
+                          cursor: 'pointer',
+                          '&:hover': { color: 'primary.main' }
+                        }} 
+                      />
+                    </TableCell>
                     <TableCell>{usuario.username}</TableCell>
                     <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{profileLabels[usuario.role]}</TableCell>
                     <TableCell>
