@@ -19,6 +19,13 @@ export type {
   ExameListResponse,
 } from './Exame';
 export type {
+  Medico,
+  CreateMedicoDto,
+  UpdateMedicoDto,
+  MedicoListResponse,
+  MedicoQueryParams,
+} from './Medico';
+export type {
   DashboardMetrics,
   UsuarioMetrics,
   PacienteMetrics,

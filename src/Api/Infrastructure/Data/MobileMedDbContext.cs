@@ -11,6 +11,7 @@ namespace MobileMed.Api.Infrastructure.Data
 
         public virtual DbSet<Paciente> Pacientes { get; set; }
         public virtual DbSet<Exame> Exames { get; set; }
+        public virtual DbSet<Medico> Medicos { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
         public virtual DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
@@ -82,6 +83,35 @@ namespace MobileMed.Api.Infrastructure.Data
                 entity.Property(bt => bt.ExpiresAt).IsRequired();
                 entity.Property(bt => bt.BlacklistedAt).IsRequired();
                 entity.Property(bt => bt.Reason).HasMaxLength(200);
+            });
+
+            // Configuração da entidade Medico
+            modelBuilder.Entity<Medico>(entity =>
+            {
+                entity.HasKey(m => m.Id);
+                entity.HasIndex(m => m.Documento).IsUnique();
+                entity.HasIndex(m => m.CRM).IsUnique();
+                entity.Property(m => m.Nome).IsRequired().HasMaxLength(200);
+                entity.Property(m => m.Documento).IsRequired().HasMaxLength(20);
+                entity.Property(m => m.DataNascimento).IsRequired();
+                entity.Property(m => m.Telefone).HasMaxLength(20);
+                entity.Property(m => m.Email).HasMaxLength(100);
+                entity.Property(m => m.Endereco).HasMaxLength(300);
+                entity.Property(m => m.CRM).IsRequired().HasMaxLength(20);
+                entity.Property(m => m.Especialidade).IsRequired().HasMaxLength(100);
+                entity.Property(m => m.DataCriacao).IsRequired();
+                
+                // Relacionamento com User
+                entity.HasOne(m => m.User)
+                    .WithOne()
+                    .HasForeignKey<Medico>(m => m.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Relacionamento com Exames (um médico pode realizar muitos exames)
+                entity.HasMany(m => m.ExamesRealizados)
+                    .WithOne()
+                    .HasForeignKey("MedicoId")
+                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

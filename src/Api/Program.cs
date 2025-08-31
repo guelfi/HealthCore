@@ -77,6 +77,7 @@ builder.Services.AddDbContext<MobileMedDbContext>(options =>
 // Register application services
 builder.Services.AddScoped<PacienteService>();
 builder.Services.AddScoped<ExameService>();
+builder.Services.AddScoped<MedicoService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AdminService>();
@@ -749,6 +750,124 @@ app.MapPatch("/admin/usuarios/{id:guid}/ativar", async (Guid id, AdminService ad
     {
         logger.LogError(ex, "Erro inesperado ao ativar usuário: {Id}", id);
         return Results.Problem("Erro inesperado ao ativar usuário.");
+    }
+}).RequireAuthorization();
+
+// Endpoints de Médicos
+app.MapPost("/medicos", async (CreateMedicoDto createMedicoDto, MedicoService medicoService, ILogger<Program> logger) =>
+{
+    if (!ModelState.IsValid(createMedicoDto))
+    {
+        return Results.BadRequest("Dados inválidos fornecidos.");
+    }
+
+    try
+    {
+        logger.LogInformation("Criando médico: {Nome}", createMedicoDto.Nome);
+        var medico = await medicoService.CreateMedicoAsync(createMedicoDto);
+        logger.LogInformation("Médico criado com sucesso: {Id}", medico.Id);
+        return Results.Created($"/medicos/{medico.Id}", medico);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning("Erro de validação ao criar médico: {Message}", ex.Message);
+        return Results.Conflict(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao criar médico");
+        return Results.Problem("Erro inesperado ao criar médico.");
+    }
+}).RequireAuthorization();
+
+app.MapGet("/medicos", async (MedicoService medicoService, ILogger<Program> logger, int page = 1, int pageSize = 7) =>
+{
+    try
+    {
+        logger.LogInformation("Listando médicos - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+        var medicos = await medicoService.GetMedicosAsync(page, pageSize);
+        logger.LogInformation("Listagem de médicos concluída. Médicos retornados: {Count}", medicos.Count);
+        return Results.Ok(medicos);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao listar médicos");
+        return Results.Problem("Erro inesperado ao listar médicos.");
+    }
+}).RequireAuthorization();
+
+app.MapGet("/medicos/{id:guid}", async (Guid id, MedicoService medicoService, ILogger<Program> logger) =>
+{
+    try
+    {
+        var medico = await medicoService.GetMedicoByIdAsync(id);
+        if (medico == null)
+        {
+            logger.LogWarning("Médico não encontrado: {Id}", id);
+            return Results.NotFound(new { Message = $"Médico com ID {id} não encontrado." });
+        }
+
+        logger.LogInformation("Médico encontrado: {Id}", id);
+        return Results.Ok(medico);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao buscar médico: {Id}", id);
+        return Results.Problem("Erro inesperado ao buscar médico.");
+    }
+}).RequireAuthorization();
+
+app.MapPut("/medicos/{id:guid}", async (Guid id, UpdateMedicoDto updateMedicoDto, MedicoService medicoService, ILogger<Program> logger) =>
+{
+    if (!ModelState.IsValid(updateMedicoDto))
+    {
+        return Results.BadRequest("Dados inválidos fornecidos.");
+    }
+
+    try
+    {
+        logger.LogInformation("Atualizando médico: {Id}", id);
+        var medico = await medicoService.UpdateMedicoAsync(id, updateMedicoDto);
+        if (medico == null)
+        {
+            logger.LogWarning("Médico não encontrado para atualização: {Id}", id);
+            return Results.NotFound(new { Message = $"Médico com ID {id} não encontrado." });
+        }
+
+        logger.LogInformation("Médico atualizado com sucesso: {Id}", id);
+        return Results.Ok(medico);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning("Erro de validação ao atualizar médico {Id}: {Message}", id, ex.Message);
+        return Results.Conflict(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao atualizar médico: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar médico.");
+    }
+}).RequireAuthorization();
+
+app.MapDelete("/medicos/{id:guid}", async (Guid id, MedicoService medicoService, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Excluindo médico: {Id}", id);
+        var success = await medicoService.DeleteMedicoAsync(id);
+        if (!success)
+        {
+            logger.LogWarning("Médico não encontrado para exclusão: {Id}", id);
+            return Results.NotFound(new { Message = $"Médico com ID {id} não encontrado." });
+        }
+
+        logger.LogInformation("Médico excluído com sucesso: {Id}", id);
+        return Results.NoContent();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao excluir médico: {Id}", id);
+        return Results.Problem("Erro inesperado ao excluir médico.");
     }
 }).RequireAuthorization();
 

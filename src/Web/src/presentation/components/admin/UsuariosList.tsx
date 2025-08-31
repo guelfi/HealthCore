@@ -19,35 +19,56 @@ import {
   TablePagination,
   Skeleton,
   Switch,
+  Alert,
 } from '@mui/material';
 import { Edit, Delete, Search, Add, Visibility } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { mockUsuarios } from '../../../application/stores/mockData';
 import type { Usuario } from '../../../domain/entities/Usuario';
 import { UserProfile } from '../../../domain/enums/UserProfile';
 import { useUIStore } from '../../../application/stores/uiStore';
+import { useUsuarios } from '../../hooks/useUsuarios';
 
 const UsuariosList: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useUIStore();
-
-  const [usuarios, setUsuarios] = React.useState<Usuario[]>(mockUsuarios);
-  const [filteredUsuarios, setFilteredUsuarios] =
-    React.useState<Usuario[]>(mockUsuarios);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(7);
-  const [loading] = React.useState(false);
+  
+  const {
+    usuarios,
+    total,
+    loading,
+    error,
+    fetchUsuarios,
+    activateUsuario,
+    deactivateUsuario,
+    clearError,
+  } = useUsuarios();
 
+  const [filteredUsuarios, setFilteredUsuarios] =
+    React.useState<Usuario[]>([]);
+
+  // Carregar usuários na inicialização
   React.useEffect(() => {
-    const filtered = usuarios.filter(
-      usuario =>
-        usuario.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        usuario.role.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredUsuarios(filtered);
+    fetchUsuarios({ page: page + 1, pageSize: rowsPerPage });
+  }, [fetchUsuarios, page, rowsPerPage]);
+
+  // Filtrar usuários localmente
+  React.useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredUsuarios(usuarios);
+    } else {
+      const filtered = usuarios.filter(
+        (usuario) =>
+          usuario.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          usuario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          usuario.nome.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredUsuarios(filtered);
+    }
     setPage(0);
-  }, [searchTerm, usuarios]);
+  }, [usuarios, searchTerm]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -57,17 +78,27 @@ const UsuariosList: React.FC = () => {
     navigate(`/admin/usuarios/editar/${usuario.id}`);
   };
 
-  const handleToggleActive = (usuario: Usuario) => {
-    const updatedUsuarios = usuarios.map(u =>
-      u.id === usuario.id ? { ...u, isActive: !u.isActive } : u
-    );
-    setUsuarios(updatedUsuarios);
-
-    const status = usuario.isActive ? 'desativado' : 'ativado';
-    addNotification(
-      `Usuário ${usuario.username} ${status} com sucesso`,
-      'success'
-    );
+  const handleToggleActive = async (id: string, isActive: boolean) => {
+    try {
+      if (isActive) {
+        await deactivateUsuario(id);
+        addNotification(
+          'Usuário desativado com sucesso!',
+          'success'
+        );
+      } else {
+        await activateUsuario(id);
+        addNotification(
+          'Usuário ativado com sucesso!',
+          'success'
+        );
+      }
+    } catch (error: any) {
+      addNotification(
+        error.message || 'Erro ao alterar status do usuário',
+        'error'
+      );
+    }
   };
 
   const handleDelete = (usuario: Usuario) => {
@@ -139,6 +170,16 @@ const UsuariosList: React.FC = () => {
         </Button>
       </Box>
 
+      {error && (
+        <Alert 
+          severity="error" 
+          onClose={clearError}
+          sx={{ mb: 2 }}
+        >
+          {error}
+        </Alert>
+      )}
+      
       <Card>
         <CardContent>
           <Box mb={2}>
@@ -226,7 +267,7 @@ const UsuariosList: React.FC = () => {
                     <TableCell align="center">
                       <Switch
                         checked={usuario.isActive}
-                        onChange={() => handleToggleActive(usuario)}
+                        onChange={() => handleToggleActive(usuario.id, usuario.isActive)}
                         color="primary"
                         size="small"
                       />
@@ -265,17 +306,18 @@ const UsuariosList: React.FC = () => {
           </TableContainer>
 
           <TablePagination
-            component="div"
-            count={filteredUsuarios.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Linhas por página:"
-            labelDisplayedRows={({ from, to, count }) =>
-              `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
-            }
-          />
+          component="div"
+          count={total}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 7, 10, 25]}
+          labelRowsPerPage="Linhas por página:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+          }
+        />
         </CardContent>
       </Card>
     </Box>

@@ -4,3 +4,4 @@ export * from './useResponsive';
 export * from './useRetry';
 export * from './useExames';
 export * from './usePacientes';
+export * from './useMedicos';
