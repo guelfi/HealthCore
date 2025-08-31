@@ -32,12 +32,12 @@ import type { Paciente } from '../../domain/entities/Paciente';
 import { usePacientes } from '../hooks/usePacientes';
 
 const PacientesPage: React.FC = () => {
-  const {
-    pacientes
-  } = usePacientes();
+  const { pacientes } = usePacientes();
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
-  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
+  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(
+    null
+  );
   const [page, setPage] = useState(1);
   const [pageSize] = useState(7);
 
@@ -78,7 +78,11 @@ const PacientesPage: React.FC = () => {
         <Typography variant="h4" component="h1">
           Gestão de Pacientes
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ display: { xs: 'none', md: 'block' } }}
+        >
           Cadastro e manutenção de pacientes do sistema
         </Typography>
       </Box>
@@ -87,12 +91,14 @@ const PacientesPage: React.FC = () => {
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
         <CardContent sx={{ p: 3 }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3 
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+            }}
+          >
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -100,13 +106,14 @@ const PacientesPage: React.FC = () => {
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                }
+                  background:
+                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                },
               }}
             >
               Adicionar Paciente
             </Button>
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography variant="body2" color="text.secondary">
                 Total: {pacientes.length} pacientes
@@ -126,16 +133,58 @@ const PacientesPage: React.FC = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Nome</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>CPF</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Data Nascimento</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Telefone</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Email</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Cadastrado em</TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Nome
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    CPF
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Data Nascimento
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Telefone
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Email
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Cadastrado em
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedData.map((paciente) => (
+                {paginatedData.map(paciente => (
                   <TableRow
                     key={paciente.id}
                     onClick={() => handleRowClick(paciente)}
@@ -148,10 +197,16 @@ const PacientesPage: React.FC = () => {
                   >
                     <TableCell>{paciente.nome}</TableCell>
                     <TableCell>{paciente.documento}</TableCell>
-                    <TableCell>{new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>
+                      {new Date(paciente.dataNascimento).toLocaleDateString(
+                        'pt-BR'
+                      )}
+                    </TableCell>
                     <TableCell>{paciente.telefone}</TableCell>
                     <TableCell>{paciente.email}</TableCell>
-                    <TableCell>{new Date(paciente.createdAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>
+                      {new Date(paciente.createdAt).toLocaleDateString('pt-BR')}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -161,8 +216,8 @@ const PacientesPage: React.FC = () => {
       </Card>
 
       {/* Dialog de Manutenção */}
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth={false}
         sx={{
@@ -171,23 +226,27 @@ const PacientesPage: React.FC = () => {
             maxWidth: '550px',
             margin: { xs: 1, sm: 3 },
             maxHeight: { xs: '95vh', sm: '90vh' },
-            minHeight: { xs: 'auto', sm: 'auto' }
-          }
+            minHeight: { xs: 'auto', sm: 'auto' },
+          },
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
           <PersonIcon />
           {dialogMode === 'add' ? 'Adicionar Paciente' : 'Editar Paciente'}
         </DialogTitle>
-        
+
         <DialogContent sx={{ pt: 4.625, px: 3, pb: 2, overflow: 'auto' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}>
+          <Box
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}
+          >
             <TextField
               fullWidth
               label="Nome Completo"
@@ -206,8 +265,13 @@ const PacientesPage: React.FC = () => {
               fullWidth
               label="Data de Nascimento"
               type="date"
-              defaultValue={selectedPaciente?.dataNascimento ? 
-                new Date(selectedPaciente.dataNascimento).toISOString().split('T')[0] : ''}
+              defaultValue={
+                selectedPaciente?.dataNascimento
+                  ? new Date(selectedPaciente.dataNascimento)
+                      .toISOString()
+                      .split('T')[0]
+                  : ''
+              }
               variant="outlined"
               size="small"
               InputLabelProps={{ shrink: true }}
@@ -237,19 +301,21 @@ const PacientesPage: React.FC = () => {
               rows={2}
             />
             {selectedPaciente && (
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 0.5, 
-                flexWrap: 'wrap',
-                mt: 0.5
-              }}>
-                <Chip 
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 0.5,
+                  flexWrap: 'wrap',
+                  mt: 0.5,
+                }}
+              >
+                <Chip
                   label={`Cadastrado: ${new Date(selectedPaciente.createdAt).toLocaleDateString('pt-BR')}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
-                <Chip 
+                <Chip
                   label={`Atualizado: ${new Date(selectedPaciente.updatedAt).toLocaleDateString('pt-BR')}`}
                   variant="outlined"
                   size="small"
@@ -259,7 +325,7 @@ const PacientesPage: React.FC = () => {
             )}
           </Box>
         </DialogContent>
-        
+
         <DialogActions sx={{ p: 2, gap: 0.5 }}>
           {dialogMode === 'edit' && (
             <Button
@@ -273,8 +339,8 @@ const PacientesPage: React.FC = () => {
               Excluir
             </Button>
           )}
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             variant="contained"
             startIcon={<EditIcon />}
             size="small"
@@ -283,13 +349,13 @@ const PacientesPage: React.FC = () => {
               '&:hover': {
                 background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
               },
-              fontSize: '0.75rem'
+              fontSize: '0.75rem',
             }}
           >
             {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
           </Button>
-          <Button 
-            onClick={handleCloseDialog} 
+          <Button
+            onClick={handleCloseDialog}
             color="inherit"
             size="small"
             sx={{ fontSize: '0.75rem' }}

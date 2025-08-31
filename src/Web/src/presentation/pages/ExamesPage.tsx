@@ -98,7 +98,11 @@ const ExamesPage: React.FC = () => {
         <Typography variant="h4" component="h1">
           Gestão de Exames
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ display: { xs: 'none', md: 'block' } }}
+        >
           Cadastro e manutenção de exames médicos
         </Typography>
       </Box>
@@ -107,12 +111,14 @@ const ExamesPage: React.FC = () => {
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
         <CardContent sx={{ p: 3 }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3 
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+            }}
+          >
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -120,13 +126,14 @@ const ExamesPage: React.FC = () => {
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                }
+                  background:
+                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                },
               }}
             >
               Adicionar Exame
             </Button>
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography variant="body2" color="text.secondary">
                 Total: {exames.length} exames
@@ -146,15 +153,53 @@ const ExamesPage: React.FC = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Paciente</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', display: { xs: 'none', md: 'table-cell' } }}>Modalidade</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', display: { xs: 'none', lg: 'table-cell' } }}>Descrição</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold' }}>Data do Exame</TableCell>
-                  <TableCell sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)', fontWeight: 'bold', display: { xs: 'none', md: 'table-cell' } }}>Cadastrado em</TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Paciente
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                      display: { xs: 'none', md: 'table-cell' },
+                    }}
+                  >
+                    Modalidade
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                      display: { xs: 'none', lg: 'table-cell' },
+                    }}
+                  >
+                    Descrição
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Data do Exame
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                      fontWeight: 'bold',
+                      display: { xs: 'none', md: 'table-cell' },
+                    }}
+                  >
+                    Cadastrado em
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedData.map((exame) => (
+                {paginatedData.map(exame => (
                   <TableRow
                     key={exame.id}
                     onClick={() => handleRowClick(exame)}
@@ -166,10 +211,24 @@ const ExamesPage: React.FC = () => {
                     }}
                   >
                     <TableCell>{exame.paciente?.nome || 'N/A'}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{modalidadeLabels[exame.modalidade] || exame.modalidade}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{exame.descricao}</TableCell>
-                    <TableCell>{new Date(exame.dataExame).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{new Date(exame.createdAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {modalidadeLabels[exame.modalidade] || exame.modalidade}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', lg: 'table-cell' } }}
+                    >
+                      {exame.descricao}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(exame.dataExame).toLocaleDateString('pt-BR')}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {new Date(exame.createdAt).toLocaleDateString('pt-BR')}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -179,8 +238,8 @@ const ExamesPage: React.FC = () => {
       </Card>
 
       {/* Dialog de Manutenção */}
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth={false}
         sx={{
@@ -188,34 +247,45 @@ const ExamesPage: React.FC = () => {
             width: { xs: '95vw', sm: '550px' },
             maxWidth: '550px',
             margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' }
-          }
+            minHeight: { xs: 'auto', sm: 'auto' },
+          },
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
           <ExameIcon />
           {dialogMode === 'add' ? 'Adicionar Exame' : 'Editar Exame'}
         </DialogTitle>
-        
-        <DialogContent sx={{ 
-          pt: 4.625, 
-          px: 3, 
-          pb: 2
-        }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}>
+
+        <DialogContent
+          sx={{
+            pt: 4.625,
+            px: 3,
+            pb: 2,
+          }}
+        >
+          <Box
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}
+          >
             <Autocomplete
               options={pacientes}
-              getOptionLabel={(option) => option.nome}
+              getOptionLabel={option => option.nome}
               defaultValue={selectedExame?.paciente || null}
               size="small"
-              renderInput={(params) => (
-                <TextField {...params} label="Paciente" variant="outlined" size="small" />
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label="Paciente"
+                  variant="outlined"
+                  size="small"
+                />
               )}
             />
             <FormControl fullWidth variant="outlined" size="small">
@@ -244,8 +314,13 @@ const ExamesPage: React.FC = () => {
               fullWidth
               label="Data do Exame"
               type="date"
-              defaultValue={selectedExame?.dataExame ? 
-                new Date(selectedExame.dataExame).toISOString().split('T')[0] : ''}
+              defaultValue={
+                selectedExame?.dataExame
+                  ? new Date(selectedExame.dataExame)
+                      .toISOString()
+                      .split('T')[0]
+                  : ''
+              }
               variant="outlined"
               size="small"
               InputLabelProps={{ shrink: true }}
@@ -259,25 +334,27 @@ const ExamesPage: React.FC = () => {
               helperText="Identificador único"
             />
             {selectedExame && (
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 0.5, 
-                flexWrap: 'wrap',
-                mt: 0.5
-              }}>
-                <Chip 
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 0.5,
+                  flexWrap: 'wrap',
+                  mt: 0.5,
+                }}
+              >
+                <Chip
                   label={`ID: ${selectedExame.id}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
-                <Chip 
+                <Chip
                   label={`Cadastrado: ${new Date(selectedExame.createdAt).toLocaleDateString('pt-BR')}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
-                <Chip 
+                <Chip
                   label={`Atualizado: ${new Date(selectedExame.updatedAt).toLocaleDateString('pt-BR')}`}
                   variant="outlined"
                   size="small"
@@ -287,7 +364,7 @@ const ExamesPage: React.FC = () => {
             )}
           </Box>
         </DialogContent>
-        
+
         <DialogActions sx={{ p: 2, gap: 0.5 }}>
           {dialogMode === 'edit' && (
             <Button
@@ -301,8 +378,8 @@ const ExamesPage: React.FC = () => {
               Excluir
             </Button>
           )}
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             variant="contained"
             startIcon={<EditIcon />}
             size="small"
@@ -311,13 +388,13 @@ const ExamesPage: React.FC = () => {
               '&:hover': {
                 background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
               },
-              fontSize: '0.75rem'
+              fontSize: '0.75rem',
             }}
           >
             {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
           </Button>
-          <Button 
-            onClick={handleCloseDialog} 
+          <Button
+            onClick={handleCloseDialog}
             color="inherit"
             size="small"
             sx={{ fontSize: '0.75rem' }}

@@ -87,7 +87,11 @@ const MedicosPageTable: React.FC = () => {
         <Typography variant="h4" component="h1">
           Gestão de Médicos
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ display: { xs: 'none', md: 'block' } }}
+        >
           Cadastro e manutenção de médicos do sistema
         </Typography>
       </Box>
@@ -96,12 +100,14 @@ const MedicosPageTable: React.FC = () => {
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
         <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3 
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+            }}
+          >
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -110,15 +116,20 @@ const MedicosPageTable: React.FC = () => {
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                }
+                  background:
+                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                },
               }}
             >
               Adicionar Médico
             </Button>
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+              >
                 Total: {medicos.length}
               </Typography>
               <Pagination
@@ -132,42 +143,64 @@ const MedicosPageTable: React.FC = () => {
           </Box>
 
           {/* Tabela de Dados */}
-          <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', maxHeight: 450 }}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              boxShadow: 'none',
+              border: '1px solid',
+              borderColor: 'divider',
+              maxHeight: 450,
+            }}
+          >
             <Table size="small">
               <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                 <TableRow>
                   <TableCell align="center" sx={{ width: 50 }}></TableCell>
-                  <TableCell><strong>Nome Médico</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Perfil</strong></TableCell>
-                  <TableCell><strong>Situação</strong></TableCell>
-                  <TableCell><strong>Cadastrado</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Atualizado</strong></TableCell>
+                  <TableCell>
+                    <strong>Nome Médico</strong>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <strong>Perfil</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Situação</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Cadastrado</strong>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <strong>Atualizado</strong>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedData.map((medico) => (
-                  <TableRow 
+                {paginatedData.map(medico => (
+                  <TableRow
                     key={medico.id}
                     onClick={() => handleRowClick(medico)}
-                    sx={{ 
+                    sx={{
                       cursor: 'pointer',
-                      '&:hover': { 
-                        backgroundColor: 'rgba(102, 126, 234, 0.04)' 
-                      }
+                      '&:hover': {
+                        backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                      },
                     }}
                   >
                     <TableCell align="center">
-                      <Visibility 
-                        color="action" 
-                        sx={{ 
+                      <Visibility
+                        color="action"
+                        sx={{
                           fontSize: '1.2rem',
                           cursor: 'pointer',
-                          '&:hover': { color: 'primary.main' }
-                        }} 
+                          '&:hover': { color: 'primary.main' },
+                        }}
                       />
                     </TableCell>
                     <TableCell>{medico.username}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Médico</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      Médico
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={medico.isActive ? 'Ativo' : 'Inativo'}
@@ -176,8 +209,18 @@ const MedicosPageTable: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>{medico.createdAt ? new Date(medico.createdAt).toLocaleDateString('pt-BR') : '-'}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{medico.updatedAt ? new Date(medico.updatedAt).toLocaleDateString('pt-BR') : '-'}</TableCell>
+                    <TableCell>
+                      {medico.createdAt
+                        ? new Date(medico.createdAt).toLocaleDateString('pt-BR')
+                        : '-'}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                    >
+                      {medico.updatedAt
+                        ? new Date(medico.updatedAt).toLocaleDateString('pt-BR')
+                        : '-'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -187,8 +230,8 @@ const MedicosPageTable: React.FC = () => {
       </Card>
 
       {/* Dialog de Manutenção */}
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth={false}
         sx={{
@@ -196,23 +239,32 @@ const MedicosPageTable: React.FC = () => {
             width: { xs: '95vw', sm: '500px' },
             maxWidth: '500px',
             margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' }
-          }
+            minHeight: { xs: 'auto', sm: 'auto' },
+          },
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
           <MedicoIcon />
           {dialogMode === 'add' ? 'Adicionar Médico' : 'Editar Médico'}
         </DialogTitle>
-        
+
         <DialogContent sx={{ pt: 1, px: 1.5, pb: 1 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 }, mt: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: { xs: 1, sm: 1.2 },
+              mt: 1,
+            }}
+          >
             <TextField
               fullWidth
               label="Nome Médico"
@@ -221,11 +273,11 @@ const MedicosPageTable: React.FC = () => {
               size="small"
               sx={{
                 '& .MuiInputBase-root': {
-                  padding: '4px 6px'
+                  padding: '4px 6px',
                 },
                 '& .MuiInputBase-input': {
-                  padding: '4px 0'
-                }
+                  padding: '4px 0',
+                },
               }}
             />
             <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
@@ -235,14 +287,18 @@ const MedicosPageTable: React.FC = () => {
                 type="password"
                 variant="outlined"
                 size="small"
-                placeholder={dialogMode === 'edit' ? 'Deixe em branco para manter atual' : ''}
+                placeholder={
+                  dialogMode === 'edit'
+                    ? 'Deixe em branco para manter atual'
+                    : ''
+                }
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
               <TextField
@@ -253,22 +309,27 @@ const MedicosPageTable: React.FC = () => {
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
             </Box>
-            <FormControl fullWidth variant="outlined" size="small" sx={{
-              '& .MuiInputBase-root': {
-                padding: '6px 8px'
-              },
-              '& .MuiSelect-select': {
-                padding: '6px 0'
-              }
-            }}>
+            <FormControl
+              fullWidth
+              variant="outlined"
+              size="small"
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '6px 8px',
+                },
+                '& .MuiSelect-select': {
+                  padding: '6px 0',
+                },
+              }}
+            >
               <InputLabel>Situação</InputLabel>
               <Select
                 defaultValue={selectedMedico?.isActive ?? true}
@@ -279,25 +340,27 @@ const MedicosPageTable: React.FC = () => {
               </Select>
             </FormControl>
             {selectedMedico && (
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 0.5, 
-                flexWrap: 'wrap',
-                mt: 0.5
-              }}>
-                <Chip 
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 0.5,
+                  flexWrap: 'wrap',
+                  mt: 0.5,
+                }}
+              >
+                <Chip
                   label={`Cadastrado: ${selectedMedico.createdAt ? new Date(selectedMedico.createdAt).toLocaleDateString('pt-BR') : '-'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
-                <Chip 
+                <Chip
                   label={`Atualizado: ${selectedMedico.updatedAt ? new Date(selectedMedico.updatedAt).toLocaleDateString('pt-BR') : '-'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
-                <Chip 
+                <Chip
                   label={selectedMedico.isActive ? 'Ativo' : 'Inativo'}
                   color={selectedMedico.isActive ? 'success' : 'error'}
                   variant="outlined"
@@ -308,7 +371,7 @@ const MedicosPageTable: React.FC = () => {
             )}
           </Box>
         </DialogContent>
-        
+
         <DialogActions sx={{ p: 2, gap: 0.5 }}>
           {dialogMode === 'edit' && (
             <Button
@@ -322,16 +385,16 @@ const MedicosPageTable: React.FC = () => {
               Excluir
             </Button>
           )}
-          <Button 
-            onClick={handleCloseDialog} 
-            color="inherit" 
+          <Button
+            onClick={handleCloseDialog}
+            color="inherit"
             size="small"
             sx={{ fontSize: '0.75rem' }}
           >
             Fechar
           </Button>
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             variant="contained"
             startIcon={<EditIcon />}
             size="small"
@@ -340,7 +403,7 @@ const MedicosPageTable: React.FC = () => {
               '&:hover': {
                 background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
               },
-              fontSize: '0.75rem'
+              fontSize: '0.75rem',
             }}
           >
             {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}

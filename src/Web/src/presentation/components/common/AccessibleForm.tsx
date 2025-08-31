@@ -50,17 +50,17 @@ export const AccessibleTextField: React.FC<AccessibleTextFieldProps> = ({
 }) => {
   const errorId = error ? `${id}-error` : undefined;
   const helperTextId = helperText ? `${id}-helper` : undefined;
-  
-  const describedBy = [ariaDescribedBy, errorId, helperTextId]
-    .filter(Boolean)
-    .join(' ') || undefined;
+
+  const describedBy =
+    [ariaDescribedBy, errorId, helperTextId].filter(Boolean).join(' ') ||
+    undefined;
 
   return (
     <TextField
       id={id}
       label={label}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={e => onChange(e.target.value)}
       error={!!error}
       helperText={error || helperText}
       required={required}
@@ -103,10 +103,9 @@ export const AccessibleSelect: React.FC<AccessibleSelectProps> = ({
 }) => {
   const errorId = error ? `${id}-error` : undefined;
   const helperTextId = helperText ? `${id}-helper` : undefined;
-  
-  const describedBy = [errorId, helperTextId]
-    .filter(Boolean)
-    .join(' ') || undefined;
+
+  const describedBy =
+    [errorId, helperTextId].filter(Boolean).join(' ') || undefined;
 
   return (
     <FormControl fullWidth error={!!error} disabled={disabled}>
@@ -117,15 +116,15 @@ export const AccessibleSelect: React.FC<AccessibleSelectProps> = ({
         labelId={`${id}-label`}
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value as string)}
+        onChange={e => onChange(e.target.value as string)}
         label={label}
         aria-describedby={describedBy}
         aria-invalid={!!error}
         aria-required={required}
       >
-        {options.map((option) => (
-          <MenuItem 
-            key={option.value} 
+        {options.map(option => (
+          <MenuItem
+            key={option.value}
             value={option.value}
             disabled={option.disabled}
           >
@@ -134,9 +133,7 @@ export const AccessibleSelect: React.FC<AccessibleSelectProps> = ({
         ))}
       </Select>
       {(error || helperText) && (
-        <FormHelperText id={describedBy}>
-          {error || helperText}
-        </FormHelperText>
+        <FormHelperText id={describedBy}>{error || helperText}</FormHelperText>
       )}
     </FormControl>
   );
@@ -163,10 +160,9 @@ export const AccessibleCheckbox: React.FC<AccessibleCheckboxProps> = ({
 }) => {
   const errorId = error ? `${id}-error` : undefined;
   const helperTextId = helperText ? `${id}-helper` : undefined;
-  
-  const describedBy = [errorId, helperTextId]
-    .filter(Boolean)
-    .join(' ') || undefined;
+
+  const describedBy =
+    [errorId, helperTextId].filter(Boolean).join(' ') || undefined;
 
   return (
     <FormControl error={!!error} disabled={disabled}>
@@ -175,7 +171,7 @@ export const AccessibleCheckbox: React.FC<AccessibleCheckboxProps> = ({
           <Checkbox
             id={id}
             checked={checked}
-            onChange={(e) => onChange(e.target.checked)}
+            onChange={e => onChange(e.target.checked)}
             aria-describedby={describedBy}
             aria-invalid={!!error}
           />
@@ -183,9 +179,7 @@ export const AccessibleCheckbox: React.FC<AccessibleCheckboxProps> = ({
         label={label}
       />
       {(error || helperText) && (
-        <FormHelperText id={describedBy}>
-          {error || helperText}
-        </FormHelperText>
+        <FormHelperText id={describedBy}>{error || helperText}</FormHelperText>
       )}
     </FormControl>
   );
@@ -218,10 +212,9 @@ export const AccessibleRadioGroup: React.FC<AccessibleRadioGroupProps> = ({
 }) => {
   const errorId = error ? `${id}-error` : undefined;
   const helperTextId = helperText ? `${id}-helper` : undefined;
-  
-  const describedBy = [errorId, helperTextId]
-    .filter(Boolean)
-    .join(' ') || undefined;
+
+  const describedBy =
+    [errorId, helperTextId].filter(Boolean).join(' ') || undefined;
 
   return (
     <FormControl error={!!error} disabled={disabled} required={required}>
@@ -229,13 +222,13 @@ export const AccessibleRadioGroup: React.FC<AccessibleRadioGroupProps> = ({
       <RadioGroup
         aria-labelledby={`${id}-label`}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         row={row}
         aria-describedby={describedBy}
         aria-invalid={!!error}
         aria-required={required}
       >
-        {options.map((option) => (
+        {options.map(option => (
           <FormControlLabel
             key={option.value}
             value={option.value}
@@ -246,9 +239,7 @@ export const AccessibleRadioGroup: React.FC<AccessibleRadioGroupProps> = ({
         ))}
       </RadioGroup>
       {(error || helperText) && (
-        <FormHelperText id={describedBy}>
-          {error || helperText}
-        </FormHelperText>
+        <FormHelperText id={describedBy}>{error || helperText}</FormHelperText>
       )}
     </FormControl>
   );
@@ -277,10 +268,10 @@ export const ScreenReaderAnnouncer: React.FC = () => {
 };
 
 // Skip Link Component
-export const SkipLink: React.FC<{ href: string; children: React.ReactNode }> = ({
-  href,
-  children,
-}) => (
+export const SkipLink: React.FC<{
+  href: string;
+  children: React.ReactNode;
+}> = ({ href, children }) => (
   <Button
     href={href}
     sx={{

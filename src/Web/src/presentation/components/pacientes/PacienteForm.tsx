@@ -12,13 +12,22 @@ import {
 } from '@mui/material';
 import { Save, ArrowBack } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { CreatePacienteDto, UpdatePacienteDto, Paciente } from '../../../domain/entities/Paciente';
+import type {
+  CreatePacienteDto,
+  UpdatePacienteDto,
+  Paciente,
+} from '../../../domain/entities/Paciente';
 import { useUIStore } from '../../../application/stores/uiStore';
 import { usePacientes } from '../../hooks/usePacientes';
 
 const pacienteSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  documento: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF deve estar no formato 000.000.000-00'),
+  documento: z
+    .string()
+    .regex(
+      /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+      'CPF deve estar no formato 000.000.000-00'
+    ),
   dataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
   telefone: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
@@ -32,17 +41,19 @@ const PacienteForm: React.FC = () => {
   const { id } = useParams();
   const { addNotification } = useUIStore();
   const isEditing = Boolean(id);
-  
+
   const {
     createPaciente,
     updatePaciente,
     getPacienteById,
     loading: apiLoading,
-    error: _error
+    error: _error,
   } = usePacientes();
-  
+
   const [loading, setLoading] = React.useState(false);
-  const [_pacienteData, setPacienteData] = React.useState<Paciente | null>(null);
+  const [_pacienteData, setPacienteData] = React.useState<Paciente | null>(
+    null
+  );
 
   const {
     register,
@@ -60,10 +71,13 @@ const PacienteForm: React.FC = () => {
           setLoading(true);
           const paciente = await getPacienteById(id);
           setPacienteData(paciente);
-          
+
           setValue('nome', paciente.nome);
           setValue('documento', paciente.documento);
-          setValue('dataNascimento', new Date(paciente.dataNascimento).toISOString().split('T')[0]);
+          setValue(
+            'dataNascimento',
+            new Date(paciente.dataNascimento).toISOString().split('T')[0]
+          );
           setValue('telefone', paciente.telefone || '');
           setValue('email', paciente.email || '');
           setValue('endereco', paciente.endereco || '');
@@ -74,14 +88,14 @@ const PacienteForm: React.FC = () => {
           setLoading(false);
         }
       };
-      
+
       loadPaciente();
     }
   }, [isEditing, id, setValue, getPacienteById, addNotification, navigate]);
 
   const onSubmit = async (data: PacienteFormData) => {
     setLoading(true);
-    
+
     try {
       const pacienteData = {
         nome: data.nome,
@@ -91,7 +105,7 @@ const PacienteForm: React.FC = () => {
         email: data.email,
         endereco: data.endereco,
       };
-      
+
       if (isEditing && id) {
         await updatePaciente(id, pacienteData as UpdatePacienteDto);
         addNotification('Paciente atualizado com sucesso!', 'success');
@@ -99,7 +113,7 @@ const PacienteForm: React.FC = () => {
         await createPaciente(pacienteData as CreatePacienteDto);
         addNotification('Paciente cadastrado com sucesso!', 'success');
       }
-      
+
       navigate('/pacientes');
     } catch (error: any) {
       addNotification(error.message || 'Erro ao salvar paciente', 'error');
@@ -137,23 +151,31 @@ const PacienteForm: React.FC = () => {
             {isEditing ? 'Editar Paciente' : 'Novo Paciente'}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {isEditing ? 'Atualize as informações do paciente' : 'Cadastre um novo paciente no sistema'}
+            {isEditing
+              ? 'Atualize as informações do paciente'
+              : 'Cadastre um novo paciente no sistema'}
           </Typography>
         </Box>
       </Box>
 
       <Card>
         <CardContent sx={{ p: { xs: 1, sm: 1.5 } }}>
-          <Box 
-            component="form" 
+          <Box
+            component="form"
             onSubmit={handleSubmit(onSubmit)}
-            sx={{ 
+            sx={{
               maxWidth: { xs: '100%', sm: '600px' },
               mx: 'auto',
-              mt: 1
+              mt: 1,
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 } }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: { xs: 1, sm: 1.2 },
+              }}
+            >
               <TextField
                 {...register('nome')}
                 fullWidth
@@ -164,11 +186,11 @@ const PacienteForm: React.FC = () => {
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
 
@@ -186,13 +208,13 @@ const PacienteForm: React.FC = () => {
                     flex: '1 1 200px',
                     minWidth: '200px',
                     '& .MuiInputBase-root': {
-                      padding: '4px 6px'
+                      padding: '4px 6px',
                     },
                     '& .MuiInputBase-input': {
-                      padding: '4px 0'
-                    }
+                      padding: '4px 0',
+                    },
                   }}
-                  onChange={(e) => {
+                  onChange={e => {
                     const formatted = formatCPF(e.target.value);
                     setValue('documento', formatted);
                   }}
@@ -211,11 +233,11 @@ const PacienteForm: React.FC = () => {
                     flex: '1 1 180px',
                     minWidth: '180px',
                     '& .MuiInputBase-root': {
-                      padding: '4px 6px'
+                      padding: '4px 6px',
                     },
                     '& .MuiInputBase-input': {
-                      padding: '4px 0'
-                    }
+                      padding: '4px 0',
+                    },
                   }}
                 />
               </Box>
@@ -234,13 +256,13 @@ const PacienteForm: React.FC = () => {
                     flex: '1 1 180px',
                     minWidth: '180px',
                     '& .MuiInputBase-root': {
-                      padding: '4px 6px'
+                      padding: '4px 6px',
                     },
                     '& .MuiInputBase-input': {
-                      padding: '4px 0'
-                    }
+                      padding: '4px 0',
+                    },
                   }}
-                  onChange={(e) => {
+                  onChange={e => {
                     const formatted = formatPhone(e.target.value);
                     setValue('telefone', formatted);
                   }}
@@ -259,11 +281,11 @@ const PacienteForm: React.FC = () => {
                     flex: '1 1 220px',
                     minWidth: '220px',
                     '& .MuiInputBase-root': {
-                      padding: '4px 6px'
+                      padding: '4px 6px',
                     },
                     '& .MuiInputBase-input': {
-                      padding: '4px 0'
-                    }
+                      padding: '4px 0',
+                    },
                   }}
                 />
               </Box>
@@ -281,11 +303,11 @@ const PacienteForm: React.FC = () => {
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
 
@@ -296,7 +318,7 @@ const PacienteForm: React.FC = () => {
                   startIcon={<Save />}
                   disabled={loading || apiLoading}
                 >
-                  {(loading || apiLoading) ? 'Salvando...' : 'Salvar'}
+                  {loading || apiLoading ? 'Salvando...' : 'Salvar'}
                 </Button>
                 <Button
                   variant="outlined"

@@ -1,16 +1,16 @@
 import { apiClient } from '../../infrastructure/api/client';
-import type { 
-  Paciente, 
-  CreatePacienteDto, 
-  UpdatePacienteDto, 
-  PacienteListResponse 
+import type {
+  Paciente,
+  CreatePacienteDto,
+  UpdatePacienteDto,
+  PacienteListResponse,
 } from '../../domain/entities/Paciente';
 
 // Debug discreto para serviços - só console.log
 const debug = {
   log: (message: string, data?: any) => {
     console.log(`🔗 [PacienteService] ${message}`, data);
-  }
+  },
 };
 
 export interface PacienteQueryParams {
@@ -24,41 +24,47 @@ export class PacienteService {
   /**
    * Lista pacientes com paginação e filtros
    */
-  static async list(params: PacienteQueryParams = {}): Promise<PacienteListResponse> {
+  static async list(
+    params: PacienteQueryParams = {}
+  ): Promise<PacienteListResponse> {
     debug.log('Iniciando list() com parâmetros:', params);
-    
+
     const { page = 1, pageSize = 7, nome, documento } = params;
-    
+
     const searchParams = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
     });
-    
+
     if (nome) {
       searchParams.append('nome', nome);
     }
-    
+
     if (documento) {
       searchParams.append('documento', documento);
     }
-    
+
     const fullUrl = `/pacientes?${searchParams.toString()}`;
     debug.log('URL completa da requisição:', fullUrl);
     debug.log('Base URL do apiClient:', apiClient.defaults.baseURL);
     debug.log('URL final será:', `${apiClient.defaults.baseURL}${fullUrl}`);
-    
+
     try {
       const response = await apiClient.get(fullUrl);
-      
+
       debug.log('Status da resposta:', response.status);
       debug.log('Dados recebidos:', {
         tipo: Array.isArray(response.data) ? 'Array' : 'Object',
         quantidade: Array.isArray(response.data) ? response.data.length : 'N/A',
-        data: response.data
+        data: response.data,
       });
-      
+
       // Verificar se a API retorna a nova estrutura paginada ou a antiga
-      if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+      if (
+        response.data &&
+        typeof response.data === 'object' &&
+        'data' in response.data
+      ) {
         // Nova estrutura paginada - usar diretamente
         debug.log('Usando nova estrutura paginada da API');
         return response.data as PacienteListResponse;
@@ -66,15 +72,15 @@ export class PacienteService {
         // Estrutura antiga (array simples) - converter para nova estrutura
         debug.log('Convertendo estrutura antiga para nova estrutura paginada');
         const pacientesArray = response.data as Paciente[];
-        
+
         const result = {
           data: pacientesArray,
           total: pacientesArray.length,
           page: page,
           pageSize: pageSize,
-          totalPages: Math.ceil(pacientesArray.length / pageSize)
+          totalPages: Math.ceil(pacientesArray.length / pageSize),
         };
-        
+
         debug.log('Resultado final (convertido):', result);
         return result;
       }
@@ -83,7 +89,7 @@ export class PacienteService {
         message: error.message,
         status: error.response?.status,
         statusText: error.response?.statusText,
-        data: error.response?.data
+        data: error.response?.data,
       });
       throw error;
     }
@@ -105,14 +111,15 @@ export class PacienteService {
     const pacienteData = {
       nome: data.nome,
       documento: data.documento, // Backend espera 'documento', não 'cpf'
-      dataNascimento: data.dataNascimento instanceof Date ? 
-        data.dataNascimento.toISOString() : 
-        new Date(data.dataNascimento).toISOString(),
+      dataNascimento:
+        data.dataNascimento instanceof Date
+          ? data.dataNascimento.toISOString()
+          : new Date(data.dataNascimento).toISOString(),
       telefone: data.telefone || null,
       email: data.email || null,
-      endereco: data.endereco || null
+      endereco: data.endereco || null,
     };
-    
+
     const response = await apiClient.post('/pacientes', pacienteData);
     return response.data;
   }
@@ -127,15 +134,16 @@ export class PacienteService {
       documento: data.documento, // Backend espera 'documento'
       telefone: data.telefone || null,
       email: data.email || null,
-      endereco: data.endereco || null
+      endereco: data.endereco || null,
     };
-    
+
     if (data.dataNascimento) {
-      updateData.dataNascimento = data.dataNascimento instanceof Date ? 
-        data.dataNascimento.toISOString() : 
-        new Date(data.dataNascimento).toISOString();
+      updateData.dataNascimento =
+        data.dataNascimento instanceof Date
+          ? data.dataNascimento.toISOString()
+          : new Date(data.dataNascimento).toISOString();
     }
-    
+
     const response = await apiClient.put(`/pacientes/${id}`, updateData);
     return response.data;
   }
@@ -151,7 +159,9 @@ export class PacienteService {
    * Busca pacientes por nome
    */
   static async searchByName(nome: string): Promise<Paciente[]> {
-    const response = await apiClient.get(`/pacientes/search?nome=${encodeURIComponent(nome)}`);
+    const response = await apiClient.get(
+      `/pacientes/search?nome=${encodeURIComponent(nome)}`
+    );
     return response.data;
   }
 }

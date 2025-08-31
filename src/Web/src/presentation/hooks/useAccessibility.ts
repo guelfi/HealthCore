@@ -17,9 +17,11 @@ export function useFocusManagement() {
     const focusableElements = container.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    
+
     const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    const lastElement = focusableElements[
+      focusableElements.length - 1
+    ] as HTMLElement;
 
     const handleTabKey = (e: KeyboardEvent) => {
       if (e.key === 'Tab') {
@@ -38,7 +40,7 @@ export function useFocusManagement() {
     };
 
     container.addEventListener('keydown', handleTabKey);
-    
+
     return () => {
       container.removeEventListener('keydown', handleTabKey);
     };
@@ -81,7 +83,7 @@ export function useKeyboardNavigation(
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
@@ -92,7 +94,10 @@ export function useKeyboardNavigation(
 export function useScreenReader() {
   const [announcement, setAnnouncement] = useState('');
 
-  const announce = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+  const announce = (
+    message: string,
+    priority: 'polite' | 'assertive' = 'polite'
+  ) => {
     setAnnouncement(''); // Clear first to ensure re-announcement
     setTimeout(() => {
       setAnnouncement(message);
@@ -115,7 +120,7 @@ export function useReducedMotion() {
     };
 
     mediaQuery.addEventListener('change', handleChange);
-    
+
     return () => {
       mediaQuery.removeEventListener('change', handleChange);
     };

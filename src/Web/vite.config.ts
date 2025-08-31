@@ -30,8 +30,6 @@ export default defineConfig({
       port: 5005,
       host: 'localhost', // Força HMR a usar localhost
     },
-    allowedHosts: [
-      '5ca808654f2c.ngrok-free.app'
-    ]
+    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app'],
   },
 });

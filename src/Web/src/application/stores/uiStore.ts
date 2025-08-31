@@ -35,13 +35,12 @@ export const useUIStore = create<UIStore>()(
       notifications: [],
 
       // Actions
-      toggleSidebar: () =>
-        set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      toggleSidebar: () => set(state => ({ sidebarOpen: !state.sidebarOpen })),
 
       setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
 
       toggleTheme: () =>
-        set((state) => ({
+        set(state => ({
           theme: state.theme === 'light' ? 'dark' : 'light',
         })),
 
@@ -53,7 +52,7 @@ export const useUIStore = create<UIStore>()(
           type,
           timestamp: new Date(),
         };
-        set((state) => ({
+        set(state => ({
           notifications: [...state.notifications, notification],
         }));
 
@@ -63,16 +62,16 @@ export const useUIStore = create<UIStore>()(
         }, 5000);
       },
 
-      removeNotification: (id) =>
-        set((state) => ({
-          notifications: state.notifications.filter((n) => n.id !== id),
+      removeNotification: id =>
+        set(state => ({
+          notifications: state.notifications.filter(n => n.id !== id),
         })),
 
       clearNotifications: () => set({ notifications: [] }),
     }),
     {
       name: 'ui-store',
-      partialize: (state) => ({
+      partialize: state => ({
         sidebarOpen: state.sidebarOpen,
         theme: state.theme,
       }),

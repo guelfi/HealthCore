@@ -1,31 +1,31 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    Box,
-    AppBar,
-    Toolbar,
-    Typography,
-    Drawer,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    IconButton,
-    useTheme,
-    useMediaQuery,
-    Menu,
-    MenuItem,
-    Avatar,
+  Box,
+  AppBar,
+  Toolbar,
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+  Menu,
+  MenuItem,
+  Avatar,
 } from '@mui/material';
 import {
-    Dashboard,
-    People,
-    Assignment,
-    AdminPanelSettings,
-    LocalHospital,
-    Logout,
-    Menu as MenuIcon,
+  Dashboard,
+  People,
+  Assignment,
+  AdminPanelSettings,
+  LocalHospital,
+  Logout,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useUIStore } from '../../../application/stores/uiStore';
@@ -35,243 +35,255 @@ import Footer from './Footer';
 const drawerWidth = 240;
 
 interface AppLayoutProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-    const { user, logout } = useAuthStore();
-    const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { user, logout } = useAuthStore();
+  const { sidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const userMenuOpen = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const userMenuOpen = Boolean(anchorEl);
 
-    React.useEffect(() => {
-        if (!isMobile) {
-            setSidebarOpen(true);
-        }
-    }, [isMobile, setSidebarOpen]);
+  React.useEffect(() => {
+    if (!isMobile) {
+      setSidebarOpen(true);
+    }
+  }, [isMobile, setSidebarOpen]);
 
-    const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-    const handleUserMenuClose = () => {
-        setAnchorEl(null);
-    };
+  const handleUserMenuClose = () => {
+    setAnchorEl(null);
+  };
 
-    const handleLogout = async () => {
-        handleUserMenuClose();
-        await logout();
-        navigate('/login');
-    };
+  const handleLogout = async () => {
+    handleUserMenuClose();
+    await logout();
+    navigate('/login');
+  };
 
-    const menuItems = [
-        { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    ];
+  const menuItems = [
+    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
+  ];
 
-    if (user?.role === UserProfile.ADMINISTRADOR) {
-        menuItems.push(
-            { text: 'Médicos', icon: <LocalHospital />, path: '/admin/medicos' },
-            { text: 'Pacientes', icon: <People />, path: '/pacientes' },
-            { text: 'Exames', icon: <Assignment />, path: '/exames' },
-            { text: 'Usuários', icon: <AdminPanelSettings />, path: '/admin/usuarios' }
-        );
-    } else {
-        menuItems.push(
-            { text: 'Pacientes', icon: <People />, path: '/pacientes' },
-            { text: 'Exames', icon: <Assignment />, path: '/exames' }
-        );
+  if (user?.role === UserProfile.ADMINISTRADOR) {
+    menuItems.push(
+      { text: 'Médicos', icon: <LocalHospital />, path: '/admin/medicos' },
+      { text: 'Pacientes', icon: <People />, path: '/pacientes' },
+      { text: 'Exames', icon: <Assignment />, path: '/exames' },
+      {
+        text: 'Usuários',
+        icon: <AdminPanelSettings />,
+        path: '/admin/usuarios',
+      }
+    );
+  } else {
+    menuItems.push(
+      { text: 'Pacientes', icon: <People />, path: '/pacientes' },
+      { text: 'Exames', icon: <Assignment />, path: '/exames' }
+    );
+  }
+
+  const handleMenuClick = (path: string) => {
+    navigate(path);
+    if (isMobile) {
+      toggleSidebar();
     }
 
-    const handleMenuClick = (path: string) => {
-        navigate(path);
-        if (isMobile) {
-            toggleSidebar();
-        }
+    // Scroll to top when navigating, with special handling for Dashboard
+    if (path === '/dashboard') {
+      // Immediate scroll for Dashboard
+      window.scrollTo(0, 0);
+      // Additional smooth scroll after navigation
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
-        // Scroll to top when navigating, with special handling for Dashboard
-        if (path === '/dashboard') {
-            // Immediate scroll for Dashboard
-            window.scrollTo(0, 0);
-            // Additional smooth scroll after navigation
-            setTimeout(() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 100);
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
+  // Verificar se estamos no Dashboard ou em uma Page
+  const isDashboard = location.pathname === '/dashboard';
 
-    // Verificar se estamos no Dashboard ou em uma Page
-    const isDashboard = location.pathname === '/dashboard';
+  const drawerContent = (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Toolbar />
+      <Box sx={{ overflow: 'auto', flex: 1 }}>
+        <List>
+          {menuItems.map(item => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                selected={
+                  location.pathname === item.path ||
+                  location.pathname.startsWith(item.path + '/')
+                }
+                onClick={() => handleMenuClick(item.path)}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+      {/* Footer no sidebar: sempre visível */}
+      <Box sx={{ mt: 'auto' }}>
+        <Footer compact />
+      </Box>
+    </Box>
+  );
 
-    const drawerContent = (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Toolbar />
-            <Box sx={{ overflow: 'auto', flex: 1 }}>
-                <List>
-                    {menuItems.map((item) => (
-                        <ListItem key={item.text} disablePadding>
-                            <ListItemButton
-                                selected={location.pathname === item.path || location.pathname.startsWith(item.path + '/')}
-                                onClick={() => handleMenuClick(item.path)}
-                            >
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText primary={item.text} />
-                            </ListItemButton>
-                        </ListItem>
-                    ))}
-                </List>
-            </Box>
-            {/* Footer no sidebar: sempre visível */}
-            <Box sx={{ mt: 'auto' }}>
-                <Footer compact />
-            </Box>
-        </Box>
-    );
-
-    return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <AppBar
-                position="fixed"
-                sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <AppBar
+        position="fixed"
+        sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}
+      >
+        <Toolbar>
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={toggleSidebar}
+              sx={{ mr: 2 }}
             >
-                <Toolbar>
-                    {isMobile && (
-                        <IconButton
-                            color="inherit"
-                            aria-label="open drawer"
-                            edge="start"
-                            onClick={toggleSidebar}
-                            sx={{ mr: 2 }}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                    )}
-                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-                        MobileMed
-                    </Typography>
+              <MenuIcon />
+            </IconButton>
+          )}
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            MobileMed
+          </Typography>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                color: 'white',
-                                fontWeight: 600,
-                                display: { xs: 'none', sm: 'block' }
-                            }}
-                        >
-                            {user?.username}
-                        </Typography>
-                        <IconButton onClick={handleUserMenuClick} color="inherit">
-                            <Avatar sx={{
-                                width: 32,
-                                height: 32,
-                                bgcolor: 'rgba(255, 255, 255, 0.2)',
-                                color: 'white',
-                                fontWeight: 'bold'
-                            }}>
-                                {user?.username?.charAt(0).toUpperCase()}
-                            </Avatar>
-                        </IconButton>
-                        <Menu
-                            anchorEl={anchorEl}
-                            open={userMenuOpen}
-                            onClose={handleUserMenuClose}
-                        >
-                            <MenuItem disabled sx={{
-                                fontWeight: 600,
-                                color: 'primary.main',
-                                '&.Mui-disabled': {
-                                    color: 'primary.main',
-                                    opacity: 1
-                                }
-                            }}>
-                                {user?.username}
-                            </MenuItem>
-                            <MenuItem onClick={handleLogout}>
-                                <ListItemIcon>
-                                    <Logout fontSize="small" />
-                                </ListItemIcon>
-                                Sair
-                            </MenuItem>
-                        </Menu>
-                    </Box>
-                </Toolbar>
-            </AppBar>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'white',
+                fontWeight: 600,
+                display: { xs: 'none', sm: 'block' },
+              }}
+            >
+              {user?.username}
+            </Typography>
+            <IconButton onClick={handleUserMenuClick} color="inherit">
+              <Avatar
+                sx={{
+                  width: 32,
+                  height: 32,
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontWeight: 'bold',
+                }}
+              >
+                {user?.username?.charAt(0).toUpperCase()}
+              </Avatar>
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={userMenuOpen}
+              onClose={handleUserMenuClose}
+            >
+              <MenuItem
+                disabled
+                sx={{
+                  fontWeight: 600,
+                  color: 'primary.main',
+                  '&.Mui-disabled': {
+                    color: 'primary.main',
+                    opacity: 1,
+                  },
+                }}
+              >
+                {user?.username}
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <Logout fontSize="small" />
+                </ListItemIcon>
+                Sair
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
-            <Box sx={{ display: 'flex', flex: 1 }}>
-                <Drawer
-                    variant={isMobile ? 'temporary' : 'permanent'}
-                    open={sidebarOpen}
-                    onClose={toggleSidebar}
-                    sx={{
-                        width: drawerWidth,
-                        flexShrink: 0,
-                        [`& .MuiDrawer-paper`]: {
-                            width: drawerWidth,
-                            boxSizing: 'border-box',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        },
-                    }}
-                >
-                    {drawerContent}
-                </Drawer>
+      <Box sx={{ display: 'flex', flex: 1 }}>
+        <Drawer
+          variant={isMobile ? 'temporary' : 'permanent'}
+          open={sidebarOpen}
+          onClose={toggleSidebar}
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
 
-                <Box
-                    component="main"
-                    sx={{
-                        flexGrow: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        width: { sm: `calc(100% - ${drawerWidth}px)` },
-                        position: 'fixed',
-                        top: { xs: '56px', sm: '64px' }, // Posição fixa após o header
-                        right: 0,
-                        bottom: 0,
-                        left: { xs: 0, sm: `${drawerWidth}px` }, // Considera o drawer em desktop
-                        overflow: 'hidden', // Remove scroll do container principal
-                    }}
-                >
-                    {/* Container wrapper que inicia logo abaixo do header */}
-                    <Box 
-                        sx={{ 
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: '120vh', // 120% da viewport para comportar todo conteúdo
-                            overflowY: 'auto', // Scroll interno apenas
-                            overflowX: 'hidden', // Remove scroll horizontal
-                            '&::-webkit-scrollbar': {
-                                display: 'none' // Oculta scrollbar no webkit
-                            },
-                            scrollbarWidth: 'none', // Oculta scrollbar no Firefox
-                        }}
-                    >
-                        {/* Container de conteúdo das páginas */}
-                        <Box 
-                            sx={{ 
-                                p: 3,
-                                pb: (isDashboard && !isMobile) ? 1 : 3,
-                                mb: (isDashboard && !isMobile) ? 2 : 0,
-                                minHeight: '100%', // Garante altura mínima
-                            }}
-                        >
-                            {children}
-                        </Box>
-                    </Box>
-                </Box>
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            width: { sm: `calc(100% - ${drawerWidth}px)` },
+            position: 'fixed',
+            top: { xs: '56px', sm: '64px' }, // Posição fixa após o header
+            right: 0,
+            bottom: 0,
+            left: { xs: 0, sm: `${drawerWidth}px` }, // Considera o drawer em desktop
+            overflow: 'hidden', // Remove scroll do container principal
+          }}
+        >
+          {/* Container wrapper que inicia logo abaixo do header */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '120vh', // 120% da viewport para comportar todo conteúdo
+              overflowY: 'auto', // Scroll interno apenas
+              overflowX: 'hidden', // Remove scroll horizontal
+              '&::-webkit-scrollbar': {
+                display: 'none', // Oculta scrollbar no webkit
+              },
+              scrollbarWidth: 'none', // Oculta scrollbar no Firefox
+            }}
+          >
+            {/* Container de conteúdo das páginas */}
+            <Box
+              sx={{
+                p: 3,
+                pb: isDashboard && !isMobile ? 1 : 3,
+                mb: isDashboard && !isMobile ? 2 : 0,
+                minHeight: '100%', // Garante altura mínima
+              }}
+            >
+              {children}
             </Box>
-
-            {/* Footer removido da Dashboard - agora aparece apenas no sidebar */}
+          </Box>
         </Box>
-    );
+      </Box>
+
+      {/* Footer removido da Dashboard - agora aparece apenas no sidebar */}
+    </Box>
+  );
 };
 
 export default AppLayout;

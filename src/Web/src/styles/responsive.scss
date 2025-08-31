@@ -47,7 +47,7 @@ $breakpoint-xl: 1536px;
   @include mobile-only {
     display: none !important;
   }
-  
+
   @include desktop-only {
     display: none !important;
   }
@@ -74,7 +74,7 @@ $breakpoint-xl: 1536px;
 // Responsive spacing
 .responsive-padding {
   padding: 16px;
-  
+
   @include tablet-and-desktop {
     padding: 24px;
   }
@@ -82,7 +82,7 @@ $breakpoint-xl: 1536px;
 
 .responsive-margin {
   margin: 16px;
-  
+
   @include tablet-and-desktop {
     margin: 24px;
   }
@@ -93,11 +93,11 @@ $breakpoint-xl: 1536px;
   display: grid;
   gap: 16px;
   grid-template-columns: 1fr;
-  
+
   @include tablet-only {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   @include desktop-only {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
@@ -107,7 +107,7 @@ $breakpoint-xl: 1536px;
 // Responsive text
 .responsive-text {
   font-size: 14px;
-  
+
   @include tablet-and-desktop {
     font-size: 16px;
   }
@@ -115,7 +115,7 @@ $breakpoint-xl: 1536px;
 
 .responsive-title {
   font-size: 20px;
-  
+
   @include tablet-and-desktop {
     font-size: 24px;
   }
@@ -162,7 +162,7 @@ $breakpoint-xl: 1536px;
   .no-print {
     display: none !important;
   }
-  
+
   .print-only {
     display: block !important;
   }

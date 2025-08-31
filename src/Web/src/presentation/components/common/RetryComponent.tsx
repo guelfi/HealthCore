@@ -34,21 +34,25 @@ const RetryComponent: React.FC<RetryComponentProps> = ({
       <CardContent>
         <Box textAlign="center" py={2}>
           <Warning sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
-          
+
           <Typography variant="h6" gutterBottom>
             Erro ao carregar dados
           </Typography>
-          
+
           <Typography variant="body2" color="text.secondary" paragraph>
             {errorMessage}
           </Typography>
 
           {showDetails && typeof error !== 'string' && (
             <Alert severity="error" sx={{ mt: 2, mb: 2, textAlign: 'left' }}>
-              <Typography variant="caption" component="pre" sx={{ 
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}>
+              <Typography
+                variant="caption"
+                component="pre"
+                sx={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
                 {error.stack}
               </Typography>
             </Alert>
@@ -65,9 +69,13 @@ const RetryComponent: React.FC<RetryComponentProps> = ({
               >
                 {loading ? 'Tentando novamente...' : 'Tentar Novamente'}
               </Button>
-              
+
               {maxRetries > 1 && (
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mt: 1, display: 'block' }}
+                >
                   Tentativa {currentRetry + 1} de {maxRetries}
                 </Typography>
               )}
@@ -77,8 +85,8 @@ const RetryComponent: React.FC<RetryComponentProps> = ({
           {!hasRetriesLeft && (
             <Alert severity="error" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                Número máximo de tentativas excedido. 
-                Recarregue a página ou entre em contato com o suporte.
+                Número máximo de tentativas excedido. Recarregue a página ou
+                entre em contato com o suporte.
               </Typography>
             </Alert>
           )}

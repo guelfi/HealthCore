@@ -26,7 +26,7 @@ export const pacienteSchema = z.object({
   dataNascimento: z
     .string()
     .min(1, 'Data de nascimento é obrigatória')
-    .refine((date) => {
+    .refine(date => {
       const birthDate = new Date(date);
       const today = new Date();
       return birthDate <= today;
@@ -34,7 +34,7 @@ export const pacienteSchema = z.object({
   contato: z
     .string()
     .optional()
-    .refine((val) => !val || val.length >= 10, {
+    .refine(val => !val || val.length >= 10, {
       message: 'Contato deve ter pelo menos 10 caracteres',
     }),
 });
@@ -42,9 +42,12 @@ export const pacienteSchema = z.object({
 // Schema de validação para exame
 export const exameSchema = z.object({
   pacienteId: z.string().min(1, 'Paciente é obrigatório'),
-  modalidade: z.enum(['CR', 'CT', 'DX', 'MG', 'MR', 'NM', 'OT', 'PT', 'RF', 'US', 'XA'], {
-    message: 'Modalidade DICOM inválida',
-  }),
+  modalidade: z.enum(
+    ['CR', 'CT', 'DX', 'MG', 'MR', 'NM', 'OT', 'PT', 'RF', 'US', 'XA'],
+    {
+      message: 'Modalidade DICOM inválida',
+    }
+  ),
 });
 
 // Tipos TypeScript derivados dos schemas

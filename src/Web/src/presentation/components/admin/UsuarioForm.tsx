@@ -18,7 +18,13 @@ import {
   FormControlLabel,
   Switch,
 } from '@mui/material';
-import { Save, ArrowBack, Visibility, VisibilityOff, Refresh } from '@mui/icons-material';
+import {
+  Save,
+  ArrowBack,
+  Visibility,
+  VisibilityOff,
+  Refresh,
+} from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 // import type { CreateUsuarioDto } from '../../../domain/entities/Usuario'; // Removido: não utilizado
 import { UserProfile } from '../../../domain/enums/UserProfile';
@@ -38,7 +44,7 @@ const UsuarioForm: React.FC = () => {
   const { id } = useParams();
   const { addNotification } = useUIStore();
   const isEditing = Boolean(id);
-  
+
   const [loading, setLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -67,11 +73,11 @@ const UsuarioForm: React.FC = () => {
 
   const onSubmit = async (_data: UsuarioFormData) => {
     setLoading(true);
-    
+
     try {
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const action = isEditing ? 'atualizado' : 'cadastrado';
       addNotification(`Usuário ${action} com sucesso!`, 'success');
       navigate('/admin/usuarios');
@@ -83,7 +89,8 @@ const UsuarioForm: React.FC = () => {
   };
 
   const generatePassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let password = '';
     for (let i = 0; i < 8; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -111,23 +118,31 @@ const UsuarioForm: React.FC = () => {
             {isEditing ? 'Editar Usuário' : 'Novo Usuário'}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            {isEditing ? 'Atualize as informações do usuário' : 'Cadastre um novo usuário no sistema'}
+            {isEditing
+              ? 'Atualize as informações do usuário'
+              : 'Cadastre um novo usuário no sistema'}
           </Typography>
         </Box>
       </Box>
 
       <Card>
         <CardContent sx={{ p: { xs: 1, sm: 1.5 } }}>
-          <Box 
-            component="form" 
+          <Box
+            component="form"
             onSubmit={handleSubmit(onSubmit)}
-            sx={{ 
+            sx={{
               maxWidth: { xs: '100%', sm: '600px' },
               mx: 'auto',
-              mt: 1
+              mt: 1,
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 } }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: { xs: 1, sm: 1.2 },
+              }}
+            >
               <TextField
                 {...register('username')}
                 fullWidth
@@ -138,22 +153,25 @@ const UsuarioForm: React.FC = () => {
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
 
-              <FormControl fullWidth error={!!errors.role} size="small"
+              <FormControl
+                fullWidth
+                error={!!errors.role}
+                size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiSelect-select': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               >
                 <InputLabel>Perfil *</InputLabel>
@@ -162,14 +180,18 @@ const UsuarioForm: React.FC = () => {
                   label="Perfil *"
                   disabled={loading}
                 >
-                  {Object.values(UserProfile).map((profile) => (
+                  {Object.values(UserProfile).map(profile => (
                     <MenuItem key={profile} value={profile}>
                       {profile}
                     </MenuItem>
                   ))}
                 </Select>
                 {errors.role && (
-                  <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                  <Typography
+                    variant="caption"
+                    color="error"
+                    sx={{ mt: 0.5, ml: 1.75 }}
+                  >
                     {errors.role.message}
                   </Typography>
                 )}
@@ -186,11 +208,11 @@ const UsuarioForm: React.FC = () => {
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
                 InputProps={{
                   endAdornment: (

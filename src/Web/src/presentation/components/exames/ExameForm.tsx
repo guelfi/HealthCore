@@ -26,16 +26,22 @@ import { Save, Visibility } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ExameService } from '../../../application/services/ExameService';
 import { PacienteService } from '../../../application/services/PacienteService';
-import type { Exame, CreateExameDto, UpdateExameDto } from '../../../domain/entities/Exame';
+import type {
+  Exame,
+  CreateExameDto,
+  UpdateExameDto,
+} from '../../../domain/entities/Exame';
 import type { Paciente } from '../../../domain/entities/Paciente';
-import { ModalidadeDicom, ModalidadeDicomLabels } from '../../../domain/enums/ModalidadeDicom';
+import {
+  ModalidadeDicom,
+  ModalidadeDicomLabels,
+} from '../../../domain/enums/ModalidadeDicom';
 import { useUIStore } from '../../../application/stores/uiStore';
-
 
 // Definir o esquema de validação
 const exameSchema = z.object({
   pacienteId: z.string().min(1, 'Paciente é obrigatório'),
-  modalidade: z.nativeEnum(ModalidadeDicom).refine((val) => val !== undefined, {
+  modalidade: z.nativeEnum(ModalidadeDicom).refine(val => val !== undefined, {
     message: 'Modalidade é obrigatória',
   }),
   descricao: z.string().optional(),
@@ -52,25 +58,26 @@ interface ExameFormProps {
   onDelete?: (id: string) => void;
 }
 
-const ExameForm: React.FC<ExameFormProps> = ({ 
-  mode, 
-  initialData, 
-  onSaveSuccess, 
+const ExameForm: React.FC<ExameFormProps> = ({
+  mode,
+  initialData,
+  onSaveSuccess,
   onCancel,
-  onDelete
+  onDelete,
 }) => {
   const navigate = useNavigate();
   const { id: _id } = useParams();
   const { addNotification } = useUIStore();
   const isEditing = mode === 'edit';
-  
+
   const [loading, setLoading] = useState(false);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [pacientesLoading, setPacientesLoading] = useState(false);
-  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
+  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(
+    null
+  );
   const [formError, setFormError] = useState<string | null>(null);
   const [showPacienteDialog, setShowPacienteDialog] = useState(false);
-
 
   const {
     register,
@@ -86,7 +93,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
       modalidade: ModalidadeDicom.CT,
       descricao: '',
       dataExame: new Date().toISOString().split('T')[0],
-    }
+    },
   });
 
   const watchedPacienteId = watch('pacienteId');
@@ -113,7 +120,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
   useEffect(() => {
     if (isEditing && initialData) {
       // Modo edição - carregar dados do exame
-      
+
       // Validar e formatar a data do exame
       let formattedDate;
       try {
@@ -126,7 +133,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
       } catch (error) {
         formattedDate = new Date().toISOString().split('T')[0];
       }
-      
+
       // Usar reset para garantir que todos os valores sejam definidos corretamente
       reset({
         pacienteId: initialData.pacienteId,
@@ -134,7 +141,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
         descricao: initialData.descricao || '',
         dataExame: formattedDate,
       });
-      
+
       // Encontrar e definir o paciente selecionado
       const paciente = pacientes.find(p => p.id === initialData.pacienteId);
       if (paciente) {
@@ -150,7 +157,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
       });
       setSelectedPaciente(null);
     }
-    
+
     // Limpar erros
     setFormError(null);
   }, [mode, initialData, setValue, pacientes]);
@@ -176,7 +183,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
   const onSubmit = async (data: ExameFormData) => {
     setLoading(true);
     setFormError(null);
-    
+
     try {
       if (isEditing && initialData) {
         // Atualizar exame existente
@@ -186,7 +193,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
           descricao: data.descricao,
           dataExame: new Date(data.dataExame),
         };
-        
+
         await ExameService.update(initialData.id, updateData);
         addNotification('Exame atualizado com sucesso!', 'success');
       } else {
@@ -197,11 +204,11 @@ const ExameForm: React.FC<ExameFormProps> = ({
           descricao: data.descricao,
           dataExame: new Date(data.dataExame),
         };
-        
+
         await ExameService.create(createData);
         addNotification('Exame cadastrado com sucesso!', 'success');
       }
-      
+
       // Chamar callback de sucesso ou navegar
       if (onSaveSuccess) {
         onSaveSuccess();
@@ -210,10 +217,11 @@ const ExameForm: React.FC<ExameFormProps> = ({
       }
     } catch (error: any) {
       console.error('Erro ao salvar exame:', error);
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error ||
-                          error.message || 
-                          'Erro ao salvar exame';
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Erro ao salvar exame';
       setFormError(errorMessage);
       addNotification(errorMessage, 'error');
     } finally {
@@ -233,30 +241,43 @@ const ExameForm: React.FC<ExameFormProps> = ({
           {formError}
         </Alert>
       )}
-      
-      <Box 
-        component="form" 
+
+      <Box
+        component="form"
         onSubmit={handleSubmit(onSubmit)}
-        sx={{ 
+        sx={{
           maxWidth: { xs: '100%', sm: '600px' },
-          mx: 'auto'
+          mx: 'auto',
         }}
       >
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 }, mt: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: { xs: 1, sm: 1.2 },
+            mt: 2,
+          }}
+        >
           {isEditing ? (
             <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 0.5 }}
+              >
                 Paciente
               </Typography>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                p: 1.5, 
-                border: '1px solid', 
-                borderColor: 'divider', 
-                borderRadius: 1, 
-                bgcolor: 'grey.50' 
-              }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  p: 1.5,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  bgcolor: 'grey.50',
+                }}
+              >
                 {selectedPaciente && (
                   <IconButton
                     size="small"
@@ -267,14 +288,16 @@ const ExameForm: React.FC<ExameFormProps> = ({
                   </IconButton>
                 )}
                 <Typography variant="body2">
-                  {selectedPaciente ? `${selectedPaciente.nome} - ${selectedPaciente.documento}` : 'Carregando...'}
+                  {selectedPaciente
+                    ? `${selectedPaciente.nome} - ${selectedPaciente.documento}`
+                    : 'Carregando...'}
                 </Typography>
               </Box>
             </Box>
           ) : (
             <Autocomplete
               options={pacientes}
-              getOptionLabel={(option) => `${option.nome} - ${option.documento}`}
+              getOptionLabel={option => `${option.nome} - ${option.documento}`}
               value={selectedPaciente}
               onChange={handlePacienteChange}
               loading={pacientesLoading}
@@ -282,13 +305,13 @@ const ExameForm: React.FC<ExameFormProps> = ({
               size="small"
               sx={{
                 '& .MuiInputBase-root': {
-                  padding: '4px 6px'
+                  padding: '4px 6px',
                 },
                 '& .MuiInputBase-input': {
-                  padding: '4px 0'
-                }
+                  padding: '4px 0',
+                },
               }}
-              renderInput={(params) => (
+              renderInput={params => (
                 <TextField
                   {...params}
                   label="Paciente *"
@@ -297,11 +320,11 @@ const ExameForm: React.FC<ExameFormProps> = ({
                   size="small"
                   sx={{
                     '& .MuiInputBase-root': {
-                      padding: '4px 6px'
+                      padding: '4px 6px',
                     },
                     '& .MuiInputBase-input': {
-                      padding: '4px 0'
-                    }
+                      padding: '4px 0',
+                    },
                   }}
                   InputProps={{
                     ...params.InputProps,
@@ -316,7 +339,9 @@ const ExameForm: React.FC<ExameFormProps> = ({
                     ),
                     endAdornment: (
                       <>
-                        {pacientesLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {pacientesLoading ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
                         {params.InputProps.endAdornment}
                       </>
                     ),
@@ -328,30 +353,41 @@ const ExameForm: React.FC<ExameFormProps> = ({
 
           {isEditing ? (
             <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 0.5 }}
+              >
                 Modalidade DICOM
               </Typography>
-              <Box sx={{ 
-                p: 1.5, 
-                border: '1px solid', 
-                borderColor: 'divider', 
-                borderRadius: 1, 
-                bgcolor: 'grey.50' 
-              }}>
+              <Box
+                sx={{
+                  p: 1.5,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  bgcolor: 'grey.50',
+                }}
+              >
                 <Typography variant="body2">
-                  {watch('modalidade') ? `${watch('modalidade')} - ${ModalidadeDicomLabels[watch('modalidade') as ModalidadeDicom]}` : 'Carregando...'}
+                  {watch('modalidade')
+                    ? `${watch('modalidade')} - ${ModalidadeDicomLabels[watch('modalidade') as ModalidadeDicom]}`
+                    : 'Carregando...'}
                 </Typography>
               </Box>
             </Box>
           ) : (
-            <FormControl fullWidth error={!!errors.modalidade} size="small"
+            <FormControl
+              fullWidth
+              error={!!errors.modalidade}
+              size="small"
               sx={{
                 '& .MuiInputBase-root': {
-                  padding: '4px 6px'
+                  padding: '4px 6px',
                 },
                 '& .MuiSelect-select': {
-                  padding: '4px 0'
-                }
+                  padding: '4px 0',
+                },
               }}
             >
               <InputLabel>Modalidade DICOM *</InputLabel>
@@ -361,14 +397,18 @@ const ExameForm: React.FC<ExameFormProps> = ({
                 disabled={loading}
                 size="small"
               >
-                {Object.values(ModalidadeDicom).map((modalidade) => (
+                {Object.values(ModalidadeDicom).map(modalidade => (
                   <MenuItem key={modalidade} value={modalidade}>
                     {modalidade} - {ModalidadeDicomLabels[modalidade]}
                   </MenuItem>
                 ))}
               </Select>
               {errors.modalidade && (
-                <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{ mt: 0.5, ml: 1.75 }}
+                >
                   {errors.modalidade.message}
                 </Typography>
               )}
@@ -387,11 +427,11 @@ const ExameForm: React.FC<ExameFormProps> = ({
             size="small"
             sx={{
               '& .MuiInputBase-root': {
-                padding: '4px 6px'
+                padding: '4px 6px',
               },
               '& .MuiInputBase-input': {
-                padding: '4px 0'
-              }
+                padding: '4px 0',
+              },
             }}
           />
 
@@ -407,16 +447,14 @@ const ExameForm: React.FC<ExameFormProps> = ({
             rows={4}
             sx={{
               '& .MuiInputBase-root': {
-                padding: '4px 6px'
+                padding: '4px 6px',
               },
               '& .MuiInputBase-input': {
-                padding: '4px 0'
-              }
+                padding: '4px 0',
+              },
             }}
             size="small"
           />
-
-
 
           <Box display="flex" gap={2} justifyContent="flex-end" mt={1}>
             {isEditing && onDelete && initialData && (
@@ -431,7 +469,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
                 Excluir
               </Button>
             )}
-            
+
             <Button
               type="submit"
               variant="contained"
@@ -442,7 +480,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
             >
               {loading ? 'Salvando...' : 'Salvar'}
             </Button>
-            
+
             <Button
               variant="outlined"
               onClick={onCancel || (() => navigate('/exames'))}
@@ -457,8 +495,8 @@ const ExameForm: React.FC<ExameFormProps> = ({
       </Box>
 
       {/* Dialog de informações do paciente */}
-      <Dialog 
-        open={showPacienteDialog} 
+      <Dialog
+        open={showPacienteDialog}
         onClose={() => setShowPacienteDialog(false)}
         maxWidth="sm"
         fullWidth
@@ -466,22 +504,31 @@ const ExameForm: React.FC<ExameFormProps> = ({
           '& .MuiDialog-paper': {
             width: { xs: '95vw', sm: '600px' },
             maxWidth: '600px',
-            margin: { xs: 1, sm: 3 }
-          }
+            margin: { xs: 1, sm: 3 },
+          },
         }}
       >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
           Informações do Paciente
         </DialogTitle>
         <DialogContent sx={{ pt: 1.625, px: 1.5, pb: 1 }}>
           {selectedPaciente && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 }, mt: 2.25 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: { xs: 1, sm: 1.2 },
+                mt: 2.25,
+              }}
+            >
               <TextField
                 fullWidth
                 label="Nome"
@@ -490,14 +537,14 @@ const ExameForm: React.FC<ExameFormProps> = ({
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
-              
+
               <TextField
                 fullWidth
                 label="CPF"
@@ -506,30 +553,32 @@ const ExameForm: React.FC<ExameFormProps> = ({
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
-              
+
               <TextField
                 fullWidth
                 label="Data de Nascimento"
-                value={new Date(selectedPaciente.dataNascimento).toLocaleDateString('pt-BR')}
+                value={new Date(
+                  selectedPaciente.dataNascimento
+                ).toLocaleDateString('pt-BR')}
                 InputProps={{ readOnly: true }}
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
-              
+
               <TextField
                 fullWidth
                 label="Telefone"
@@ -538,14 +587,14 @@ const ExameForm: React.FC<ExameFormProps> = ({
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': {
-                    padding: '4px 6px'
+                    padding: '4px 6px',
                   },
                   '& .MuiInputBase-input': {
-                    padding: '4px 0'
-                  }
+                    padding: '4px 0',
+                  },
                 }}
               />
-              
+
               {selectedPaciente.email && (
                 <TextField
                   fullWidth
@@ -555,15 +604,15 @@ const ExameForm: React.FC<ExameFormProps> = ({
                   size="small"
                   sx={{
                     '& .MuiInputBase-root': {
-                      padding: '4px 6px'
+                      padding: '4px 6px',
                     },
                     '& .MuiInputBase-input': {
-                      padding: '4px 0'
-                    }
+                      padding: '4px 0',
+                    },
                   }}
                 />
               )}
-              
+
               {selectedPaciente.endereco && (
                 <TextField
                   fullWidth
@@ -575,11 +624,11 @@ const ExameForm: React.FC<ExameFormProps> = ({
                   rows={2}
                   sx={{
                     '& .MuiInputBase-root': {
-                      padding: '4px 6px'
+                      padding: '4px 6px',
                     },
                     '& .MuiInputBase-input': {
-                      padding: '4px 0'
-                    }
+                      padding: '4px 0',
+                    },
                   }}
                 />
               )}
@@ -587,7 +636,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
           )}
         </DialogContent>
         <DialogActions sx={{ p: 1.5, gap: 1, justifyContent: 'flex-end' }}>
-          <Button 
+          <Button
             onClick={() => setShowPacienteDialog(false)}
             variant="outlined"
             sx={{ padding: '3px 12px' }}
@@ -596,8 +645,6 @@ const ExameForm: React.FC<ExameFormProps> = ({
           </Button>
         </DialogActions>
       </Dialog>
-
-
     </>
   );
 };

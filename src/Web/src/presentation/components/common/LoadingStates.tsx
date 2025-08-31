@@ -16,9 +16,9 @@ import {
 } from '@mui/material';
 
 // Loading Spinner Component
-export const LoadingSpinner: React.FC<{ size?: number; message?: string }> = ({ 
-  size = 40, 
-  message 
+export const LoadingSpinner: React.FC<{ size?: number; message?: string }> = ({
+  size = 40,
+  message,
 }) => (
   <Box display="flex" flexDirection="column" alignItems="center" gap={2} py={4}>
     <CircularProgress size={size} />
@@ -31,14 +31,14 @@ export const LoadingSpinner: React.FC<{ size?: number; message?: string }> = ({
 );
 
 // Page Loading Component
-export const PageLoading: React.FC<{ message?: string }> = ({ 
-  message = 'Carregando...' 
+export const PageLoading: React.FC<{ message?: string }> = ({
+  message = 'Carregando...',
 }) => (
-  <Box 
-    display="flex" 
-    flexDirection="column" 
-    alignItems="center" 
-    justifyContent="center" 
+  <Box
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    justifyContent="center"
     minHeight="400px"
     gap={2}
   >
@@ -50,28 +50,28 @@ export const PageLoading: React.FC<{ message?: string }> = ({
 );
 
 // Progress Bar Component
-export const ProgressBar: React.FC<{ 
-  value?: number; 
+export const ProgressBar: React.FC<{
+  value?: number;
   message?: string;
   variant?: 'determinate' | 'indeterminate';
-}> = ({ 
-  value, 
-  message,
-  variant = 'indeterminate'
-}) => (
+}> = ({ value, message, variant = 'indeterminate' }) => (
   <Box sx={{ width: '100%', py: 2 }}>
     {message && (
       <Typography variant="body2" color="text.secondary" gutterBottom>
         {message}
       </Typography>
     )}
-    <LinearProgress 
-      variant={variant} 
-      value={value} 
+    <LinearProgress
+      variant={variant}
+      value={value}
       sx={{ height: 8, borderRadius: 4 }}
     />
     {variant === 'determinate' && value !== undefined && (
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ mt: 1, display: 'block' }}
+      >
         {Math.round(value)}%
       </Typography>
     )}
@@ -79,15 +79,11 @@ export const ProgressBar: React.FC<{
 );
 
 // Table Skeleton Component
-export const TableSkeleton: React.FC<{ 
-  rows?: number; 
+export const TableSkeleton: React.FC<{
+  rows?: number;
   columns?: number;
   showHeader?: boolean;
-}> = ({ 
-  rows = 5, 
-  columns = 4,
-  showHeader = true
-}) => (
+}> = ({ rows = 5, columns = 4, showHeader = true }) => (
   <TableContainer>
     <Table>
       {showHeader && (
@@ -106,7 +102,10 @@ export const TableSkeleton: React.FC<{
           <TableRow key={rowIndex}>
             {Array.from({ length: columns }).map((_, colIndex) => (
               <TableCell key={colIndex}>
-                <Skeleton variant="text" width={colIndex === 0 ? "60%" : "40%"} />
+                <Skeleton
+                  variant="text"
+                  width={colIndex === 0 ? '60%' : '40%'}
+                />
               </TableCell>
             ))}
           </TableRow>
@@ -117,13 +116,10 @@ export const TableSkeleton: React.FC<{
 );
 
 // Card Skeleton Component
-export const CardSkeleton: React.FC<{ 
+export const CardSkeleton: React.FC<{
   height?: number;
   showAvatar?: boolean;
-}> = ({ 
-  height = 200,
-  showAvatar = false
-}) => (
+}> = ({ height = 200, showAvatar = false }) => (
   <Card>
     <CardContent>
       <Box display="flex" alignItems="center" gap={2} mb={2}>
@@ -139,13 +135,10 @@ export const CardSkeleton: React.FC<{
 );
 
 // List Skeleton Component
-export const ListSkeleton: React.FC<{ 
+export const ListSkeleton: React.FC<{
   items?: number;
   showAvatar?: boolean;
-}> = ({ 
-  items = 5,
-  showAvatar = true
-}) => (
+}> = ({ items = 5, showAvatar = true }) => (
   <Box>
     {Array.from({ length: items }).map((_, index) => (
       <Box key={index} display="flex" alignItems="center" gap={2} py={2}>
@@ -161,16 +154,19 @@ export const ListSkeleton: React.FC<{
 );
 
 // Form Skeleton Component
-export const FormSkeleton: React.FC<{ 
+export const FormSkeleton: React.FC<{
   fields?: number;
-}> = ({ 
-  fields = 4
-}) => (
+}> = ({ fields = 4 }) => (
   <Box>
     {Array.from({ length: fields }).map((_, index) => (
       <Box key={index} mb={3}>
         <Skeleton variant="text" width="30%" height={20} />
-        <Skeleton variant="rectangular" width="100%" height={56} sx={{ mt: 1 }} />
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={56}
+          sx={{ mt: 1 }}
+        />
       </Box>
     ))}
     <Box display="flex" gap={2} justifyContent="flex-end" mt={4}>
@@ -184,16 +180,25 @@ export const FormSkeleton: React.FC<{
 export const DashboardSkeleton: React.FC = () => (
   <Box>
     <Skeleton variant="text" width="40%" height={40} sx={{ mb: 3 }} />
-    
+
     {/* Metric Cards */}
-    <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={3} mb={4}>
+    <Box
+      display="grid"
+      gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))"
+      gap={3}
+      mb={4}
+    >
       {Array.from({ length: 4 }).map((_, index) => (
         <CardSkeleton key={index} height={120} showAvatar />
       ))}
     </Box>
-    
+
     {/* Charts/Tables */}
-    <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(400px, 1fr))" gap={3}>
+    <Box
+      display="grid"
+      gridTemplateColumns="repeat(auto-fit, minmax(400px, 1fr))"
+      gap={3}
+    >
       <CardSkeleton height={300} />
       <CardSkeleton height={300} />
     </Box>

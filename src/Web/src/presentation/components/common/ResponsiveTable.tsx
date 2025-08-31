@@ -48,34 +48,34 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   const theme = useTheme();
 
   // Filter columns for mobile view
-  const visibleColumns = isMobile 
+  const visibleColumns = isMobile
     ? columns.filter(col => !col.hideOnMobile)
     : columns;
 
   // Default mobile card renderer
   const defaultMobileCardRenderer = (row: any, index: number) => (
-    <Card 
-      key={row[keyField]} 
-      sx={{ 
-        mb: 2, 
+    <Card
+      key={row[keyField]}
+      sx={{
+        mb: 2,
         cursor: onRowClick ? 'pointer' : 'default',
         '&:hover': onRowClick ? { bgcolor: 'action.hover' } : {},
       }}
       onClick={() => onRowClick?.(row)}
     >
       <CardContent>
-        {columns.map((column) => {
+        {columns.map(column => {
           const value = row[column.id];
-          const formattedValue = column.format ? column.format(value, row) : value;
-          
+          const formattedValue = column.format
+            ? column.format(value, row)
+            : value;
+
           return (
             <Box key={column.id} mb={1}>
               <Typography variant="caption" color="text.secondary">
                 {column.label}
               </Typography>
-              <Typography variant="body2">
-                {formattedValue}
-              </Typography>
+              <Typography variant="body2">{formattedValue}</Typography>
             </Box>
           );
         })}
@@ -105,8 +105,8 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   if (isMobile) {
     return (
       <Box>
-        {data.map((row, index) => 
-          mobileCardRenderer 
+        {data.map((row, index) =>
+          mobileCardRenderer
             ? mobileCardRenderer(row, index)
             : defaultMobileCardRenderer(row, index)
         )}
@@ -116,24 +116,24 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
 
   // Desktop view
   return (
-    <TableContainer 
-      component={Paper} 
-      sx={{ 
+    <TableContainer
+      component={Paper}
+      sx={{
         maxHeight: 600,
         '& .MuiTableCell-root': {
           borderBottom: `1px solid ${theme.palette.divider}`,
-        }
+        },
       }}
     >
       <Table stickyHeader aria-label="responsive table">
         <TableHead>
           <TableRow>
-            {visibleColumns.map((column) => (
+            {visibleColumns.map(column => (
               <TableCell
                 key={column.id}
                 align={column.align}
                 style={{ minWidth: column.minWidth }}
-                sx={{ 
+                sx={{
                   fontWeight: 'bold',
                   bgcolor: 'background.paper',
                 }}
@@ -144,20 +144,22 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row) => (
+          {data.map(row => (
             <TableRow
               key={row[keyField]}
               hover={!!onRowClick}
               onClick={() => onRowClick?.(row)}
-              sx={{ 
+              sx={{
                 cursor: onRowClick ? 'pointer' : 'default',
                 '&:last-child td, &:last-child th': { border: 0 },
               }}
             >
-              {visibleColumns.map((column) => {
+              {visibleColumns.map(column => {
                 const value = row[column.id];
-                const formattedValue = column.format ? column.format(value, row) : value;
-                
+                const formattedValue = column.format
+                  ? column.format(value, row)
+                  : value;
+
                 return (
                   <TableCell key={column.id} align={column.align}>
                     {formattedValue}

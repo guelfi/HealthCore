@@ -1,9 +1,9 @@
 import { apiClient } from '../../infrastructure/api/client';
-import type { 
-  Exame, 
-  CreateExameDto, 
-  UpdateExameDto, 
-  ExameListResponse 
+import type {
+  Exame,
+  CreateExameDto,
+  UpdateExameDto,
+  ExameListResponse,
 } from '../../domain/entities/Exame';
 import { ModalidadeDicom } from '../../domain/enums/ModalidadeDicom';
 
@@ -21,29 +21,36 @@ export class ExameService {
    * Lista exames com paginação e filtros
    */
   static async list(params: ExameQueryParams = {}): Promise<ExameListResponse> {
-    const { page = 1, pageSize = 7, pacienteId, modalidade, dataInicio, dataFim } = params;
-    
+    const {
+      page = 1,
+      pageSize = 7,
+      pacienteId,
+      modalidade,
+      dataInicio,
+      dataFim,
+    } = params;
+
     const searchParams = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),
     });
-    
+
     if (pacienteId) {
       searchParams.append('pacienteId', pacienteId);
     }
-    
+
     if (modalidade) {
       searchParams.append('modalidade', modalidade);
     }
-    
+
     if (dataInicio) {
       searchParams.append('dataInicio', dataInicio.toISOString());
     }
-    
+
     if (dataFim) {
       searchParams.append('dataFim', dataFim.toISOString());
     }
-    
+
     const response = await apiClient.get(`/exames?${searchParams.toString()}`);
     return response.data;
   }
@@ -59,7 +66,10 @@ export class ExameService {
   /**
    * Lista exames de um paciente específico
    */
-  static async getByPacienteId(pacienteId: string, params: Omit<ExameQueryParams, 'pacienteId'> = {}): Promise<ExameListResponse> {
+  static async getByPacienteId(
+    pacienteId: string,
+    params: Omit<ExameQueryParams, 'pacienteId'> = {}
+  ): Promise<ExameListResponse> {
     return this.list({ ...params, pacienteId });
   }
 
@@ -70,10 +80,12 @@ export class ExameService {
     // Gerar idempotencyKey automaticamente se não fornecida
     const exameData = {
       ...data,
-      idempotencyKey: data.idempotencyKey || `exam-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      idempotencyKey:
+        data.idempotencyKey ||
+        `exam-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       dataExame: data.dataExame.toISOString(),
     };
-    
+
     const response = await apiClient.post('/exames', exameData);
     return response.data;
   }
@@ -83,11 +95,11 @@ export class ExameService {
    */
   static async update(id: string, data: UpdateExameDto): Promise<Exame> {
     const updateData: any = { ...data };
-    
+
     if (data.dataExame) {
       updateData.dataExame = data.dataExame.toISOString();
     }
-    
+
     const response = await apiClient.put(`/exames/${id}`, updateData);
     return response.data;
   }
@@ -102,14 +114,21 @@ export class ExameService {
   /**
    * Busca exames por modalidade
    */
-  static async getByModalidade(modalidade: ModalidadeDicom, params: Omit<ExameQueryParams, 'modalidade'> = {}): Promise<ExameListResponse> {
+  static async getByModalidade(
+    modalidade: ModalidadeDicom,
+    params: Omit<ExameQueryParams, 'modalidade'> = {}
+  ): Promise<ExameListResponse> {
     return this.list({ ...params, modalidade });
   }
 
   /**
    * Busca exames por período
    */
-  static async getByPeriodo(dataInicio: Date, dataFim: Date, params: Omit<ExameQueryParams, 'dataInicio' | 'dataFim'> = {}): Promise<ExameListResponse> {
+  static async getByPeriodo(
+    dataInicio: Date,
+    dataFim: Date,
+    params: Omit<ExameQueryParams, 'dataInicio' | 'dataFim'> = {}
+  ): Promise<ExameListResponse> {
     return this.list({ ...params, dataInicio, dataFim });
   }
 
@@ -118,7 +137,9 @@ export class ExameService {
    */
   static async checkIdempotency(idempotencyKey: string): Promise<boolean> {
     try {
-      const response = await apiClient.get(`/exames/check-idempotency/${idempotencyKey}`);
+      const response = await apiClient.get(
+        `/exames/check-idempotency/${idempotencyKey}`
+      );
       return response.data.exists;
     } catch (error) {
       // Se o endpoint não existir, assumir que não há duplicata
@@ -129,7 +150,9 @@ export class ExameService {
   /**
    * Obtém estatísticas de exames por modalidade
    */
-  static async getStatisticsByModalidade(): Promise<{ modalidade: string; count: number }[]> {
+  static async getStatisticsByModalidade(): Promise<
+    { modalidade: string; count: number }[]
+  > {
     try {
       const response = await apiClient.get('/exames/statistics/modalidade');
       return response.data;
@@ -142,9 +165,13 @@ export class ExameService {
   /**
    * Obtém estatísticas de exames por período
    */
-  static async getStatisticsByPeriodo(periodo: 'day' | 'week' | 'month' | 'year' = 'month'): Promise<{ date: string; count: number }[]> {
+  static async getStatisticsByPeriodo(
+    periodo: 'day' | 'week' | 'month' | 'year' = 'month'
+  ): Promise<{ date: string; count: number }[]> {
     try {
-      const response = await apiClient.get(`/exames/statistics/periodo?periodo=${periodo}`);
+      const response = await apiClient.get(
+        `/exames/statistics/periodo?periodo=${periodo}`
+      );
       return response.data;
     } catch (error) {
       console.warn('Endpoint de estatísticas não disponível:', error);
