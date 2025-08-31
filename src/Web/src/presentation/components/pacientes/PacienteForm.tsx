@@ -38,11 +38,11 @@ const PacienteForm: React.FC = () => {
     updatePaciente,
     getPacienteById,
     loading: apiLoading,
-    error
+    error: _error
   } = usePacientes();
   
   const [loading, setLoading] = React.useState(false);
-  const [pacienteData, setPacienteData] = React.useState<Paciente | null>(null);
+  const [_pacienteData, setPacienteData] = React.useState<Paciente | null>(null);
 
   const {
     register,
@@ -123,35 +123,37 @@ const PacienteForm: React.FC = () => {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" gap={2} mb={3}>
+      <Box display="flex" alignItems="center" gap={2} mb={2}>
         <Button
           startIcon={<ArrowBack />}
           onClick={() => navigate('/pacientes')}
           variant="outlined"
+          size="small"
         >
           Voltar
         </Button>
         <Box>
-          <Typography variant="h4" component="h1">
+          <Typography variant="h5" component="h1" sx={{ mb: 0.5 }}>
             {isEditing ? 'Editar Paciente' : 'Novo Paciente'}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             {isEditing ? 'Atualize as informações do paciente' : 'Cadastre um novo paciente no sistema'}
           </Typography>
         </Box>
       </Box>
 
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 1, sm: 1.5 } }}>
           <Box 
             component="form" 
             onSubmit={handleSubmit(onSubmit)}
             sx={{ 
               maxWidth: { xs: '100%', sm: '600px' },
-              mx: 'auto'
+              mx: 'auto',
+              mt: 1
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 } }}>
               <TextField
                 {...register('nome')}
                 fullWidth
@@ -159,57 +161,112 @@ const PacienteForm: React.FC = () => {
                 error={!!errors.nome}
                 helperText={errors.nome?.message}
                 disabled={loading || apiLoading}
-              />
-
-              <TextField
-                {...register('documento')}
-                fullWidth
-                label="CPF *"
-                placeholder="000.000.000-00"
-                error={!!errors.documento}
-                helperText={errors.documento?.message}
-                disabled={loading || apiLoading}
-                onChange={(e) => {
-                  const formatted = formatCPF(e.target.value);
-                  setValue('documento', formatted);
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
                 }}
               />
 
-              <TextField
-                {...register('dataNascimento')}
-                fullWidth
-                label="Data de Nascimento *"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                error={!!errors.dataNascimento}
-                helperText={errors.dataNascimento?.message}
-                disabled={loading || apiLoading}
-              />
+              {/* Linha com campos lado a lado */}
+              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                <TextField
+                  {...register('documento')}
+                  label="CPF *"
+                  placeholder="000.000.000-00"
+                  error={!!errors.documento}
+                  helperText={errors.documento?.message}
+                  disabled={loading || apiLoading}
+                  size="small"
+                  sx={{
+                    flex: '1 1 200px',
+                    minWidth: '200px',
+                    '& .MuiInputBase-root': {
+                      padding: '4px 6px'
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '4px 0'
+                    }
+                  }}
+                  onChange={(e) => {
+                    const formatted = formatCPF(e.target.value);
+                    setValue('documento', formatted);
+                  }}
+                />
 
-              <TextField
-                {...register('telefone')}
-                fullWidth
-                label="Telefone"
-                placeholder="(11) 99999-9999"
-                error={!!errors.telefone}
-                helperText={errors.telefone?.message}
-                disabled={loading || apiLoading}
-                onChange={(e) => {
-                  const formatted = formatPhone(e.target.value);
-                  setValue('telefone', formatted);
-                }}
-              />
+                <TextField
+                  {...register('dataNascimento')}
+                  label="Data de Nascimento *"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  error={!!errors.dataNascimento}
+                  helperText={errors.dataNascimento?.message}
+                  disabled={loading || apiLoading}
+                  size="small"
+                  sx={{
+                    flex: '1 1 180px',
+                    minWidth: '180px',
+                    '& .MuiInputBase-root': {
+                      padding: '4px 6px'
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '4px 0'
+                    }
+                  }}
+                />
+              </Box>
 
-              <TextField
-                {...register('email')}
-                fullWidth
-                label="Email"
-                type="email"
-                placeholder="paciente@email.com"
-                error={!!errors.email}
-                helperText={errors.email?.message}
-                disabled={loading || apiLoading}
-              />
+              {/* Segunda linha com telefone e email */}
+              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                <TextField
+                  {...register('telefone')}
+                  label="Telefone"
+                  placeholder="(11) 99999-9999"
+                  error={!!errors.telefone}
+                  helperText={errors.telefone?.message}
+                  disabled={loading || apiLoading}
+                  size="small"
+                  sx={{
+                    flex: '1 1 180px',
+                    minWidth: '180px',
+                    '& .MuiInputBase-root': {
+                      padding: '4px 6px'
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '4px 0'
+                    }
+                  }}
+                  onChange={(e) => {
+                    const formatted = formatPhone(e.target.value);
+                    setValue('telefone', formatted);
+                  }}
+                />
+
+                <TextField
+                  {...register('email')}
+                  label="Email"
+                  type="email"
+                  placeholder="paciente@email.com"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  disabled={loading || apiLoading}
+                  size="small"
+                  sx={{
+                    flex: '1 1 220px',
+                    minWidth: '220px',
+                    '& .MuiInputBase-root': {
+                      padding: '4px 6px'
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '4px 0'
+                    }
+                  }}
+                />
+              </Box>
 
               <TextField
                 {...register('endereco')}
@@ -221,15 +278,24 @@ const PacienteForm: React.FC = () => {
                 disabled={loading || apiLoading}
                 multiline
                 rows={2}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
               />
 
-              <Box display="flex" gap={2} justifyContent="flex-end" mt={2}>
+              <Box display="flex" gap={2} justifyContent="flex-end" mt={1}>
                 <Button
                   variant="outlined"
                   onClick={() => navigate('/pacientes')}
                   disabled={loading || apiLoading}
                 >
-                  Cancelar
+                  Fechar
                 </Button>
                 <Button
                   type="submit"

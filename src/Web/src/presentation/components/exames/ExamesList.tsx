@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -17,11 +17,12 @@ import {
   InputAdornment,
   Button,
   TablePagination,
-  Skeleton,
+  CircularProgress,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
+  Alert,
 } from '@mui/material';
 import {
   Edit,
@@ -31,7 +32,7 @@ import {
   Assignment,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { mockExames } from '../../../application/stores/mockData';
+import { useExames, usePacientes } from '../../hooks';
 import type { Exame } from '../../../domain/entities/Exame';
 import { ModalidadeDicom, ModalidadeDicomLabels } from '../../../domain/enums/ModalidadeDicom';
 import { useUIStore } from '../../../application/stores/uiStore';
@@ -40,31 +41,52 @@ const ExamesList: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useUIStore();
   
-  const [exames] = React.useState<Exame[]>(mockExames);
-  const [filteredExames, setFilteredExames] = React.useState<Exame[]>(mockExames);
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [modalidadeFilter, setModalidadeFilter] = React.useState<string>('');
+  // Hooks para exames e pacientes
+  const {
+    exames,
+    total,
+    currentPage,
+    totalPages,
+    loading,
+    error,
+    fetchExames,
+    deleteExame,
+  } = useExames();
+  
+  const {
+    pacientes: allPacientes,
+    loading: pacientesLoading,
+    fetchPacientes,
+  } = usePacientes();
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [modalidadeFilter, setModalidadeFilter] = useState<string>('');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [loading] = React.useState(false);
 
-  React.useEffect(() => {
-    let filtered = exames.filter(exame =>
-      exame.paciente?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exame.paciente?.documento.includes(searchTerm) ||
-      exame.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  // Carregar exames e pacientes ao montar o componente
+  useEffect(() => {
+    fetchExames({ page: page + 1, pageSize: rowsPerPage });
+    fetchPacientes({ page: 1, pageSize: 100 }); // Carregar todos os pacientes
+  }, [page, rowsPerPage, fetchExames, fetchPacientes]);
 
+  // Aplicar filtros quando eles mudarem
+  useEffect(() => {
+    const filters: any = {
+      page: page + 1,
+      pageSize: rowsPerPage,
+    };
+    
     if (modalidadeFilter) {
-      filtered = filtered.filter(exame => exame.modalidade === modalidadeFilter);
+      filters.modalidade = modalidadeFilter;
     }
-
-    setFilteredExames(filtered);
-    setPage(0);
-  }, [searchTerm, modalidadeFilter, exames]);
+    
+    fetchExames(filters);
+  }, [modalidadeFilter, page, rowsPerPage, fetchExames]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+    // Implementar busca por termo
   };
 
   const handleModalidadeFilterChange = (event: any) => {
@@ -75,9 +97,13 @@ const ExamesList: React.FC = () => {
     navigate(`/exames/editar/${exame.id}`);
   };
 
-  const handleDelete = (exame: Exame) => {
-    // Mock delete - in real app, would show confirmation dialog
-    addNotification(`Exame removido com sucesso`, 'success');
+  const handleDelete = async (exame: Exame) => {
+    try {
+      await deleteExame(exame.id);
+      addNotification(`Exame removido com sucesso`, 'success');
+    } catch (error) {
+      addNotification(`Erro ao remover exame`, 'error');
+    }
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -89,39 +115,52 @@ const ExamesList: React.FC = () => {
     setPage(0);
   };
 
-  const paginatedExames = filteredExames.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
   const getModalidadeColor = (modalidade: ModalidadeDicom) => {
     const colors: Record<ModalidadeDicom, 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'> = {
       [ModalidadeDicom.CR]: 'info',
       [ModalidadeDicom.CT]: 'primary',
-      [ModalidadeDicom.DX]: 'warning', // Changed from XR
+      [ModalidadeDicom.DX]: 'warning',
       [ModalidadeDicom.MG]: 'primary',
       [ModalidadeDicom.MR]: 'secondary',
       [ModalidadeDicom.NM]: 'secondary',
-      [ModalidadeDicom.OT]: 'error', // New modality
+      [ModalidadeDicom.OT]: 'error',
       [ModalidadeDicom.PT]: 'success',
       [ModalidadeDicom.RF]: 'warning',
       [ModalidadeDicom.US]: 'success',
-      [ModalidadeDicom.XA]: 'info', // New modality
+      [ModalidadeDicom.XA]: 'info',
     };
     return colors[modalidade] || 'default';
   };
 
-  if (loading) {
+  // Obter nome do paciente pelo ID
+  const getPacienteName = (pacienteId: string) => {
+    const paciente = allPacientes.find(p => p.id === pacienteId);
+    return paciente ? paciente.nome : 'N/A';
+  };
+
+  // Obter CPF do paciente pelo ID
+  const getPacienteDocumento = (pacienteId: string) => {
+    const paciente = allPacientes.find(p => p.id === pacienteId);
+    return paciente ? paciente.documento : 'N/A';
+  };
+
+  if (loading && exames.length === 0) {
     return (
       <Box>
-        <Skeleton variant="text" width={200} height={40} />
-        <Skeleton variant="rectangular" width="100%" height={400} sx={{ mt: 2 }} />
+        <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box>
+    <>
+      {/* Mensagem de erro */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
@@ -166,12 +205,18 @@ const ExamesList: React.FC = () => {
                 <MenuItem value="">Todas</MenuItem>
                 {Object.values(ModalidadeDicom).map((modalidade) => (
                   <MenuItem key={modalidade} value={modalidade}>
-                    {modalidade}
+                    {modalidade} - {ModalidadeDicomLabels[modalidade]}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Box>
+
+          {loading && exames.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
 
           <TableContainer component={Paper} variant="outlined">
             <Table>
@@ -186,18 +231,18 @@ const ExamesList: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedExames.map((exame) => (
+                {exames.map((exame) => (
                   <TableRow key={exame.id} hover>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1}>
                         <Assignment color="action" />
-                        {exame.paciente?.nome}
+                        {getPacienteName(exame.pacienteId)}
                       </Box>
                     </TableCell>
-                    <TableCell>{exame.paciente?.cpf}</TableCell>
+                    <TableCell>{getPacienteDocumento(exame.pacienteId)}</TableCell>
                     <TableCell>
                       <Chip
-                        label={exame.modalidade}
+                        label={ModalidadeDicomLabels[exame.modalidade] || exame.modalidade}
                         color={getModalidadeColor(exame.modalidade)}
                         size="small"
                       />
@@ -224,11 +269,11 @@ const ExamesList: React.FC = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-                {paginatedExames.length === 0 && (
+                {exames.length === 0 && !loading && (
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                       <Typography variant="body1" color="text.secondary">
-                        {searchTerm || modalidadeFilter ? 'Nenhum exame encontrado' : 'Nenhum exame cadastrado'}
+                        Nenhum exame cadastrado
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -239,7 +284,7 @@ const ExamesList: React.FC = () => {
 
           <TablePagination
             component="div"
-            count={filteredExames.length}
+            count={total}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
@@ -251,7 +296,7 @@ const ExamesList: React.FC = () => {
           />
         </CardContent>
       </Card>
-    </Box>
+    </>
   );
 };
 

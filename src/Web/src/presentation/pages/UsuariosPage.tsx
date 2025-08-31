@@ -93,7 +93,7 @@ const UsuariosPage: React.FC = () => {
 
       {/* Card Principal */}
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
           {/* Cabeçalho do Grid */}
           <Box sx={{
             display: 'flex',
@@ -163,8 +163,8 @@ const UsuariosPage: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>{new Date(usuario.createdAt).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{new Date(usuario.updatedAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{usuario.createdAt ? new Date(usuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{usuario.updatedAt ? new Date(usuario.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -199,19 +199,34 @@ const UsuariosPage: React.FC = () => {
         </DialogTitle>
 
         <DialogContent sx={{
-          pt: 4,
-          px: 3,
-          pb: 2
+          pt: 3,
+          px: 2,
+          pb: 1.5
         }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 }, mt: 2 }}>
             <TextField
               fullWidth
               label="Nome de Usuário"
               defaultValue={selectedUsuario?.username || ''}
               variant="outlined"
               size="small"
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '6px 8px'
+                },
+                '& .MuiInputBase-input': {
+                  padding: '6px 0'
+                }
+              }}
             />
-            <FormControl fullWidth variant="outlined" size="small">
+            <FormControl fullWidth variant="outlined" size="small" sx={{
+              '& .MuiInputBase-root': {
+                padding: '6px 8px'
+              },
+              '& .MuiSelect-select': {
+                padding: '6px 0'
+              }
+            }}>
               <InputLabel>Perfil</InputLabel>
               <Select
                 defaultValue={selectedUsuario?.role || UserProfile.MEDICO}
@@ -225,7 +240,14 @@ const UsuariosPage: React.FC = () => {
                 </MenuItem>
               </Select>
             </FormControl>
-            <FormControl fullWidth variant="outlined" size="small">
+            <FormControl fullWidth variant="outlined" size="small" sx={{
+              '& .MuiInputBase-root': {
+                padding: '6px 8px'
+              },
+              '& .MuiSelect-select': {
+                padding: '6px 0'
+              }
+            }}>
               <InputLabel>Status</InputLabel>
               <Select
                 defaultValue={selectedUsuario?.isActive ? "true" : "false"}
@@ -235,7 +257,7 @@ const UsuariosPage: React.FC = () => {
                 <MenuItem value="false">Inativo</MenuItem>
               </Select>
             </FormControl>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
               <TextField
                 fullWidth
                 label="Senha"
@@ -243,6 +265,14 @@ const UsuariosPage: React.FC = () => {
                 variant="outlined"
                 size="small"
                 placeholder={dialogMode === 'edit' ? 'Deixe em branco para manter atual' : ''}
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '6px 8px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '6px 0'
+                  }
+                }}
               />
               <TextField
                 fullWidth
@@ -250,6 +280,14 @@ const UsuariosPage: React.FC = () => {
                 type="password"
                 variant="outlined"
                 size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '6px 8px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '6px 0'
+                  }
+                }}
               />
             </Box>
             {selectedUsuario && (
@@ -273,13 +311,13 @@ const UsuariosPage: React.FC = () => {
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={`Cadastrado: ${new Date(selectedUsuario.createdAt).toLocaleDateString('pt-BR')}`}
+                  label={`Cadastrado: ${selectedUsuario.createdAt ? new Date(selectedUsuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={`Atualizado: ${new Date(selectedUsuario.updatedAt).toLocaleDateString('pt-BR')}`}
+                  label={`Atualizado: ${selectedUsuario.updatedAt ? new Date(selectedUsuario.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -315,7 +353,7 @@ const UsuariosPage: React.FC = () => {
             size="small"
             sx={{ fontSize: '0.75rem' }}
           >
-            Cancelar
+            Fechar
           </Button>
           <Button
             onClick={handleSave}

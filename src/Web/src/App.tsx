@@ -14,6 +14,8 @@ import AppLayout from './presentation/components/layout/AppLayout';
 import DashboardPage from './presentation/pages/DashboardPage';
 import PacientesPageTable from './presentation/pages/PacientesPageTable';
 import ExamesPageTable from './presentation/pages/ExamesPageTable';
+import ExameAddPage from './presentation/pages/ExameAddPage';
+import ExameEditPage from './presentation/pages/ExameEditPage';
 import MedicosPageTable from './presentation/pages/MedicosPageTable';
 import UsuariosPageTable from './presentation/pages/UsuariosPageTable';
 
@@ -77,6 +79,32 @@ const App: React.FC = () => {
               isAuthenticated ? (
                 <AppLayout>
                   <ExamesPageTable />
+                </AppLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+          
+          <Route 
+            path="/exames/novo" 
+            element={
+              isAuthenticated ? (
+                <AppLayout>
+                  <ExameAddPage />
+                </AppLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+          
+          <Route 
+            path="/exames/editar/:id" 
+            element={
+              isAuthenticated ? (
+                <AppLayout>
+                  <ExameEditPage />
                 </AppLayout>
               ) : (
                 <Navigate to="/login" replace />

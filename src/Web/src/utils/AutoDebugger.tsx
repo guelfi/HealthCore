@@ -16,7 +16,7 @@ class AutoDebuggerLogger {
   private downloadButton: HTMLElement | null = null;
   private isVisible = false; // Inicia oculto por padrão
   private maxLogs = 15;
-  private isWriting = false;
+  // private isWriting = false; // Removed unused variable
   private keyboardListenerAttached = false;
   private isEnabled = false; // Inicia desabilitado por padrão
   private keyboardHandler: ((event: KeyboardEvent) => void) | null = null;
@@ -193,7 +193,7 @@ class AutoDebuggerLogger {
     this.saveToStorage();
     
     // Enviar para arquivo de log (se possível)
-    this.saveToFile(logEntry);
+    this.saveToFile();
     
     // Atualizar UI apenas se estiver habilitado
     if (this.isEnabled) {
@@ -212,138 +212,15 @@ class AutoDebuggerLogger {
     }
   }
 
-  private async saveToFile(logEntry: LogEntry) {
-    try {
-      // Try to save directly to project logs folder
-      await this.saveToProjectLogs(logEntry);
-    } catch (error) {
-      // If that fails, schedule periodic save
-      this.scheduleFileSave();
-    }
+  private async saveToFile() {
+    // Disabled log server connection to avoid network errors
+    // Just save to localStorage for now
+    return;
   }
 
-  private async saveToProjectLogs(logEntry: LogEntry) {
-    try {
-      // Send to local log server endpoint
-      const response = await fetch('http://localhost:3001/save-log', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          level: logEntry.level,
-          component: logEntry.component,
-          message: logEntry.message,
-          data: logEntry.data,
-          timestamp: logEntry.timestamp
-        })
-      });
+  // Removed unused functions: saveToProjectLogs, fallbackToNodeSave
 
-      if (!response.ok) {
-        throw new Error('Failed to save to log server');
-      }
-      
-      const result = await response.json();
-      if (result.success) {
-        // Successfully saved to project logs folder
-        return;
-      }
-    } catch (error) {
-      // Fallback: try direct file save via Node.js script
-      this.fallbackToNodeSave(logEntry);
-    }
-  }
-
-  private async fallbackToNodeSave(logEntry: LogEntry) {
-    try {
-      // Create a script call to save via Node.js
-      const logData = {
-        level: logEntry.level,
-        component: logEntry.component,
-        message: logEntry.message,
-        data: logEntry.data,
-        timestamp: logEntry.timestamp
-      };
-      
-      // This would need to be handled by a Node.js endpoint or script
-      console.log('Saving to logs folder:', logData);
-    } catch (error) {
-      console.error('Failed to save log to project folder:', error);
-    }
-  }
-
-  private scheduleFileSave() {
-    // If not already writing, schedule a save
-    if (!this.isWriting) {
-      this.isWriting = true;
-      setTimeout(() => {
-        this.saveAllLogsToProjectFolder();
-        this.isWriting = false;
-      }, 5000); // Save every 5 seconds
-    }
-  }
-
-  private async saveAllLogsToProjectFolder() {
-    try {
-      // Try to save via log server first
-      const response = await fetch('http://localhost:3001/save-bulk-logs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ logs: this.logs })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          this.log('success', 'AutoDebugger', `💾 ${result.count} logs saved to project folder: ${result.fileName}`);
-          return;
-        }
-      }
-      
-      // Fallback to download method
-      this.downloadLogsToProjectFolder();
-    } catch (error) {
-      console.error('Error saving via log server, using fallback:', error);
-      this.downloadLogsToProjectFolder();
-    }
-  }
-
-  private downloadLogsToProjectFolder() {
-    try {
-      const now = new Date();
-      const dateStr = now.toISOString().split('T')[0];
-      const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-      
-      const logContent = this.logs.map(log => {
-        const dataStr = log.data ? ` | Data: ${JSON.stringify(log.data)}` : '';
-        return `[${log.timestamp}] [${log.level.toUpperCase()}] [${log.component}] ${log.message}${dataStr}`;
-      }).join('\n');
-      
-      // Add header
-      const header = `# AutoDebugger Frontend Logs\n# Generated: ${now.toISOString()}\n# Total Entries: ${this.logs.length}\n# =====================================\n\n`;
-      const fullContent = header + logContent;
-      
-      const blob = new Blob([fullContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `auto-debug-${dateStr}-${timeStr}.log`;
-      link.style.display = 'none';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      URL.revokeObjectURL(url);
-      
-      this.log('warning', 'AutoDebugger', `⚠️ Downloaded logs manually: auto-debug-${dateStr}-${timeStr}.log (Copy to /logs folder)`);
-    } catch (error) {
-      this.log('error', 'AutoDebugger', 'Error saving logs:', error);
-    }
-  }
+  // Removed unused functions: scheduleFileSave, saveAllLogsToProjectFolder, downloadLogsToProjectFolder
 
   private loadFromStorage() {
     try {
@@ -384,7 +261,7 @@ class AutoDebuggerLogger {
     
     this.logElement.innerHTML = '';
     
-    recentLogs.forEach((log, index) => {
+    recentLogs.forEach((log, _index) => {
       const logDiv = document.createElement('div');
       logDiv.style.cssText = `
         margin-bottom: 4px;
@@ -499,7 +376,7 @@ class AutoDebuggerLogger {
     const toggleButton = document.getElementById('toggle-debugger');
     const clearButton = document.getElementById('clear-debugger');
     
-    saveButton?.addEventListener('click', () => this.saveAllLogsToProjectFolder());
+    saveButton?.addEventListener('click', () => this.downloadLogs());
     toggleButton?.addEventListener('click', () => this.toggle());
     clearButton?.addEventListener('click', () => this.clear());
 
@@ -595,7 +472,7 @@ class AutoDebuggerLogger {
     }
     
     // Remover listener de teclado
-    if (this.keyboardListenerAttached) {
+    if (this.keyboardListenerAttached && this.keyboardHandler) {
       document.removeEventListener('keydown', this.keyboardHandler);
       this.keyboardHandler = null;
       this.keyboardListenerAttached = false;

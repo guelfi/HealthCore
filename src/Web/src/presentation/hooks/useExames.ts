@@ -1,15 +1,18 @@
 import { useState, useCallback } from 'react';
 import { ExameService, type ExameQueryParams } from '../../application/services/ExameService';
 import type { 
-  Exame, 
+  Exame as ExameEntity, 
   CreateExameDto, 
   UpdateExameDto, 
   ExameListResponse 
 } from '../../domain/entities/Exame';
+
+// Re-export Exame type for hook consumers
+export type { ExameEntity as Exame } from '../../domain/entities/Exame';
 import { ModalidadeDicom } from '../../domain/enums/ModalidadeDicom';
 
 interface UseExamesState {
-  exames: Exame[];
+  exames: ExameEntity[];
   total: number;
   currentPage: number;
   totalPages: number;
@@ -19,10 +22,10 @@ interface UseExamesState {
 
 interface UseExamesActions {
   fetchExames: (params?: ExameQueryParams) => Promise<void>;
-  createExame: (data: CreateExameDto) => Promise<Exame>;
-  updateExame: (id: string, data: UpdateExameDto) => Promise<Exame>;
+  createExame: (data: CreateExameDto) => Promise<ExameEntity>;
+  updateExame: (id: string, data: UpdateExameDto) => Promise<ExameEntity>;
   deleteExame: (id: string) => Promise<void>;
-  getExameById: (id: string) => Promise<Exame>;
+  getExameById: (id: string) => Promise<ExameEntity>;
   getExamesByPaciente: (pacienteId: string, params?: Omit<ExameQueryParams, 'pacienteId'>) => Promise<void>;
   getExamesByModalidade: (modalidade: ModalidadeDicom, params?: Omit<ExameQueryParams, 'modalidade'>) => Promise<void>;
   getExamesByPeriodo: (dataInicio: Date, dataFim: Date, params?: Omit<ExameQueryParams, 'dataInicio' | 'dataFim'>) => Promise<void>;
@@ -82,7 +85,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
     }
   }, [setLoading, clearError, updateExamesState]);
 
-  const createExame = useCallback(async (data: CreateExameDto): Promise<Exame> => {
+  const createExame = useCallback(async (data: CreateExameDto): Promise<ExameEntity> => {
     setLoading(true);
     clearError();
     
@@ -109,7 +112,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
     }
   }, [setLoading, clearError]);
 
-  const updateExame = useCallback(async (id: string, data: UpdateExameDto): Promise<Exame> => {
+  const updateExame = useCallback(async (id: string, data: UpdateExameDto): Promise<ExameEntity> => {
     setLoading(true);
     clearError();
     
@@ -162,7 +165,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
     }
   }, [setLoading, clearError]);
 
-  const getExameById = useCallback(async (id: string): Promise<Exame> => {
+  const getExameById = useCallback(async (id: string): Promise<ExameEntity> => {
     setLoading(true);
     clearError();
     

@@ -65,7 +65,7 @@ const UsuarioForm: React.FC = () => {
     }
   }, [isEditing, setValue]);
 
-  const onSubmit = async (data: UsuarioFormData) => {
+  const onSubmit = async (_data: UsuarioFormData) => {
     setLoading(true);
     
     try {
@@ -117,16 +117,17 @@ const UsuarioForm: React.FC = () => {
       </Box>
 
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 1, sm: 1.5 } }}>
           <Box 
             component="form" 
             onSubmit={handleSubmit(onSubmit)}
             sx={{ 
               maxWidth: { xs: '100%', sm: '600px' },
-              mx: 'auto'
+              mx: 'auto',
+              mt: 1
             }}
           >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 } }}>
               <TextField
                 {...register('username')}
                 fullWidth
@@ -134,9 +135,27 @@ const UsuarioForm: React.FC = () => {
                 error={!!errors.username}
                 helperText={errors.username?.message}
                 disabled={loading}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
               />
 
-              <FormControl fullWidth error={!!errors.role}>
+              <FormControl fullWidth error={!!errors.role} size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiSelect-select': {
+                    padding: '4px 0'
+                  }
+                }}
+              >
                 <InputLabel>Perfil *</InputLabel>
                 <Select
                   {...register('role')}
@@ -164,6 +183,15 @@ const UsuarioForm: React.FC = () => {
                 error={!!errors.password}
                 helperText={errors.password?.message}
                 disabled={loading}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -201,7 +229,7 @@ const UsuarioForm: React.FC = () => {
               )}
 
               <Card variant="outlined" sx={{ bgcolor: 'grey.50' }}>
-                <CardContent>
+                <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                   <Typography variant="h6" gutterBottom>
                     Informações Importantes
                   </Typography>
@@ -220,13 +248,13 @@ const UsuarioForm: React.FC = () => {
                 </CardContent>
               </Card>
 
-              <Box display="flex" gap={2} justifyContent="flex-end" mt={2}>
+              <Box display="flex" gap={2} justifyContent="flex-end" mt={1}>
                 <Button
                   variant="outlined"
                   onClick={() => navigate('/admin/usuarios')}
                   disabled={loading}
                 >
-                  Cancelar
+                  Fechar
                 </Button>
                 <Button
                   type="submit"

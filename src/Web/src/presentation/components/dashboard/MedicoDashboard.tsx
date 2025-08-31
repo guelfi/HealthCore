@@ -98,7 +98,7 @@ const MedicoDashboard: React.FC = () => {
         {/* Skeleton dos cards inferiores */}
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, width: '90%' }}>
-            <Card sx={{ flex: 1, height: 290, borderRadius: 3 }}>
+            <Card sx={{ flex: 1, height: 230, borderRadius: 3 }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
                 {[...Array(4)].map((_, i) => (
@@ -106,7 +106,7 @@ const MedicoDashboard: React.FC = () => {
                 ))}
               </CardContent>
             </Card>
-            <Card sx={{ flex: 1, height: 290, borderRadius: 3 }}>
+            <Card sx={{ flex: 1, height: 230, borderRadius: 3 }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
                 {[...Array(5)].map((_, i) => (
@@ -295,7 +295,7 @@ const MedicoDashboard: React.FC = () => {
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, width: '90%' }}>
           <Card sx={{
             flex: 1,
-            height: 290,
+            height: 230,
             boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
             borderRadius: 3,
             transition: 'all 0.3s ease-in-out',
@@ -306,22 +306,20 @@ const MedicoDashboard: React.FC = () => {
           }}>
             <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main" sx={{ fontSize: '1rem', mb: 2 }}>
-                Crescimento de Exames
+                Exames
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto' }}>
                 {metrics.crescimento.exames.map((item, index) => (
-                  <Box key={item.mes}
+                  <Box key={item.mes} display="flex" justifyContent="space-between" alignItems="center"
                     sx={{
-                      mb: 1.5,
-                      p: 1.2,
+                      mb: 0.2,
+                      p: 0.6,
                       borderRadius: 2,
                       bgcolor: 'grey.50',
                       transition: 'all 0.2s ease',
                       '&:hover': { bgcolor: 'primary.50' }
                     }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.85rem' }}>{item.mes}</Typography>
-                    </Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.85rem' }}>{item.mes}</Typography>
                     <Box display="flex" gap={2}>
                       <Box display="flex" alignItems="center" gap={0.5}>
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Pacientes:</Typography>
@@ -332,7 +330,7 @@ const MedicoDashboard: React.FC = () => {
                       <Box display="flex" alignItems="center" gap={0.5}>
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Exames:</Typography>
                         <Typography variant="body2" fontWeight="bold" color="info.main" sx={{ fontSize: '0.8rem' }}>{item.total}</Typography>
-                        {index > 0 && (
+                        {index > 0 && typeof item.total === 'number' && typeof (metrics.crescimento.exames[index - 1]?.total) === 'number' && (
                           <Typography
                             variant="body2"
                             color={item.total > (metrics.crescimento.exames[index - 1]?.total || 0) ? 'success.main' : 'text.secondary'}
@@ -351,7 +349,7 @@ const MedicoDashboard: React.FC = () => {
 
           <Card sx={{
             flex: 1,
-            height: 290,
+            height: 230,
             boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
             borderRadius: 3,
             transition: 'all 0.3s ease-in-out',
@@ -362,13 +360,13 @@ const MedicoDashboard: React.FC = () => {
           }}>
             <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom fontWeight="bold" color="secondary.main" sx={{ fontSize: '1rem', mb: 2 }}>
-                Últimas Atividades
+                Atividades
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -379,8 +377,8 @@ const MedicoDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -391,8 +389,8 @@ const MedicoDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -403,8 +401,8 @@ const MedicoDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -415,8 +413,8 @@ const MedicoDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',

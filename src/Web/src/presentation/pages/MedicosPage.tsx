@@ -231,8 +231,8 @@ const MedicosPage: React.FC = () => {
                 defaultValue={selectedMedico?.isActive ?? true}
                 label="Status"
               >
-                <MenuItem value={true}>Ativo</MenuItem>
-                <MenuItem value={false}>Inativo</MenuItem>
+                <MenuItem value="active">Ativo</MenuItem>
+                <MenuItem value="inactive">Inativo</MenuItem>
               </Select>
             </FormControl>
             {selectedMedico && (
@@ -243,13 +243,13 @@ const MedicosPage: React.FC = () => {
                 mt: 0.5
               }}>
                 <Chip
-                  label={`Cadastrado: ${new Date(selectedMedico.createdAt).toLocaleDateString('pt-BR')}`}
+                  label={`Cadastrado: ${selectedMedico.createdAt ? new Date(selectedMedico.createdAt).toLocaleDateString('pt-BR') : 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={`Atualizado: ${new Date(selectedMedico.updatedAt).toLocaleDateString('pt-BR')}`}
+                  label={`Atualizado: ${selectedMedico.updatedAt ? new Date(selectedMedico.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -285,7 +285,7 @@ const MedicosPage: React.FC = () => {
             size="small"
             sx={{ fontSize: '0.75rem' }}
           >
-            Cancelar
+            Fechar
           </Button>
           <Button
             onClick={handleSave}

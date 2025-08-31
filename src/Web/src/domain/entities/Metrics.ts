@@ -22,11 +22,11 @@ export interface ExameMetrics {
   totalExames: number;
   examesPorModalidade: Array<{
     modalidade: string;
-    total: number;
+    total: number | string;
   }>;
   examesPorPeriodo: Array<{
     periodo: string;
-    total: number;
+    total: number | string;
   }>;
   examesUltimos30Dias: number;
 }
@@ -34,15 +34,15 @@ export interface ExameMetrics {
 export interface CrescimentoMetrics {
   usuarios: Array<{
     mes: string;
-    total: number;
+    total: number | string;
   }>;
   pacientes: Array<{
     mes: string;
-    total: number;
+    total: number | string;
   }>;
   exames: Array<{
     mes: string;
-    total: number;
+    total: number | string;
   }>;
 }
 

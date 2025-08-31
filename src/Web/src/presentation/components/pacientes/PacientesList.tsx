@@ -148,7 +148,7 @@ const PacientesList: React.FC = () => {
       id: 'nome',
       label: 'Nome',
       format: (value: string) => (
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="center" gap={0.375}>
           <Person color="action" />
           {value}
         </Box>
