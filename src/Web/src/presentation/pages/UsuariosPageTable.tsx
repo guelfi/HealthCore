@@ -161,8 +161,8 @@ const UsuariosPageTable: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>{new Date(usuario.createdAt).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{new Date(usuario.updatedAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{usuario.createdAt ? new Date(usuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{usuario.updatedAt ? new Date(usuario.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -271,13 +271,13 @@ const UsuariosPageTable: React.FC = () => {
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={`Cadastrado: ${new Date(selectedUsuario.createdAt).toLocaleDateString('pt-BR')}`}
+                  label={`Cadastrado: ${selectedUsuario.createdAt ? new Date(selectedUsuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={`Atualizado: ${new Date(selectedUsuario.updatedAt).toLocaleDateString('pt-BR')}`}
+                  label={`Atualizado: ${selectedUsuario.updatedAt ? new Date(selectedUsuario.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -313,7 +313,7 @@ const UsuariosPageTable: React.FC = () => {
             size="small"
             sx={{ fontSize: '0.75rem' }}
           >
-            Cancelar
+            Fechar
           </Button>
           <Button
             onClick={handleSave}

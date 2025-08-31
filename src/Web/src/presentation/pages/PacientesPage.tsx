@@ -190,8 +190,8 @@ const PacientesPage: React.FC = () => {
           {dialogMode === 'add' ? 'Adicionar Paciente' : 'Editar Paciente'}
         </DialogTitle>
         
-        <DialogContent sx={{ pt: 4, px: 3, pb: 2, overflow: 'auto' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+        <DialogContent sx={{ pt: 4.625, px: 3, pb: 2, overflow: 'auto' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}>
             <TextField
               fullWidth
               label="Nome Completo"
@@ -283,7 +283,7 @@ const PacientesPage: React.FC = () => {
             size="small"
             sx={{ fontSize: '0.75rem' }}
           >
-            Cancelar
+            Fechar
           </Button>
           <Button 
             onClick={handleSave} 

@@ -14,12 +14,20 @@ import {
   Assignment,
   LocalHospital,
   TrendingUp,
+  TrendingDown,
+  TrendingFlat,
   Refresh,
 } from '@mui/icons-material';
 import { useMetrics } from '../../hooks/useMetrics';
 
 const AdminDashboard: React.FC = () => {
   const { metrics, isLoading, isInitialLoading, error, refreshMetrics } = useMetrics();
+
+  // Função para formatar números com 3 casas, preenchendo com espaços não-quebráveis à esquerda
+  const formatNumber = (num: number): string => {
+    const numStr = num.toString();
+    return numStr.padStart(3, '\u00A0'); // Usando espaço não-quebrável (nbsp)
+  };
 
   // Component para renderizar skeleton dos cards
   const MetricCardSkeleton = () => (
@@ -82,7 +90,7 @@ const AdminDashboard: React.FC = () => {
         {/* Skeleton dos cards inferiores */}
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, width: '95%' }}>
-            <Card sx={{ flex: 1, height: 320, borderRadius: 3 }}>
+            <Card sx={{ flex: 1, height: 280, borderRadius: 3 }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
                 {[...Array(6)].map((_, i) => (
@@ -90,7 +98,7 @@ const AdminDashboard: React.FC = () => {
                 ))}
               </CardContent>
             </Card>
-            <Card sx={{ flex: 1, height: 320, borderRadius: 3 }}>
+            <Card sx={{ flex: 1, height: 280, borderRadius: 3 }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Skeleton variant="text" width="60%" height={24} sx={{ mb: 2 }} />
                 {[...Array(6)].map((_, i) => (
@@ -98,7 +106,7 @@ const AdminDashboard: React.FC = () => {
                 ))}
               </CardContent>
             </Card>
-            <Card sx={{ flex: 1, height: 320, borderRadius: 3 }}>
+            <Card sx={{ flex: 1, height: 280, borderRadius: 3 }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Skeleton variant="text" width="40%" height={24} sx={{ mb: 2 }} />
                 {[...Array(5)].map((_, i) => (
@@ -302,10 +310,16 @@ const AdminDashboard: React.FC = () => {
                     Crescimento Mensal
                   </Typography>
                   <Typography variant="h4" component="div" fontWeight="bold" sx={{ lineHeight: 1.1, my: 0.3, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-                    +{Math.max(0, 
-                      (metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 1]?.total || 0) -
-                      (metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 2]?.total || 0)
-                    )}
+                    {(() => {
+                      const current = metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 1]?.total;
+                      const previous = metrics.crescimento.pacientes[metrics.crescimento.pacientes.length - 2]?.total;
+                      
+                      if (typeof current === 'string' || typeof previous === 'string') {
+                        return 'N/A';
+                      }
+                      
+                      return `+${Math.max(0, (current || 0) - (previous || 0))}`;
+                    })()}
                   </Typography>
                   <Typography variant="caption" color="rgba(255,255,255,0.9)" sx={{ fontSize: '0.7rem', display: 'block' }}>
                     novos pacientes
@@ -332,7 +346,7 @@ const AdminDashboard: React.FC = () => {
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, width: '95%' }}>
           <Card sx={{
             flex: 1,
-            height: 320,
+            height: { xs: 320, sm: 280 },
             boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
             borderRadius: 3,
             transition: 'all 0.3s ease-in-out',
@@ -343,43 +357,74 @@ const AdminDashboard: React.FC = () => {
           }}>
             <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main" sx={{ fontSize: '1rem', mb: 2 }}>
-                Crescimento de Médicos
+                Médicos
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto' }}>
-                {metrics.crescimento.usuarios.map((item, index) => (
-                  <Box key={item.mes} display="flex" justifyContent="space-between" alignItems="center"
-                    sx={{
-                      mb: 1.5,
-                      p: 1.2,
-                      borderRadius: 2,
-                      bgcolor: 'grey.50',
-                      transition: 'all 0.2s ease',
-                      '&:hover': { bgcolor: 'primary.50' }
-                    }}>
-                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>{item.mes}</Typography>
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Typography variant="body2" fontWeight="bold" color="primary.main" sx={{ fontSize: '0.85rem' }}>{item.total}</Typography>
-                      {index > 0 && (
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: item.total > metrics.crescimento.usuarios[index - 1].total ? 'success.main' : 'text.secondary',
-                            fontSize: '1em'
-                          }}
-                        >
-                          {item.total > metrics.crescimento.usuarios[index - 1].total ? '↗' : '→'}
+                {metrics.crescimento.usuarios.map((item, index) => {
+                  const isLastItem = index === metrics.crescimento.usuarios.length - 1;
+                  let comparacao = '';
+                  let corComparacao = 'text.secondary';
+                  let iconeComparacao = null;
+                  
+                  if (index > 0 && typeof item.total === 'number' && typeof metrics.crescimento.usuarios[index - 1].total === 'number') {
+                    const atual = Number(item.total);
+                    const anterior = Number(metrics.crescimento.usuarios[index - 1].total);
+                    
+                    if (atual > anterior) {
+                      comparacao = 'maior';
+                      corComparacao = 'success.main';
+                      iconeComparacao = <TrendingUp sx={{ fontSize: '1rem', color: 'success.main', ml: 0.5 }} />;
+                    } else if (atual < anterior) {
+                      comparacao = 'menor';
+                      corComparacao = 'error.main';
+                      iconeComparacao = <TrendingDown sx={{ fontSize: '1rem', color: 'error.main', ml: 0.5 }} />;
+                    } else {
+                      comparacao = 'equivalente';
+                      corComparacao = 'warning.main';
+                      iconeComparacao = <TrendingFlat sx={{ fontSize: '1rem', color: 'warning.main', ml: 0.5 }} />;
+                    }
+                  } else if (isLastItem) {
+                    comparacao = 'maior';
+                    corComparacao = 'success.main';
+                    iconeComparacao = <TrendingUp sx={{ fontSize: '1rem', color: 'success.main', ml: 0.5 }} />;
+                  }
+                  
+                  return (
+                    <Box key={item.mes} display="flex" justifyContent="flex-start" alignItems="center"
+                         sx={{
+                           mb: 0.05,
+                           py: 0.6,
+                           pl: 4,
+                           pr: 2,
+                           borderRadius: 2,
+                           bgcolor: 'grey.50',
+                           transition: 'all 0.2s ease',
+                           '&:hover': { bgcolor: 'primary.50' }
+                         }}>
+                       <Box display="flex" alignItems="center" justifyContent="flex-start" gap={0.5}>
+                        <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>
+                          {item.mes}: 
                         </Typography>
-                      )}
+                        <Typography variant="body2" fontWeight="bold" color="primary.main" sx={{ fontSize: '0.85rem' }}>
+                          {item.total}
+                        </Typography>
+                        {iconeComparacao}
+                        {comparacao && (
+                          <Typography variant="body2" sx={{ fontSize: '0.75rem', color: corComparacao, ml: 0.5 }}>
+                            {comparacao}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
-                ))}
+                  );
+                })}
               </Box>
             </CardContent>
           </Card>
 
           <Card sx={{
             flex: 1,
-            height: 320,
+            height: 280,
             boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
             borderRadius: 3,
             transition: 'all 0.3s ease-in-out',
@@ -390,31 +435,31 @@ const AdminDashboard: React.FC = () => {
           }}>
             <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom fontWeight="bold" color="secondary.main" sx={{ fontSize: '1rem', mb: 2 }}>
-                Crescimento de Pacientes e Exames
+                Pacientes e Exames
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto' }}>
                 {metrics.crescimento.pacientes.map((item, index) => (
-                  <Box key={item.mes}
+                  <Box key={item.mes} display="flex" justifyContent="space-between" alignItems="center"
                     sx={{
-                      mb: 1.5,
-                      p: 1.2,
+                      mb: 0.2,
+                      p: 0.6,
                       borderRadius: 2,
                       bgcolor: 'grey.50',
                       transition: 'all 0.2s ease',
                       '&:hover': { bgcolor: 'secondary.50' }
                     }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>{item.mes}</Typography>
-                    </Box>
+                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.85rem' }}>{item.mes}</Typography>
                     <Box display="flex" gap={2}>
                       <Box display="flex" alignItems="center" gap={0.5}>
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Pacientes:</Typography>
-                        <Typography variant="body2" fontWeight="bold" color="success.main" sx={{ fontSize: '0.8rem' }}>{item.total}</Typography>
+                        <Typography variant="body2" fontWeight="bold" color="success.main" sx={{ fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                          {formatNumber(Number(item.total))}
+                        </Typography>
                       </Box>
                       <Box display="flex" alignItems="center" gap={0.5}>
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Exames:</Typography>
-                        <Typography variant="body2" fontWeight="bold" color="info.main" sx={{ fontSize: '0.8rem' }}>
-                          {metrics.crescimento.exames[index]?.total || 0}
+                        <Typography variant="body2" fontWeight="bold" color="info.main" sx={{ fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                          {formatNumber(Number(metrics.crescimento.exames[index]?.total || 0))}
                         </Typography>
                       </Box>
                     </Box>
@@ -426,7 +471,7 @@ const AdminDashboard: React.FC = () => {
 
           <Card sx={{
             flex: 1,
-            height: 320,
+            height: 280,
             boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
             borderRadius: 3,
             transition: 'all 0.3s ease-in-out',
@@ -437,13 +482,13 @@ const AdminDashboard: React.FC = () => {
           }}>
             <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom fontWeight="bold" color="warning.main" sx={{ fontSize: '1rem', mb: 2 }}>
-                Últimas Atividades
+                Atividades
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -454,8 +499,8 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -466,8 +511,8 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -478,8 +523,8 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1.5,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',
@@ -490,8 +535,8 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center"
                   sx={{
-                    mb: 1,
-                    p: 1.2,
+                    mb: 0.2,
+                    p: 0.6,
                     borderRadius: 2,
                     bgcolor: 'grey.50',
                     transition: 'all 0.2s ease',

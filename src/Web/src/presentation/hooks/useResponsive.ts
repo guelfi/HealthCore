@@ -1,5 +1,5 @@
-import { useTheme, useMediaQuery } from '@mui/material/styles';
-import type { Breakpoint } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 export function useResponsive() {
   const theme = useTheme();
@@ -25,7 +25,7 @@ export function useResponsive() {
   };
 }
 
-export function useBreakpoint(breakpoint: Breakpoint, direction: 'up' | 'down' | 'only' = 'up') {
+export function useBreakpoint(breakpoint: any, direction: 'up' | 'down' | 'only' = 'up') {
   const theme = useTheme();
   
   const query = direction === 'up' 

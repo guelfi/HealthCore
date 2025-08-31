@@ -93,7 +93,7 @@ const MedicosPageTable: React.FC = () => {
 
       {/* Card Principal */}
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
-        <CardContent sx={{ p: { xs: 1, md: 3 } }}>
+        <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
           {/* Cabeçalho do Grid */}
           <Box sx={{ 
             display: 'flex', 
@@ -164,8 +164,8 @@ const MedicosPageTable: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>{new Date(medico.createdAt).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{new Date(medico.updatedAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{medico.createdAt ? new Date(medico.createdAt).toLocaleDateString('pt-BR') : '-'}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{medico.updatedAt ? new Date(medico.updatedAt).toLocaleDateString('pt-BR') : '-'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -199,16 +199,24 @@ const MedicosPageTable: React.FC = () => {
           {dialogMode === 'add' ? 'Adicionar Médico' : 'Editar Médico'}
         </DialogTitle>
         
-        <DialogContent sx={{ pt: 4, px: 3, pb: 2 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+        <DialogContent sx={{ pt: 1, px: 1.5, pb: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 }, mt: 1 }}>
             <TextField
               fullWidth
               label="Nome Médico"
               defaultValue={selectedMedico?.username || ''}
               variant="outlined"
               size="small"
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '4px 6px'
+                },
+                '& .MuiInputBase-input': {
+                  padding: '4px 0'
+                }
+              }}
             />
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
               <TextField
                 fullWidth
                 label="Senha"
@@ -216,6 +224,14 @@ const MedicosPageTable: React.FC = () => {
                 variant="outlined"
                 size="small"
                 placeholder={dialogMode === 'edit' ? 'Deixe em branco para manter atual' : ''}
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
               />
               <TextField
                 fullWidth
@@ -223,9 +239,24 @@ const MedicosPageTable: React.FC = () => {
                 type="password"
                 variant="outlined"
                 size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
               />
             </Box>
-            <FormControl fullWidth variant="outlined" size="small">
+            <FormControl fullWidth variant="outlined" size="small" sx={{
+              '& .MuiInputBase-root': {
+                padding: '6px 8px'
+              },
+              '& .MuiSelect-select': {
+                padding: '6px 0'
+              }
+            }}>
               <InputLabel>Situação</InputLabel>
               <Select
                 defaultValue={selectedMedico?.isActive ?? true}
@@ -243,13 +274,13 @@ const MedicosPageTable: React.FC = () => {
                 mt: 0.5
               }}>
                 <Chip 
-                  label={`Cadastrado: ${new Date(selectedMedico.createdAt).toLocaleDateString('pt-BR')}`}
+                  label={`Cadastrado: ${selectedMedico.createdAt ? new Date(selectedMedico.createdAt).toLocaleDateString('pt-BR') : '-'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip 
-                  label={`Atualizado: ${new Date(selectedMedico.updatedAt).toLocaleDateString('pt-BR')}`}
+                  label={`Atualizado: ${selectedMedico.updatedAt ? new Date(selectedMedico.updatedAt).toLocaleDateString('pt-BR') : '-'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -285,7 +316,7 @@ const MedicosPageTable: React.FC = () => {
             size="small"
             sx={{ fontSize: '0.75rem' }}
           >
-            Cancelar
+            Fechar
           </Button>
           <Button 
             onClick={handleSave} 

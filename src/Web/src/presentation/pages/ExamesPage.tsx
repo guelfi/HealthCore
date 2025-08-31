@@ -204,11 +204,11 @@ const ExamesPage: React.FC = () => {
         </DialogTitle>
         
         <DialogContent sx={{ 
-          pt: 4, 
+          pt: 4.625, 
           px: 3, 
           pb: 2
         }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}>
             <Autocomplete
               options={pacientes}
               getOptionLabel={(option) => option.nome}
@@ -307,7 +307,7 @@ const ExamesPage: React.FC = () => {
             size="small"
             sx={{ fontSize: '0.75rem' }}
           >
-            Cancelar
+            Fechar
           </Button>
           <Button 
             onClick={handleSave} 

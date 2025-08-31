@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   useTheme,
-  useMediaQuery,
   Box,
   Typography,
   Button,
@@ -12,7 +11,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Pagination,
+
   Table,
   TableBody,
   TableCell,
@@ -21,6 +20,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -44,6 +44,7 @@ import {
   DeleteConfirmationDialog,
   SuccessDialog
 } from '../components/common/ConfirmationDialogs';
+import CustomPagination from '../components/common/CustomPagination';
 
 const PacientesPageTable: React.FC = () => {
   const debug = useAutoDebugger('PacientesPageTable');
@@ -198,78 +199,77 @@ const PacientesPageTable: React.FC = () => {
     if (!selectedPaciente) return;
 
     try {
-      setSaving(true);
-      debug.warning('Excluindo paciente:', selectedPaciente.id);
-
       await deletePaciente(selectedPaciente.id);
       debug.success('Paciente excluído com sucesso!');
-
       setSuccessMessage({
-        title: 'Excluído!',
+        title: 'Sucesso!',
         message: `Paciente "${selectedPaciente.nome}" foi excluído com sucesso.`
       });
-
       setShowDeleteDialog(false);
-      handleCloseDialog();
+      handleCloseDialog(); // Fechar o dialog principal de edição
       setShowSuccessDialog(true);
       fetchPacientes({ page: 1, pageSize: 10 }); // Recarregar lista
     } catch (error: any) {
       debug.error('Erro ao excluir:', error);
       addNotification(error.message || 'Erro ao excluir paciente', 'error');
-    } finally {
-      setSaving(false);
     }
   };
 
-  const handleDeleteClick = () => {
-    setShowDeleteDialog(true);
+  const totalPages = Math.ceil(total / pageSize);
+
+  const handlePageChange = (newPage: number) => {
+    debug.info('Mudando página:', { newPage });
+    fetchPacientes({ page: newPage, pageSize });
   };
 
   const handleInputChange = (field: string, value: string) => {
-    let formattedValue = value;
-
-    // Aplicar máscaras durante a digitação
-    switch (field) {
-      case 'documento':
-        formattedValue = applyCPFMask(value);
-        break;
-      case 'telefone':
-        formattedValue = applyPhoneMask(value);
-        break;
-      default:
-        formattedValue = value;
-    }
-
     setFormData(prev => ({
       ...prev,
-      [field]: formattedValue
+      [field]: value
     }));
   };
 
-  // Os dados já vêm paginados da API, não precisamos paginar localmente
-  const paginatedData = pacientes;
+  // Aplicar máscaras durante a digitação
+  const handleDocumentoChange = (value: string) => {
+    const maskedValue = applyCPFMask(value);
+    handleInputChange('documento', maskedValue);
+  };
+
+  const handleTelefoneChange = (value: string) => {
+    const maskedValue = applyPhoneMask(value);
+    handleInputChange('telefone', maskedValue);
+  };
 
   return (
-    <Box>
+    <>
       {/* Título e Descrição */}
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
         <Typography variant="h4" component="h1">
           Gestão de Pacientes
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-          Cadastro e manutenção de pacientes do sistema
+          Cadastro e manutenção de pacientes
         </Typography>
       </Box>
 
+      {/* Mensagem de erro */}
+      {error && (
+        <Box sx={{ mb: 2 }}>
+          <Typography color="error" variant="body2">
+            Erro: {error}
+          </Typography>
+        </Box>
+      )}
+
       {/* Card Principal */}
       <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
-        <CardContent sx={{ p: { xs: 1, md: 3 } }}>
+        <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
           {/* Cabeçalho do Grid */}
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            mb: 3 
           }}>
             <Button
               variant="contained"
@@ -285,92 +285,89 @@ const PacientesPageTable: React.FC = () => {
             >
               Adicionar Paciente
             </Button>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                {total > 0 ? `${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, total)} de ${total}` : '0 de 0'}
-              </Typography>
-              <Pagination
-                count={totalPagesFromHook}
-                page={currentPage}
-                onChange={(_, newPage) => {
-                  debug.info(`Mudando para página ${newPage}`);
-                  fetchPacientes({ page: newPage, pageSize });
-                }}
-                size="small"
-                color="primary"
-              />
-            </Box>
+            
+            <CustomPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={total}
+              itemsPerPage={pageSize}
+              onPageChange={handlePageChange}
+              size="small"
+            />
           </Box>
 
+          {/* Estado de carregamento */}
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+              <Typography>Carregando pacientes...</Typography>
+            </Box>
+          )}
+
           {/* Tabela de Dados */}
-          <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', maxHeight: 450 }}>
-            <Table size="small">
-              <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
-                <TableRow>
-                  <TableCell><strong>Nome</strong></TableCell>
-                  <TableCell><strong>CPF</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Data de Nascimento</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Telefone</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}><strong>Email</strong></TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}><strong>Cadastrado em</strong></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedData.map((paciente) => (
-                  <TableRow
-                    key={paciente.id}
-                    onClick={() => handleRowClick(paciente)}
-                    sx={{
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: 'rgba(102, 126, 234, 0.04)'
-                      }
-                    }}
-                  >
-                    <TableCell>{paciente.nome}</TableCell>
-                    <TableCell>{formatCPF(paciente.documento)}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                      {formatDateBR(paciente.dataNascimento)}
-                    </TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                      {paciente.telefone ? formatPhone(paciente.telefone) : '-'}
-                    </TableCell>
-                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                      {paciente.email || '-'}
-                    </TableCell>
-                    <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                      {paciente.createdAt ?
-                        formatDateBR(paciente.createdAt) :
-                        'N/A'
-                      }
-                    </TableCell>
+          {!loading && (
+            <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
+              <Table>
+                <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
+                  <TableRow>
+                    <TableCell><strong>Nome</strong></TableCell>
+                    <TableCell><strong>Documento</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Data de Nascimento</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}><strong>Telefone</strong></TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>E-mail</strong></TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {pacientes.map((paciente) => (
+                    <TableRow 
+                      key={paciente.id}
+                      onClick={() => handleRowClick(paciente)}
+                      sx={{ 
+                        cursor: 'pointer',
+                        '&:hover': { 
+                          backgroundColor: 'rgba(102, 126, 234, 0.04)' 
+                        }
+                      }}
+                    >
+                      <TableCell>{paciente.nome}</TableCell>
+                      <TableCell>{formatCPF(paciente.documento)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDateBR(paciente.dataNascimento)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{formatPhone(paciente.telefone || '')}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{paciente.email || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                  {pacientes.length === 0 && !loading && (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        <Typography variant="body1" color="text.secondary" sx={{ py: 4 }}>
+                          Nenhum paciente encontrado
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </CardContent>
       </Card>
 
       {/* Dialog de Manutenção */}
-      <Dialog
-        open={openDialog}
+      <Dialog 
+        open={openDialog} 
         onClose={handleCloseDialog}
-        maxWidth={false}
+        maxWidth="sm"
+        fullWidth
         sx={{
           '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '550px' },
-            maxWidth: '550px',
-            margin: { xs: 1, sm: 3 },
-            maxHeight: { xs: '95vh', sm: '90vh' },
-            minHeight: { xs: 'auto', sm: 'auto' }
+            width: { xs: '95vw', sm: '600px' },
+            maxWidth: '600px',
+            margin: { xs: 1, sm: 3 }
           }
         }}
       >
-        <DialogTitle sx={{
-          display: 'flex',
-          alignItems: 'center',
+        <DialogTitle sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
           gap: 1,
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white'
@@ -378,128 +375,182 @@ const PacientesPageTable: React.FC = () => {
           <PersonIcon />
           {dialogMode === 'add' ? 'Adicionar Paciente' : 'Editar Paciente'}
         </DialogTitle>
-
-        <DialogContent sx={{ pt: 4, px: 3, pb: 2, overflow: 'auto' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+        
+        <DialogContent sx={{ pt: 1.625, px: 1.5, pb: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 }, mt: 2.25 }}>
             <TextField
               fullWidth
-              label="Nome Completo"
+              label="Nome *"
               value={formData.nome}
               onChange={(e) => handleInputChange('nome', e.target.value)}
-              variant="outlined"
+              disabled={saving}
               size="small"
-              required
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '4px 6px'
+                },
+                '& .MuiInputBase-input': {
+                  padding: '4px 0'
+                }
+              }}
             />
-            <TextField
-              fullWidth
-              label="CPF"
-              placeholder="000.000.000-00"
-              value={formData.documento}
-              onChange={(e) => handleInputChange('documento', e.target.value)}
-              variant="outlined"
-              size="small"
-              required
-              inputProps={{ maxLength: 14 }}
-            />
-            <TextField
-              fullWidth
-              label="Data de Nascimento"
-              type="date"
-              value={formData.dataNascimento}
-              onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
-              variant="outlined"
-              size="small"
-              InputLabelProps={{ shrink: true }}
-              required
-            />
-            <TextField
-              fullWidth
-              label="Telefone"
-              placeholder="(11) 99999-9999"
-              value={formData.telefone}
-              onChange={(e) => handleInputChange('telefone', e.target.value)}
-              variant="outlined"
-              size="small"
-              inputProps={{ maxLength: 15 }}
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              variant="outlined"
-              size="small"
-            />
+            
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
+              <TextField
+                fullWidth
+                label="Documento (CPF) *"
+                value={formData.documento}
+                onChange={(e) => handleDocumentoChange(e.target.value)}
+                disabled={saving}
+                inputProps={{ maxLength: 14 }}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
+              />
+              
+              <TextField
+                fullWidth
+                label="Data de Nascimento *"
+                type="date"
+                value={formData.dataNascimento}
+                onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                disabled={saving}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
+              />
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
+              <TextField
+                fullWidth
+                label="Telefone"
+                value={formData.telefone}
+                onChange={(e) => handleTelefoneChange(e.target.value)}
+                disabled={saving}
+                inputProps={{ maxLength: 15 }}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
+              />
+              
+              <TextField
+                fullWidth
+                label="E-mail"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                disabled={saving}
+                size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px'
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0'
+                  }
+                }}
+              />
+            </Box>
+            
             <TextField
               fullWidth
               label="Endereço"
-              value={formData.endereco}
-              onChange={(e) => handleInputChange('endereco', e.target.value)}
-              variant="outlined"
-              size="small"
               multiline
               rows={2}
+              value={formData.endereco}
+              onChange={(e) => handleInputChange('endereco', e.target.value)}
+              disabled={saving}
+              size="small"
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '4px 6px'
+                },
+                '& .MuiInputBase-input': {
+                  padding: '4px 0'
+                }
+              }}
             />
           </Box>
         </DialogContent>
-
-        <DialogActions sx={{ p: 3, gap: 1 }}>
-          <Button
-            onClick={handleCloseDialog}
-            disabled={saving}
-            color="inherit"
-          >
-            Cancelar
-          </Button>
-
+        
+        <DialogActions sx={{ p: 1.5, gap: 1, justifyContent: 'flex-end' }}>
           {dialogMode === 'edit' && (
             <Button
-              onClick={handleDeleteClick}
+              onClick={() => setShowDeleteDialog(true)}
               disabled={saving}
-              color="error"
               variant="outlined"
+              color="error"
               startIcon={<DeleteIcon />}
+              sx={{ padding: '3px 12px' }}
             >
               Excluir
             </Button>
           )}
-
+          
+          <Button
+            onClick={handleCloseDialog}
+            disabled={saving}
+            variant="outlined"
+            sx={{ padding: '3px 12px' }}
+          >
+            Fechar
+          </Button>
+          
           <Button
             onClick={handleSave}
-            disabled={saving || !formData.nome || !formData.documento || !formData.dataNascimento}
-            color="primary"
+            disabled={saving}
             variant="contained"
-            startIcon={dialogMode === 'add' ? <AddIcon /> : <EditIcon />}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              },
+              padding: '3px 12px'
+            }}
           >
-            {saving ?
-              (dialogMode === 'add' ? 'Criando...' : 'Salvando...') :
-              (dialogMode === 'add' ? 'Criar' : 'Salvar')
-            }
+            {saving ? 'Salvando...' : 'Salvar'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Diálogo de confirmação de exclusão */}
+      {/* Diálogo de Confirmação de Exclusão */}
       <DeleteConfirmationDialog
         open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}
         itemName={selectedPaciente?.nome || ''}
-        itemType="o paciente"
+        itemType="paciente"
         loading={saving}
       />
 
-      {/* Diálogo de sucesso */}
+      {/* Diálogo de Sucesso */}
       <SuccessDialog
         open={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
         title={successMessage.title}
         message={successMessage.message}
-        autoClose={true}
-        autoCloseDelay={3000}
       />
-    </Box>
+    </>
   );
 };
 
