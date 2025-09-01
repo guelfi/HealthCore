@@ -30,7 +30,6 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  LocalHospital as MedicoIcon,
   Visibility,
 } from '@mui/icons-material';
 import { mockUsuarios } from '../../application/stores/mockData';

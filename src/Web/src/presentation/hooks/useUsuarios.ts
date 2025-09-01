@@ -13,7 +13,7 @@ import { UserProfile } from '../../domain/enums/UserProfile';
 
 // Debug discreto para hooks - só console.log
 const debug = {
-  log: (message: string, data?: any) => {
+  log: (message: string, data?: unknown) => {
     console.log(`🎣 [useUsuarios] ${message}`, data);
   },
 };
@@ -87,16 +87,18 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
         }));
 
         debug.log('Estado atualizado - usuários:', response.data.length);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+        const errorMessage = error && typeof error === 'object' && 'message' in error ? (error as any).message : 'Erro desconhecido';
         debug.log('Erro ao buscar usuários:', {
-          message: error.message,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
+          message: errorMessage,
+          status: errorResponse?.status,
+          statusText: errorResponse?.statusText,
+          data: errorResponse?.data,
         });
         setError(
-          error.response?.data?.message ||
-            error.message ||
+          errorResponse?.data?.message ||
+            errorMessage ||
             'Erro ao carregar usuários'
         );
         setState(prev => ({ ...prev, loading: false }));
@@ -124,11 +126,13 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
         }));
 
         return usuario;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+        const errorMessage = error && typeof error === 'object' && 'message' in error ? (error as any).message : 'Erro desconhecido';
         debug.log('Erro ao criar usuário:', error);
         setError(
-          error.response?.data?.message ||
-            error.message ||
+          errorResponse?.data?.message ||
+            errorMessage ||
             'Erro ao criar usuário'
         );
         setState(prev => ({ ...prev, loading: false }));
@@ -156,11 +160,13 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
         }));
 
         return usuario;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+        const errorMessage = error && typeof error === 'object' && 'message' in error ? (error as any).message : 'Erro desconhecido';
         debug.log('Erro ao atualizar usuário:', error);
         setError(
-          error.response?.data?.message ||
-            error.message ||
+          errorResponse?.data?.message ||
+            errorMessage ||
             'Erro ao atualizar usuário'
         );
         setState(prev => ({ ...prev, loading: false }));

@@ -8,7 +8,7 @@ import type {
 
 // Debug discreto para serviços - só console.log
 const debug = {
-  log: (message: string, data?: any) => {
+  log: (message: string, data?: unknown) => {
     console.log(`🔗 [PacienteService] ${message}`, data);
   },
 };
@@ -84,12 +84,14 @@ export class PacienteService {
         debug.log('Resultado final (convertido):', result);
         return result;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
       debug.log('Erro na requisição:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
+        message: errorMessage,
+        status: errorResponse?.status,
+        statusText: errorResponse?.statusText,
+        data: errorResponse?.data,
       });
       throw error;
     }
@@ -129,7 +131,7 @@ export class PacienteService {
    */
   static async update(id: string, data: UpdatePacienteDto): Promise<Paciente> {
     // Converter dados para o formato esperado pelo backend
-    const updateData: any = {
+    const updateData: UpdatePacienteDto & { dataNascimento?: string } = {
       nome: data.nome,
       documento: data.documento, // Backend espera 'documento'
       telefone: data.telefone || null,

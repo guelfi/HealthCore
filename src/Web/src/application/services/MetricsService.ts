@@ -56,10 +56,11 @@ class MetricsService {
     try {
       const response = await apiClient.get<AdminMetricsDto>('/admin/metrics');
       return this.adaptAdminMetrics(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao buscar métricas administrativas:', error);
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
       throw new Error(
-        error.response?.data?.message ||
+        errorResponse?.data?.message ||
           'Falha ao carregar métricas administrativas'
       );
     }
@@ -72,10 +73,11 @@ class MetricsService {
     try {
       const response = await apiClient.get<MedicoMetricsDto>('/medico/metrics');
       return this.adaptMedicoMetrics(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao buscar métricas do médico:', error);
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
       throw new Error(
-        error.response?.data?.message || 'Falha ao carregar métricas do médico'
+        errorResponse?.data?.message || 'Falha ao carregar métricas do médico'
       );
     }
   }

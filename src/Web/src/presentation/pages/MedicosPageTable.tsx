@@ -13,11 +13,6 @@ import {
   DialogActions,
   TextField,
   Chip,
-  Pagination,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -27,16 +22,29 @@ import {
   Paper,
   CircularProgress,
   Alert,
+  Pagination,
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
-  LocalHospital as MedicoIcon,
   Visibility,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useMedicos } from '../hooks/useMedicos';
 import type { Medico, CreateMedicoDto, UpdateMedicoDto } from '../../domain/entities/Medico';
+import { useUIStore } from '../../application/stores/uiStore';
+import {
+  formatCPF,
+  applyCPFMask,
+  applyPhoneMask,
+  unformatCPF,
+  unformatPhone,
+} from '../../utils/formatters';
+import {
+  DeleteConfirmationDialog,
+  SuccessDialog,
+} from '../components/common/ConfirmationDialogs';
+import CustomPagination from '../components/common/CustomPagination';
 
 const MedicosPageTable: React.FC = () => {
   const theme = useTheme();
@@ -71,6 +79,12 @@ const MedicosPageTable: React.FC = () => {
     username: '',
     password: '',
   });
+  const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const { addNotification } = useUIStore();
 
   // Carregar médicos ao montar o componente
   useEffect(() => {
@@ -81,10 +95,10 @@ const MedicosPageTable: React.FC = () => {
     setSelectedMedico(medico);
     setFormData({
       nome: medico.nome,
-      documento: medico.documento,
+      documento: applyCPFMask(medico.documento),
       crm: medico.crm,
       especialidade: medico.especialidade,
-      telefone: medico.telefone || '',
+      telefone: medico.telefone ? applyPhoneMask(medico.telefone) : '',
       email: medico.email || '',
       username: medico.user?.username || '',
       password: '', // Não preencher senha na edição
@@ -116,43 +130,84 @@ const MedicosPageTable: React.FC = () => {
   };
 
   const handleSave = async () => {
+    setSaving(true);
     try {
       if (dialogMode === 'add') {
-        await createMedico(formData);
+        const createData: CreateMedicoDto = {
+          ...formData,
+          documento: unformatCPF(formData.documento),
+          telefone: unformatPhone(formData.telefone),
+        };
+        await createMedico(createData);
+        setSuccessMessage('Médico adicionado com sucesso!');
       } else if (selectedMedico) {
         const updateData: UpdateMedicoDto = {
           nome: formData.nome,
-          documento: formData.documento,
+          documento: unformatCPF(formData.documento),
           crm: formData.crm,
           especialidade: formData.especialidade,
-          telefone: formData.telefone,
+          telefone: unformatPhone(formData.telefone),
           email: formData.email,
         };
         await updateMedico(selectedMedico.id, updateData);
+        setSuccessMessage('Médico atualizado com sucesso!');
       }
       handleCloseDialog();
+      setSuccessDialogOpen(true);
       // Recarregar a lista
       await fetchMedicos({ page, pageSize });
     } catch (error) {
       console.error('Erro ao salvar médico:', error);
+      addNotification({
+        type: 'error',
+        message: `Erro ao ${dialogMode === 'add' ? 'adicionar' : 'atualizar'} médico. Tente novamente.`,
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     if (selectedMedico) {
+      setSaving(true);
       try {
         await deleteMedico(selectedMedico.id);
+        setDeleteDialogOpen(false);
         handleCloseDialog();
+        setSuccessMessage('Médico excluído com sucesso!');
+        setSuccessDialogOpen(true);
         // Recarregar a lista
         await fetchMedicos({ page, pageSize });
       } catch (error) {
         console.error('Erro ao deletar médico:', error);
+        addNotification({
+          type: 'error',
+          message: 'Erro ao excluir médico. Tente novamente.',
+        });
+      } finally {
+        setSaving(false);
       }
     }
   };
 
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+  };
+
   const handleInputChange = (field: keyof CreateMedicoDto, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    let formattedValue = value;
+    
+    if (field === 'documento') {
+      formattedValue = applyCPFMask(value);
+    } else if (field === 'telefone') {
+      formattedValue = applyPhoneMask(value);
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: formattedValue }));
   };
 
   const handlePageChange = (newPage: number) => {
@@ -303,7 +358,7 @@ const MedicosPageTable: React.FC = () => {
                     <TableCell
                       sx={{ display: { xs: 'none', sm: 'table-cell' } }}
                     >
-                      {medico.documento}
+                      {formatCPF(medico.documento)}
                     </TableCell>
                     <TableCell
                       sx={{ display: { xs: 'none', md: 'table-cell' } }}
@@ -328,13 +383,13 @@ const MedicosPageTable: React.FC = () => {
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        maxWidth={false}
+        maxWidth="sm"
+        fullWidth
         sx={{
           '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '500px' },
-            maxWidth: '500px',
+            width: { xs: '95vw', sm: '600px' },
+            maxWidth: '600px',
             margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' },
           },
         }}
       >
@@ -347,17 +402,17 @@ const MedicosPageTable: React.FC = () => {
             color: 'white',
           }}
         >
-          <MedicoIcon />
+          <PersonIcon />
           {dialogMode === 'add' ? 'Adicionar Médico' : 'Editar Médico'}
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 1, px: 1.5, pb: 1 }}>
+        <DialogContent sx={{ pt: 1.625, px: 1.5, pb: 1 }}>
           <Box
             sx={{
               display: 'flex',
               flexDirection: 'column',
               gap: { xs: 1, sm: 1.2 },
-              mt: 1,
+              mt: 2.25,
             }}
           >
             <TextField
@@ -368,6 +423,14 @@ const MedicosPageTable: React.FC = () => {
               variant="outlined"
               size="small"
               required
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '4px 6px',
+                },
+                '& .MuiInputBase-input': {
+                  padding: '4px 0',
+                },
+              }}
             />
             <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
               <TextField
@@ -378,6 +441,14 @@ const MedicosPageTable: React.FC = () => {
                 variant="outlined"
                 size="small"
                 required
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0',
+                  },
+                }}
               />
               <TextField
                 fullWidth
@@ -387,6 +458,14 @@ const MedicosPageTable: React.FC = () => {
                 variant="outlined"
                 size="small"
                 required
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0',
+                  },
+                }}
               />
             </Box>
             <TextField
@@ -397,6 +476,14 @@ const MedicosPageTable: React.FC = () => {
               variant="outlined"
               size="small"
               required
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '4px 6px',
+                },
+                '& .MuiInputBase-input': {
+                  padding: '4px 0',
+                },
+              }}
             />
             <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
               <TextField
@@ -406,6 +493,14 @@ const MedicosPageTable: React.FC = () => {
                 onChange={(e) => handleInputChange('telefone', e.target.value)}
                 variant="outlined"
                 size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0',
+                  },
+                }}
               />
               <TextField
                 fullWidth
@@ -415,6 +510,14 @@ const MedicosPageTable: React.FC = () => {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 variant="outlined"
                 size="small"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0',
+                  },
+                }}
               />
             </Box>
             <TextField
@@ -427,6 +530,14 @@ const MedicosPageTable: React.FC = () => {
               required
               disabled={dialogMode === 'edit'}
               helperText={dialogMode === 'edit' ? 'Username não pode ser alterado' : ''}
+              sx={{
+                '& .MuiInputBase-root': {
+                  padding: '4px 6px',
+                },
+                '& .MuiInputBase-input': {
+                  padding: '4px 0',
+                },
+              }}
             />
             {dialogMode === 'add' && (
               <TextField
@@ -438,6 +549,14 @@ const MedicosPageTable: React.FC = () => {
                 variant="outlined"
                 size="small"
                 required
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 6px',
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '4px 0',
+                  },
+                }}
               />
             )}
             {selectedMedico && (
@@ -467,43 +586,61 @@ const MedicosPageTable: React.FC = () => {
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, gap: 0.5 }}>
+        <DialogActions sx={{ p: 1.5, gap: 1, justifyContent: 'flex-end' }}>
           {dialogMode === 'edit' && (
             <Button
-              onClick={handleDelete}
-              color="error"
+              onClick={handleDeleteClick}
+              disabled={saving}
               variant="outlined"
+              color="error"
               startIcon={<DeleteIcon />}
-              size="small"
-              sx={{ fontSize: '0.75rem' }}
-              disabled={loading}
+              sx={{ padding: '3px 12px' }}
             >
               Excluir
             </Button>
           )}
-          <Button
-            onClick={handleCloseDialog}
-            color="inherit"
-            variant="outlined"
-            size="small"
-            sx={{ fontSize: '0.75rem' }}
-            disabled={loading}
-          >
-            Cancelar
-          </Button>
+
           <Button
             onClick={handleSave}
-            color="primary"
+            disabled={saving || !formData.nome || !formData.documento || !formData.crm || !formData.especialidade || !formData.username || (dialogMode === 'add' && !formData.password)}
             variant="contained"
-            startIcon={dialogMode === 'add' ? <AddIcon /> : <EditIcon />}
-            size="small"
-            sx={{ fontSize: '0.75rem' }}
-            disabled={loading || !formData.nome || !formData.documento || !formData.crm || !formData.especialidade || !formData.username || (dialogMode === 'add' && !formData.password)}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              },
+              padding: '3px 12px',
+            }}
           >
-            {loading ? 'Salvando...' : dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+            {saving ? 'Salvando...' : 'Salvar'}
+          </Button>
+
+          <Button
+            onClick={handleCloseDialog}
+            disabled={saving}
+            variant="outlined"
+            sx={{ padding: '3px 12px' }}
+          >
+            Fechar
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Diálogo de Confirmação de Exclusão */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        itemName={selectedMedico?.nome || ''}
+        itemType="médico"
+      />
+
+      {/* Diálogo de Sucesso */}
+      <SuccessDialog
+        open={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+        message={successMessage}
+      />
     </Box>
   );
 };

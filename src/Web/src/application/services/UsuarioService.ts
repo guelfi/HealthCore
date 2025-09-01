@@ -8,7 +8,7 @@ import { UserProfile } from '../../domain/enums/UserProfile';
 
 // Debug discreto para serviços - só console.log
 const debug = {
-  log: (message: string, data?: any) => {
+  log: (message: string, data?: unknown) => {
     console.log(`🔗 [UsuarioService] ${message}`, data);
   },
 };
@@ -97,12 +97,14 @@ export class UsuarioService {
         debug.log('Resultado final (convertido):', result);
         return result;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
       debug.log('Erro na requisição:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
+        message: errorMessage,
+        status: errorResponse?.status,
+        statusText: errorResponse?.statusText,
+        data: errorResponse?.data,
       });
       throw error;
     }
@@ -144,7 +146,7 @@ export class UsuarioService {
     debug.log('Atualizando usuário:', { id, data });
     
     // Converter dados para o formato esperado pelo backend
-    const updateData: any = {};
+    const updateData: Partial<UpdateUsuarioDto> = {};
     
     if (data.username !== undefined) {
       updateData.username = data.username;

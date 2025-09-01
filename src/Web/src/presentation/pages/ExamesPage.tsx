@@ -31,7 +31,6 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Assignment as ExameIcon,
 } from '@mui/icons-material';
 import { mockExames, mockPacientes } from '../../application/stores/mockData';
 import { ModalidadeDicom } from '../../domain/enums/ModalidadeDicom';
