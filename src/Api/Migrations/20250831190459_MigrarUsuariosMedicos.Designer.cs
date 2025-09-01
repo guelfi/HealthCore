@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MobileMed.Api.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using MobileMed.Api.Infrastructure.Data;
 namespace MobileMed.Api.Migrations
 {
     [DbContext(typeof(MobileMedDbContext))]
-    partial class MobileMedDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250831190459_MigrarUsuariosMedicos")]
+    partial class MigrarUsuariosMedicos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
@@ -161,9 +164,6 @@ namespace MobileMed.Api.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("MedicoId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -173,8 +173,6 @@ namespace MobileMed.Api.Migrations
 
                     b.HasIndex("Documento")
                         .IsUnique();
-
-                    b.HasIndex("MedicoId");
 
                     b.ToTable("Pacientes");
                 });
@@ -277,16 +275,6 @@ namespace MobileMed.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MobileMed.Api.Core.Domain.Entities.Paciente", b =>
-                {
-                    b.HasOne("MobileMed.Api.Core.Domain.Entities.Medico", "Medico")
-                        .WithMany("Pacientes")
-                        .HasForeignKey("MedicoId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Medico");
-                });
-
             modelBuilder.Entity("MobileMed.Api.Core.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("MobileMed.Api.Core.Domain.Entities.User", "User")
@@ -301,8 +289,6 @@ namespace MobileMed.Api.Migrations
             modelBuilder.Entity("MobileMed.Api.Core.Domain.Entities.Medico", b =>
                 {
                     b.Navigation("ExamesRealizados");
-
-                    b.Navigation("Pacientes");
                 });
 
             modelBuilder.Entity("MobileMed.Api.Core.Domain.Entities.Paciente", b =>

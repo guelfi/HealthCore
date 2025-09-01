@@ -45,13 +45,23 @@ namespace MobileMed.Api.Core.Application.Services
             };
         }
 
-        public async Task<PagedResponseDto<PacienteDto>> GetPacientesAsync(int page, int pageSize)
+        public async Task<PagedResponseDto<PacienteDto>> GetPacientesAsync(int page, int pageSize, Guid? medicoId = null)
         {
-            // Calcular o total de pacientes
-            var total = await _context.Pacientes.CountAsync();
+            // Criar query base
+            var query = _context.Pacientes.AsQueryable();
             
-            // Obter os pacientes paginados
-            var pacientes = await _context.Pacientes
+            // Filtrar por médico se especificado
+            if (medicoId.HasValue)
+            {
+                query = query.Where(p => p.MedicoId == medicoId.Value);
+            }
+            
+            // Calcular o total de pacientes (com filtro aplicado)
+            var total = await query.CountAsync();
+            
+            // Obter os pacientes paginados com informações do médico
+            var pacientes = await query
+                .Include(p => p.Medico)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -62,7 +72,12 @@ namespace MobileMed.Api.Core.Application.Services
                 Id = p.Id,
                 Nome = p.Nome,
                 DataNascimento = p.DataNascimento,
-                Documento = p.Documento
+                Documento = p.Documento,
+                DataCriacao = p.DataCriacao,
+                MedicoId = p.MedicoId,
+                MedicoNome = p.Medico?.Nome,
+                MedicoCRM = p.Medico?.CRM,
+                MedicoEspecialidade = p.Medico?.Especialidade
             }).ToList();
 
             // Calcular total de páginas

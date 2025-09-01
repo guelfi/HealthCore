@@ -638,14 +638,15 @@ const AdminDashboard: React.FC = () => {
                         />
                       );
                     }
-                  } else if (isLastItem) {
-                    comparacao = 'maior';
-                    corComparacao = 'success.main';
+                  } else {
+                    // Para o primeiro item ou quando não há comparação, mostrar ícone neutro
+                    comparacao = 'inicial';
+                    corComparacao = 'text.secondary';
                     iconeComparacao = (
-                      <TrendingUp
+                      <TrendingFlat
                         sx={{
                           fontSize: '1rem',
-                          color: 'success.main',
+                          color: 'text.secondary',
                           ml: 0.5,
                         }}
                       />
@@ -659,10 +660,8 @@ const AdminDashboard: React.FC = () => {
                       justifyContent="flex-start"
                       alignItems="center"
                       sx={{
-                        mb: 0.05,
-                        py: 0.6,
-                        pl: 4,
-                        pr: 2,
+                        mb: 0.2,
+                        p: 0.6,
                         borderRadius: 2,
                         bgcolor: 'grey.50',
                         transition: 'all 0.2s ease',
@@ -672,37 +671,40 @@ const AdminDashboard: React.FC = () => {
                       <Box
                         display="flex"
                         alignItems="center"
-                        justifyContent="flex-start"
-                        gap={0.5}
+                        justifyContent="space-between"
+                        width="100%"
                       >
                         <Typography
                           variant="body2"
                           fontWeight={500}
-                          sx={{ fontSize: '0.85rem' }}
+                          sx={{ fontSize: '0.85rem', minWidth: '60px' }}
                         >
-                          {item.mes}:
+                          {item.mes}
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          fontWeight="bold"
-                          color="primary.main"
-                          sx={{ fontSize: '0.85rem' }}
-                        >
-                          {item.total}
-                        </Typography>
-                        {iconeComparacao}
-                        {comparacao && (
+                        <Box display="flex" alignItems="center" gap={0.5}>
                           <Typography
                             variant="body2"
-                            sx={{
-                              fontSize: '0.75rem',
-                              color: corComparacao,
-                              ml: 0.5,
-                            }}
+                            fontWeight="bold"
+                            color="primary.main"
+                            sx={{ fontSize: '0.85rem', fontFamily: 'monospace', minWidth: '30px', textAlign: 'right' }}
                           >
-                            {comparacao}
+                            {formatNumber(Number(item.total))}
                           </Typography>
-                        )}
+                          {iconeComparacao}
+                          {comparacao && (
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.75rem',
+                                color: corComparacao,
+                                ml: 0.5,
+                                minWidth: '70px',
+                              }}
+                            >
+                              {comparacao}
+                            </Typography>
+                          )}
+                        </Box>
                       </Box>
                     </Box>
                   );

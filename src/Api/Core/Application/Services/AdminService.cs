@@ -320,25 +320,37 @@ namespace MobileMed.Api.Core.Application.Services
             }
         }
 
-        public async Task<MedicoMetricsDto> GetMedicoMetricsAsync(Guid medicoId)
+        public async Task<MedicoMetricsDto> GetMedicoMetricsAsync(Guid userId)
         {
             try
             {
-                _logger.LogInformation("Gerando métricas para médico: {MedicoId}", medicoId);
+                _logger.LogInformation("Gerando métricas para médico: {UserId}", userId);
 
                 // Verificar se o usuário é médico
-                var medico = await _context.Users.FindAsync(medicoId);
-                if (medico == null || medico.Role != UserRole.Medico)
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null || user.Role != UserRole.Medico)
                 {
                     throw new InvalidOperationException("Usuário não é um médico válido.");
                 }
 
-                var totalPacientes = await _context.Pacientes.CountAsync();
-                var totalExames = await _context.Exames.CountAsync();
+                // Buscar o registro do médico na tabela Medicos
+                var medico = await _context.Medicos.FirstOrDefaultAsync(m => m.UserId == userId);
+                if (medico == null)
+                {
+                    throw new InvalidOperationException("Registro de médico não encontrado.");
+                }
 
-                // Exames por paciente (simulado - seria necessário relacionamento real)
+                // Contar apenas pacientes do médico logado
+                var totalPacientes = await _context.Pacientes.CountAsync(p => p.MedicoId == medico.Id);
+                
+                // Contar apenas exames dos pacientes do médico logado
+                var totalExames = await _context.Exames
+                    .Where(e => _context.Pacientes.Any(p => p.Id == e.PacienteId && p.MedicoId == medico.Id))
+                    .CountAsync();
+
+                // Exames por paciente (apenas pacientes do médico)
                 var examesPorPaciente = await _context.Pacientes
-                    .Take(10) // Limitar para performance
+                    .Where(p => p.MedicoId == medico.Id)
                     .Select(p => new ExamesPorPacienteDto
                     {
                         Paciente = p.Nome,
@@ -346,8 +358,9 @@ namespace MobileMed.Api.Core.Application.Services
                     })
                     .ToListAsync();
 
-                // Modalidades mais utilizadas
+                // Modalidades mais utilizadas (apenas exames dos pacientes do médico)
                 var modalidades = await _context.Exames
+                    .Where(e => _context.Pacientes.Any(p => p.Id == e.PacienteId && p.MedicoId == medico.Id))
                     .GroupBy(e => e.Modalidade)
                     .Select(g => new ModalidadeDto
                     {
@@ -366,12 +379,12 @@ namespace MobileMed.Api.Core.Application.Services
                     ModalidadesMaisUtilizadas = modalidades
                 };
 
-                _logger.LogInformation("Métricas do médico geradas com sucesso");
+                _logger.LogInformation("Métricas do médico geradas com sucesso - Pacientes: {Pacientes}, Exames: {Exames}", totalPacientes, totalExames);
                 return metrics;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao gerar métricas do médico: {MedicoId}", medicoId);
+                _logger.LogError(ex, "Erro ao gerar métricas do médico: {UserId}", userId);
                 throw;
             }
         }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MobileMed.Api.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using MobileMed.Api.Infrastructure.Data;
 namespace MobileMed.Api.Migrations
 {
     [DbContext(typeof(MobileMedDbContext))]
-    partial class MobileMedDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250831200445_AddMedicoIdToPacientesNullable")]
+    partial class AddMedicoIdToPacientesNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");

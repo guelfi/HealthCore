@@ -492,11 +492,11 @@ const MedicoDashboard: React.FC = () => {
                     <Typography
                       variant="body2"
                       fontWeight={600}
-                      sx={{ fontSize: '0.85rem' }}
+                      sx={{ fontSize: '0.85rem', minWidth: '60px' }}
                     >
                       {item.mes}
                     </Typography>
-                    <Box display="flex" gap={2}>
+                    <Box display="flex" gap={1.5} alignItems="center">
                       <Box display="flex" alignItems="center" gap={0.5}>
                         <Typography
                           variant="caption"
@@ -509,9 +509,9 @@ const MedicoDashboard: React.FC = () => {
                           variant="body2"
                           fontWeight="bold"
                           color="success.main"
-                          sx={{ fontSize: '0.8rem' }}
+                          sx={{ fontSize: '0.8rem', fontFamily: 'monospace', minWidth: '30px', textAlign: 'right' }}
                         >
-                          {metrics.crescimento.pacientes[index]?.total || 0}
+                          {String(metrics.crescimento.pacientes[index]?.total || 0).padStart(3, '\u00A0')}
                         </Typography>
                       </Box>
                       <Box display="flex" alignItems="center" gap={0.5}>
@@ -526,32 +526,35 @@ const MedicoDashboard: React.FC = () => {
                           variant="body2"
                           fontWeight="bold"
                           color="info.main"
-                          sx={{ fontSize: '0.8rem' }}
+                          sx={{ fontSize: '0.8rem', fontFamily: 'monospace', minWidth: '30px', textAlign: 'right' }}
                         >
-                          {item.total}
+                          {String(item.total).padStart(3, '\u00A0')}
                         </Typography>
-                        {index > 0 &&
+                        <Typography
+                          variant="body2"
+                          color={
+                            index > 0 &&
+                            typeof item.total === 'number' &&
+                            typeof metrics.crescimento.exames[index - 1]?.total === 'number'
+                              ? item.total > (metrics.crescimento.exames[index - 1]?.total || 0)
+                                ? 'success.main'
+                                : item.total < (metrics.crescimento.exames[index - 1]?.total || 0)
+                                ? 'error.main'
+                                : 'warning.main'
+                              : 'text.secondary'
+                          }
+                          sx={{ fontSize: '1em', minWidth: '20px', textAlign: 'center' }}
+                        >
+                          {index > 0 &&
                           typeof item.total === 'number' &&
-                          typeof metrics.crescimento.exames[index - 1]
-                            ?.total === 'number' && (
-                            <Typography
-                              variant="body2"
-                              color={
-                                item.total >
-                                (metrics.crescimento.exames[index - 1]?.total ||
-                                  0)
-                                  ? 'success.main'
-                                  : 'text.secondary'
-                              }
-                              sx={{ fontSize: '1em' }}
-                            >
-                              {item.total >
-                              (metrics.crescimento.exames[index - 1]?.total ||
-                                0)
-                                ? '↗'
-                                : '→'}
-                            </Typography>
-                          )}
+                          typeof metrics.crescimento.exames[index - 1]?.total === 'number'
+                            ? item.total > (metrics.crescimento.exames[index - 1]?.total || 0)
+                              ? '↗'
+                              : item.total < (metrics.crescimento.exames[index - 1]?.total || 0)
+                              ? '↘'
+                              : '→'
+                            : '→'}
+                        </Typography>
                       </Box>
                     </Box>
                   </Box>
