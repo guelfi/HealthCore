@@ -89,7 +89,7 @@ export const formatDateBR = (date: string | Date): string => {
       month: '2-digit',
       year: 'numeric',
     });
-  } catch (error) {
+  } catch {
     return '';
   }
 };
@@ -115,7 +115,7 @@ export const formatDateTimeBR = (date: string | Date): string => {
       hour: '2-digit',
       minute: '2-digit',
     });
-  } catch (error) {
+  } catch {
     return '';
   }
 };
@@ -127,7 +127,7 @@ export const parseDateBR = (dateBR: string): string => {
   if (!dateBR) return '';
 
   // Remove caracteres não numéricos e barras
-  const clean = dateBR.replace(/[^\d\/]/g, '');
+  const clean = dateBR.replace(/[^\d/]/g, '');
 
   // Verifica formato dd/mm/aaaa
   const match = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);

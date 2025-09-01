@@ -9,7 +9,7 @@ import type {
 
 // Debug discreto para serviços - só console.log
 const debug = {
-  log: (message: string, data?: any) => {
+  log: (message: string, data?: unknown) => {
     console.log(`🔗 [MedicoService] ${message}`, data);
   },
 };
@@ -70,14 +70,15 @@ export class MedicoService {
 
       debug.log('Dados processados:', resultado);
       return resultado;
-    } catch (error: any) {
+    } catch (error: unknown) {
       debug.log('Erro na requisição:', error);
       
-      if (error.response) {
-        debug.log('Status do erro:', error.response.status);
-        debug.log('Dados do erro:', error.response.data);
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      if (errorResponse) {
+        debug.log('Status do erro:', errorResponse.status);
+        debug.log('Dados do erro:', errorResponse.data);
         
-        const errorMessage = error.response.data?.message || 'Erro ao buscar médicos';
+        const errorMessage = errorResponse.data?.message || 'Erro ao buscar médicos';
         throw new Error(errorMessage);
       } else if (error.request) {
         debug.log('Erro de rede - sem resposta do servidor');
@@ -127,11 +128,12 @@ export class MedicoService {
       
       debug.log('Médico criado com sucesso:', medico);
       return medico;
-    } catch (error: any) {
+    } catch (error: unknown) {
       debug.log('Erro ao criar médico:', error);
       
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      if (errorResponse?.data?.message) {
+        throw new Error(errorResponse.data.message);
       }
       
       throw new Error('Erro ao criar médico');
@@ -157,11 +159,12 @@ export class MedicoService {
       
       debug.log('Médico atualizado com sucesso:', medico);
       return medico;
-    } catch (error: any) {
+    } catch (error: unknown) {
       debug.log('Erro ao atualizar médico:', error);
       
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      if (errorResponse?.data?.message) {
+        throw new Error(errorResponse.data.message);
       }
       
       throw new Error('Erro ao atualizar médico');
@@ -177,11 +180,12 @@ export class MedicoService {
     try {
       await apiClient.delete(`/medicos/${id}`);
       debug.log('Médico removido com sucesso');
-    } catch (error: any) {
+    } catch (error: unknown) {
       debug.log('Erro ao remover médico:', error);
       
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      if (errorResponse?.data?.message) {
+        throw new Error(errorResponse.data.message);
       }
       
       throw new Error('Erro ao remover médico');
@@ -207,11 +211,12 @@ export class MedicoService {
       
       debug.log('Médico ativado com sucesso:', medico);
       return medico;
-    } catch (error: any) {
+    } catch (error: unknown) {
       debug.log('Erro ao ativar médico:', error);
       
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      if (errorResponse?.data?.message) {
+        throw new Error(errorResponse.data.message);
       }
       
       throw new Error('Erro ao ativar médico');

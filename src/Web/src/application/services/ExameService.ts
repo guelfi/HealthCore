@@ -94,7 +94,7 @@ export class ExameService {
    * Atualiza um exame existente
    */
   static async update(id: string, data: UpdateExameDto): Promise<Exame> {
-    const updateData: any = { ...data };
+    const updateData: UpdateExameDto & { dataExame?: string } = { ...data };
 
     if (data.dataExame) {
       updateData.dataExame = data.dataExame.toISOString();
@@ -141,7 +141,7 @@ export class ExameService {
         `/exames/check-idempotency/${idempotencyKey}`
       );
       return response.data.exists;
-    } catch (error) {
+    } catch {
       // Se o endpoint não existir, assumir que não há duplicata
       return false;
     }
