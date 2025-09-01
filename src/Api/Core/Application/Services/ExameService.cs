@@ -68,9 +68,15 @@ namespace MobileMed.Api.Core.Application.Services
             };
         }
 
-        public async Task<PagedResponseDto<ExameDto>> GetExamesAsync(int page, int pageSize, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public async Task<PagedResponseDto<ExameDto>> GetExamesAsync(int page, int pageSize, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null, Guid? medicoId = null)
         {
             var query = _context.Exames.AsQueryable();
+
+            // Filtrar por médico se especificado (apenas exames dos pacientes do médico)
+            if (medicoId.HasValue)
+            {
+                query = query.Where(e => _context.Pacientes.Any(p => p.Id == e.PacienteId && p.MedicoId == medicoId.Value));
+            }
 
             // Aplicar filtros
             if (!string.IsNullOrEmpty(modalidade) && Enum.TryParse(modalidade, true, out ModalidadeExame modalidadeEnum))

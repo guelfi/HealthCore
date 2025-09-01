@@ -1,0 +1,30 @@
+Building...
+[15:47:20 INF] User profile is available. Using '/Users/guelfi/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+[15:47:21 INF] Now listening on: http://0.0.0.0:5000
+[15:47:21 INF] Application started. Press Ctrl+C to shut down.
+[15:47:21 INF] Hosting environment: Development
+[15:47:21 INF] Content root path: /Users/guelfi/Projetos/DesafioTecnico/src/Api
+[15:47:24 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/index.html - null null
+[15:47:24 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/index.html - 200 null text/html;charset=utf-8 208.8279ms
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/v1/swagger.json - null null
+[15:47:25 INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/favicon-32x32.png - null null
+[15:47:25 INF] Sending file. Request path: '/favicon-32x32.png'. Physical path: 'N/A'
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/favicon-32x32.png - 200 628 image/png 21.6867ms
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/index.html - null null
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/index.html - 200 null text/html;charset=utf-8 1.3722ms
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/swagger-ui-standalone-preset.js - null null
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/swagger-ui-bundle.js - null null
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/swagger-ui.css - null null
+[15:47:25 INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+[15:47:25 INF] Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/swagger-ui.css - 200 143943 text/css 30.7781ms
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/swagger-ui-standalone-preset.js - 200 339486 text/javascript 33.4736ms
+[15:47:25 INF] Sending file. Request path: '/swagger-ui-bundle.js'. Physical path: 'N/A'
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/swagger-ui-bundle.js - 200 1096145 text/javascript 63.6446ms
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/v1/swagger.json - null null
+[15:47:25 INF] Request starting HTTP/1.1 GET http://192.168.15.119:5000/swagger/favicon-32x32.png - null null
+[15:47:25 INF] Sending file. Request path: '/favicon-32x32.png'. Physical path: 'N/A'
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/favicon-32x32.png - 200 628 image/png 0.5969ms
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 377ms
+[15:47:25 INF] Request finished HTTP/1.1 GET http://192.168.15.119:5000/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 32.3022ms

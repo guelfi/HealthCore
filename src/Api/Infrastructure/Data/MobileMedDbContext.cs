@@ -28,6 +28,13 @@ namespace MobileMed.Api.Infrastructure.Data
                 entity.Property(p => p.Nome).IsRequired().HasMaxLength(200);
                 entity.Property(p => p.Documento).IsRequired().HasMaxLength(20);
                 entity.Property(p => p.DataNascimento).IsRequired();
+                
+                // Relacionamento com Médico (opcional temporariamente)
+                entity.HasOne(p => p.Medico)
+                    .WithMany(m => m.Pacientes)
+                    .HasForeignKey(p => p.MedicoId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
             });
 
             // Configuração da entidade Exame

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MobileMed.Api.Core.Application.DTOs;
 using MobileMed.Api.Core.Domain.Entities;
+using MobileMed.Api.Core.Domain.Enums;
 using MobileMed.Api.Infrastructure.Data;
 
 namespace MobileMed.Api.Core.Application.Services
@@ -8,20 +10,26 @@ namespace MobileMed.Api.Core.Application.Services
     public class MedicoService
     {
         private readonly MobileMedDbContext _context;
+        private readonly ILogger<MedicoService> _logger;
 
-        public MedicoService(MobileMedDbContext context)
+        public MedicoService(MobileMedDbContext context, ILogger<MedicoService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<MedicoDto> CreateMedicoAsync(CreateMedicoDto createMedicoDto)
         {
+            _logger.LogInformation("Iniciando criação de médico - Documento: {Documento}, CRM: {CRM}, Username: {Username}", 
+                createMedicoDto.Documento, createMedicoDto.CRM, createMedicoDto.Username);
+
             // Verificar se já existe um médico com o mesmo documento
             var medicoExistente = await _context.Medicos
                 .FirstOrDefaultAsync(m => m.Documento == createMedicoDto.Documento);
                 
             if (medicoExistente != null)
             {
+                _logger.LogWarning("Tentativa de criar médico com documento já existente: {Documento}", createMedicoDto.Documento);
                 throw new InvalidOperationException("Já existe um médico cadastrado com este documento.");
             }
 
@@ -31,6 +39,7 @@ namespace MobileMed.Api.Core.Application.Services
                 
             if (medicoComMesmoCRM != null)
             {
+                _logger.LogWarning("Tentativa de criar médico com CRM já existente: {CRM}", createMedicoDto.CRM);
                 throw new InvalidOperationException("Já existe um médico cadastrado com este CRM.");
             }
 
@@ -40,6 +49,8 @@ namespace MobileMed.Api.Core.Application.Services
                 
             if (usuarioExistente != null)
             {
+                _logger.LogWarning("Tentativa de criar médico com username já existente: {Username}. Usuário existente - ID: {UserId}, Role: {Role}", 
+                    createMedicoDto.Username, usuarioExistente.Id, usuarioExistente.Role);
                 throw new InvalidOperationException("Já existe um usuário cadastrado com este username.");
             }
 
@@ -110,8 +121,11 @@ namespace MobileMed.Api.Core.Application.Services
 
         public async Task<PagedResponseDto<MedicoDto>> GetMedicosAsync(int page, int pageSize)
         {
+            _logger.LogInformation("Listando médicos - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+            
             // Calcular o total de médicos
             var total = await _context.Medicos.CountAsync();
+            _logger.LogInformation("Total de médicos encontrados: {Total}", total);
             
             // Obter os médicos paginados com dados do usuário
             var medicos = await _context.Medicos

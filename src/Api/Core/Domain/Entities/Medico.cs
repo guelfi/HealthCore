@@ -19,6 +19,7 @@ namespace MobileMed.Api.Core.Domain.Entities
         
         // Relacionamentos
         public User User { get; set; } = null!;
+        public ICollection<Paciente> Pacientes { get; set; } = new List<Paciente>();
         public ICollection<Exame> ExamesRealizados { get; set; } = new List<Exame>();
     }
 }

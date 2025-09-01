@@ -1,0 +1,13 @@
+{
+  "nome": "Dr. Carlos Teste",
+  "documento": "98765432100",
+  "dataNascimento": "1980-05-15T00:00:00",
+  "telefone": "(11) 99999-9999",
+  "email": "carlos.teste@email.com",
+  "endereco": "Rua Teste, 123 - São Paulo, SP",
+  "crm": "CRM/SP 999999",
+  "especialidade": "Clínica Geral",
+  "username": "carlos.teste",
+  "password": "senha123",
+  "isActive": true
+}

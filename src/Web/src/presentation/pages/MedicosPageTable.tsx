@@ -440,7 +440,6 @@ const MedicosPageTable: React.FC = () => {
                 required
               />
             )}
-            </Box>
             {selectedMedico && (
               <Box
                 sx={{

@@ -3,6 +3,7 @@ using MobileMed.Api.Core.Application.DTOs;
 using MobileMed.Api.Core.Application.DTOs.Auth;
 using MobileMed.Api.Core.Application.DTOs.Admin;
 using MobileMed.Api.Core.Application.Services;
+using MobileMed.Api.Core.Domain.Entities;
 using MobileMed.Api.Core.Domain.Enums;
 using MobileMed.Api.Infrastructure.Data;
 using MobileMed.Api.Infrastructure.Middleware;
@@ -312,13 +313,45 @@ app.MapPost("/pacientes", async (CreatePacienteDto createPacienteDto, PacienteSe
     }
 });
 
-app.MapGet("/pacientes", async (PacienteService pacienteService, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
+app.MapGet("/pacientes", async (PacienteService pacienteService, HttpContext context, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
 {
-    logger.LogInformation("Listando pacientes - Página: {Page}, Tamanho da página: {PageSize}", page, pageSize);
-    var pacientes = await pacienteService.GetPacientesAsync(page, pageSize);
-    logger.LogInformation("Listagem de pacientes concluída. Número de pacientes retornados: {Count}", pacientes.Data.Count);
-    return Results.Ok(pacientes);
-});
+    try
+    {
+        logger.LogInformation("Listando pacientes - Página: {Page}, Tamanho da página: {PageSize}", page, pageSize);
+        
+        // Verificar o role do usuário logado
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        Guid? medicoId = null;
+        
+        // Se for médico, filtrar apenas seus pacientes
+        if (userRole == UserRole.Medico.ToString() && !string.IsNullOrEmpty(userId))
+        {
+            // Buscar o ID do médico baseado no UserId
+            using var scope = context.RequestServices.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<MobileMedDbContext>();
+            
+            var medico = await dbContext.Medicos
+                .FirstOrDefaultAsync(m => m.UserId == Guid.Parse(userId));
+                
+            if (medico != null)
+            {
+                medicoId = medico.Id;
+                logger.LogInformation("Filtrando pacientes para o médico: {MedicoId}", medicoId);
+            }
+        }
+        
+        var pacientes = await pacienteService.GetPacientesAsync(page, pageSize, medicoId);
+        logger.LogInformation("Listagem de pacientes concluída. Número de pacientes retornados: {Count}", pacientes.Data.Count);
+        return Results.Ok(pacientes);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao listar pacientes");
+        return Results.Problem("Erro inesperado ao listar pacientes.");
+    }
+}).RequireAuthorization();
 
 app.MapPut("/pacientes/{id:guid}", async (Guid id, UpdatePacienteDto updatePacienteDto, PacienteService pacienteService, ILogger<Program> logger) =>
 {
@@ -381,13 +414,54 @@ app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameS
     }
 });
 
-app.MapGet("/exames", async (ExameService exameService, int page = 1, int pageSize = 10, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null, ILogger<Program> logger = null!) =>
+app.MapGet("/exames", async (HttpContext context, ExameService exameService, MobileMedDbContext dbContext, int page = 1, int pageSize = 10, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null, ILogger<Program> logger = null!) =>
 {
-    logger.LogInformation("Listando exames - Página: {Page}, Tamanho da página: {PageSize}, Modalidade: {Modalidade}, PacienteId: {PacienteId}", page, pageSize, modalidade, pacienteId);
-    var exames = await exameService.GetExamesAsync(page, pageSize, modalidade, pacienteId, dataInicio, dataFim);
-    logger.LogInformation("Listagem de exames concluída. Número de exames retornados: {Count}", exames.Data.Count);
-    return Results.Ok(exames);
-});
+    try
+    {
+        logger.LogInformation("Listando exames - Página: {Page}, Tamanho da página: {PageSize}, Modalidade: {Modalidade}, PacienteId: {PacienteId}", page, pageSize, modalidade, pacienteId);
+        
+        // Obter informações do usuário logado
+        var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userRoleClaim = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userRoleClaim))
+        {
+            logger.LogWarning("Usuário não autenticado tentando acessar exames");
+            return Results.Unauthorized();
+        }
+        
+        var userId = Guid.Parse(userIdClaim);
+        var userRole = Enum.Parse<UserRole>(userRoleClaim);
+        
+        Guid? medicoId = null;
+        
+        // Se for médico, filtrar apenas exames dos seus pacientes
+        if (userRole == UserRole.Medico)
+        {
+            var medico = await dbContext.Medicos.FirstOrDefaultAsync(m => m.UserId == userId);
+            if (medico == null)
+            {
+                logger.LogWarning("Médico não encontrado para o usuário {UserId}", userId);
+                return Results.NotFound(new { Message = "Médico não encontrado" });
+            }
+            medicoId = medico.Id;
+            logger.LogInformation("Filtrando exames dos pacientes do médico {MedicoId}", medicoId);
+        }
+        else
+        {
+            logger.LogInformation("Usuário administrador - listando todos os exames");
+        }
+        
+        var exames = await exameService.GetExamesAsync(page, pageSize, modalidade, pacienteId, dataInicio, dataFim, medicoId);
+        logger.LogInformation("Listagem de exames concluída. Número de exames retornados: {Count}", exames.Data.Count);
+        return Results.Ok(exames);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao listar exames");
+        return Results.Problem("Erro inesperado ao listar exames.");
+    }
+}).RequireAuthorization();
 
 app.MapGet("/exames/{id:guid}", async (Guid id, ExameService exameService, ILogger<Program> logger) =>
 {
@@ -620,7 +694,7 @@ app.MapGet("/admin/usuarios", async (AdminService adminService, HttpContext cont
 
         logger.LogInformation("Listando usuários via admin - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
         var users = await adminService.GetUsersAsync(page, pageSize);
-        logger.LogInformation("Listagem de usuários concluída. Usuários retornados: {Count}", users.Count);
+        logger.LogInformation("Listagem de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
         return Results.Ok(users);
     }
     catch (Exception ex)
@@ -756,10 +830,7 @@ app.MapPatch("/admin/usuarios/{id:guid}/ativar", async (Guid id, AdminService ad
 // Endpoints de Médicos
 app.MapPost("/medicos", async (CreateMedicoDto createMedicoDto, MedicoService medicoService, ILogger<Program> logger) =>
 {
-    if (!ModelState.IsValid(createMedicoDto))
-    {
-        return Results.BadRequest("Dados inválidos fornecidos.");
-    }
+    // Validação será feita pelas Data Annotations
 
     try
     {
@@ -786,7 +857,7 @@ app.MapGet("/medicos", async (MedicoService medicoService, ILogger<Program> logg
     {
         logger.LogInformation("Listando médicos - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
         var medicos = await medicoService.GetMedicosAsync(page, pageSize);
-        logger.LogInformation("Listagem de médicos concluída. Médicos retornados: {Count}", medicos.Count);
+        logger.LogInformation("Listagem de médicos concluída. Médicos retornados: {Count}", medicos.Data.Count);
         return Results.Ok(medicos);
     }
     catch (Exception ex)
@@ -819,10 +890,7 @@ app.MapGet("/medicos/{id:guid}", async (Guid id, MedicoService medicoService, IL
 
 app.MapPut("/medicos/{id:guid}", async (Guid id, UpdateMedicoDto updateMedicoDto, MedicoService medicoService, ILogger<Program> logger) =>
 {
-    if (!ModelState.IsValid(updateMedicoDto))
-    {
-        return Results.BadRequest("Dados inválidos fornecidos.");
-    }
+    // Validação será feita pelas Data Annotations
 
     try
     {
@@ -870,6 +938,56 @@ app.MapDelete("/medicos/{id:guid}", async (Guid id, MedicoService medicoService,
         return Results.Problem("Erro inesperado ao excluir médico.");
     }
 }).RequireAuthorization();
+
+// Endpoint temporário para debug de médicos
+app.MapGet("/debug/medicos-usuarios", async (MobileMedDbContext context, ILogger<Program> logger) =>
+{
+    logger.LogInformation("Executando debug de médicos e usuários");
+    
+    // 1. Usuários com role de médico
+    var usuariosMedicos = await context.Users
+        .Where(u => u.Role == UserRole.Medico)
+        .Select(u => new { u.Id, u.Username, u.Role, u.IsActive, u.CreatedAt })
+        .ToListAsync();
+    
+    // 2. Total de médicos na tabela
+    var totalMedicos = await context.Medicos.CountAsync();
+    
+    // 3. Médicos existentes
+    var medicosExistentes = await context.Medicos
+        .Include(m => m.User)
+        .Select(m => new { 
+            m.Id, 
+            m.UserId, 
+            m.Nome, 
+            m.Documento, 
+            m.CRM, 
+            m.Especialidade,
+            Username = m.User != null ? m.User.Username : null,
+            IsActive = m.User != null ? m.User.IsActive : false
+        })
+        .ToListAsync();
+    
+    // 4. Usuários médicos sem registro na tabela Médicos
+    var usuariosSemMedico = await context.Users
+        .Where(u => u.Role == UserRole.Medico)
+        .Where(u => !context.Medicos.Any(m => m.UserId == u.Id))
+        .Select(u => new { u.Id, u.Username, u.Role, u.IsActive, u.CreatedAt })
+        .ToListAsync();
+    
+    var resultado = new
+    {
+        UsuariosMedicos = usuariosMedicos,
+        TotalMedicos = totalMedicos,
+        MedicosExistentes = medicosExistentes,
+        UsuariosSemMedico = usuariosSemMedico
+    };
+    
+    logger.LogInformation("Debug concluído - Usuários médicos: {Count1}, Médicos na tabela: {Count2}, Usuários sem médico: {Count3}", 
+        usuariosMedicos.Count, totalMedicos, usuariosSemMedico.Count);
+    
+    return Results.Ok(resultado);
+});
 
 // Endpoints de Métricas
 app.MapGet("/admin/metrics", async (AdminService adminService, HttpContext context, ILogger<Program> logger) =>
@@ -929,5 +1047,20 @@ app.MapGet("/medico/metrics", async (AdminService adminService, HttpContext cont
         return Results.Problem("Erro inesperado ao gerar métricas.");
     }
 }).RequireAuthorization();
+
+// ENDPOINT TEMPORÁRIO - Gerar hash da senha para médicos
+app.MapGet("/temp/gerar-hash-senha", () =>
+{
+    string senha = "@246!588";
+    string hash = BCrypt.Net.BCrypt.HashPassword(senha);
+    
+    return Results.Ok(new
+    {
+        senha = senha,
+        hash = hash,
+        sqlCommand = $"UPDATE Users SET PasswordHash = '{hash}' WHERE Role = 2;",
+        verificacao = BCrypt.Net.BCrypt.Verify(senha, hash)
+    });
+});
 
 app.Run();
