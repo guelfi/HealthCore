@@ -35,4 +35,4 @@ scripts/*.pid
 .kiro/
 
 # Banco de dados
-*.db
+#*.db
