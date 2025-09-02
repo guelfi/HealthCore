@@ -15,6 +15,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Diagnostics;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.OpenApi.Models;
 
 // Configurar o Serilog
 Log.Logger = new LoggerConfiguration()
@@ -26,7 +27,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Adicione esta linha:
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MobileMed API", Version = "v1" });
+    // ... outras configurações ...
+});
 
 // Add model validation
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
