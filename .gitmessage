@@ -1,0 +1,36 @@
+# Título da alteração (máximo 50 caracteres)
+# |<----  Usando máximo 50 caracteres  ---->|
+
+# Explique o motivo desta alteração (máximo 72 caracteres por linha)
+# |<----   Tente limitar cada linha a no máximo 72 caracteres   ---->|
+
+# Forneça links ou chaves para quaisquer tickets, artigos ou outros recursos relevantes
+# Exemplo: Closes #23
+
+# --- INSTRUÇÕES DE COMMIT ---
+# Lembre-se de:
+# * Usar o imperativo no título ("Adiciona" não "Adicionado")
+# * Não terminar o título com ponto final
+# * Separar o título do corpo com uma linha em branco
+# * Usar o corpo para explicar o que e por que, não como
+# * Pode incluir múltiplos parágrafos no corpo
+# 
+# Tipos de commit sugeridos:
+# feat: nova funcionalidade
+# fix: correção de bug
+# docs: alterações na documentação
+# style: formatação, ponto e vírgula ausente, etc; sem mudança de código
+# refactor: refatoração do código de produção
+# test: adição de testes, refatoração de testes; sem mudança de código de produção
+# chore: atualização de tarefas de build, configurações do gerenciador de pacotes, etc
+# perf: melhoria de performance
+# ci: mudanças nos arquivos e scripts de CI
+# build: mudanças que afetam o sistema de build ou dependências externas
+# revert: reverte um commit anterior
+#
+# Exemplos de boas mensagens:
+# feat: Adiciona autenticação JWT para usuários
+# fix: Corrige validação de email no formulário de cadastro
+# docs: Atualiza README com instruções de instalação
+# refactor: Reorganiza estrutura de pastas dos componentes
+# test: Adiciona testes unitários para serviço de pacientes

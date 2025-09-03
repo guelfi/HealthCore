@@ -1,2 +1,21 @@
 {
+  "git.inputValidation": "always",
+  "git.inputValidationLength": 72,
+  "git.inputValidationSubjectLength": 50,
+  "git.useCommitInputAsStashMessage": true,
+  "git.verboseCommit": true,
+  "git.defaultCloneDirectory": "./",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.showPushSuccessNotification": true,
+  "scm.inputFontFamily": "Consolas, 'Courier New', monospace",
+  "scm.inputFontSize": 14,
+  "git.branchProtection": [
+    "main",
+    "master",
+    "develop"
+  ],
+  "git.timeline.showAuthor": true,
+  "git.timeline.showUncommitted": true
 }
