@@ -1,0 +1,53 @@
+[commit]
+	template = .gitmessage
+	verbose = true
+
+[core]
+	editor = code --wait
+	autocrlf = true
+
+[pull]
+	rebase = false
+
+[init]
+	defaultBranch = main
+
+[user]
+	# Configure seu nome e email:
+	# name = Seu Nome
+	# email = seu.email@exemplo.com
+
+[alias]
+	# Aliases úteis em português
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	ca = commit -a
+	cm = commit -m
+	cam = commit -am
+	l = log --oneline --graph --decorate
+	la = log --oneline --graph --decorate --all
+	undo = reset --soft HEAD~1
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	visual = !gitk
+
+[color]
+	ui = auto
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
