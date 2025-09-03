@@ -13,36 +13,24 @@ using MobileMed.Api.Core.Domain.Entities;
 
 namespace MobileMed.Api.Tests
 {
-    public class PacienteServiceTests
+    public class PacienteServiceTests : IDisposable
     {
+        private readonly MobileMedDbContext _context;
         private readonly PacienteService _pacienteService;
-        private readonly Mock<MobileMedDbContext> _mockContext;
-        private readonly Mock<DbSet<Paciente>> _mockPacienteDbSet;
-        private readonly List<Paciente> _pacientes;
 
         public PacienteServiceTests()
         {
-            _pacientes = new List<Paciente>();
-            _mockPacienteDbSet = new Mock<DbSet<Paciente>>();
-            var queryablePacientes = new TestAsyncEnumerable<Paciente>(_pacientes).AsQueryable();
-            _mockPacienteDbSet.As<IQueryable<Paciente>>().Setup(m => m.Provider).Returns(queryablePacientes.Provider);
-            _mockPacienteDbSet.As<IQueryable<Paciente>>().Setup(m => m.Expression).Returns(queryablePacientes.Expression);
-            _mockPacienteDbSet.As<IQueryable<Paciente>>().Setup(m => m.ElementType).Returns(queryablePacientes.ElementType);
-            _mockPacienteDbSet.As<IAsyncEnumerable<Paciente>>().Setup(m => m.GetAsyncEnumerator(default)).Returns(new TestAsyncEnumerator<Paciente>(queryablePacientes.GetEnumerator()));
-
-            _mockPacienteDbSet.Setup(d => d.Add(It.IsAny<Paciente>())).Callback<Paciente>((s) => _pacientes.Add(s));
-            _mockPacienteDbSet.Setup(d => d.Remove(It.IsAny<Paciente>())).Callback<Paciente>((s) => _pacientes.Remove(s));
-            _mockPacienteDbSet.Setup(d => d.FindAsync(It.IsAny<object[]>()))
-                .Returns<object[]>(ids => new ValueTask<Paciente?>(_pacientes.FirstOrDefault(d => d.Id == (Guid)ids[0])));
-
             var options = new DbContextOptionsBuilder<MobileMedDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
-            _mockContext = new Mock<MobileMedDbContext>(options);
-            _mockContext.Setup(c => c.Pacientes).Returns(_mockPacienteDbSet.Object);
-            _mockContext.Setup(c => c.SaveChangesAsync(default)).ReturnsAsync(1);
 
-            _pacienteService = new PacienteService(_mockContext.Object);
+            _context = new MobileMedDbContext(options);
+            _pacienteService = new PacienteService(_context);
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
         }
 
         [Fact]
@@ -61,7 +49,8 @@ namespace MobileMed.Api.Tests
             // Assert
             result.Should().NotBeNull();
             result.Nome.Should().Be(createPacienteDto.Nome);
-            _pacientes.Should().HaveCount(1);
+            var savedPaciente = await _context.Pacientes.FindAsync(result.Id);
+            savedPaciente.Should().NotBeNull();
         }
 
         [Fact]
@@ -73,7 +62,8 @@ namespace MobileMed.Api.Tests
                 Nome = "Test User",
                 Documento = "12345678901"
             };
-            _pacientes.Add(new Paciente { Documento = "12345678901" });
+            await _context.Pacientes.AddAsync(new Paciente { Id = Guid.NewGuid(), Documento = "12345678901" });
+            await _context.SaveChangesAsync();
 
             // Act
             Func<Task> act = async () => await _pacienteService.CreatePacienteAsync(createPacienteDto);
@@ -86,9 +76,15 @@ namespace MobileMed.Api.Tests
         public async Task GetPacientesAsync_ShouldReturnPagedListOfPacientes()
         {
             // Arrange
-            _pacientes.Add(new Paciente { Nome = "Paciente 1" });
-            _pacientes.Add(new Paciente { Nome = "Paciente 2" });
-            _pacientes.Add(new Paciente { Nome = "Paciente 3" });
+            var pacientes = new List<Paciente>
+            {
+                new Paciente { Id = Guid.NewGuid(), Nome = "Paciente 1" },
+                new Paciente { Id = Guid.NewGuid(), Nome = "Paciente 2" },
+                new Paciente { Id = Guid.NewGuid(), Nome = "Paciente 3" }
+            };
+            
+            await _context.Pacientes.AddRangeAsync(pacientes);
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _pacienteService.GetPacientesAsync(1, 2);
@@ -107,7 +103,8 @@ namespace MobileMed.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            _pacientes.Add(new Paciente { Id = pacienteId, Nome = "Old Name" });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Old Name" });
+            await _context.SaveChangesAsync();
             var updateDto = new UpdatePacienteDto { Nome = "New Name" };
 
             // Act
@@ -137,14 +134,16 @@ namespace MobileMed.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            _pacientes.Add(new Paciente { Id = pacienteId });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId });
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _pacienteService.DeletePacienteAsync(pacienteId);
 
             // Assert
             result.Should().BeTrue();
-            _pacientes.Should().BeEmpty();
+            var deletedPaciente = await _context.Pacientes.FindAsync(pacienteId);
+            deletedPaciente.Should().BeNull();
         }
 
         [Fact]

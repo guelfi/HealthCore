@@ -7,7 +7,6 @@ import {
   Button,
   Typography,
   Collapse,
-  IconButton,
 } from '@mui/material';
 import {
   Refresh,

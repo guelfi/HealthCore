@@ -15,7 +15,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type {
   CreatePacienteDto,
   UpdatePacienteDto,
-  Paciente,
 } from '../../../domain/entities/Paciente';
 import { useUIStore } from '../../../application/stores/uiStore';
 import { usePacientes } from '../../hooks/usePacientes';
@@ -47,13 +46,9 @@ const PacienteForm: React.FC = () => {
     updatePaciente,
     getPacienteById,
     loading: apiLoading,
-    error: _error,
   } = usePacientes();
 
   const [loading, setLoading] = React.useState(false);
-  const [_pacienteData, setPacienteData] = React.useState<Paciente | null>(
-    null
-  );
 
   const {
     register,
@@ -70,7 +65,6 @@ const PacienteForm: React.FC = () => {
         try {
           setLoading(true);
           const paciente = await getPacienteById(id);
-          setPacienteData(paciente);
 
           setValue('nome', paciente.nome);
           setValue('documento', paciente.documento);
@@ -81,7 +75,7 @@ const PacienteForm: React.FC = () => {
           setValue('telefone', paciente.telefone || '');
           setValue('email', paciente.email || '');
           setValue('endereco', paciente.endereco || '');
-        } catch (error) {
+        } catch {
           addNotification('Erro ao carregar dados do paciente', 'error');
           navigate('/pacientes');
         } finally {

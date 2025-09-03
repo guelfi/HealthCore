@@ -5,8 +5,6 @@ import { z } from 'zod';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   TextField,
   Button,
   FormControl,
@@ -23,7 +21,7 @@ import {
   DialogActions,
 } from '@mui/material';
 import { Save, Visibility } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ExameService } from '../../../application/services/ExameService';
 import { PacienteService } from '../../../application/services/PacienteService';
 import type {
@@ -66,7 +64,6 @@ const ExameForm: React.FC<ExameFormProps> = ({
   onDelete,
 }) => {
   const navigate = useNavigate();
-  const { id: _id } = useParams();
   const { addNotification } = useUIStore();
   const isEditing = mode === 'edit';
 
@@ -130,9 +127,9 @@ const ExameForm: React.FC<ExameFormProps> = ({
         } else {
           formattedDate = examDate.toISOString().split('T')[0];
         }
-      } catch (error) {
-        formattedDate = new Date().toISOString().split('T')[0];
-      }
+      } catch {
+          formattedDate = new Date().toISOString().split('T')[0];
+        }
 
       // Usar reset para garantir que todos os valores sejam definidos corretamente
       reset({

@@ -584,8 +584,6 @@ const AdminDashboard: React.FC = () => {
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto' }}>
                 {metrics.crescimento.usuarios.map((item, index) => {
-                  const isLastItem =
-                    index === metrics.crescimento.usuarios.length - 1;
                   let comparacao = '';
                   let corComparacao = 'text.secondary';
                   let iconeComparacao = null;
