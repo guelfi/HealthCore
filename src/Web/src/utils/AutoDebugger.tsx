@@ -311,10 +311,10 @@ class AutoDebuggerLogger {
         : '';
 
       logDiv.innerHTML = `
-        <div style=\"color: ${this.getLogColor(log.level)}; font-weight: bold;\">
+        <div style="color: ${this.getLogColor(log.level)}; font-weight: bold;">
           ${this.getLogIcon(log.level)} [${log.component}] ${time}
         </div>
-        <div style=\"color: white; margin-top: 2px;\">
+        <div style="color: white; margin-top: 2px;">
           ${log.message}${shortData}
         </div>
       `;

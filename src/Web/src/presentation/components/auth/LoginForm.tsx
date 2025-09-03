@@ -46,7 +46,7 @@ const LoginForm: React.FC = () => {
       clearError();
       await login(data);
       addNotification('Login realizado com sucesso!', 'success');
-    } catch (error) {
+    } catch {
       // Error is already handled in the store
     }
   };

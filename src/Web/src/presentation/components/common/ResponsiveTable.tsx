@@ -11,7 +11,7 @@ import {
   Card,
   CardContent,
   Typography,
-  Chip,
+
   useTheme,
 } from '@mui/material';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -53,7 +53,7 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
     : columns;
 
   // Default mobile card renderer
-  const defaultMobileCardRenderer = (row: any, index: number) => (
+  const defaultMobileRenderer = (row: any, _index: number) => (
     <Card
       key={row[keyField]}
       sx={{
@@ -108,7 +108,7 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
         {data.map((row, index) =>
           mobileCardRenderer
             ? mobileCardRenderer(row, index)
-            : defaultMobileCardRenderer(row, index)
+            : defaultMobileRenderer(row, index)
         )}
       </Box>
     );

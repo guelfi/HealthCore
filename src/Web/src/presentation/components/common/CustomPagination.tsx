@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, IconButton, Button, useTheme } from '@mui/material';
+import { Box, Typography, IconButton, Button } from '@mui/material';
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,8 +24,6 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
   onPageChange,
   size = 'medium',
 }) => {
-  const theme = useTheme();
-
   // Calcular o range de itens da página atual
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);

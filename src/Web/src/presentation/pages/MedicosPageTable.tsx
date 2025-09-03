@@ -44,7 +44,6 @@ import {
   DeleteConfirmationDialog,
   SuccessDialog,
 } from '../components/common/ConfirmationDialogs';
-import CustomPagination from '../components/common/CustomPagination';
 
 const MedicosPageTable: React.FC = () => {
   const theme = useTheme();

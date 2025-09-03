@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, useTheme } from '@mui/material';
+import { Container, useTheme } from '@mui/material';
 import { useResponsive } from '../../hooks/useResponsive';
 
 interface ResponsiveContainerProps {

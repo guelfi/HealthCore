@@ -96,7 +96,7 @@ export function useScreenReader() {
 
   const announce = (
     message: string,
-    priority: 'polite' | 'assertive' = 'polite'
+    _priority: 'polite' | 'assertive' = 'polite'
   ) => {
     setAnnouncement(''); // Clear first to ensure re-announcement
     setTimeout(() => {

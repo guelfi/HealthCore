@@ -22,7 +22,7 @@ import { apiConfig } from '../../infrastructure/utils/apiConfig';
 import { useResponsive } from '../hooks/useResponsive';
 
 const DiagnosticPage: React.FC = () => {
-  const { isMobile, isTablet, isDesktop } = useResponsive();
+  const { isMobile, isTablet } = useResponsive();
   const config = apiConfig.getDebugInfo();
 
   const systemInfo = {

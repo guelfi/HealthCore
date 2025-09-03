@@ -93,7 +93,7 @@ const ExamesList: React.FC = () => {
     try {
       await deleteExame(exame.id);
       addNotification(`Exame removido com sucesso`, 'success');
-    } catch (error) {
+    } catch {
       addNotification(`Erro ao remover exame`, 'error');
     }
   };

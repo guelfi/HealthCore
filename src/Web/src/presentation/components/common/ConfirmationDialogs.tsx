@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Button,
@@ -9,7 +8,6 @@ import {
   Box,
   Card,
   CardContent,
-  Alert,
   Slide,
   Fade,
   useTheme,
@@ -19,9 +17,6 @@ import {
   Warning,
   Error,
   Info,
-  DeleteForever,
-  Save,
-  Cancel,
 } from '@mui/icons-material';
 import { type TransitionProps } from '@mui/material/transitions';
 
