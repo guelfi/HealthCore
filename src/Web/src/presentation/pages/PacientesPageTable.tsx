@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   useTheme,
+  useMediaQuery,
   Box,
   Typography,
   Button,
@@ -11,6 +12,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Chip,
   Table,
   TableBody,
   TableCell,
@@ -18,18 +20,31 @@ import {
   TableHead,
   TableRow,
   Paper,
+  CircularProgress,
+  Alert,
+  Pagination,
 } from '@mui/material';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   Add as AddIcon,
+  Edit as EditIcon,
   Delete as DeleteIcon,
-  Person as PersonIcon,
   Visibility,
+  Person as PersonIcon,
+  Save,
+  Close,
 } from '@mui/icons-material';
+import {
+  standardCardStyles,
+  standardCardContentStyles,
+  standardDialogButtonStyles,
+  standardDialogActionsStyles,
+  standardDialogTitleStyles,
+  standardAddButtonStyles,
+} from '../styles/cardStyles';
 import type { Paciente } from '../../domain/entities/Paciente';
 import { usePacientes } from '../hooks/usePacientes';
 import { useUIStore } from '../../application/stores/uiStore';
-import { useAutoDebugger } from '../../utils/AutoDebugger';
+
 import {
   formatCPF,
   formatPhone,
@@ -43,12 +58,10 @@ import {
   DeleteConfirmationDialog,
   SuccessDialog,
 } from '../components/common/ConfirmationDialogs';
+import StandardDialogButtons from '../components/common/StandardDialogButtons';
 import CustomPagination from '../components/common/CustomPagination';
 
 const PacientesPageTable: React.FC = () => {
-  const debug = useAutoDebugger('PacientesPageTable');
-  debug.info('Componente inicializado!');
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { addNotification } = useUIStore();
@@ -65,27 +78,15 @@ const PacientesPageTable: React.FC = () => {
     deletePaciente,
   } = usePacientes();
 
-  debug.debug('Hook usePacientes inicializado:', {
-    pacientes: pacientes.length,
-    loading,
-    error,
-  });
-
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
-  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(
-    null
-  );
+  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
+  const [page, setPage] = useState(1);
   const [pageSize] = useState(7);
   const [saving, setSaving] = useState(false);
-
-  // Estados para diálogos de confirmação
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [successMessage, setSuccessMessage] = useState({
-    title: '',
-    message: '',
-  });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Estados do formulário
   const [formData, setFormData] = useState({
@@ -97,33 +98,10 @@ const PacientesPageTable: React.FC = () => {
     endereco: '',
   });
 
-  // Monitorar mudanças nos pacientes
-  React.useEffect(() => {
-    debug.info('Pacientes atualizados:', {
-      quantidade: pacientes.length,
-      loading,
-      error,
-      primeiroPaciente: pacientes[0]?.nome || 'nenhum',
-      estruturaPrimeiroPaciente: pacientes[0]
-        ? {
-            id: pacientes[0].id,
-            nome: pacientes[0].nome,
-            documento: pacientes[0].documento,
-            dataNascimento: pacientes[0].dataNascimento,
-            telefone: pacientes[0].telefone,
-            email: pacientes[0].email,
-            createdAt: pacientes[0].createdAt,
-            todasAsPropriedades: Object.keys(pacientes[0]),
-          }
-        : null,
-    });
-  }, [pacientes, loading, error]);
-
-  // Forçar carregamento inicial
-  React.useEffect(() => {
-    debug.info('Disparando fetchPacientes inicial...');
-    fetchPacientes({ page: 1, pageSize: 10 });
-  }, [fetchPacientes]);
+  // Carregar pacientes ao montar o componente
+  useEffect(() => {
+    fetchPacientes({ page, pageSize });
+  }, [fetchPacientes, page, pageSize]);
 
   const handleRowClick = (paciente: Paciente) => {
     setSelectedPaciente(paciente);
@@ -164,7 +142,6 @@ const PacientesPageTable: React.FC = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      debug.info('Salvando paciente:', { dialogMode, formData });
 
       const pacienteData = {
         nome: formData.nome,
@@ -177,25 +154,16 @@ const PacientesPageTable: React.FC = () => {
 
       if (dialogMode === 'add') {
         await createPaciente(pacienteData);
-        debug.success('Paciente criado com sucesso!');
-        setSuccessMessage({
-          title: 'Sucesso!',
-          message: `Paciente "${formData.nome}" foi criado com sucesso.`,
-        });
+        setSuccessMessage(`Paciente "${formData.nome}" foi criado com sucesso.`);
       } else if (selectedPaciente) {
         await updatePaciente(selectedPaciente.id, pacienteData);
-        debug.success('Paciente atualizado com sucesso!');
-        setSuccessMessage({
-          title: 'Sucesso!',
-          message: `Paciente "${formData.nome}" foi atualizado com sucesso.`,
-        });
+        setSuccessMessage(`Paciente "${formData.nome}" foi atualizado com sucesso.`);
       }
 
       handleCloseDialog();
-      setShowSuccessDialog(true);
-      fetchPacientes({ page: 1, pageSize: 10 }); // Recarregar lista
+      setSuccessDialogOpen(true);
+      fetchPacientes({ page, pageSize }); // Recarregar lista
     } catch (error: any) {
-      debug.error('Erro ao salvar:', error);
       addNotification(error.message || 'Erro ao salvar paciente', 'error');
     } finally {
       setSaving(false);
@@ -207,17 +175,12 @@ const PacientesPageTable: React.FC = () => {
 
     try {
       await deletePaciente(selectedPaciente.id);
-      debug.success('Paciente excluído com sucesso!');
-      setSuccessMessage({
-        title: 'Sucesso!',
-        message: `Paciente "${selectedPaciente.nome}" foi excluído com sucesso.`,
-      });
-      setShowDeleteDialog(false);
+      setSuccessMessage(`Paciente "${selectedPaciente.nome}" foi excluído com sucesso.`);
+      setDeleteDialogOpen(false);
       handleCloseDialog(); // Fechar o dialog principal de edição
-      setShowSuccessDialog(true);
-      fetchPacientes({ page: 1, pageSize: 10 }); // Recarregar lista
+      setSuccessDialogOpen(true);
+      fetchPacientes({ page, pageSize }); // Recarregar lista
     } catch (error: any) {
-      debug.error('Erro ao excluir:', error);
       addNotification(error.message || 'Erro ao excluir paciente', 'error');
     }
   };
@@ -225,8 +188,7 @@ const PacientesPageTable: React.FC = () => {
   const totalPages = Math.ceil(total / pageSize);
 
   const handlePageChange = (newPage: number) => {
-    debug.info('Mudando página:', { newPage });
-    fetchPacientes({ page: newPage, pageSize });
+    setPage(newPage);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -273,8 +235,8 @@ const PacientesPageTable: React.FC = () => {
       )}
 
       {/* Card Principal */}
-      <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
-        <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+      <Card sx={standardCardStyles}>
+        <CardContent sx={standardCardContentStyles}>
           {/* Cabeçalho do Grid */}
           <Box
             sx={{
@@ -289,13 +251,7 @@ const PacientesPageTable: React.FC = () => {
               startIcon={<AddIcon />}
               onClick={handleAddNew}
               size={isMobile ? 'small' : 'medium'}
-              sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                '&:hover': {
-                  background:
-                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                },
-              }}
+              sx={standardAddButtonStyles}
             >
               Adicionar Paciente
             </Button>
@@ -325,33 +281,31 @@ const PacientesPageTable: React.FC = () => {
                 boxShadow: 'none',
                 border: '1px solid',
                 borderColor: 'divider',
+                maxHeight: 450,
               }}
             >
               <Table size="small">
                 <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                   <TableRow>
-                    <TableCell
-                      align="center"
-                      sx={{ width: 50, py: 1 }}
-                    ></TableCell>
-                    <TableCell sx={{ py: 1 }}>
+                    <TableCell align="center" sx={{ width: 50 }}></TableCell>
+                    <TableCell>
                       <strong>Nome</strong>
                     </TableCell>
-                    <TableCell sx={{ py: 1 }}>
+                    <TableCell>
                       <strong>Documento</strong>
                     </TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
                     >
                       <strong>Data de Nascimento</strong>
                     </TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', sm: 'table-cell' }, py: 1 }}
+                      sx={{ display: { xs: 'none', sm: 'table-cell' } }}
                     >
                       <strong>Telefone</strong>
                     </TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
                     >
                       <strong>E-mail</strong>
                     </TableCell>
@@ -364,13 +318,13 @@ const PacientesPageTable: React.FC = () => {
                       onClick={() => handleRowClick(paciente)}
                       sx={{
                         cursor: 'pointer',
-                        height: 35,
+                        height: 31,
                         '&:hover': {
                           backgroundColor: 'rgba(102, 126, 234, 0.04)',
                         },
                       }}
                     >
-                      <TableCell align="center" sx={{ py: '1px' }}>
+                      <TableCell align="center">
                         <Visibility
                           color="action"
                           sx={{
@@ -380,14 +334,13 @@ const PacientesPageTable: React.FC = () => {
                           }}
                         />
                       </TableCell>
-                      <TableCell sx={{ py: '1px' }}>{paciente.nome}</TableCell>
-                      <TableCell sx={{ py: '1px' }}>
+                      <TableCell>{paciente.nome}</TableCell>
+                      <TableCell>
                         {formatCPF(paciente.documento)}
                       </TableCell>
                       <TableCell
                         sx={{
                           display: { xs: 'none', md: 'table-cell' },
-                          py: '1px',
                         }}
                       >
                         {formatDateBR(paciente.dataNascimento)}
@@ -395,7 +348,6 @@ const PacientesPageTable: React.FC = () => {
                       <TableCell
                         sx={{
                           display: { xs: 'none', sm: 'table-cell' },
-                          py: '1px',
                         }}
                       >
                         {formatPhone(paciente.telefone || '')}
@@ -403,7 +355,6 @@ const PacientesPageTable: React.FC = () => {
                       <TableCell
                         sx={{
                           display: { xs: 'none', md: 'table-cell' },
-                          py: '1px',
                         }}
                       >
                         {paciente.email || '-'}
@@ -444,15 +395,7 @@ const PacientesPageTable: React.FC = () => {
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-          }}
-        >
+        <DialogTitle sx={standardDialogTitleStyles}>
           <PersonIcon />
           {dialogMode === 'add' ? 'Adicionar Paciente' : 'Editar Paciente'}
         </DialogTitle>
@@ -583,50 +526,20 @@ const PacientesPageTable: React.FC = () => {
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: 1.5, gap: 1, justifyContent: 'flex-end' }}>
-          {dialogMode === 'edit' && (
-            <Button
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={saving}
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              sx={{ padding: '3px 12px' }}
-            >
-              Excluir
-            </Button>
-          )}
-
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            variant="contained"
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-              },
-              padding: '3px 12px',
-            }}
-          >
-            {saving ? 'Salvando...' : 'Salvar'}
-          </Button>
-
-          <Button
-            onClick={handleCloseDialog}
-            disabled={saving}
-            variant="outlined"
-            sx={{ padding: '3px 12px' }}
-          >
-            Fechar
-          </Button>
-        </DialogActions>
+        <StandardDialogButtons
+           onSave={handleSave}
+           onClose={handleCloseDialog}
+           onDelete={dialogMode === 'edit' ? () => setDeleteDialogOpen(true) : undefined}
+           showDelete={dialogMode === 'edit'}
+           saveLoading={saving}
+           saveText={dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+         />
       </Dialog>
 
       {/* Diálogo de Confirmação de Exclusão */}
       <DeleteConfirmationDialog
-        open={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDelete}
         itemName={selectedPaciente?.nome || ''}
         itemType="paciente"
@@ -635,10 +548,10 @@ const PacientesPageTable: React.FC = () => {
 
       {/* Diálogo de Sucesso */}
       <SuccessDialog
-        open={showSuccessDialog}
-        onClose={() => setShowSuccessDialog(false)}
-        title={successMessage.title}
-        message={successMessage.message}
+        open={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+        title="Sucesso!"
+        message={successMessage}
       />
     </>
   );

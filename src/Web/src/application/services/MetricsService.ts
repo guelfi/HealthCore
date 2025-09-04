@@ -2,6 +2,17 @@ import { apiClient } from '../../infrastructure/api/client';
 import type { DashboardMetrics } from '../../domain/entities/Metrics';
 import { UserProfile } from '../../domain/enums/UserProfile';
 
+interface ErrorResponse {
+  response?: {
+    status: number;
+    data?: {
+      message?: string;
+    };
+  };
+  request?: unknown;
+  message?: string;
+}
+
 // Interfaces dos DTOs do Backend
 interface AdminMetricsDto {
   totalUsuarios: number;
@@ -58,7 +69,7 @@ class MetricsService {
       return this.adaptAdminMetrics(response.data);
     } catch (error: unknown) {
       console.error('Erro ao buscar métricas administrativas:', error);
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       throw new Error(
         errorResponse?.data?.message ||
           'Falha ao carregar métricas administrativas'
@@ -75,7 +86,7 @@ class MetricsService {
       return this.adaptMedicoMetrics(response.data);
     } catch (error: unknown) {
       console.error('Erro ao buscar métricas do médico:', error);
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       throw new Error(
         errorResponse?.data?.message || 'Falha ao carregar métricas do médico'
       );

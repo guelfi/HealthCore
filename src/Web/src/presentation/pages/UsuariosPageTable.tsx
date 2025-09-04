@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  useTheme,
+  useMediaQuery,
   Box,
   Typography,
   Button,
@@ -23,30 +25,102 @@ import {
   TableHead,
   TableRow,
   Paper,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
+import { formatDateBR } from '../utils/dateUtils';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Person as UsuarioIcon,
   Visibility,
+  Save,
 } from '@mui/icons-material';
-import { mockUsuarios } from '../../application/stores/mockData';
+import {
+  standardCardStyles,
+  standardCardContentStyles,
+  standardDialogButtonStyles,
+  standardDialogActionsStyles,
+  standardDialogTitleStyles,
+  standardAddButtonStyles,
+} from '../styles/cardStyles';
 import { UserProfile } from '../../domain/enums/UserProfile';
-import type { Usuario } from '../../domain/entities/Usuario';
+import type { Usuario, CreateUsuarioDto, UpdateUsuarioDto } from '../../domain/entities/Usuario';
+import { useUsuarios } from '../hooks/useUsuarios';
+import { useUIStore } from '../../application/stores/uiStore';
+import {
+  DeleteConfirmationDialog,
+  SuccessDialog,
+} from '../components/common/ConfirmationDialogs';
+import StandardDialogButtons from '../components/common/StandardDialogButtons';
 
 const UsuariosPageTable: React.FC = () => {
-  const [usuarios] = useState<Usuario[]>(mockUsuarios);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { addNotification } = useUIStore();
+  
+  const {
+    usuarios,
+    total,
+    currentPage,
+    totalPages,
+    loading,
+    error,
+    fetchUsuarios,
+    createUsuario,
+    updateUsuario,
+    deleteUsuario,
+    // activateUsuario,
+    // deactivateUsuario,
+    clearError,
+  } = useUsuarios();
+
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
-  const [page, setPage] = useState(1);
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    role: UserProfile.MEDICO,
+    isActive: true,
+  });
+  const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [pageSize] = useState(7);
 
   const profileLabels = {
     [UserProfile.ADMINISTRADOR]: 'Administrador',
     [UserProfile.MEDICO]: 'Médico',
   };
+
+  // Carregar usuários ao montar o componente
+  useEffect(() => {
+    fetchUsuarios({ page: currentPage, pageSize });
+  }, [currentPage, pageSize, fetchUsuarios]);
+
+  // Resetar form data quando o dialog abrir
+  useEffect(() => {
+    if (openDialog) {
+      if (dialogMode === 'add') {
+        setFormData({
+          username: '',
+          password: '',
+          role: UserProfile.MEDICO,
+          isActive: true,
+        });
+      } else if (selectedUsuario) {
+        setFormData({
+          username: selectedUsuario.username,
+          password: '',
+          role: selectedUsuario.role,
+          isActive: selectedUsuario.isActive,
+        });
+      }
+    }
+  }, [openDialog, dialogMode, selectedUsuario]);
 
   const handleRowClick = (usuario: Usuario) => {
     setSelectedUsuario(usuario);
@@ -65,18 +139,92 @@ const UsuariosPageTable: React.FC = () => {
     setSelectedUsuario(null);
   };
 
-  const handleSave = () => {
-    // Implementar lógica de salvar
-    handleCloseDialog();
+  const handleSave = async () => {
+    if (!formData.username || (dialogMode === 'add' && !formData.password)) {
+      addNotification('Preencha todos os campos obrigatórios', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      if (dialogMode === 'add') {
+        const createData: CreateUsuarioDto = {
+          username: formData.username,
+          password: formData.password,
+          role: formData.role,
+        };
+        await createUsuario(createData);
+        setSuccessMessage('Usuário criado com sucesso!');
+      } else if (selectedUsuario) {
+        const updateData: UpdateUsuarioDto = {
+          username: formData.username,
+          role: formData.role,
+          isActive: formData.isActive,
+        };
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
+        await updateUsuario(selectedUsuario.id, updateData);
+        setSuccessMessage('Usuário atualizado com sucesso!');
+      }
+      
+      handleCloseDialog();
+      setSuccessDialogOpen(true);
+      await fetchUsuarios({ page: currentPage, pageSize });
+    } catch (error) {
+      console.error('Erro ao salvar usuário:', error);
+      addNotification('Erro ao salvar usuário', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = () => {
-    // Implementar lógica de deletar
-    handleCloseDialog();
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
   };
 
-  const paginatedData = usuarios.slice((page - 1) * pageSize, page * pageSize);
-  const totalPages = Math.ceil(usuarios.length / pageSize);
+  const handleDeleteConfirm = async () => {
+    if (!selectedUsuario) return;
+
+    try {
+      await deleteUsuario(selectedUsuario.id);
+      setDeleteDialogOpen(false);
+      handleCloseDialog();
+      setSuccessMessage('Usuário excluído com sucesso!');
+      setSuccessDialogOpen(true);
+      await fetchUsuarios({ page: currentPage, pageSize });
+    } catch (error) {
+      console.error('Erro ao excluir usuário:', error);
+      addNotification('Erro ao excluir usuário', 'error');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    await fetchUsuarios({ page: newPage, pageSize });
+  };
+
+  // const handleToggleActive = async (usuario: Usuario) => {
+  //   try {
+  //     if (usuario.isActive) {
+  //       await deactivateUsuario(usuario.id);
+  //       setSuccessMessage('Usuário desativado com sucesso!');
+  //     } else {
+  //       await activateUsuario(usuario.id);
+  //       setSuccessMessage('Usuário ativado com sucesso!');
+  //     }
+  //     setSuccessDialogOpen(true);
+  //     await fetchUsuarios({ page: currentPage, pageSize });
+  //   } catch (error) {
+  //     console.error('Erro ao alterar status do usuário:', error);
+  //     addNotification('Erro ao alterar status do usuário', 'error');
+  //   }
+  // };
+
+  const paginatedData = usuarios;
 
   return (
     <Box>
@@ -95,8 +243,8 @@ const UsuariosPageTable: React.FC = () => {
       </Box>
 
       {/* Card Principal */}
-      <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
-        <CardContent sx={{ p: 3 }}>
+      <Card sx={standardCardStyles}>
+        <CardContent sx={standardCardContentStyles}>
           {/* Cabeçalho do Grid */}
           <Box
             sx={{
@@ -110,13 +258,8 @@ const UsuariosPageTable: React.FC = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddNew}
-              sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                '&:hover': {
-                  background:
-                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                },
-              }}
+              size={isMobile ? 'small' : 'medium'}
+              sx={standardAddButtonStyles}
             >
               Adicionar Usuário
             </Button>
@@ -127,19 +270,34 @@ const UsuariosPageTable: React.FC = () => {
                 color="text.secondary"
                 sx={{ display: { xs: 'none', sm: 'block' } }}
               >
-                Total: {usuarios.length}
+                Total: {total}
               </Typography>
               <Pagination
                 count={totalPages}
-                page={page}
-                onChange={(_, newPage) => setPage(newPage)}
+                page={currentPage}
+                onChange={(_, newPage) => handlePageChange(newPage)}
                 size="small"
                 color="primary"
               />
             </Box>
           </Box>
 
-          {/* Tabela de Dados */}
+          {/* Mensagem de Erro */}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
+              {error}
+            </Alert>
+          )}
+
+          {/* Loading */}
+           {loading && (
+             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+               <CircularProgress />
+             </Box>
+           )}
+
+            {/* Tabela de Dados */}
+            {!loading && (
           <TableContainer
             component={Paper}
             sx={{
@@ -177,12 +335,13 @@ const UsuariosPageTable: React.FC = () => {
                     onClick={() => handleRowClick(usuario)}
                     sx={{
                       cursor: 'pointer',
+                      height: 31,
                       '&:hover': {
                         backgroundColor: 'rgba(102, 126, 234, 0.04)',
                       },
                     }}
                   >
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ py: '1px' }}>
                       <Visibility
                         color="action"
                         sx={{
@@ -192,13 +351,13 @@ const UsuariosPageTable: React.FC = () => {
                         }}
                       />
                     </TableCell>
-                    <TableCell>{usuario.username}</TableCell>
+                    <TableCell sx={{ py: '1px' }}>{usuario.username}</TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
                     >
                       {profileLabels[usuario.role]}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: '1px' }}>
                       <Chip
                         label={usuario.isActive ? 'Ativo' : 'Inativo'}
                         color={usuario.isActive ? 'success' : 'error'}
@@ -206,27 +365,20 @@ const UsuariosPageTable: React.FC = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
-                      {usuario.createdAt
-                        ? new Date(usuario.createdAt).toLocaleDateString(
-                            'pt-BR'
-                          )
-                        : 'N/A'}
+                    <TableCell sx={{ py: '1px' }}>
+                      {formatDateBR(usuario.createdAt) || 'N/A'}
                     </TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
                     >
-                      {usuario.updatedAt
-                        ? new Date(usuario.updatedAt).toLocaleDateString(
-                            'pt-BR'
-                          )
-                        : 'N/A'}
+                      {formatDateBR(usuario.updatedAt) || 'N/A'}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+            )}
         </CardContent>
       </Card>
 
@@ -244,15 +396,7 @@ const UsuariosPageTable: React.FC = () => {
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-          }}
-        >
+        <DialogTitle sx={standardDialogTitleStyles}>
           <UsuarioIcon />
           {dialogMode === 'add' ? 'Adicionar Usuário' : 'Editar Usuário'}
         </DialogTitle>
@@ -268,14 +412,16 @@ const UsuariosPageTable: React.FC = () => {
             <TextField
               fullWidth
               label="Nome de Usuário"
-              defaultValue={selectedUsuario?.username || ''}
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               variant="outlined"
               size="small"
             />
             <FormControl fullWidth variant="outlined" size="small">
               <InputLabel>Perfil</InputLabel>
               <Select
-                defaultValue={selectedUsuario?.role || UserProfile.MEDICO}
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value as UserProfile })}
                 label="Perfil"
               >
                 <MenuItem value={UserProfile.ADMINISTRADOR}>
@@ -289,7 +435,8 @@ const UsuariosPageTable: React.FC = () => {
             <FormControl fullWidth variant="outlined" size="small">
               <InputLabel>Status</InputLabel>
               <Select
-                defaultValue={selectedUsuario?.isActive ?? true}
+                value={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
                 label="Status"
               >
                 <MenuItem value="true">Ativo</MenuItem>
@@ -301,6 +448,8 @@ const UsuariosPageTable: React.FC = () => {
                 fullWidth
                 label="Senha"
                 type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 variant="outlined"
                 size="small"
                 placeholder={
@@ -340,13 +489,13 @@ const UsuariosPageTable: React.FC = () => {
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={`Cadastrado: ${selectedUsuario.createdAt ? new Date(selectedUsuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}`}
+                  label={`Cadastrado: ${formatDateBR(selectedUsuario.createdAt) || 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={`Atualizado: ${selectedUsuario.updatedAt ? new Date(selectedUsuario.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}`}
+                  label={`Atualizado: ${formatDateBR(selectedUsuario.updatedAt) || 'N/A'}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -363,44 +512,32 @@ const UsuariosPageTable: React.FC = () => {
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, gap: 0.5 }}>
-          {dialogMode === 'edit' && (
-            <Button
-              onClick={handleDelete}
-              color="error"
-              variant="outlined"
-              startIcon={<DeleteIcon />}
-              size="small"
-              sx={{ fontSize: '0.75rem' }}
-            >
-              Excluir
-            </Button>
-          )}
-          <Button
-            onClick={handleCloseDialog}
-            color="inherit"
-            size="small"
-            sx={{ fontSize: '0.75rem' }}
-          >
-            Fechar
-          </Button>
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            startIcon={<EditIcon />}
-            size="small"
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-              },
-              fontSize: '0.75rem',
-            }}
-          >
-            {dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
-          </Button>
-        </DialogActions>
+        <StandardDialogButtons
+          onSave={handleSave}
+          onClose={handleCloseDialog}
+          onDelete={dialogMode === 'edit' ? handleDeleteClick : undefined}
+          showDelete={dialogMode === 'edit'}
+          saveLoading={saving}
+          saveText={dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+        />
       </Dialog>
+
+      {/* Dialogs de Confirmação */}
+      <DeleteConfirmationDialog
+         open={deleteDialogOpen}
+         onClose={handleDeleteCancel}
+         onConfirm={handleDeleteConfirm}
+         itemName={selectedUsuario?.username || ''}
+         itemType="usuário"
+         loading={saving}
+       />
+
+      <SuccessDialog
+         open={successDialogOpen}
+         onClose={() => setSuccessDialogOpen(false)}
+         title="Sucesso!"
+         message={successMessage}
+       />
     </Box>
   );
 };

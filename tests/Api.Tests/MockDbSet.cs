@@ -7,14 +7,9 @@ using Moq;
 
 namespace MobileMed.Api.Tests
 {
-    public class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
+    public class TestAsyncQueryProvider<TEntity>(IQueryProvider inner) : IAsyncQueryProvider
     {
-        private readonly IQueryProvider _inner;
-
-        public TestAsyncQueryProvider(IQueryProvider inner)
-        {
-            _inner = inner;
-        }
+        private readonly IQueryProvider _inner = inner;
 
         public IQueryable CreateQuery(System.Linq.Expressions.Expression expression)
         {
@@ -26,7 +21,7 @@ namespace MobileMed.Api.Tests
             return new TestAsyncEnumerable<TElement>(expression);
         }
 
-        public object Execute(System.Linq.Expressions.Expression expression)
+        public object? Execute(System.Linq.Expressions.Expression expression)
         {
             return _inner.Execute(expression);
         }
@@ -43,14 +38,14 @@ namespace MobileMed.Api.Tests
                                  .GetMethod(
                                      name: nameof(IQueryProvider.Execute),
                                      genericParameterCount: 1,
-                                     types: new[] { typeof(System.Linq.Expressions.Expression) }
-                                 )
+                                     types: [typeof(System.Linq.Expressions.Expression)]
+                                 )?
                                  .MakeGenericMethod(expectedResultType)
-                                 .Invoke(this, new[] { expression });
+                                 .Invoke(this, [expression]);
 
-            return (TResult)typeof(Task).GetMethod(nameof(Task.FromResult))
+            return (TResult)(typeof(Task).GetMethod(nameof(Task.FromResult))?
                                         .MakeGenericMethod(expectedResultType)
-                                        .Invoke(null, new[] { executionResult });
+                                        .Invoke(null, [executionResult]) ?? throw new InvalidOperationException("Task.FromResult method not found"));
         }
     }
 
@@ -70,18 +65,14 @@ namespace MobileMed.Api.Tests
         IQueryProvider IQueryable.Provider => new TestAsyncQueryProvider<T>(this);
     }
 
-    public class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
+    public class TestAsyncEnumerator<T>(IEnumerator<T> inner) : IAsyncEnumerator<T>
     {
-        private readonly IEnumerator<T> _inner;
-
-        public TestAsyncEnumerator(IEnumerator<T> inner)
-        {
-            _inner = inner;
-        }
+        private readonly IEnumerator<T> _inner = inner;
 
         public ValueTask DisposeAsync()
         {
             _inner.Dispose();
+            GC.SuppressFinalize(this);
             return new ValueTask();
         }
 

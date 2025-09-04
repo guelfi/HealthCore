@@ -139,5 +139,85 @@ namespace MobileMed.Api.Core.Application.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<PacienteDto?> GetPacienteByIdAsync(Guid id)
+        {
+            var paciente = await _context.Pacientes
+                .Include(p => p.Medico)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (paciente == null)
+            {
+                return null;
+            }
+
+            return new PacienteDto
+            {
+                Id = paciente.Id,
+                Nome = paciente.Nome,
+                DataNascimento = paciente.DataNascimento,
+                Documento = paciente.Documento,
+                DataCriacao = paciente.DataCriacao,
+                MedicoId = paciente.MedicoId,
+                MedicoNome = paciente.Medico?.Nome,
+                MedicoCRM = paciente.Medico?.CRM,
+                MedicoEspecialidade = paciente.Medico?.Especialidade
+            };
+        }
+
+        public async Task<PagedResponseDto<PacienteDto>> SearchPacientesByNomeAsync(string? nome, int page, int pageSize, Guid? medicoId = null)
+        {
+            // Criar query base
+            var query = _context.Pacientes.AsQueryable();
+            
+            // Filtrar por nome se especificado
+            if (!string.IsNullOrEmpty(nome))
+            {
+                query = query.Where(p => p.Nome.Contains(nome));
+            }
+            
+            // Filtrar por médico se especificado
+            if (medicoId.HasValue)
+            {
+                query = query.Where(p => p.MedicoId == medicoId.Value);
+            }
+            
+            // Calcular o total de pacientes (com filtros aplicados)
+            var total = await query.CountAsync();
+            
+            // Obter os pacientes paginados com informações do médico
+            var pacientes = await query
+                .Include(p => p.Medico)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Converter para DTOs
+            var pacienteDtos = pacientes.Select(p => new PacienteDto
+            {
+                Id = p.Id,
+                Nome = p.Nome,
+                DataNascimento = p.DataNascimento,
+                Documento = p.Documento,
+                DataCriacao = p.DataCriacao,
+                MedicoId = p.MedicoId,
+                MedicoNome = p.Medico?.Nome,
+                MedicoCRM = p.Medico?.CRM,
+                MedicoEspecialidade = p.Medico?.Especialidade
+            }).ToList();
+
+            // Calcular total de páginas
+            var totalPages = (int)Math.Ceiling((double)total / pageSize);
+
+            // Retornar resposta paginada
+            return new PagedResponseDto<PacienteDto>
+            {
+                Data = pacienteDtos,
+                Total = total,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalPages
+            };
+        }
     }
 }

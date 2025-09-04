@@ -185,5 +185,119 @@ namespace MobileMed.Api.Tests
             // Assert
             result.Should().BeFalse();
         }
+
+        [Fact]
+        public async Task CheckIdempotencyAsync_ShouldReturnTrue_WhenKeyExists()
+        {
+            // Arrange
+            var idempotencyKey = Guid.NewGuid().ToString();
+            var pacienteId = Guid.NewGuid();
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId });
+            await _context.Exames.AddAsync(new Exame { IdempotencyKey = idempotencyKey, PacienteId = pacienteId });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _exameService.CheckIdempotencyAsync(idempotencyKey);
+
+            // Assert
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task CheckIdempotencyAsync_ShouldReturnFalse_WhenKeyDoesNotExist()
+        {
+            // Arrange
+            var idempotencyKey = Guid.NewGuid().ToString();
+
+            // Act
+            var result = await _exameService.CheckIdempotencyAsync(idempotencyKey);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task GetStatisticsByModalidadeAsync_ShouldReturnCorrectStatistics()
+        {
+            // Arrange
+            var pacienteId = Guid.NewGuid();
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId });
+            await _context.Exames.AddAsync(new Exame { Modalidade = ModalidadeExame.CT, PacienteId = pacienteId, IdempotencyKey = Guid.NewGuid().ToString() });
+            await _context.Exames.AddAsync(new Exame { Modalidade = ModalidadeExame.CT, PacienteId = pacienteId, IdempotencyKey = Guid.NewGuid().ToString() });
+            await _context.Exames.AddAsync(new Exame { Modalidade = ModalidadeExame.MR, PacienteId = pacienteId, IdempotencyKey = Guid.NewGuid().ToString() });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _exameService.GetStatisticsByModalidadeAsync();
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().HaveCount(2);
+            // Verificar se contém as modalidades esperadas
+            var ctStat = result.FirstOrDefault(r => r.GetType().GetProperty("Modalidade")?.GetValue(r)?.ToString() == "CT");
+            var mrStat = result.FirstOrDefault(r => r.GetType().GetProperty("Modalidade")?.GetValue(r)?.ToString() == "MR");
+            ctStat.Should().NotBeNull();
+            mrStat.Should().NotBeNull();
+            
+            var ctQuantidade = ctStat?.GetType().GetProperty("Quantidade")?.GetValue(ctStat);
+            var mrQuantidade = mrStat?.GetType().GetProperty("Quantidade")?.GetValue(mrStat);
+            ctQuantidade.Should().Be(2);
+            mrQuantidade.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GetStatisticsByPeriodoAsync_ShouldReturnCorrectStatistics()
+        {
+            // Arrange
+            var pacienteId = Guid.NewGuid();
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId });
+            
+            var currentMonth = DateTime.UtcNow;
+            var lastMonth = currentMonth.AddMonths(-1);
+            
+            await _context.Exames.AddAsync(new Exame { 
+                Modalidade = ModalidadeExame.CT, 
+                PacienteId = pacienteId, 
+                IdempotencyKey = Guid.NewGuid().ToString(),
+                DataCriacao = currentMonth
+            });
+            await _context.Exames.AddAsync(new Exame { 
+                Modalidade = ModalidadeExame.MR, 
+                PacienteId = pacienteId, 
+                IdempotencyKey = Guid.NewGuid().ToString(),
+                DataCriacao = currentMonth
+            });
+            await _context.Exames.AddAsync(new Exame { 
+                Modalidade = ModalidadeExame.XA, 
+                PacienteId = pacienteId, 
+                IdempotencyKey = Guid.NewGuid().ToString(),
+                DataCriacao = lastMonth
+            });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _exameService.GetStatisticsByPeriodoAsync();
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().HaveCountGreaterThan(0);
+            // Verificar se contém os períodos esperados
+            var currentPeriod = $"{currentMonth.Year}-{currentMonth.Month:D2}";
+            var lastPeriod = $"{lastMonth.Year}-{lastMonth.Month:D2}";
+            
+            var currentStat = result.FirstOrDefault(r => r.GetType().GetProperty("Periodo")?.GetValue(r)?.ToString() == currentPeriod);
+            var lastStat = result.FirstOrDefault(r => r.GetType().GetProperty("Periodo")?.GetValue(r)?.ToString() == lastPeriod);
+            
+            if (currentStat != null)
+            {
+                var currentQuantidade = currentStat.GetType().GetProperty("Quantidade")?.GetValue(currentStat);
+                currentQuantidade.Should().Be(2);
+            }
+            if (lastStat != null)
+            {
+                var lastQuantidade = lastStat.GetType().GetProperty("Quantidade")?.GetValue(lastStat);
+                lastQuantidade.Should().Be(1);
+            }
+        }
     }
 }

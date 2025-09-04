@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import ExameForm from '../components/exames/ExameForm';
+import ExameForm from '../components/common/ExameForm';
 
 const ExameAddPage: React.FC = () => {
   const navigate = useNavigate();

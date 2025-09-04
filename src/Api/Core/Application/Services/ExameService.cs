@@ -208,5 +208,55 @@ namespace MobileMed.Api.Core.Application.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> CheckIdempotencyAsync(string idempotencyKey)
+        {
+            var exameExistente = await _context.Exames
+                .FirstOrDefaultAsync(e => e.IdempotencyKey == idempotencyKey);
+            
+            return exameExistente != null;
+        }
+
+        public async Task<List<object>> GetStatisticsByModalidadeAsync()
+        {
+            var statistics = await _context.Exames
+                .GroupBy(e => e.Modalidade)
+                .Select(g => new 
+                {
+                    Modalidade = g.Key.ToString(),
+                    Quantidade = g.Count()
+                })
+                .OrderByDescending(s => s.Quantidade)
+                .ToListAsync();
+
+            return statistics.Cast<object>().ToList();
+        }
+
+        public async Task<List<object>> GetStatisticsByPeriodoAsync(DateTime? dataInicio = null, DateTime? dataFim = null)
+        {
+            var query = _context.Exames.AsQueryable();
+
+            // Se não foram fornecidas datas, usar os últimos 6 meses
+            if (!dataInicio.HasValue || !dataFim.HasValue)
+            {
+                dataFim = DateTime.UtcNow;
+                dataInicio = dataFim.Value.AddMonths(-6);
+            }
+
+            // Filtrar por período
+            query = query.Where(e => e.DataCriacao >= dataInicio.Value && e.DataCriacao <= dataFim.Value);
+
+            var statistics = await query
+                .GroupBy(e => new { Year = e.DataCriacao.Year, Month = e.DataCriacao.Month })
+                .Select(g => new 
+                {
+                    Periodo = $"{g.Key.Year}-{g.Key.Month:D2}",
+                    Quantidade = g.Count()
+                })
+                .OrderBy(s => s.Periodo)
+                .ToListAsync();
+
+            return statistics.Cast<object>().ToList();
+        }
     }
 }

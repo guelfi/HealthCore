@@ -1,3 +1,6 @@
+// Import responsive utilities
+@use './responsive.scss';
+
 // CSS Custom Properties (CSS Variables)
 :root {
   --primary-color: #0092ff;
@@ -79,9 +82,6 @@ body {
     }
   }
 }
-
-// Import responsive utilities
-@import './responsive.scss';
 
 // Responsividade
 @media (max-width: 768px) {

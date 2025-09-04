@@ -7,16 +7,10 @@ using MobileMed.Api.Infrastructure.Data;
 
 namespace MobileMed.Api.Core.Application.Services
 {
-    public class MedicoService
+    public class MedicoService(MobileMedDbContext context, ILogger<MedicoService> logger)
     {
-        private readonly MobileMedDbContext _context;
-        private readonly ILogger<MedicoService> _logger;
-
-        public MedicoService(MobileMedDbContext context, ILogger<MedicoService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        private readonly MobileMedDbContext _context = context;
+        private readonly ILogger<MedicoService> _logger = logger;
 
         public async Task<MedicoDto> CreateMedicoAsync(CreateMedicoDto createMedicoDto)
         {
@@ -76,16 +70,15 @@ namespace MobileMed.Api.Core.Application.Services
                 // Criar o médico
                 var medico = new Medico
                 {
-                    Id = Guid.NewGuid(),
                     UserId = user.Id,
                     Nome = createMedicoDto.Nome,
                     Documento = createMedicoDto.Documento,
                     DataNascimento = createMedicoDto.DataNascimento,
-                    Telefone = createMedicoDto.Telefone,
-                    Email = createMedicoDto.Email,
-                    Endereco = createMedicoDto.Endereco,
+                    Telefone = createMedicoDto.Telefone ?? string.Empty,
+                    Email = createMedicoDto.Email ?? string.Empty,
+                    Endereco = createMedicoDto.Endereco ?? string.Empty,
                     CRM = createMedicoDto.CRM,
-                    Especialidade = createMedicoDto.Especialidade,
+                    Especialidade = createMedicoDto.Especialidade ?? string.Empty,
                     DataCriacao = DateTime.UtcNow
                 };
 
@@ -246,11 +239,11 @@ namespace MobileMed.Api.Core.Application.Services
                 medico.Nome = updateMedicoDto.Nome;
                 medico.Documento = updateMedicoDto.Documento;
                 medico.DataNascimento = updateMedicoDto.DataNascimento;
-                medico.Telefone = updateMedicoDto.Telefone;
-                medico.Email = updateMedicoDto.Email;
-                medico.Endereco = updateMedicoDto.Endereco;
+                medico.Telefone = updateMedicoDto.Telefone ?? string.Empty;
+                medico.Email = updateMedicoDto.Email ?? string.Empty;
+                medico.Endereco = updateMedicoDto.Endereco ?? string.Empty;
                 medico.CRM = updateMedicoDto.CRM;
-                medico.Especialidade = updateMedicoDto.Especialidade;
+                medico.Especialidade = updateMedicoDto.Especialidade ?? string.Empty;
 
                 // Atualizar dados do usuário se fornecidos
                 if (medico.User != null)

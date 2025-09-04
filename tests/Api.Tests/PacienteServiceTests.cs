@@ -158,5 +158,118 @@ namespace MobileMed.Api.Tests
             // Assert
             result.Should().BeFalse();
         }
+
+        [Fact]
+        public async Task GetPacienteByIdAsync_ShouldReturnPaciente_WhenPacienteExists()
+        {
+            // Arrange
+            var medicoId = Guid.NewGuid();
+            var pacienteId = Guid.NewGuid();
+            var medico = new Medico { Id = medicoId, Nome = "Dr. Test", CRM = "12345" };
+            var paciente = new Paciente { Id = pacienteId, Nome = "Test Patient", MedicoId = medicoId };
+            
+            await _context.Medicos.AddAsync(medico);
+            await _context.Pacientes.AddAsync(paciente);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _pacienteService.GetPacienteByIdAsync(pacienteId);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Id.Should().Be(pacienteId);
+            result.Nome.Should().Be("Test Patient");
+            result.MedicoNome.Should().Be("Dr. Test");
+        }
+
+        [Fact]
+        public async Task GetPacienteByIdAsync_ShouldReturnNull_WhenPacienteDoesNotExist()
+        {
+            // Arrange
+            var pacienteId = Guid.NewGuid();
+
+            // Act
+            var result = await _pacienteService.GetPacienteByIdAsync(pacienteId);
+
+            // Assert
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task SearchPacientesByNomeAsync_ShouldReturnMatchingPacientes()
+        {
+            // Arrange
+            var medico = new Medico { Id = Guid.NewGuid(), Nome = "Dr. Test", CRM = "12345" };
+            var pacientes = new List<Paciente>
+            {
+                new Paciente { Id = Guid.NewGuid(), Nome = "João Silva", MedicoId = medico.Id },
+                new Paciente { Id = Guid.NewGuid(), Nome = "Maria João", MedicoId = medico.Id },
+                new Paciente { Id = Guid.NewGuid(), Nome = "Pedro Santos", MedicoId = medico.Id }
+            };
+            
+            await _context.Medicos.AddAsync(medico);
+            await _context.Pacientes.AddRangeAsync(pacientes);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _pacienteService.SearchPacientesByNomeAsync("João", 1, 10);
+
+            // Assert
+            result.Should().NotBeNull();
+            result!.Data.Should().HaveCount(2);
+            result!.Data.Should().OnlyContain(p => p.Nome != null && p.Nome.Contains("João"));
+            result!.Total.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task SearchPacientesByNomeAsync_ShouldReturnEmptyList_WhenNoMatches()
+        {
+            // Arrange
+            var pacientes = new List<Paciente>
+            {
+                new Paciente { Id = Guid.NewGuid(), Nome = "João Silva" },
+                new Paciente { Id = Guid.NewGuid(), Nome = "Maria Santos" }
+            };
+            
+            await _context.Pacientes.AddRangeAsync(pacientes);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _pacienteService.SearchPacientesByNomeAsync("Carlos", 1, 10);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Data.Should().BeEmpty();
+            result.Total.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task SearchPacientesByNomeAsync_ShouldFilterByMedicoId_WhenProvided()
+        {
+            // Arrange
+            var medico1Id = Guid.NewGuid();
+            var medico2Id = Guid.NewGuid();
+            var medico1 = new Medico { Id = medico1Id, Nome = "Dr. Test 1", CRM = "12345" };
+            var medico2 = new Medico { Id = medico2Id, Nome = "Dr. Test 2", CRM = "67890" };
+            
+            var pacientes = new List<Paciente>
+            {
+                new Paciente { Id = Guid.NewGuid(), Nome = "João Silva", MedicoId = medico1Id },
+                new Paciente { Id = Guid.NewGuid(), Nome = "João Santos", MedicoId = medico2Id }
+            };
+            
+            await _context.Medicos.AddRangeAsync(new[] { medico1, medico2 });
+            await _context.Pacientes.AddRangeAsync(pacientes);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _pacienteService.SearchPacientesByNomeAsync("João", 1, 10, medico1Id);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Data.Should().HaveCount(1);
+            result.Data.First().Nome.Should().Be("João Silva");
+            result.Total.Should().Be(1);
+        }
     }
 }

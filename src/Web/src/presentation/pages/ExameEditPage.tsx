@@ -3,7 +3,7 @@ import { Box, CircularProgress, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ExameService } from '../../application/services/ExameService';
 import type { Exame } from '../../domain/entities/Exame';
-import ExameForm from '../components/exames/ExameForm';
+import ExameForm from '../components/common/ExameForm';
 
 const ExameEditPage: React.FC = () => {
   const navigate = useNavigate();

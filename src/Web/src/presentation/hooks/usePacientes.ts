@@ -97,7 +97,7 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         setLoading(false);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const createPaciente = useCallback(
@@ -128,7 +128,7 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const updatePaciente = useCallback(
@@ -160,7 +160,7 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const deletePaciente = useCallback(
@@ -189,7 +189,7 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const getPacienteById = useCallback(
@@ -213,7 +213,7 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const searchPacientes = useCallback(

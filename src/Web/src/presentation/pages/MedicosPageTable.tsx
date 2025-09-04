@@ -26,10 +26,20 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
+  Edit as EditIcon,
   Delete as DeleteIcon,
   Visibility,
   Person as PersonIcon,
+  Save,
 } from '@mui/icons-material';
+import {
+  standardCardStyles,
+  standardCardContentStyles,
+  standardDialogButtonStyles,
+  standardDialogActionsStyles,
+  standardDialogTitleStyles,
+  standardAddButtonStyles,
+} from '../styles/cardStyles';
 import { useMedicos } from '../hooks/useMedicos';
 import type { Medico, CreateMedicoDto, UpdateMedicoDto } from '../../domain/entities/Medico';
 import { useUIStore } from '../../application/stores/uiStore';
@@ -44,6 +54,7 @@ import {
   DeleteConfirmationDialog,
   SuccessDialog,
 } from '../components/common/ConfirmationDialogs';
+import StandardDialogButtons from '../components/common/StandardDialogButtons';
 
 const MedicosPageTable: React.FC = () => {
   const theme = useTheme();
@@ -68,7 +79,7 @@ const MedicosPageTable: React.FC = () => {
   const [selectedMedico, setSelectedMedico] = useState<Medico | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(7);
-  const [formData, setFormData] = useState<CreateMedicoDto>({
+  const [formData, setFormData] = useState({
     nome: '',
     documento: '',
     crm: '',
@@ -77,6 +88,7 @@ const MedicosPageTable: React.FC = () => {
     email: '',
     username: '',
     password: '',
+    dataNascimento: new Date().toISOString().split('T')[0],
   });
   const [saving, setSaving] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -99,8 +111,9 @@ const MedicosPageTable: React.FC = () => {
       especialidade: medico.especialidade,
       telefone: medico.telefone ? applyPhoneMask(medico.telefone) : '',
       email: medico.email || '',
-      username: medico.user?.username || '',
+      username: medico.username || '',
       password: '', // Não preencher senha na edição
+      dataNascimento: medico.dataNascimento ? new Date(medico.dataNascimento).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     });
     setDialogMode('edit');
     setOpenDialog(true);
@@ -117,6 +130,7 @@ const MedicosPageTable: React.FC = () => {
       email: '',
       username: '',
       password: '',
+      dataNascimento: new Date().toISOString().split('T')[0],
     });
     setDialogMode('add');
     setOpenDialog(true);
@@ -136,6 +150,7 @@ const MedicosPageTable: React.FC = () => {
           ...formData,
           documento: unformatCPF(formData.documento),
           telefone: unformatPhone(formData.telefone),
+          dataNascimento: new Date(formData.dataNascimento),
         };
         await createMedico(createData);
         setSuccessMessage('Médico adicionado com sucesso!');
@@ -147,6 +162,7 @@ const MedicosPageTable: React.FC = () => {
           especialidade: formData.especialidade,
           telefone: unformatPhone(formData.telefone),
           email: formData.email,
+          dataNascimento: new Date(formData.dataNascimento),
         };
         await updateMedico(selectedMedico.id, updateData);
         setSuccessMessage('Médico atualizado com sucesso!');
@@ -197,7 +213,7 @@ const MedicosPageTable: React.FC = () => {
     setDeleteDialogOpen(false);
   };
 
-  const handleInputChange = (field: keyof CreateMedicoDto, value: string) => {
+  const handleInputChange = (field: string, value: string) => {
     let formattedValue = value;
     
     if (field === 'documento') {
@@ -234,8 +250,8 @@ const MedicosPageTable: React.FC = () => {
       </Box>
 
       {/* Card Principal */}
-      <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
-        <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+      <Card sx={standardCardStyles}>
+        <CardContent sx={standardCardContentStyles}>
           {/* Cabeçalho do Grid */}
           <Box
             sx={{
@@ -332,35 +348,36 @@ const MedicosPageTable: React.FC = () => {
                     onClick={() => handleRowClick(medico)}
                     sx={{
                       cursor: 'pointer',
+                      height: 31,
                       '&:hover': {
                         backgroundColor: 'rgba(102, 126, 234, 0.04)',
                       },
                     }}
                   >
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ py: '1px' }}>
                       <Visibility
                         color="action"
                         sx={{
-                          fontSize: '1.2rem',
+                          fontSize: '1.1rem',
                           cursor: 'pointer',
                           '&:hover': { color: 'primary.main' },
                         }}
                       />
                     </TableCell>
-                    <TableCell>{medico.nome}</TableCell>
+                    <TableCell sx={{ py: '1px' }}>{medico.nome}</TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
                     >
                       {medico.crm}
                     </TableCell>
-                    <TableCell>{medico.especialidade}</TableCell>
+                    <TableCell sx={{ py: '1px' }}>{medico.especialidade}</TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', sm: 'table-cell' } }}
+                      sx={{ display: { xs: 'none', sm: 'table-cell' }, py: '1px' }}
                     >
                       {formatCPF(medico.documento)}
                     </TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
+                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
                     >
                       <Chip
                         label={medico.isActive ? 'Ativo' : 'Inativo'}
@@ -382,37 +399,25 @@ const MedicosPageTable: React.FC = () => {
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
+        maxWidth={false}
         sx={{
           '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '600px' },
-            maxWidth: '600px',
+            width: { xs: '95vw', sm: '550px' },
+            maxWidth: '550px',
             margin: { xs: 1, sm: 3 },
+            maxHeight: { xs: '95vh', sm: '90vh' },
+            minHeight: { xs: 'auto', sm: 'auto' },
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-          }}
-        >
+        <DialogTitle sx={standardDialogTitleStyles}>
           <PersonIcon />
           {dialogMode === 'add' ? 'Adicionar Médico' : 'Editar Médico'}
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 1.625, px: 1.5, pb: 1 }}>
+        <DialogContent sx={{ pt: 4.625, px: 3, pb: 2, overflow: 'auto' }}>
           <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: { xs: 1, sm: 1.2 },
-              mt: 2.25,
-            }}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}
           >
             <TextField
               fullWidth
@@ -564,7 +569,7 @@ const MedicosPageTable: React.FC = () => {
                   display: 'flex',
                   gap: 0.5,
                   flexWrap: 'wrap',
-                  mt: 1,
+                  mt: 0.5,
                 }}
               >
                 <Chip
@@ -574,8 +579,7 @@ const MedicosPageTable: React.FC = () => {
                   sx={{ fontSize: '0.65rem', height: '20px' }}
                 />
                 <Chip
-                  label={selectedMedico.isActive ? 'Ativo' : 'Inativo'}
-                  color={selectedMedico.isActive ? 'success' : 'error'}
+                  label={`CRM: ${selectedMedico.crm}`}
                   variant="outlined"
                   size="small"
                   sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -585,51 +589,21 @@ const MedicosPageTable: React.FC = () => {
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: 1.5, gap: 1, justifyContent: 'flex-end' }}>
-          {dialogMode === 'edit' && (
-            <Button
-              onClick={handleDeleteClick}
-              disabled={saving}
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              sx={{ padding: '3px 12px' }}
-            >
-              Excluir
-            </Button>
-          )}
-
-          <Button
-            onClick={handleSave}
-            disabled={saving || !formData.nome || !formData.documento || !formData.crm || !formData.especialidade || !formData.username || (dialogMode === 'add' && !formData.password)}
-            variant="contained"
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-              },
-              padding: '3px 12px',
-            }}
-          >
-            {saving ? 'Salvando...' : 'Salvar'}
-          </Button>
-
-          <Button
-            onClick={handleCloseDialog}
-            disabled={saving}
-            variant="outlined"
-            sx={{ padding: '3px 12px' }}
-          >
-            Fechar
-          </Button>
-        </DialogActions>
+        <StandardDialogButtons
+          onSave={handleSave}
+          onClose={handleCloseDialog}
+          onDelete={dialogMode === 'edit' ? handleDeleteClick : undefined}
+          showDelete={dialogMode === 'edit'}
+          saveLoading={saving}
+          saveText={dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
+        />
       </Dialog>
 
       {/* Diálogo de Confirmação de Exclusão */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
+        onClose={handleDeleteCancel}
         itemName={selectedMedico?.nome || ''}
         itemType="médico"
       />
@@ -638,6 +612,7 @@ const MedicosPageTable: React.FC = () => {
       <SuccessDialog
         open={successDialogOpen}
         onClose={() => setSuccessDialogOpen(false)}
+        title="Sucesso!"
         message={successMessage}
       />
     </Box>
