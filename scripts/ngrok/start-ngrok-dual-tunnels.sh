@@ -31,7 +31,7 @@ echo "🔍 Verificando serviços..."
 API_RUNNING=false
 FRONTEND_RUNNING=false
 
-if curl -s --max-time 3 "http://localhost:5000/health/ready" > /dev/null 2>&1; then
+if curl -s --max-time 3 "http://localhost:5000/health" > /dev/null 2>&1; then
     echo -e "${GREEN}✅ API rodando na porta 5000${NC}"
     API_RUNNING=true
 else
@@ -218,7 +218,7 @@ else
     
     # Usar script existente para modo alternado
     echo "🔄 Executando modo alternado..."
-    ./start-ngrok-complete.sh
+    bash scripts/ngrok/start-ngrok-complete.sh
 fi
 
 # Cleanup

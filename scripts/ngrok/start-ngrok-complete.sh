@@ -16,8 +16,8 @@ echo "============================================="
 # Verificar se os serviços estão rodando
 echo "🔍 Verificando serviços..."
 
-API_RUNNING=$(curl -s --max-time 3 "http://192.168.15.119:5000/health" > /dev/null 2>&1 && echo "true" || echo "false")
-FRONTEND_RUNNING=$(curl -s --max-time 3 "http://192.168.15.119:5005" > /dev/null 2>&1 && echo "true" || echo "false")
+API_RUNNING=$(curl -s --max-time 3 "http://localhost:5000/health" > /dev/null 2>&1 && echo "true" || echo "false")
+FRONTEND_RUNNING=$(curl -s --max-time 3 "http://localhost:5005" > /dev/null 2>&1 && echo "true" || echo "false")
 
 if [ "$API_RUNNING" = "false" ]; then
     echo -e "${RED}❌ API não está rodando na porta 5000${NC}"

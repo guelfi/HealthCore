@@ -61,7 +61,7 @@ start_servers() {
     # Iniciando API
     echo -e "${YELLOW}🔥 Iniciando Backend (API)...${NC}"
     echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    "$SCRIPT_DIR/api.sh" start
+    "$SCRIPT_DIR/../api/api.sh" start
     API_STATUS=$?
 
     echo ""
@@ -73,7 +73,7 @@ echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━
     # Iniciando Frontend
     echo -e "${YELLOW}🔥 Iniciando Frontend (Web)...${NC}"
     echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    "$SCRIPT_DIR/front.sh" start
+    "$SCRIPT_DIR/../frontend/front.sh" start
     FRONTEND_STATUS=$?
 
     echo ""
@@ -98,8 +98,8 @@ echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━
         echo -e "   ${WHITE}• Swagger:${NC} ${BLUE}http://localhost:$API_PORT/swagger${NC}"
         echo ""
         echo -e "${CYAN}📋 Comandos Úteis:${NC}"
-        echo -e "   ${WHITE}• Parar API:${NC} ${YELLOW}$SCRIPT_DIR/api.sh stop${NC}"
-        echo -e "   ${WHITE}• Parar Frontend:${NC} ${YELLOW}$SCRIPT_DIR/front.sh stop${NC}"
+        echo -e "   ${WHITE}• Parar API:${NC} ${YELLOW}$SCRIPT_DIR/../api/api.sh stop${NC}"
+        echo -e "   ${WHITE}• Parar Frontend:${NC} ${YELLOW}$SCRIPT_DIR/../frontend/front.sh stop${NC}"
         echo -e "   ${WHITE}• Parar Ambos:${NC} ${YELLOW}$SCRIPT_DIR/servers.sh stop${NC}"
         echo -e "   ${WHITE}• Ver Logs:${NC} ${YELLOW}tail -f log/*.log${NC}"
         echo ""
@@ -314,12 +314,12 @@ stop_servers() {
 
     echo -e "${YELLOW}🛑 Parando Backend (API)...${NC}"
     echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    "$SCRIPT_DIR/api.sh" stop
+    "$SCRIPT_DIR/../api/api.sh" stop
     echo ""
 
     echo -e "${YELLOW}🛑 Parando Frontend (Web)...${NC}"
     echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    "$SCRIPT_DIR/front.sh" stop
+    "$SCRIPT_DIR/../frontend/front.sh" stop
     echo ""
 
     echo -e "${GREEN}✅ Todos os serviços parados.${NC}"
