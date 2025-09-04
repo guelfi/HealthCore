@@ -1,0 +1,13 @@
+t=2025-09-04T17:50:09-0300 lvl=info msg="no configuration paths supplied"
+t=2025-09-04T17:50:09-0300 lvl=info msg="using configuration at default config path" path=/home/guelfi/.config/ngrok/ngrok.yml
+t=2025-09-04T17:50:09-0300 lvl=info msg="open config file" path=/home/guelfi/.config/ngrok/ngrok.yml err=nil
+t=2025-09-04T17:50:09-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2025-09-04T17:50:09-0300 lvl=info msg="client session established" obj=tunnels.session
+t=2025-09-04T17:50:09-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2025-09-04T17:50:10-0300 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5000 url=https://c0b6aec06362.ngrok-free.app
+t=2025-09-04T17:50:44-0300 lvl=info msg=start pg=/api/tunnels id=06cf4667b493d306
+t=2025-09-04T17:50:44-0300 lvl=info msg=end pg=/api/tunnels id=06cf4667b493d306 status=200 dur=909.852µs
+t=2025-09-04T17:51:37-0300 lvl=info msg="join connections" obj=join id=0d9354cf6f6f l=127.0.0.1:5000 r=179.209.68.212:18292
+t=2025-09-04T17:51:52-0300 lvl=info msg="received stop request" obj=app stopReq="{err:<nil> restart:false}"
+t=2025-09-04T17:51:52-0300 lvl=info msg="session closing" obj=tunnels.session err=nil
+t=2025-09-04T17:51:52-0300 lvl=info msg="accept failed" obj=tunnels.session obj=csess id=56132c087641 err="reconnecting session closed"
