@@ -7,6 +7,17 @@ import type {
   MedicoQueryParams,
 } from '../../domain/entities/Medico';
 
+interface ErrorResponse {
+  response?: {
+    status: number;
+    data?: {
+      message?: string;
+    };
+  };
+  request?: unknown;
+  message?: string;
+}
+
 // Debug discreto para serviços - só console.log
 const debug = {
   log: (message: string, data?: unknown) => {
@@ -73,7 +84,7 @@ export class MedicoService {
     } catch (error: unknown) {
       debug.log('Erro na requisição:', error);
       
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       if (errorResponse) {
         debug.log('Status do erro:', errorResponse.status);
         debug.log('Dados do erro:', errorResponse.data);
@@ -131,7 +142,7 @@ export class MedicoService {
     } catch (error: unknown) {
       debug.log('Erro ao criar médico:', error);
       
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       if (errorResponse?.data?.message) {
         throw new Error(errorResponse.data.message);
       }
@@ -162,7 +173,7 @@ export class MedicoService {
     } catch (error: unknown) {
       debug.log('Erro ao atualizar médico:', error);
       
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       if (errorResponse?.data?.message) {
         throw new Error(errorResponse.data.message);
       }
@@ -183,7 +194,7 @@ export class MedicoService {
     } catch (error: unknown) {
       debug.log('Erro ao remover médico:', error);
       
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       if (errorResponse?.data?.message) {
         throw new Error(errorResponse.data.message);
       }
@@ -214,7 +225,7 @@ export class MedicoService {
     } catch (error: unknown) {
       debug.log('Erro ao ativar médico:', error);
       
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       if (errorResponse?.data?.message) {
         throw new Error(errorResponse.data.message);
       }

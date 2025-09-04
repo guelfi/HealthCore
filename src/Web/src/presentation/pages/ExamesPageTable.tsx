@@ -19,6 +19,13 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
+import {
+  standardCardStyles,
+  standardCardContentStyles,
+  standardDialogTitleStyles,
+  standardAddButtonStyles,
+} from '../styles/cardStyles';
+import { formatDateBR } from '../utils/dateUtils';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   Add as AddIcon,
@@ -29,7 +36,7 @@ import { useExames, usePacientes } from '../hooks';
 import type { Exame } from '../../domain/entities/Exame';
 import type { Paciente } from '../../domain/entities/Paciente';
 import { ModalidadeDicomLabels } from '../../domain/enums/ModalidadeDicom';
-import ExameForm from '../components/exames/ExameForm';
+import ExameForm from '../components/common/ExameForm';
 import CustomPagination from '../components/common/CustomPagination';
 import {
   DeleteConfirmationDialog,
@@ -72,7 +79,7 @@ const ExamesPageTable: React.FC = () => {
   useEffect(() => {
     fetchExames({ page: 1, pageSize });
     fetchPacientes({ page: 1, pageSize: 100 }); // Carregar todos os pacientes
-  }, [fetchExames, fetchPacientes]);
+  }, [fetchExames, fetchPacientes, pageSize]);
 
   const handleRowClick = (exame: Exame) => {
     // Mostrar loading se já há um exame selecionado (mudança de seleção)
@@ -171,8 +178,8 @@ const ExamesPageTable: React.FC = () => {
       )}
 
       {/* Card Principal */}
-      <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)', borderRadius: 3 }}>
-        <CardContent sx={{ p: 3 }}>
+      <Card sx={standardCardStyles}>
+        <CardContent sx={standardCardContentStyles}>
           {/* Cabeçalho do Grid */}
           <Box
             sx={{
@@ -187,13 +194,7 @@ const ExamesPageTable: React.FC = () => {
               startIcon={<AddIcon />}
               onClick={handleAddNew}
               size={isMobile ? 'small' : 'medium'}
-              sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                '&:hover': {
-                  background:
-                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                },
-              }}
+              sx={standardAddButtonStyles}
             >
               Adicionar Exame
             </Button>
@@ -223,29 +224,27 @@ const ExamesPageTable: React.FC = () => {
                 boxShadow: 'none',
                 border: '1px solid',
                 borderColor: 'divider',
+                maxHeight: 450,
               }}
             >
               <Table size="small">
                 <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
                   <TableRow>
-                    <TableCell
-                      align="center"
-                      sx={{ width: 50, py: 1 }}
-                    ></TableCell>
-                    <TableCell sx={{ py: 1 }}>
+                    <TableCell align="center" sx={{ width: 50 }}></TableCell>
+                    <TableCell>
                       <strong>Paciente</strong>
                     </TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}
+                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
                     >
                       <strong>Modalidade</strong>
                     </TableCell>
                     <TableCell
-                      sx={{ display: { xs: 'none', lg: 'table-cell' }, py: 1 }}
+                      sx={{ display: { xs: 'none', lg: 'table-cell' } }}
                     >
                       <strong>Descrição</strong>
                     </TableCell>
-                    <TableCell sx={{ py: 1 }}>
+                    <TableCell>
                       <strong>Data do Exame</strong>
                     </TableCell>
                     <TableCell
@@ -262,7 +261,7 @@ const ExamesPageTable: React.FC = () => {
                       onClick={() => handleRowClick(exame)}
                       sx={{
                         cursor: 'pointer',
-                        height: 35,
+                        height: 31,
                         '&:hover': {
                           backgroundColor: 'rgba(102, 126, 234, 0.04)',
                         },
@@ -299,7 +298,7 @@ const ExamesPageTable: React.FC = () => {
                         {exame.descricao || '-'}
                       </TableCell>
                       <TableCell sx={{ py: '1px' }}>
-                        {new Date(exame.dataExame).toLocaleDateString('pt-BR')}
+                        {formatDateBR(exame.dataExame)}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -307,7 +306,7 @@ const ExamesPageTable: React.FC = () => {
                           py: '1px',
                         }}
                       >
-                        {new Date(exame.createdAt).toLocaleDateString('pt-BR')}
+                        {formatDateBR(exame.createdAt)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -346,15 +345,7 @@ const ExamesPageTable: React.FC = () => {
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-          }}
-        >
+        <DialogTitle sx={standardDialogTitleStyles}>
           <ExameIcon />
           {dialogMode === 'add' ? 'Adicionar Exame' : 'Editar Exame'}
         </DialogTitle>

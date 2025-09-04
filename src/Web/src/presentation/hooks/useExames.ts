@@ -99,7 +99,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         setLoading(false);
       }
     },
-    [setLoading, clearError, updateExamesState]
+    [setLoading, clearError, updateExamesState, setError]
   );
 
   const createExame = useCallback(
@@ -130,7 +130,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const updateExame = useCallback(
@@ -160,7 +160,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const deleteExame = useCallback(
@@ -189,7 +189,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const getExameById = useCallback(
@@ -213,7 +213,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         throw new Error(errorMessage);
       }
     },
-    [setLoading, clearError]
+    [setLoading, clearError, setError]
   );
 
   const getExamesByPaciente = useCallback(
@@ -238,7 +238,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         setLoading(false);
       }
     },
-    [setLoading, clearError, updateExamesState]
+    [setLoading, clearError, updateExamesState, setError]
   );
 
   const getExamesByModalidade = useCallback(
@@ -263,7 +263,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         setLoading(false);
       }
     },
-    [setLoading, clearError, updateExamesState]
+    [setLoading, clearError, updateExamesState, setError]
   );
 
   const getExamesByPeriodo = useCallback(
@@ -293,7 +293,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         setLoading(false);
       }
     },
-    [setLoading, clearError, updateExamesState]
+    [setLoading, clearError, updateExamesState, setError]
   );
 
   const checkIdempotency = useCallback(

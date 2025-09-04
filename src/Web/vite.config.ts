@@ -22,6 +22,54 @@ export default defineConfig({
       '@/enums': '/src/domain/enums',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // Separar bibliotecas grandes em chunks próprios
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@mui') || id.includes('@emotion')) {
+              return 'mui-vendor';
+            }
+            if (id.includes('react-router')) {
+              return 'router-vendor';
+            }
+            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
+              return 'form-vendor';
+            }
+            // Outras bibliotecas em um chunk vendor geral
+            return 'vendor';
+          }
+          
+          // Separar código da aplicação por domínio
+          if (id.includes('/presentation/components/pacientes') || id.includes('PacientesPageTable')) {
+            return 'pacientes';
+          }
+          if (id.includes('/presentation/components/exames') || id.includes('ExamesPageTable')) {
+            return 'exames';
+          }
+          if (id.includes('/presentation/components/dashboard') || id.includes('Dashboard')) {
+            return 'dashboard';
+          }
+          if (id.includes('/application/services')) {
+            return 'services';
+          }
+          if (id.includes('/presentation/hooks')) {
+            return 'hooks';
+          }
+        },
+        // Configurar tamanho máximo dos chunks
+        chunkFileNames: () => {
+          return `js/[name]-[hash].js`;
+        },
+      },
+    },
+    // Configurar limite de aviso para chunks
+    chunkSizeWarningLimit: 1000,
+  },
   server: {
     port: 5005,
     host: '0.0.0.0', // Permite acesso de qualquer IP da rede

@@ -394,6 +394,58 @@ app.MapDelete("/pacientes/{id:guid}", async (Guid id, PacienteService pacienteSe
     return Results.NoContent();
 });
 
+app.MapGet("/pacientes/{id:guid}", async (Guid id, PacienteService pacienteService, ILogger<Program> logger) =>
+{
+    logger.LogInformation("Buscando paciente com ID: {Id}", id);
+    var paciente = await pacienteService.GetPacienteByIdAsync(id);
+    if (paciente == null)
+    {
+        logger.LogWarning("Paciente com ID: {Id} não encontrado.", id);
+        return Results.NotFound(new { Message = $"Paciente com ID {id} não encontrado." });
+    }
+    logger.LogInformation("Paciente encontrado: {Id}", id);
+    return Results.Ok(paciente);
+}).RequireAuthorization();
+
+app.MapGet("/pacientes/search", async (PacienteService pacienteService, HttpContext context, ILogger<Program> logger, string? nome = null, int page = 1, int pageSize = 10) =>
+{
+    try
+    {
+        logger.LogInformation("Buscando pacientes por nome: {Nome} - Página: {Page}, Tamanho: {PageSize}", nome, page, pageSize);
+        
+        // Verificar o role do usuário logado
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        Guid? medicoId = null;
+        
+        // Se for médico, filtrar apenas seus pacientes
+        if (userRole == UserRole.Medico.ToString() && !string.IsNullOrEmpty(userId))
+        {
+            using var scope = context.RequestServices.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<MobileMedDbContext>();
+            
+            var medico = await dbContext.Medicos
+                .FirstOrDefaultAsync(m => m.UserId == Guid.Parse(userId));
+                
+            if (medico != null)
+            {
+                medicoId = medico.Id;
+                logger.LogInformation("Filtrando pacientes para o médico: {MedicoId}", medicoId);
+            }
+        }
+        
+        var pacientes = await pacienteService.SearchPacientesByNomeAsync(nome, page, pageSize, medicoId);
+        logger.LogInformation("Busca de pacientes concluída. Número de pacientes retornados: {Count}", pacientes.Data.Count);
+        return Results.Ok(pacientes);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao buscar pacientes por nome");
+        return Results.Problem("Erro inesperado ao buscar pacientes.");
+    }
+}).RequireAuthorization();
+
 // Endpoints para Exames
 app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameService, ILogger<Program> logger) =>
 {
@@ -530,6 +582,54 @@ app.MapGet("/exames/modalidades", (ILogger<Program> logger) =>
     
     return Results.Ok(modalidades);
 });
+
+// Endpoint para verificar idempotência
+app.MapGet("/exames/check-idempotency/{idempotencyKey}", async (string idempotencyKey, ExameService exameService, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Verificando idempotência para chave: {IdempotencyKey}", idempotencyKey);
+        var exists = await exameService.CheckIdempotencyAsync(idempotencyKey);
+        return Results.Ok(new { exists });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao verificar idempotência para chave: {IdempotencyKey}", idempotencyKey);
+        return Results.Problem("Erro inesperado ao verificar idempotência.");
+    }
+}).RequireAuthorization();
+
+// Endpoint para estatísticas por modalidade
+app.MapGet("/exames/statistics/modalidade", async (ExameService exameService, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Obtendo estatísticas de exames por modalidade");
+        var statistics = await exameService.GetStatisticsByModalidadeAsync();
+        return Results.Ok(statistics);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao obter estatísticas por modalidade");
+        return Results.Problem("Erro inesperado ao obter estatísticas.");
+    }
+}).RequireAuthorization();
+
+// Endpoint para estatísticas por período
+app.MapGet("/exames/statistics/periodo", async (ExameService exameService, ILogger<Program> logger, DateTime? dataInicio = null, DateTime? dataFim = null) =>
+{
+    try
+    {
+        logger.LogInformation("Obtendo estatísticas de exames por período - Início: {DataInicio}, Fim: {DataFim}", dataInicio, dataFim);
+        var statistics = await exameService.GetStatisticsByPeriodoAsync(dataInicio, dataFim);
+        return Results.Ok(statistics);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao obter estatísticas por período");
+        return Results.Problem("Erro inesperado ao obter estatísticas.");
+    }
+}).RequireAuthorization();
 
 static string GetModalidadeDescription(MobileMed.Api.Core.Domain.Enums.ModalidadeExame modalidade)
 {
@@ -831,6 +931,129 @@ app.MapPatch("/admin/usuarios/{id:guid}/ativar", async (Guid id, AdminService ad
     {
         logger.LogError(ex, "Erro inesperado ao ativar usuário: {Id}", id);
         return Results.Problem("Erro inesperado ao ativar usuário.");
+    }
+}).RequireAuthorization();
+
+// Endpoints de Usuários (públicos para o frontend)
+app.MapGet("/users", async (AdminService adminService, HttpContext context, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
+{
+    try
+    {
+        logger.LogInformation("Listando usuários - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+        var users = await adminService.GetUsersAsync(page, pageSize);
+        logger.LogInformation("Listagem de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
+        return Results.Ok(users);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao listar usuários");
+        return Results.Problem("Erro inesperado ao listar usuários.");
+    }
+}).RequireAuthorization();
+
+app.MapGet("/users/{id:guid}", async (Guid id, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        var user = await adminService.GetUserByIdAsync(id);
+        if (user == null)
+        {
+            logger.LogWarning("Usuário não encontrado: {Id}", id);
+            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+        }
+
+        return Results.Ok(user);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao buscar usuário: {Id}", id);
+        return Results.Problem("Erro inesperado ao buscar usuário.");
+    }
+}).RequireAuthorization();
+
+app.MapPost("/users", async (CreateUserDto createUserDto, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Criando usuário: {Username}", createUserDto.Username);
+        var user = await adminService.CreateUserAsync(createUserDto);
+        logger.LogInformation("Usuário criado com sucesso: {Id}", user.Id);
+        return Results.Created($"/users/{user.Id}", user);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning("Erro de validação ao criar usuário: {Message}", ex.Message);
+        return Results.Conflict(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao criar usuário");
+        return Results.Problem("Erro inesperado ao criar usuário.");
+    }
+}).RequireAuthorization();
+
+app.MapPut("/users/{id:guid}", async (Guid id, UpdateUserDto updateUserDto, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Atualizando usuário: {Id}", id);
+        var user = await adminService.UpdateUserAsync(id, updateUserDto);
+        if (user == null)
+        {
+            logger.LogWarning("Usuário não encontrado para atualização: {Id}", id);
+            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+        }
+
+        logger.LogInformation("Usuário atualizado com sucesso: {Id}", id);
+        return Results.Ok(user);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning("Erro de validação ao atualizar usuário: {Message}", ex.Message);
+        return Results.Conflict(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao atualizar usuário: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar usuário.");
+    }
+}).RequireAuthorization();
+
+app.MapDelete("/users/{id:guid}", async (Guid id, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Desativando usuário: {Id}", id);
+        var result = await adminService.DeactivateUserAsync(id);
+        if (!result)
+        {
+            logger.LogWarning("Usuário não encontrado para desativação: {Id}", id);
+            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+        }
+
+        logger.LogInformation("Usuário desativado com sucesso: {Id}", id);
+        return Results.Ok(new { Message = "Usuário desativado com sucesso." });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao desativar usuário: {Id}", id);
+        return Results.Problem("Erro inesperado ao desativar usuário.");
+    }
+}).RequireAuthorization();
+
+app.MapGet("/users/search", async (AdminService adminService, HttpContext context, ILogger<Program> logger, string? username = null, int page = 1, int pageSize = 10) =>
+{
+    try
+    {
+        logger.LogInformation("Buscando usuários por username: {Username} - Página: {Page}, Tamanho: {PageSize}", username, page, pageSize);
+        var users = await adminService.SearchUsersByUsernameAsync(username, page, pageSize);
+        logger.LogInformation("Busca de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
+        return Results.Ok(users);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao buscar usuários por username");
+        return Results.Problem("Erro inesperado ao buscar usuários.");
     }
 }).RequireAuthorization();
 

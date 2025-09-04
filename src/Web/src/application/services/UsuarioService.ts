@@ -6,6 +6,18 @@ import type {
 } from '../../domain/entities/Usuario';
 import { UserProfile } from '../../domain/enums/UserProfile';
 
+interface ErrorResponse {
+  response?: {
+    status: number;
+    statusText?: string;
+    data?: {
+      message?: string;
+    };
+  };
+  request?: unknown;
+  message?: string;
+}
+
 // Debug discreto para serviços - só console.log
 const debug = {
   log: (message: string, data?: unknown) => {
@@ -99,7 +111,7 @@ export class UsuarioService {
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
+      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
       debug.log('Erro na requisição:', {
         message: errorMessage,
         status: errorResponse?.status,

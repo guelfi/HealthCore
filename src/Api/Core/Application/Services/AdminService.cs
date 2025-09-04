@@ -388,5 +388,60 @@ namespace MobileMed.Api.Core.Application.Services
                 throw;
             }
         }
+
+        public async Task<PagedResponseDto<UserResponseDto>> SearchUsersByUsernameAsync(string? username, int page = 1, int pageSize = 10)
+        {
+            try
+            {
+                _logger.LogInformation("Buscando usuários por username: {Username} - Página: {Page}, Tamanho: {PageSize}", username, page, pageSize);
+
+                // Criar query base
+                var query = _context.Users.AsQueryable();
+                
+                // Filtrar por username se especificado
+                if (!string.IsNullOrEmpty(username))
+                {
+                    query = query.Where(u => u.Username.Contains(username));
+                }
+                
+                // Calcular o total de usuários (com filtro aplicado)
+                var total = await query.CountAsync();
+                
+                // Obter os usuários paginados
+                var users = await query
+                    .OrderBy(u => u.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(u => new UserResponseDto
+                    {
+                        Id = u.Id,
+                        Username = u.Username,
+                        Role = u.Role,
+                        IsActive = u.IsActive,
+                        CreatedAt = u.CreatedAt
+                    })
+                    .ToListAsync();
+
+                // Calcular total de páginas
+                var totalPages = (int)Math.Ceiling((double)total / pageSize);
+
+                _logger.LogInformation("Busca de usuários concluída. Número de usuários retornados: {Count}", users.Count);
+
+                // Retornar resposta paginada
+                return new PagedResponseDto<UserResponseDto>
+                {
+                    Data = users,
+                    Total = total,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalPages = totalPages
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar usuários por username");
+                throw;
+            }
+        }
     }
 }

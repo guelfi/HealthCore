@@ -16,8 +16,15 @@
     "preview": "vite preview --host 0.0.0.0 --port 5005",
     "test:connectivity": "./scripts/test-connectivity.sh",
     "test:api": "./scripts/test-connectivity.sh http://192.168.15.119:5000",
-    "setup:ngrok": "cp .env.ngrok .env && echo 'Configuração ngrok aplicada! Execute npm run dev:ngrok'",
-    "diagnostic": "echo 'Acesse http://localhost:5005/diagnostic para diagnóstico completo'"
+    "setup:ngrok": "./scripts/setup-ngrok.sh",
+    "fix:ngrok": "./scripts/fix-ngrok-connection.sh",
+    "ngrok:start": "ngrok http 5005",
+    "ngrok:dashboard": "echo 'Painel do ngrok: http://localhost:4040' && open http://localhost:4040 2>/dev/null || xdg-open http://localhost:4040 2>/dev/null || echo 'Abra manualmente: http://localhost:4040'",
+    "diagnostic": "echo 'Acesse http://localhost:5005/diagnostic para diagnóstico completo'",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -36,20 +43,26 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
     "sass": "^1.90.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vitest": "^3.2.4"
   }
 }

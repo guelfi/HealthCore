@@ -3,18 +3,15 @@ using MobileMed.Api.Core.Domain.Entities;
 
 namespace MobileMed.Api.Infrastructure.Data
 {
-    public class MobileMedDbContext : DbContext
+    public class MobileMedDbContext(DbContextOptions<MobileMedDbContext> options) : DbContext(options)
     {
-        public MobileMedDbContext(DbContextOptions<MobileMedDbContext> options) : base(options)
-        {
-        }
 
-        public virtual DbSet<Paciente> Pacientes { get; set; }
-        public virtual DbSet<Exame> Exames { get; set; }
-        public virtual DbSet<Medico> Medicos { get; set; }
-        public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
-        public virtual DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+        public virtual DbSet<Paciente> Pacientes { get; set; } = null!;
+        public virtual DbSet<Exame> Exames { get; set; } = null!;
+        public virtual DbSet<Medico> Medicos { get; set; } = null!;
+        public virtual DbSet<User> Users { get; set; } = null!;
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+        public virtual DbSet<BlacklistedToken> BlacklistedTokens { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
