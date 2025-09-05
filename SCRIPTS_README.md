@@ -6,7 +6,10 @@ Scripts unificados para gerenciar a API e Frontend do MobileMed de forma simples
 
 ### Windows
 ```cmd
-# Iniciar todos os serviços
+# Iniciar todos os serviços (modo normal - mantém terminal ocupado)
+mobilemed.bat start
+
+# Iniciar todos os serviços (modo background - libera terminal)
 mobilemed.bat start
 
 # Ver status
@@ -18,7 +21,10 @@ mobilemed.bat stop
 
 ### Linux/macOS/WSL
 ```bash
-# Iniciar todos os serviços
+# Iniciar todos os serviços (modo normal - mantém terminal ocupado)
+./mobilemed.sh start
+
+# Iniciar todos os serviços (modo background - libera terminal)
 ./mobilemed.sh start
 
 # Ver status
@@ -34,6 +40,9 @@ mobilemed.bat stop
 node mobilemed.js start
 node mobilemed.js status
 node mobilemed.js stop
+
+# Modo background
+node mobilemed.js start --detached
 ```
 
 ## 📋 Comandos Disponíveis
@@ -46,6 +55,12 @@ node mobilemed.js stop
 | `status` | Mostra status dos serviços | `mobilemed.sh status` |
 | `ngrok` | Configura acesso externo | `mobilemed.sh ngrok` |
 | `help` | Mostra ajuda | `mobilemed.sh help` |
+
+## 🚀 Modo Background (Libera Terminal)
+
+Ao executar o comando `start`, os scripts agora iniciam os serviços em background automaticamente, liberando o terminal para uso. Isso é especialmente útil para desenvolvimento, pois você pode continuar usando o mesmo terminal para outros comandos enquanto os serviços estão em execução.
+
+Para verificar se os serviços estão rodando, use o comando `status`.
 
 ## 🎯 Comandos Específicos
 
@@ -163,6 +178,7 @@ Os novos scripts utilizam e integram com os scripts existentes em `/scripts/`:
 3. **Debug Frontend**: Use `./mobilemed.sh start frontend` para testar apenas o frontend
 4. **Status**: Sempre use `./mobilemed.sh status` para verificar o que está rodando
 5. **Limpeza**: Use `./mobilemed.sh stop` antes de fechar o terminal
+6. **Background**: Use `./mobilemed.sh start` para iniciar os serviços em background e liberar o terminal
 
 ## 🆘 Suporte
 

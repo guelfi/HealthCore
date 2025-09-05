@@ -36,6 +36,68 @@ Para que eu tenha controle sobre o histórico clínico mesmo em situações de r
     -   Cadastro funcional via formulários.
     -   UI amigável com mensagens de erro e loading.
 
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+
+-   [Node.js](https://nodejs.org/) (versão 18 ou superior)
+-   [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+-   [pm2](https://pm2.keymetrics.io/) (gerenciador de processos para Node.js)
+
+### Instalação
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/seu-usuario/desafio-tecnico.git
+    cd desafio-tecnico
+    ```
+
+2.  **Instale as dependências do frontend:**
+    ```bash
+    cd src/Web
+    npm install
+    cd ../..
+    ```
+
+3.  **Instale o pm2 globalmente:**
+    ```bash
+    npm install pm2 -g
+    ```
+
+### Execução
+
+Para iniciar os serviços da API e do Frontend, utilize os scripts na raiz do projeto:
+
+-   **No Linux/macOS:**
+    ```bash
+    ./mobilemed.sh start
+    ```
+-   **No Windows:**
+    ```bash
+    mobilemed.bat start
+    ```
+
+### Comandos Disponíveis
+
+-   `start`: Inicia a API e o Frontend.
+-   `stop`: Para a API e o Frontend.
+-   `restart`: Reinicia a API e o Frontend.
+-   `status`: Mostra o status dos serviços.
+-   `logs`: Exibe os logs dos serviços.
+
+**Exemplos:**
+
+```bash
+# Iniciar apenas a API
+./mobilemed.sh start api
+
+# Parar apenas o Frontend
+./mobilemed.sh stop frontend
+
+# Visualizar os logs da API
+./mobilemed.sh logs api
+```
+
 🔥 **Critérios de Aceite**
 
 -   **Dado** que um paciente válido foi cadastrado,  
