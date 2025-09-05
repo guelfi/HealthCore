@@ -1,0 +1,17 @@
+t=2025-09-04T21:50:13-0300 lvl=info msg="no configuration paths supplied"
+t=2025-09-04T21:50:13-0300 lvl=info msg="using configuration at default config path" path=/home/guelfi/.config/ngrok/ngrok.yml
+t=2025-09-04T21:50:13-0300 lvl=info msg="open config file" path=/home/guelfi/.config/ngrok/ngrok.yml err=nil
+t=2025-09-04T21:50:13-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2025-09-04T21:50:13-0300 lvl=info msg="client session established" obj=tunnels.session
+t=2025-09-04T21:50:13-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2025-09-04T21:50:14-0300 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:5005 url=https://c4b39da5aa03.ngrok-free.app
+t=2025-09-04T21:50:21-0300 lvl=info msg=start pg=/api/tunnels id=4ca39b079ea08a50
+t=2025-09-04T21:50:21-0300 lvl=info msg=end pg=/api/tunnels id=4ca39b079ea08a50 status=200 dur=1.891168ms
+t=2025-09-04T21:50:36-0300 lvl=info msg=start pg=/api/tunnels id=12a72131fe1363f0
+t=2025-09-04T21:50:36-0300 lvl=info msg=end pg=/api/tunnels id=12a72131fe1363f0 status=200 dur=674.665µs
+t=2025-09-04T21:50:36-0300 lvl=info msg=start pg=/api/tunnels id=7de2bd8259994929
+t=2025-09-04T21:50:36-0300 lvl=info msg=end pg=/api/tunnels id=7de2bd8259994929 status=200 dur=581.653µs
+t=2025-09-04T21:50:37-0300 lvl=info msg="join connections" obj=join id=b18c929503c9 l=127.0.0.1:5005 r=191.13.202.247:27696
+t=2025-09-04T21:50:55-0300 lvl=info msg="join connections" obj=join id=9e2d7d5e6b18 l=127.0.0.1:5005 r=[2804:7f0:bec2:f108:14a2:d305:e342:4f02]:64192
+t=2025-09-04T21:54:42-0300 lvl=info msg="received stop request" obj=app stopReq="{err:<nil> restart:false}"
+t=2025-09-04T21:54:42-0300 lvl=info msg="session closing" obj=tunnels.session err=nil
