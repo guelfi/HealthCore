@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "dev:network": "vite --host 0.0.0.0",
-    "dev:ngrok": "./scripts/start-with-ngrok.sh",
     "build": "vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -16,10 +15,6 @@
     "preview": "vite preview --host 0.0.0.0 --port 5005",
     "test:connectivity": "./scripts/test-connectivity.sh",
     "test:api": "./scripts/test-connectivity.sh http://192.168.15.119:5000",
-    "setup:ngrok": "./scripts/setup-ngrok.sh",
-    "fix:ngrok": "./scripts/fix-ngrok-connection.sh",
-    "ngrok:start": "ngrok http 5005",
-    "ngrok:dashboard": "echo 'Painel do ngrok: http://localhost:4040' && open http://localhost:4040 2>/dev/null || xdg-open http://localhost:4040 2>/dev/null || echo 'Abra manualmente: http://localhost:4040'",
     "diagnostic": "echo 'Acesse http://localhost:5005/diagnostic para diagnóstico completo'",
     "test": "vitest",
     "test:ui": "vitest --ui",

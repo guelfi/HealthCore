@@ -1,0 +1,5 @@
+# Sessão ngrok ativa - Thu Sep  4 21:50:21 -03 2025
+FRONTEND_URL=https://c4b39da5aa03.ngrok-free.app
+NGROK_PID=260965
+API_PID=N/A
+FRONTEND_PID=N/A

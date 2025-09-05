@@ -260,33 +260,14 @@ ${colors.cyan}${colors.bright}🏥 MobileMed - Gerenciador de Serviços${colors.
         console.log('  node mobilemed.js stop [api|frontend]   - Para os serviços');
         console.log('  node mobilemed.js restart [api|frontend] - Reinicia os serviços');
         console.log('  node mobilemed.js status                 - Mostra status dos serviços');
-        console.log('  node mobilemed.js ngrok                  - Configura acesso externo');
+
         console.log('  node mobilemed.js help                   - Mostra esta ajuda');
         console.log('\nExemplos:');
         console.log('  node mobilemed.js start                  - Inicia API e Frontend');
         console.log('  node mobilemed.js start api              - Inicia apenas a API');
         console.log('  node mobilemed.js stop frontend          - Para apenas o Frontend');
     }
-    
-    async ngrok() {
-        Logger.header('Configurando Ngrok');
-        Logger.info('Executando script de ngrok...');
-        
-        const ngrokScript = path.join(__dirname, 'scripts', 'ngrok', 'start-ngrok-complete.sh');
-        
-        if (fs.existsSync(ngrokScript)) {
-            exec(`bash "${ngrokScript}"`, (error, stdout, stderr) => {
-                if (error) {
-                    Logger.error(`Erro ao executar ngrok: ${error.message}`);
-                    return;
-                }
-                console.log(stdout);
-                if (stderr) console.error(stderr);
-            });
-        } else {
-            Logger.error('Script de ngrok não encontrado');
-        }
-    }
+
 }
 
 // Execução principal
@@ -308,9 +289,6 @@ if (require.main === module) {
             break;
         case 'status':
             mobilemed.status();
-            break;
-        case 'ngrok':
-            mobilemed.ngrok();
             break;
         case 'help':
         default:

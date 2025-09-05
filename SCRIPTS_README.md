@@ -142,29 +142,11 @@ netstat -ano | findstr :5005
 chmod +x mobilemed.sh mobilemed.js
 ```
 
-## 🌍 Acesso Externo com Ngrok
-
-Para permitir acesso externo (celular, outros dispositivos):
-
-```bash
-# 1. Primeiro, inicie os serviços
-./mobilemed.sh start
-
-# 2. Configure o ngrok
-./mobilemed.sh ngrok
-```
-
-O ngrok criará URLs públicas temporárias para seus serviços.
-
 ## 📱 Testando no Celular
 
-1. **Rede Local**: Use o IP da sua máquina
-   - API: `http://192.168.x.x:5000`
-   - App: `http://192.168.x.x:5005`
-
-2. **Ngrok**: Use as URLs geradas pelo ngrok
-   - Mais seguro para testes externos
-   - Funciona fora da sua rede local
+**Rede Local**: Use o IP da sua máquina
+- API: `http://192.168.x.x:5000`
+- App: `http://192.168.x.x:5005`
 
 ## 🔄 Integração com Scripts Existentes
 
@@ -172,7 +154,6 @@ Os novos scripts utilizam e integram com os scripts existentes em `/scripts/`:
 
 - **API**: Baseado em `scripts/api/start-api.sh`
 - **Frontend**: Baseado em `scripts/frontend/start-frontend.sh`
-- **Ngrok**: Utiliza `scripts/ngrok/start-ngrok-complete.sh`
 - **Deploy**: Integra com `scripts/deployment/`
 
 ## 💡 Dicas
