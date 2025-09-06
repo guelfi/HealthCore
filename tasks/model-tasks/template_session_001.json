@@ -1,0 +1,51 @@
+{
+  "session_info": {
+    "session_id": "template_implementation_001",
+    "created_at": "YYYY-MM-DDTHH:mm:ss.sssZ",
+    "last_updated": "YYYY-MM-DDTHH:mm:ss.sssZ",
+    "description": "[SUBSTITUIR] Descrição da funcionalidade/implementação",
+    "api_endpoint": "http://localhost:5000",
+    "frontend_port": "5005"
+  },
+  "tasks": [
+    {
+      "id": "task_example_1",
+      "content": "[SUBSTITUIR] Exemplo de tarefa 1 - Configuração inicial",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": ""
+    },
+    {
+      "id": "task_example_2",
+      "content": "[SUBSTITUIR] Exemplo de tarefa 2 - Implementação principal",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": ""
+    },
+    {
+      "id": "task_example_3",
+      "content": "[SUBSTITUIR] Exemplo de tarefa 3 - Testes e validação",
+      "status": "PENDING",
+      "started_at": null,
+      "completed_at": null,
+      "notes": ""
+    }
+  ],
+  "progress_summary": {
+    "total_tasks": 3,
+    "completed": 0,
+    "in_progress": 0,
+    "pending": 3,
+    "completion_percentage": 0
+  },
+  "files_modified": [
+    "[SUBSTITUIR] Lista de arquivos que serão/foram modificados"
+  ],
+  "next_session_priorities": [
+    "[SUBSTITUIR] Prioridade 1 para próxima sessão",
+    "[SUBSTITUIR] Prioridade 2 para próxima sessão",
+    "[SUBSTITUIR] Prioridade 3 para próxima sessão"
+  ]
+}
