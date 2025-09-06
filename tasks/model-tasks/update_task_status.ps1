@@ -1,4 +1,4 @@
-# Script para atualizar status de tarefas da sessao de integracao
+# Script para atualizar status de tarefas da sessao de implementacao
 # Usage: .\update_task_status.ps1 -TaskId "task_id" -Status "COMPLETE" -Notes "Optional notes"
 
 param(
@@ -13,12 +13,13 @@ param(
     [string]$Notes = ""
 )
 
-# Caminho do arquivo de sessao
-$SessionFile = "log\tasks\integration_session_001.json"
+# [SUBSTITUIR] Caminho do arquivo de sessao - ajustar conforme o nome do arquivo JSON
+$SessionFile = "template_session_001.json"
 
 # Verificar se o arquivo existe
 if (-not (Test-Path $SessionFile)) {
     Write-Error "Arquivo de sessao nao encontrado: $SessionFile"
+    Write-Host "Certifique-se de que o arquivo JSON da sessao existe nesta pasta." -ForegroundColor Yellow
     exit 1
 }
 
@@ -31,6 +32,8 @@ try {
     
     if (-not $task) {
         Write-Error "Tarefa nao encontrada: $TaskId"
+        Write-Host "Tarefas disponiveis:" -ForegroundColor Yellow
+        $sessionData.tasks | ForEach-Object { Write-Host "  - $($_.id): $($_.content)" -ForegroundColor Cyan }
         exit 1
     }
     
@@ -52,39 +55,40 @@ try {
         }
     }
     
-    # Atualizar notes se fornecido
-    if ($Notes) {
+    # Adicionar notas se fornecidas
+    if ($Notes -ne "") {
         $task.notes = $Notes
     }
     
-    # Atualizar session info
+    # Atualizar timestamp da sessao
     $sessionData.session_info.last_updated = $currentTime
     
-    # Recalcular progress summary
+    # Recalcular resumo de progresso
     $totalTasks = $sessionData.tasks.Count
     $completedTasks = ($sessionData.tasks | Where-Object { $_.status -eq "COMPLETE" }).Count
     $inProgressTasks = ($sessionData.tasks | Where-Object { $_.status -eq "IN_PROGRESS" }).Count
     $pendingTasks = ($sessionData.tasks | Where-Object { $_.status -eq "PENDING" }).Count
+    $completionPercentage = if ($totalTasks -gt 0) { [math]::Round(($completedTasks / $totalTasks) * 100, 2) } else { 0 }
     
     $sessionData.progress_summary.total_tasks = $totalTasks
     $sessionData.progress_summary.completed = $completedTasks
     $sessionData.progress_summary.in_progress = $inProgressTasks
     $sessionData.progress_summary.pending = $pendingTasks
-    $sessionData.progress_summary.completion_percentage = [math]::Round(($completedTasks / $totalTasks) * 100, 0)
+    $sessionData.progress_summary.completion_percentage = $completionPercentage
     
     # Salvar o arquivo atualizado
     $sessionData | ConvertTo-Json -Depth 10 | Set-Content $SessionFile -Encoding UTF8
     
-    Write-Host "Tarefa atualizada com sucesso!" -ForegroundColor Green
-    Write-Host "Tarefa: $TaskId" -ForegroundColor Cyan
-    Write-Host "Status: $oldStatus -> $Status" -ForegroundColor Yellow
-    Write-Host "Progresso: $completedTasks/$totalTasks tarefas ($($sessionData.progress_summary.completion_percentage)%)" -ForegroundColor Magenta
-    
-    if ($Notes) {
-        Write-Host "Notas: $Notes" -ForegroundColor Gray
+    # Exibir resultado
+    Write-Host "✅ Tarefa atualizada com sucesso!" -ForegroundColor Green
+    Write-Host "📋 Tarefa: $($task.content)" -ForegroundColor Cyan
+    Write-Host "🔄 Status: $oldStatus → $Status" -ForegroundColor Yellow
+    if ($Notes -ne "") {
+        Write-Host "📝 Notas: $Notes" -ForegroundColor Magenta
     }
+    Write-Host "📊 Progresso geral: $completionPercentage% ($completedTasks/$totalTasks tarefas concluídas)" -ForegroundColor Blue
     
 } catch {
-    Write-Error "Erro ao atualizar tarefa: $_"
+    Write-Error "Erro ao atualizar tarefa: $($_.Exception.Message)"
     exit 1
 }
