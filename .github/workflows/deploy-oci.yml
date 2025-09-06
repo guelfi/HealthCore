@@ -43,10 +43,13 @@ jobs:
         cache-dependency-path: src/Web/package-lock.json
     
     - name: 📦 Restore .NET dependencies
-      run: dotnet restore src/Api/MobileMed.Api.csproj
+      run: dotnet restore
     
     - name: 🔨 Build API
       run: dotnet build src/Api/MobileMed.Api.csproj --no-restore --configuration Release
+    
+    - name: 🔨 Build Tests
+      run: dotnet build tests/Api.Tests/MobileMed.Api.Tests.csproj --no-restore --configuration Release
     
     - name: 🧪 Test API
       run: dotnet test tests/Api.Tests/MobileMed.Api.Tests.csproj --no-build --configuration Release --verbosity normal
