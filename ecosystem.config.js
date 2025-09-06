@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'api',
       script: 'dotnet',
-      args: 'run --project src/Api',
+      args: 'run',
       cwd: 'src/Api',
       watch: ['src/Api'],
       ignore_watch: ['node_modules'],
@@ -14,7 +14,7 @@ module.exports = {
     {
       name: 'frontend',
       script: 'npm',
-      args: 'run dev',
+      args: 'run start',
       cwd: 'src/Web',
       watch: ['src/Web'],
       ignore_watch: ['node_modules'],
