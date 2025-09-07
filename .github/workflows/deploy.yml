@@ -1,0 +1,29 @@
+name: Deploy to OCI VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+
+      - name: Add OCI VM to known hosts
+        run: ssh-keyscan -H ${{ secrets.OCI_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy deployment script to server
+        run: scp -o StrictHostKeyChecking=no ./scripts/deploy.sh ubuntu@${{ secrets.OCI_HOST }}:/home/ubuntu/
+
+      - name: Execute deployment script on server
+        run: ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "/home/ubuntu/deploy.sh"
