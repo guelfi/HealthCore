@@ -28,8 +28,10 @@ COPY --from=publish /app/publish .
 # Copy database directory if exists
 COPY src/Api/database/ ./database/
 
-# Create non-root user
-RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
+# Create non-root user and set permissions
+RUN adduser --disabled-password --gecos '' appuser && \
+    chown -R appuser:appuser /app && \
+    chmod -R 755 /app/log
 USER appuser
 
 # Health check
