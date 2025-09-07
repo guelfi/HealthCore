@@ -193,11 +193,13 @@ static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : 
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Habilitar Swagger em produção para facilitar testes e documentação
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MobileMed API v1");
+    c.RoutePrefix = "swagger"; // Swagger disponível em /swagger
+});
 
 app.UseHttpsRedirection();
 
