@@ -1,22 +1,19 @@
 # 🚀 Oracle Cloud Infrastructure (OCI) Deployment Setup
 
-Este guia explica como configurar o deploy automático para a Oracle Cloud Infrastructure usando GitHub Actions.
+Este guia explica como configurar o deploy automático para a Oracle Cloud Infrastructure usando GitHub Actions com deploy direto via SSH.
 
 ## 📋 Pré-requisitos
 
-### 1. Conta OCI
-- Conta ativa na Oracle Cloud Infrastructure
-- Tenancy configurada
-- Compartment criado para o projeto
+### 1. Instância OCI
+- Instância Ubuntu na Oracle Cloud Infrastructure
+- Docker e Docker Compose instalados
+- Nginx configurado como reverse proxy
+- Portas 5000 (API) e 5005 (Frontend) abertas no Security Group
 
-### 2. OKE Cluster (Oracle Kubernetes Engine)
-- Cluster Kubernetes criado na OCI
-- Node pool configurado
-- Load Balancer configurado
-
-### 3. Container Registry
-- Oracle Container Registry habilitado
-- Repositórios criados para API e Frontend
+### 2. Chave SSH
+- Par de chaves SSH gerado
+- Chave pública adicionada à instância OCI
+- Chave privada configurada nos secrets do GitHub
 
 ## 🔑 Configuração de Secrets no GitHub
 
@@ -25,28 +22,19 @@ Vá para **Settings > Secrets and variables > Actions** no seu repositório GitH
 ### Secrets Obrigatórios
 
 ```bash
-# OCI Authentication
-OCI_USER_OCID=ocid1.user.oc1..aaaaaaaa...
-OCI_FINGERPRINT=aa:bb:cc:dd:ee:ff:gg:hh:ii:jj:kk:ll:mm:nn:oo:pp
-OCI_TENANCY_OCID=ocid1.tenancy.oc1..aaaaaaaa...
-OCI_REGION=us-ashburn-1
-OCI_PRIVATE_KEY=|
-  -----BEGIN PRIVATE KEY-----
-  MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...
-  -----END PRIVATE KEY-----
+# SSH Connection
+OCI_SSH_PRIVATE_KEY=|
+  -----BEGIN OPENSSH PRIVATE KEY-----
+  b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAAB...
+  -----END OPENSSH PRIVATE KEY-----
 
-# Container Registry
-OCI_USERNAME=<tenancy-namespace>/<username>
-OCI_PASSWORD=<auth-token>
-OCI_TENANCY=<tenancy-namespace>
-
-# Kubernetes
-OKE_CLUSTER_ID=ocid1.cluster.oc1..aaaaaaaa...
-
-# Application
-DOMAIN_NAME=mobilemed.example.com
-VITE_API_URL=https://mobilemed.example.com/api
+OCI_HOST=129.153.86.168
 ```
+
+### Como obter os valores:
+
+1. **OCI_SSH_PRIVATE_KEY**: Conteúdo completo da sua chave privada SSH
+2. **OCI_HOST**: IP público da sua instância OCI
 
 ### Secrets Opcionais
 
