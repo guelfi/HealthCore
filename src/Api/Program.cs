@@ -126,7 +126,8 @@ builder.Services.AddCors(options =>
             "http://localhost:5005",
             "http://127.0.0.1:5005",
             "http://0.0.0.0:5005",
-            "http://192.168.15.119:5005"
+            "http://192.168.15.119:5005",
+            "http://129.153.86.168:5005"  // OCI Frontend IP
         )
         .AllowAnyMethod()
         .AllowAnyHeader()
