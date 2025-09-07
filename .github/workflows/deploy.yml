@@ -69,6 +69,6 @@ jobs:
             
             echo '✅ Deploy concluído com sucesso!'
             echo '🌐 MobileMed disponível em:'
-            echo '   - API: http://129.153.86.168:5000'
-            echo '   - Frontend: http://129.153.86.168:5005'
+            echo '   - API: http://129.148.62.47:5000'
+            echo '   - Frontend: http://129.148.62.47:5005'
           "
