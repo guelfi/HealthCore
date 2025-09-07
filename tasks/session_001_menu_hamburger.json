@@ -1,0 +1,143 @@
+{
+  "session_info": {
+    "session_id": "001",
+    "task_name": "Menu Hambúrguer Mobile",
+    "priority": "alta",
+    "estimated_hours": "3-4",
+    "start_date": "2025-01-XX",
+    "status": "pending",
+    "responsible": "Desenvolvedor Frontend",
+    "week": "Semana 1"
+  },
+  "todos": [
+    {
+      "id": "menu-01",
+      "content": "Criar componente MobileMenu com estrutura básica",
+      "status": "pending",
+      "priority": "high",
+      "estimated_time": "45min"
+    },
+    {
+      "id": "menu-02",
+      "content": "Implementar lógica de toggle (abrir/fechar menu)",
+      "status": "pending",
+      "priority": "high",
+      "estimated_time": "30min"
+    },
+    {
+      "id": "menu-03",
+      "content": "Criar estilos SCSS responsivos para mobile",
+      "status": "pending",
+      "priority": "high",
+      "estimated_time": "60min"
+    },
+    {
+      "id": "menu-04",
+      "content": "Implementar animações de entrada/saída",
+      "status": "pending",
+      "priority": "medium",
+      "estimated_time": "45min"
+    },
+    {
+      "id": "menu-05",
+      "content": "Adicionar overlay com blur de fundo",
+      "status": "pending",
+      "priority": "medium",
+      "estimated_time": "30min"
+    },
+    {
+      "id": "menu-06",
+      "content": "Integrar menu hambúrguer no Header existente",
+      "status": "pending",
+      "priority": "high",
+      "estimated_time": "30min"
+    },
+    {
+      "id": "menu-07",
+      "content": "Implementar navegação por links do menu",
+      "status": "pending",
+      "priority": "high",
+      "estimated_time": "20min"
+    },
+    {
+      "id": "menu-08",
+      "content": "Adicionar suporte a teclado (ESC para fechar)",
+      "status": "pending",
+      "priority": "medium",
+      "estimated_time": "15min"
+    },
+    {
+      "id": "menu-09",
+      "content": "Implementar atributos de acessibilidade (ARIA)",
+      "status": "pending",
+      "priority": "medium",
+      "estimated_time": "20min"
+    },
+    {
+      "id": "menu-10",
+      "content": "Testar responsividade em diferentes dispositivos",
+      "status": "pending",
+      "priority": "high",
+      "estimated_time": "30min"
+    },
+    {
+      "id": "menu-11",
+      "content": "Validar UX e ajustar conforme necessário",
+      "status": "pending",
+      "priority": "medium",
+      "estimated_time": "25min"
+    }
+  ],
+  "progress_summary": {
+    "total_tasks": 11,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "pending_tasks": 11,
+    "completion_percentage": 0,
+    "estimated_remaining_time": "5h 30min"
+  },
+  "files_modified": [
+    "src/components/layout/MobileMenu.tsx",
+    "src/components/layout/MobileMenu.module.scss",
+    "src/components/layout/Header.tsx",
+    "src/components/layout/Header.module.scss",
+    "src/hooks/useMobileMenu.ts",
+    "src/types/Navigation.ts"
+  ],
+  "next_session_priorities": [
+    "Implementar testes unitários para MobileMenu",
+    "Validar acessibilidade com screen readers",
+    "Otimizar performance das animações",
+    "Documentar componente no Storybook"
+  ],
+  "technical_notes": {
+    "breakpoints": "Mobile: < 768px, Tablet: 768px-1024px",
+    "animations": "Usar CSS transforms para melhor performance",
+    "accessibility": "Implementar focus trap quando menu aberto",
+    "performance": "Lazy load do menu para otimizar bundle"
+  },
+  "dependencies": [
+    "React Router (navegação)",
+    "SCSS Modules (estilos)",
+    "React Hooks (estado)"
+  ],
+  "risks": [
+    {
+      "risk": "Conflito com navegação existente",
+      "mitigation": "Testar integração cuidadosamente",
+      "probability": "medium"
+    },
+    {
+      "risk": "Performance em dispositivos antigos",
+      "mitigation": "Usar animações CSS otimizadas",
+      "probability": "low"
+    }
+  ],
+  "success_criteria": [
+    "Menu funciona em todos os dispositivos mobile",
+    "Animações suaves (60fps)",
+    "Acessibilidade WCAG 2.1 AA",
+    "Integração sem quebrar funcionalidades existentes",
+    "Tempo de carregamento < 100ms"
+  ]
+}
