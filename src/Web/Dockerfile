@@ -30,9 +30,8 @@ COPY src/Web/nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built application
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Create non-root user
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx
+# Create non-root user (nginx group already exists in nginx:alpine)
+RUN adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx nginx || true
 
 # Set proper permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
