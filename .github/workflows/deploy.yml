@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: # Permite execução manual
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy MobileMed to OCI
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +23,52 @@ jobs:
       - name: Add OCI VM to known hosts
         run: ssh-keyscan -H ${{ secrets.OCI_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy deployment script to server
-        run: scp -o StrictHostKeyChecking=no ./scripts/deploy.sh ubuntu@${{ secrets.OCI_HOST }}:/home/ubuntu/
+      - name: Create project directory on OCI
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
+            sudo mkdir -p /var/www/DesafioTecnico
+            sudo chown ubuntu:ubuntu /var/www/DesafioTecnico
+          "
 
-      - name: Execute deployment script on server
-        run: ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "/home/ubuntu/deploy.sh"
+      - name: Sync project files to OCI
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='bin' \
+            --exclude='obj' \
+            --exclude='.env.local*' \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ubuntu@${{ secrets.OCI_HOST }}:/var/www/DesafioTecnico/
+
+      - name: Deploy and build on OCI
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
+            cd /var/www/DesafioTecnico
+            
+            echo '🚀 Iniciando deploy do MobileMed...'
+            
+            # Parar containers existentes
+            docker-compose down || true
+            
+            # Build e start dos containers
+            echo '🔨 Fazendo build dos containers...'
+            docker-compose up --build -d
+            
+            # Aguardar containers iniciarem
+            echo '⏳ Aguardando containers iniciarem...'
+            sleep 10
+            
+            # Verificar status dos containers
+            echo '📊 Status dos containers:'
+            docker-compose ps
+            
+            # Limpeza de imagens não utilizadas
+            echo '🧹 Limpando imagens não utilizadas...'
+            docker image prune -f
+            
+            echo '✅ Deploy concluído com sucesso!'
+            echo '🌐 MobileMed disponível em:'
+            echo '   - API: http://129.153.86.168:5000'
+            echo '   - Frontend: http://129.153.86.168:5005'
+          "
