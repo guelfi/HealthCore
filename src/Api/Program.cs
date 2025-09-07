@@ -48,7 +48,7 @@ builder.Services.AddHealthChecks()
     {
         try
         {
-            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "../log");
+            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "log");
             if (!Directory.Exists(logPath))
             {
                 Directory.CreateDirectory(logPath);
