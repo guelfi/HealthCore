@@ -18,6 +18,7 @@ namespace MobileMed.Api.Core.Application.Services
         {
             // Verificar se já existe um paciente com o mesmo documento
             var pacienteExistente = await _context.Pacientes
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Documento == createPacienteDto.Documento);
                 
             if (pacienteExistente != null)
@@ -47,8 +48,10 @@ namespace MobileMed.Api.Core.Application.Services
 
         public async Task<PagedResponseDto<PacienteDto>> GetPacientesAsync(int page, int pageSize, Guid? medicoId = null)
         {
-            // Criar query base
-            var query = _context.Pacientes.AsQueryable();
+            // Criar query base com ordem consistente para paginação
+            var query = _context.Pacientes
+                .AsNoTracking()
+                .OrderBy(p => p.Nome);
             
             // Filtrar por médico se especificado
             if (medicoId.HasValue)
@@ -59,26 +62,23 @@ namespace MobileMed.Api.Core.Application.Services
             // Calcular o total de pacientes (com filtro aplicado)
             var total = await query.CountAsync();
             
-            // Obter os pacientes paginados com informações do médico
-            var pacientes = await query
-                .Include(p => p.Medico)
+            // Usar projeção direta para melhor performance
+            var pacienteDtos = await query
+                .Select(p => new PacienteDto
+                {
+                    Id = p.Id,
+                    Nome = p.Nome,
+                    DataNascimento = p.DataNascimento,
+                    Documento = p.Documento,
+                    DataCriacao = p.DataCriacao,
+                    MedicoId = p.MedicoId,
+                    MedicoNome = p.Medico != null ? p.Medico.Nome : null,
+                    MedicoCRM = p.Medico != null ? p.Medico.CRM : null,
+                    MedicoEspecialidade = p.Medico != null ? p.Medico.Especialidade : null
+                })
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-
-            // Converter para DTOs
-            var pacienteDtos = pacientes.Select(p => new PacienteDto
-            {
-                Id = p.Id,
-                Nome = p.Nome,
-                DataNascimento = p.DataNascimento,
-                Documento = p.Documento,
-                DataCriacao = p.DataCriacao,
-                MedicoId = p.MedicoId,
-                MedicoNome = p.Medico?.Nome,
-                MedicoCRM = p.Medico?.CRM,
-                MedicoEspecialidade = p.Medico?.Especialidade
-            }).ToList();
 
             // Calcular total de páginas
             var totalPages = (int)Math.Ceiling((double)total / pageSize);
@@ -105,6 +105,7 @@ namespace MobileMed.Api.Core.Application.Services
 
             // Verificar se o novo documento já existe para outro paciente
             var pacienteComMesmoDocumento = await _context.Pacientes
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Documento == updatePacienteDto.Documento && p.Id != id);
 
             if (pacienteComMesmoDocumento != null)
@@ -142,27 +143,22 @@ namespace MobileMed.Api.Core.Application.Services
 
         public async Task<PacienteDto?> GetPacienteByIdAsync(Guid id)
         {
-            var paciente = await _context.Pacientes
-                .Include(p => p.Medico)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (paciente == null)
-            {
-                return null;
-            }
-
-            return new PacienteDto
-            {
-                Id = paciente.Id,
-                Nome = paciente.Nome,
-                DataNascimento = paciente.DataNascimento,
-                Documento = paciente.Documento,
-                DataCriacao = paciente.DataCriacao,
-                MedicoId = paciente.MedicoId,
-                MedicoNome = paciente.Medico?.Nome,
-                MedicoCRM = paciente.Medico?.CRM,
-                MedicoEspecialidade = paciente.Medico?.Especialidade
-            };
+            return await _context.Pacientes
+                .AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => new PacienteDto
+                {
+                    Id = p.Id,
+                    Nome = p.Nome,
+                    DataNascimento = p.DataNascimento,
+                    Documento = p.Documento,
+                    DataCriacao = p.DataCriacao,
+                    MedicoId = p.MedicoId,
+                    MedicoNome = p.Medico != null ? p.Medico.Nome : null,
+                    MedicoCRM = p.Medico != null ? p.Medico.CRM : null,
+                    MedicoEspecialidade = p.Medico != null ? p.Medico.Especialidade : null
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task<PagedResponseDto<PacienteDto>> SearchPacientesByNomeAsync(string? nome, int page, int pageSize, Guid? medicoId = null)

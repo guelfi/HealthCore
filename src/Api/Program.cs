@@ -8,25 +8,65 @@ using MobileMed.Api.Core.Domain.Enums;
 using MobileMed.Api.Infrastructure.Data;
 using MobileMed.Api.Infrastructure.Middleware;
 using Serilog;
+using Serilog.Formatting.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Diagnostics;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.OpenApi.Models;
+using System.Threading.RateLimiting;
 
 // Configurar o Serilog
+var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .WriteTo.File("../log/mobilemed-.log", rollingInterval: RollingInterval.Day)
+    .Enrich.WithProperty("Application", "MobileMed.Api")
+    .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production")
+    .Enrich.WithMachineName()
+    .Enrich.WithThreadId()
+    .WriteTo.Console(isDevelopment ? null : new JsonFormatter())
+    .WriteTo.File(
+        path: "../log/mobilemed-.log", 
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
+        formatter: isDevelopment ? null : new JsonFormatter())
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
+
+// Add Memory Cache
+builder.Services.AddMemoryCache();
+
+// Add Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    // Global rate limiting
+    options.AddFixedWindowLimiter("GlobalLimit", opt =>
+    {
+        opt.PermitLimit = builder.Configuration.GetValue<int>("RateLimiting:Global:PermitLimit", 100);
+        opt.Window = TimeSpan.FromMinutes(builder.Configuration.GetValue<int>("RateLimiting:Global:WindowMinutes", 1));
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = builder.Configuration.GetValue<int>("RateLimiting:Global:QueueLimit", 10);
+    });
+    
+    // Authentication endpoints rate limiting (more restrictive)
+    options.AddFixedWindowLimiter("AuthLimit", opt =>
+    {
+        opt.PermitLimit = builder.Configuration.GetValue<int>("RateLimiting:Auth:PermitLimit", 10);
+        opt.Window = TimeSpan.FromMinutes(builder.Configuration.GetValue<int>("RateLimiting:Auth:WindowMinutes", 5));
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = builder.Configuration.GetValue<int>("RateLimiting:Auth:QueueLimit", 2);
+    });
+    
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -43,7 +83,10 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
 
 // Add Health Checks
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<MobileMedDbContext>("database")
+    .AddDbContextCheck<MobileMedDbContext>(
+        "database",
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+        tags: new[] { "db", "sql", "ready" })
     .AddCheck("filesystem", () =>
     {
         try
@@ -58,25 +101,85 @@ builder.Services.AddHealthChecks()
             File.WriteAllText(testFile, DateTime.UtcNow.ToString());
             File.Delete(testFile);
             
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Filesystem is accessible");
+            // Verificar espaço em disco
+            var drive = new DriveInfo(Path.GetPathRoot(Directory.GetCurrentDirectory())!);
+            var freeSpaceGB = drive.AvailableFreeSpace / (1024.0 * 1024 * 1024);
+            var minDiskSpaceGB = builder.Configuration.GetValue<double>("HealthChecks:MinDiskSpaceGB", 1.0);
+            
+            if (freeSpaceGB < minDiskSpaceGB)
+            {
+                return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
+                    $"Low disk space: {freeSpaceGB:F2} GB available");
+            }
+            
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
+                $"Filesystem accessible. Free space: {freeSpaceGB:F2} GB");
         }
         catch (Exception ex)
         {
             return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy("Filesystem check failed", ex);
         }
-    })
+    }, tags: new[] { "filesystem", "ready" })
     .AddCheck("memory", () =>
     {
         var gc = GC.GetTotalMemory(false);
         var workingSet = Environment.WorkingSet;
+        var maxMemoryMB = builder.Configuration.GetValue<long>("HealthChecks:MaxMemoryUsageMB", 512);
+        var maxMemoryBytes = maxMemoryMB * 1024 * 1024;
         
-        if (workingSet > 1024 * 1024 * 1024) // 1GB
+        var workingSetMB = workingSet / 1024 / 1024;
+        var gcMB = gc / 1024 / 1024;
+        
+        if (workingSet > maxMemoryBytes)
         {
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded($"High memory usage: {workingSet / 1024 / 1024} MB");
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
+                $"High memory usage: Working Set {workingSetMB} MB, GC {gcMB} MB");
         }
         
-        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy($"Memory usage: {workingSet / 1024 / 1024} MB");
-    });
+        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
+            $"Memory usage normal: Working Set {workingSetMB} MB, GC {gcMB} MB");
+    }, tags: new[] { "memory", "live" })
+    .AddCheck("database-performance", async () =>
+    {
+        try
+        {
+            using var scope = builder.Services.BuildServiceProvider().CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<MobileMedDbContext>();
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
+            await context.Database.ExecuteSqlRawAsync("SELECT 1");
+            stopwatch.Stop();
+            
+            var maxResponseTimeMs = builder.Configuration.GetValue<int>("HealthChecks:DatabaseTimeoutSeconds", 5) * 1000;
+            
+            if (stopwatch.ElapsedMilliseconds > maxResponseTimeMs)
+            {
+                return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
+                    $"Database response slow: {stopwatch.ElapsedMilliseconds}ms");
+            }
+            
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
+                $"Database responsive: {stopwatch.ElapsedMilliseconds}ms");
+        }
+        catch (Exception ex)
+        {
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy(
+                "Database performance check failed", ex);
+        }
+    }, tags: new[] { "db", "performance", "ready" })
+    .AddCheck("application-startup", () =>
+    {
+        var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
+        
+        if (uptime.TotalSeconds < 30)
+        {
+            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
+                $"Application still warming up: {uptime.TotalSeconds:F0}s");
+        }
+        
+        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
+            $"Application running: {uptime.TotalMinutes:F1} minutes");
+    }, tags: new[] { "startup", "live" });
 
 // Add Entity Framework
 builder.Services.AddDbContext<MobileMedDbContext>(options =>
@@ -204,6 +307,16 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 
+// Security headers (enable by config)
+var enableSecurityHeaders = builder.Configuration.GetValue<bool>("Security:EnableSecurityHeaders", true);
+if (enableSecurityHeaders)
+{
+    app.UseSecurityHeaders();
+}
+
+// Enable Rate Limiting globally
+app.UseRateLimiter();
+
 // Use CORS
 if (app.Environment.IsDevelopment())
 {
@@ -258,11 +371,45 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     }
 });
 
-// Simple health check endpoint for load balancers
-app.MapGet("/health/ready", () => Results.Ok(new { status = "ready", timestamp = DateTime.UtcNow }));
+// Readiness probe endpoint (with database and filesystem checks)
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var response = new
+        {
+            status = report.Status.ToString().ToLowerInvariant(),
+            timestamp = DateTime.UtcNow,
+            duration = report.TotalDuration,
+            checks = report.Entries.Select(entry => new
+            {
+                name = entry.Key,
+                status = entry.Value.Status.ToString().ToLowerInvariant(),
+                duration = entry.Value.Duration,
+                description = entry.Value.Description
+            })
+        };
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
+    }
+});
 
-// Liveness probe endpoint
-app.MapGet("/health/live", () => Results.Ok(new { status = "alive", timestamp = DateTime.UtcNow }));
+// Liveness probe endpoint (minimal checks, always responsive)
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live"),
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var response = new
+        {
+            status = report.Status.ToString().ToLowerInvariant(),
+            timestamp = DateTime.UtcNow
+        };
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
+    }
+});
 
 // Detailed system info endpoint (for monitoring tools)
 app.MapGet("/health/info", () =>
@@ -573,8 +720,16 @@ app.MapDelete("/exames/{id:guid}", async (Guid id, ExameService exameService, IL
 });
 
 // Endpoint para listar modalidades disponíveis
-app.MapGet("/exames/modalidades", (ILogger<Program> logger) =>
+app.MapGet("/exames/modalidades", (ILogger<Program> logger, IMemoryCache cache) =>
 {
+    const string cacheKey = "modalidades-dicom";
+    
+    if (cache.TryGetValue(cacheKey, out var cachedModalidades))
+    {
+        logger.LogDebug("Retornando modalidades do cache");
+        return Results.Ok(cachedModalidades);
+    }
+    
     logger.LogInformation("Listando modalidades de exames disponíveis");
     var modalidades = Enum.GetValues<MobileMed.Api.Core.Domain.Enums.ModalidadeExame>()
         .Select(m => new { 
@@ -582,6 +737,14 @@ app.MapGet("/exames/modalidades", (ILogger<Program> logger) =>
             Description = GetModalidadeDescription(m) 
         })
         .ToList();
+    
+    // Cache por 24 horas (dados estáticos)
+    var cacheOptions = new MemoryCacheEntryOptions
+    {
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24),
+        Priority = CacheItemPriority.High
+    };
+    cache.Set(cacheKey, modalidades, cacheOptions);
     
     return Results.Ok(modalidades);
 });
@@ -673,7 +836,7 @@ app.MapPost("/auth/register", async (LoginRequestDto registerDto, UserService us
         logger.LogError(ex, "An unexpected error occurred during user registration for {Username}.", registerDto.Username);
         return Results.Problem("An unexpected error occurred during registration.");
     }
-});
+}).RequireRateLimiting("AuthLimit");
 
 app.MapPost("/auth/login", async (LoginRequestDto loginDto, AuthService authService, ILogger<Program> logger) =>
 {
@@ -697,7 +860,7 @@ app.MapPost("/auth/login", async (LoginRequestDto loginDto, AuthService authServ
         logger.LogError(ex, "Erro inesperado durante login para usuário: {Username}", loginDto.Username);
         return Results.Problem("Erro inesperado durante o login.");
     }
-});
+}).RequireRateLimiting("AuthLimit");
 
 app.MapPost("/auth/refresh", async (RefreshTokenRequestDto refreshDto, AuthService authService, ILogger<Program> logger) =>
 {
