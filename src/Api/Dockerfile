@@ -3,17 +3,17 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj and restore dependencies
-COPY ["src/Api/MobileMed.Api.csproj", "Api/"]
-RUN dotnet restore "Api/MobileMed.Api.csproj"
+COPY ["src/Api/HealthCore.Api.csproj", "Api/"]
+RUN dotnet restore "Api/HealthCore.Api.csproj"
 
 # Copy everything else and build
 COPY src/Api/ Api/
 WORKDIR "/src/Api"
-RUN dotnet build "MobileMed.Api.csproj" -c Release -o /app/build
+RUN dotnet build "HealthCore.Api.csproj" -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "MobileMed.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "HealthCore.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
@@ -47,4 +47,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ConnectionStrings__DefaultConnection="Data Source=database/mobilemed.db"
 
 # Start the application
-ENTRYPOINT ["dotnet", "MobileMed.Api.dll"]
+ENTRYPOINT ["dotnet", "HealthCore.Api.dll"]
