@@ -28,6 +28,8 @@ Para que eu tenha controle sobre o histórico clínico mesmo em situações de r
 -   Endpoints criados:
     -   `POST /pacientes`
     -   `GET /pacientes?page=x&pageSize=y`
+
+<!-- Deploy trigger: optimized build configuration -->
     -   `POST /exames`
     -   `GET /exames?page=x&pageSize=y`
 -   Dados persistidos de forma segura e idempotente.
