@@ -1,0 +1,151 @@
+name: Deploy to Production - Fixed
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        script: |
+          # Configurar modo de erro rigoroso
+          set -e
+          
+          echo "🚀 Iniciando deploy do MobileMed..."
+          
+          # Navegar para o diretório do projeto
+          cd /var/www/DesafioTecnico
+          
+          # Atualizar código
+          echo "📥 Atualizando código..."
+          git pull origin main
+          
+          # Função para limpeza completa de containers
+          cleanup_containers() {
+            echo "🧹 Limpando containers existentes..."
+            
+            # Parar e remover containers específicos
+            docker stop mobilemed-api mobilemed-frontend 2>/dev/null || true
+            docker rm mobilemed-api mobilemed-frontend 2>/dev/null || true
+            
+            # Remover containers órfãos com force
+            docker container prune -f 2>/dev/null || true
+            
+            # Remover redes não utilizadas
+            docker network prune -f 2>/dev/null || true
+            
+            # Aguardar liberação dos recursos
+            sleep 5
+            
+            echo "✅ Limpeza de containers concluída"
+          }
+          
+          # Função para verificar se Docker está funcionando
+          check_docker() {
+            echo "🔍 Verificando Docker..."
+            if ! docker --version >/dev/null 2>&1; then
+              echo "❌ Docker não está funcionando. Reinstalando..."
+              
+              # Remover Docker antigo
+              sudo apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
+              
+              # Instalar Docker
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sudo sh get-docker.sh
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              
+              rm get-docker.sh
+            fi
+            echo "✅ Docker funcionando"
+          }
+          
+          # Executar verificações e limpeza
+          check_docker
+          cleanup_containers
+          
+          # Build e deploy com tratamento de erro
+          echo "🔨 Fazendo build e iniciando containers..."
+          
+          # Remover docker-compose.yml version obsoleta
+          if grep -q "^version:" docker-compose.yml; then
+            sed -i '/^version:/d' docker-compose.yml
+            echo "✅ Removido 'version' obsoleto do docker-compose.yml"
+          fi
+          
+          # Build com cleanup forçado
+          docker-compose down --volumes --remove-orphans 2>/dev/null || true
+          docker-compose build --no-cache
+          
+          # Verificar se as imagens foram criadas
+          if ! docker images | grep -q "desafiotecnico-mobilemed-api\|desafiotecnico-mobilemed-frontend"; then
+            echo "❌ Falha no build das imagens"
+            exit 1
+          fi
+          
+          # Iniciar serviços
+          docker-compose up -d
+          
+          # Aguardar inicialização
+          echo "⏳ Aguardando inicialização dos serviços..."
+          sleep 30
+          
+          # Verificar se os containers estão rodando
+          if ! docker-compose ps | grep -q "Up"; then
+            echo "❌ Containers não iniciaram corretamente"
+            docker-compose logs
+            exit 1
+          fi
+          
+          # Health check
+          echo "🏥 Verificando saúde dos serviços..."
+          
+          # Verificar API
+          for i in {1..10}; do
+            if curl -f -s http://localhost:5000/health >/dev/null; then
+              echo "✅ API está respondendo"
+              break
+            fi
+            if [ $i -eq 10 ]; then
+              echo "❌ API não está respondendo após 10 tentativas"
+              docker-compose logs mobilemed-api
+              exit 1
+            fi
+            echo "⏳ Aguardando API... (tentativa $i/10)"
+            sleep 10
+          done
+          
+          # Verificar Frontend
+          for i in {1..5}; do
+            if curl -f -s http://localhost:5005 >/dev/null; then
+              echo "✅ Frontend está respondendo"
+              break
+            fi
+            if [ $i -eq 5 ]; then
+              echo "❌ Frontend não está respondendo após 5 tentativas"
+              docker-compose logs mobilemed-frontend
+              exit 1
+            fi
+            echo "⏳ Aguardando Frontend... (tentativa $i/5)"
+            sleep 5
+          done
+          
+          # Deploy bem-sucedido
+          echo "🎉 Deploy concluído com sucesso!"
+          echo "📊 Status dos serviços:"
+          docker-compose ps
+          
+          echo ""
+          echo "🌐 URLs de acesso:"
+          echo "   Frontend: http://$(curl -s ifconfig.me):5005"
+          echo "   API: http://$(curl -s ifconfig.me):5000"
+          echo "   Health: http://$(curl -s ifconfig.me):5000/health"

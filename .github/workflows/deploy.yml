@@ -73,27 +73,79 @@ jobs:
             
             echo '🚀 Iniciando deploy do MobileMed...'
             
-            echo '🧹 Parando e removendo containers antigos...'
-            sudo docker compose down --remove-orphans || true
+            echo '🧹 Limpeza completa de containers...'
+            # Parar e remover containers específicos
+            sudo docker stop mobilemed-api mobilemed-frontend 2>/dev/null || true
+            sudo docker rm mobilemed-api mobilemed-frontend 2>/dev/null || true
             
-            echo '🔨 Fazendo build e iniciando containers...'
-            sudo docker compose up --build -d
+            # Limpeza completa com Docker Compose
+            sudo docker compose down --remove-orphans --volumes || true
             
-            echo '⏳ Aguardando containers iniciarem...'
-            sleep 20
+            # Remover containers órfãos
+            sudo docker container prune -f || true
+            sudo docker network prune -f || true
+            
+            # Aguardar liberação de recursos
+            sleep 5
+            
+            echo '🔨 Fazendo build dos containers...'
+            sudo docker compose build --no-cache
+            
+            echo '🚀 Iniciando containers...'
+            sudo docker compose up -d --remove-orphans
+            
+            echo '⏳ Aguardando inicialização completa...'
+            sleep 30
             
             echo '📊 Verificando status dos containers...'
             sudo docker compose ps
-
-            API_STATUS=$(sudo docker compose ps -q mobilemed-api | xargs -r docker inspect -f '{{.State.Status}}')
-            if [ "$API_STATUS" != "running" ]; then
-              echo '❌ ERRO: O container da API não iniciou corretamente. Verificando logs...'
-              sudo docker compose logs mobilemed-api
-              exit 1
-            fi
+            
+            echo '🏥 Executando health checks...'
+            
+            # Verificar API com retry
+            for i in {1..10}; do
+              if curl -f -s http://localhost:5000/health >/dev/null 2>&1; then
+                echo '✅ API está respondendo'
+                break
+              fi
+              if [ $i -eq 10 ]; then
+                echo '❌ API não responde após 10 tentativas'
+                echo '📋 Logs da API:'
+                sudo docker compose logs --tail=20 mobilemed-api
+                exit 1
+              fi
+              echo "⏳ Aguardando API... (tentativa $i/10)"
+              sleep 5
+            done
+            
+            # Verificar Frontend
+            for i in {1..5}; do
+              if curl -f -s http://localhost:5005 >/dev/null 2>&1; then
+                echo '✅ Frontend está acessível'
+                break
+              fi
+              if [ $i -eq 5 ]; then
+                echo '❌ Frontend não responde após 5 tentativas'
+                echo '📋 Logs do Frontend:'
+                sudo docker compose logs --tail=20 mobilemed-frontend
+                exit 1
+              fi
+              echo "⏳ Aguardando Frontend... (tentativa $i/5)"
+              sleep 3
+            done
             
             echo '🧹 Limpando imagens Docker não utilizadas...'
             sudo docker image prune -f
             
-            echo '✅ Deploy concluído com sucesso!'
+            echo ''
+            echo '🎉 Deploy concluído com sucesso!'
+            echo '📊 Status final dos serviços:'
+            sudo docker compose ps
+            
+            echo ''
+            echo '🌐 URLs de acesso:'
+            PUBLIC_IP=$(curl -s --max-time 3 ifconfig.me 2>/dev/null || echo 'SEU_IP_PUBLICO')
+            echo "   Frontend: http://$PUBLIC_IP:5005"
+            echo "   API: http://$PUBLIC_IP:5000"
+            echo "   Health: http://$PUBLIC_IP:5000/health"
           EOF
