@@ -13,17 +13,19 @@ export default defineConfig({
     port: 5005
   },
   build: {
-    // Generate hashed filenames for cache busting
+    // Generate hashed filenames for cache busting with timestamp
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+        chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+        assetFileNames: `assets/[name]-[hash]-${Date.now()}.[ext]`
       }
     },
     // Ensure source maps are generated for debugging
     sourcemap: true,
     // Optimize chunk size
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    // Force cache invalidation
+    assetsInlineLimit: 0
   }
 })
