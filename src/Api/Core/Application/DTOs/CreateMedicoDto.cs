@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MobileMed.Api.Core.Application.DTOs
+namespace HealthCore.Api.Core.Application.DTOs
 {
     public class CreateMedicoDto
     {

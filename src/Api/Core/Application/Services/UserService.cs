@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Infrastructure.Data;
 
-namespace MobileMed.Api.Core.Application.Services
+namespace HealthCore.Api.Core.Application.Services
 {
     public class UserService
     {
-        private readonly MobileMedDbContext _context;
+        private readonly HealthCoreDbContext _context;
 
-        public UserService(MobileMedDbContext context)
+        public UserService(HealthCoreDbContext context)
         {
             _context = context;
         }

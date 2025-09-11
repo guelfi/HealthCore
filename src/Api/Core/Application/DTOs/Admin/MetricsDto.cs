@@ -1,4 +1,4 @@
-namespace MobileMed.Api.Core.Application.DTOs.Admin
+namespace HealthCore.Api.Core.Application.DTOs.Admin
 {
     public class AdminMetricsDto
     {

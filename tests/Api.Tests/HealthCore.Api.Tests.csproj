@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Api\MobileMed.Api.csproj" />
+    <ProjectReference Include="../../src/Api/HealthCore.Api.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,19 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using MobileMed.Api.Core.Application.DTOs;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Core.Domain.Enums;
-using MobileMed.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Application.DTOs;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Enums;
+using HealthCore.Api.Infrastructure.Data;
 
-namespace MobileMed.Api.Core.Application.Services
+namespace HealthCore.Api.Core.Application.Services
 {
-    public class ExameService
+    public class ExameService(HealthCoreDbContext context)
     {
-        private readonly MobileMedDbContext _context;
-
-        public ExameService(MobileMedDbContext context)
-        {
-            _context = context;
-        }
+        private readonly HealthCoreDbContext _context = context;
 
         public async Task<ExameDto> CreateExameAsync(CreateExameDto createExameDto)
         {
@@ -247,7 +242,7 @@ namespace MobileMed.Api.Core.Application.Services
             query = query.Where(e => e.DataCriacao >= dataInicio.Value && e.DataCriacao <= dataFim.Value);
 
             var statistics = await query
-                .GroupBy(e => new { Year = e.DataCriacao.Year, Month = e.DataCriacao.Month })
+                .GroupBy(e => new { e.DataCriacao.Year, e.DataCriacao.Month })
                 .Select(g => new 
                 {
                     Periodo = $"{g.Key.Year}-{g.Key.Month:D2}",

@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
-using MobileMed.Api.Core.Application.Services;
+using HealthCore.Api.Core.Application.Services;
 
-namespace MobileMed.Api.Infrastructure.Middleware
+namespace HealthCore.Api.Infrastructure.Middleware
 {
     public class TokenBlacklistMiddleware
     {

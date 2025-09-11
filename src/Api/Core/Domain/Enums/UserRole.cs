@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace MobileMed.Api.Core.Domain.Enums
+namespace HealthCore.Api.Core.Domain.Enums
 {
     public enum UserRole
     {

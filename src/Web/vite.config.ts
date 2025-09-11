@@ -6,11 +6,22 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    port: 5005
+    port: 5005,
+    strictPort: true,
+    hmr: {
+      port: 5005
+    },
+    cors: true
   },
   preview: {
     host: '0.0.0.0',
-    port: 5005
+    port: 5005,
+    strictPort: true,
+    cors: true
+  },
+  optimizeDeps: {
+    force: true,
+    include: ['react', 'react-dom', 'react-router-dom', '@mui/material', '@mui/icons-material']
   },
   build: {
     // Generate hashed filenames for cache busting with timestamp

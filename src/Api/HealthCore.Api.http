@@ -1,0 +1,6 @@
+@MobileMed.Api_HostAddress = http://localhost:5210
+
+GET {{MobileMed.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,18 +1,18 @@
 using Microsoft.EntityFrameworkCore;
-using MobileMed.Api.Core.Application.DTOs;
-using MobileMed.Api.Core.Application.DTOs.Admin;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Core.Domain.Enums;
-using MobileMed.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Application.DTOs;
+using HealthCore.Api.Core.Application.DTOs.Admin;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Enums;
+using HealthCore.Api.Infrastructure.Data;
 
-namespace MobileMed.Api.Core.Application.Services
+namespace HealthCore.Api.Core.Application.Services
 {
     public class AdminService
     {
-        private readonly MobileMedDbContext _context;
+        private readonly HealthCoreDbContext _context;
         private readonly ILogger<AdminService> _logger;
 
-        public AdminService(MobileMedDbContext context, ILogger<AdminService> logger)
+        public AdminService(HealthCoreDbContext context, ILogger<AdminService> logger)
         {
             _context = context;
             _logger = logger;

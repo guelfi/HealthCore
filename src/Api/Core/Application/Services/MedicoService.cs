@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MobileMed.Api.Core.Application.DTOs;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Core.Domain.Enums;
-using MobileMed.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Application.DTOs;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Enums;
+using HealthCore.Api.Infrastructure.Data;
 
-namespace MobileMed.Api.Core.Application.Services
+namespace HealthCore.Api.Core.Application.Services
 {
-    public class MedicoService(MobileMedDbContext context, ILogger<MedicoService> logger)
+    public class MedicoService(HealthCoreDbContext context, ILogger<MedicoService> logger)
     {
-        private readonly MobileMedDbContext _context = context;
+        private readonly HealthCoreDbContext _context = context;
         private readonly ILogger<MedicoService> _logger = logger;
 
         public async Task<MedicoDto> CreateMedicoAsync(CreateMedicoDto createMedicoDto)

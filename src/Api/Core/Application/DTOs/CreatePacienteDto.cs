@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using MobileMed.Api.Core.Application.Validations;
+using HealthCore.Api.Core.Application.Validations;
 
-namespace MobileMed.Api.Core.Application.DTOs
+namespace HealthCore.Api.Core.Application.DTOs
 {
     public class CreatePacienteDto
     {

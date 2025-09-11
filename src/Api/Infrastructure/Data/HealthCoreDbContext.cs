@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using MobileMed.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Entities;
 
-namespace MobileMed.Api.Infrastructure.Data
+namespace HealthCore.Api.Infrastructure.Data
 {
-    public class MobileMedDbContext(DbContextOptions<MobileMedDbContext> options) : DbContext(options)
+    public class HealthCoreDbContext(DbContextOptions<HealthCoreDbContext> options) : DbContext(options)
     {
 
         public virtual DbSet<Paciente> Pacientes { get; set; } = null!;

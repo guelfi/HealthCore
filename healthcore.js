@@ -58,7 +58,7 @@ function colorize(text, color) {
 // Função para exibir cabeçalho
 function printHeader(title) {
   console.log('\n' + colorize('='.repeat(60), 'cyan'));
-  console.log(colorize(`   🏥 MobileMed Service Manager - ${title}`, 'cyan'));
+  console.log(colorize(`   🏥 HealthCore Service Manager - ${title}`, 'cyan'));
   console.log(colorize('='.repeat(60), 'cyan') + '\n');
 }
 
@@ -284,8 +284,8 @@ async function startServices() {
   // Informar que os serviços estão sendo iniciados em background
   console.log('');
   console.log(colorize('🚀 Serviços iniciados em segundo plano!', 'green'));
-  console.log(colorize('💡 Use "./mobilemed.sh status" para verificar o status dos serviços.', 'cyan'));
-  console.log(colorize('💡 Use "./mobilemed.sh stop" para parar os serviços.', 'cyan'));
+  console.log(colorize('💡 Use "./healthcore.sh status" para verificar o status dos serviços.', 'cyan'));
+  console.log(colorize('💡 Use "./healthcore.sh stop" para parar os serviços.', 'cyan'));
   console.log('');
   displayAccessURLs();
   console.log(colorize('⏳ Os serviços podem levar alguns segundos para inicializar completamente.', 'yellow'));
@@ -410,9 +410,9 @@ function showHelp() {
   console.log(colorize('  help', 'cyan') + '    - Exibir esta ajuda');
   console.log('');
   console.log(colorize('Exemplos:', 'bold'));
-  console.log('  node mobilemed.js start');
-  console.log('  ./mobilemed.sh status');
-  console.log('  mobilemed.bat stop');
+  console.log('  node healthcore.js start');
+  console.log('  ./healthcore.sh status');
+  console.log('  healthcore.bat stop');
   console.log('');
 }
 
