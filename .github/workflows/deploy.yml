@@ -123,7 +123,27 @@ jobs:
             echo '🔨 Fazendo build dos containers com cache otimizado...'
             export DOCKER_BUILDKIT=1
             export COMPOSE_DOCKER_CLI_BUILD=1
-            sudo -E docker compose build --parallel
+            export DOCKER_CLIENT_TIMEOUT=1200
+            export COMPOSE_HTTP_TIMEOUT=1200
+            
+            # Build com timeout e retry para frontend
+            echo '📦 Building API container...'
+            sudo -E timeout 600 docker compose build healthcore-api || {
+              echo '❌ Falha no build da API'
+              exit 1
+            }
+            
+            echo '🎨 Building Frontend container with extended timeout...'
+            sudo -E timeout 1200 docker compose build healthcore-frontend || {
+              echo '⚠️ Primeiro build do frontend falhou, tentando novamente com limpeza...'
+              sudo docker builder prune -f
+              sudo -E timeout 1800 docker compose build --no-cache healthcore-frontend || {
+                echo '❌ Build do frontend falhou após retry'
+                echo '📋 Verificando logs de build...'
+                sudo docker compose logs healthcore-frontend || true
+                exit 1
+              }
+            }
             
             echo '🚀 Iniciando containers...'
             sudo docker compose up -d --remove-orphans

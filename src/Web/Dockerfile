@@ -2,15 +2,19 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
+# Install build dependencies with timeout and retry
+RUN apk add --no-cache --timeout 300 python3 make g++ || \
+    (sleep 10 && apk add --no-cache --timeout 300 python3 make g++)
 
 # Copy package files first for better caching
 COPY src/Web/package*.json ./
 
-# Install dependencies with optimizations
-RUN npm ci --only=production --no-audit --no-fund && \
-    npm ci --only=development --no-audit --no-fund
+# Install dependencies with optimizations and timeout handling
+RUN npm config set fetch-timeout 600000 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm ci --only=production --no-audit --no-fund --timeout=600000 && \
+    npm ci --only=development --no-audit --no-fund --timeout=600000
 
 # Copy source code
 COPY src/Web/ .
@@ -19,10 +23,13 @@ COPY src/Web/ .
 ARG VITE_API_URL=http://localhost:5000
 ENV VITE_API_URL=$VITE_API_URL
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=2048 --max-semi-space-size=128"
+ENV VITE_BUILD_TIMEOUT=600000
 
-# Pre-build optimization
-RUN npm run build -- --mode production
+# Pre-build optimization with timeout and memory management
+RUN timeout 600 npm run build -- --mode production || \
+    (echo "Build timeout, retrying with reduced memory..." && \
+     NODE_OPTIONS="--max-old-space-size=1024" timeout 900 npm run build -- --mode production)
 
 # Production stage
 FROM nginx:alpine AS final

@@ -28,6 +28,9 @@ services:
     build:
       context: .
       dockerfile: src/Web/Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+      shm_size: 1gb
     container_name: healthcore-frontend
     restart: unless-stopped
     ports:
@@ -44,11 +47,13 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '1.0'
+          memory: 1G
         reservations:
-          cpus: '0.1'
-          memory: 64M
+          cpus: '0.2'
+          memory: 128M
+    environment:
+      - NODE_ENV=production
 
 volumes:
   healthcore_data:
