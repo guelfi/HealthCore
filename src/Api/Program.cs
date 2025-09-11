@@ -46,7 +46,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSwaggerGen(c =>
 {
     // Adicione esta linha:
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MobileMed API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "HealthCore API", Version = "v1" });
     // ... outras configurações ...
 });
 
