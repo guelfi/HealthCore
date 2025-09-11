@@ -67,8 +67,17 @@ jobs:
             echo '🧹 Limpando imagens não utilizadas...'
             docker image prune -f
             
+            # Forçar atualização do cache do navegador
+            echo '🔄 Forçando atualização do cache do navegador...'
+            chmod +x scripts/clear-browser-cache.sh
+            ./scripts/clear-browser-cache.sh
+            
             echo '✅ Deploy concluído com sucesso!'
-            echo '🌐 MobileMed disponível em:'
+            echo '🌐 HealthCore disponível em:'
             echo '   - API: http://129.153.86.168:5000/health'
             echo '   - Frontend: http://129.153.86.168:5005'
+            echo '💡 Se o cache ainda persistir, instrua os usuários a:'
+            echo '   - Pressionar Ctrl+F5 (Windows/Linux) ou Cmd+Shift+R (Mac)'
+            echo '   - Ou abrir em aba anônima/privada'
+            echo '   - Ou limpar cache do navegador manualmente'
           "
