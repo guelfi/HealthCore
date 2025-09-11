@@ -95,13 +95,13 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --no-verbose --tries=1 --timeout=8 --spider http://localhost:5000/health/live || exit 1
 
 # Security: Use explicit entrypoint (avoid shell form)
-ENTRYPOINT ["dotnet", "MobileMed.Api.dll"]
+ENTRYPOINT ["dotnet", "HealthCore.Api.dll"]
 
 # Metadata labels for better maintenance
-LABEL maintainer="MobileMed Team" \
+LABEL maintainer="HealthCore Team" \
       version="1.0.0" \
-      description="MobileMed API - Production optimized container" \
-      org.opencontainers.image.source="https://github.com/mobilemed/api" \
+      description="HealthCore API - Production optimized container" \
+      org.opencontainers.image.source="https://github.com/healthcore/api" \
       org.opencontainers.image.created="2024-01-01" \
-      org.opencontainers.image.title="MobileMed API" \
+      org.opencontainers.image.title="HealthCore API" \
       org.opencontainers.image.description="Secure containerized medical examination management API"
