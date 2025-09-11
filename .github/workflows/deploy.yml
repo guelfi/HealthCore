@@ -45,36 +45,50 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
             set -e
+
+            echo '🔧 Garantindo que as ferramentas lsof e docker compose estejam disponíveis...'
+            sudo apt-get update > /dev/null
+            sudo apt-get install -y lsof > /dev/null
+
             cd /var/www/DesafioTecnico
             
             echo '🚀 Iniciando deploy do MobileMed...'
             
             echo '🧹 Parando e removendo containers antigos e órfãos...'
-            docker-compose down --remove-orphans || true
+            sudo docker compose down --remove-orphans || true
             
             echo '🔓 Forçando a liberação das portas 5000 e 5005...'
-            sudo kill -9 $(sudo lsof -t -i:5000) || true
-            sudo kill -9 $(sudo lsof -t -i:5005) || true
+            PORT_5000_PID=$(sudo lsof -t -i:5000 || true)
+            if [ -n "$PORT_5000_PID" ]; then
+              echo "Matando processo $PORT_5000_PID na porta 5000..."
+              sudo kill -9 $PORT_5000_PID
+            fi
+
+            PORT_5005_PID=$(sudo lsof -t -i:5005 || true)
+            if [ -n "$PORT_5005_PID" ]; then
+              echo "Matando processo $PORT_5005_PID na porta 5005..."
+              sudo kill -9 $PORT_5005_PID
+            fi
             sleep 2
             
             echo '🔨 Fazendo build dos containers...'
-            docker-compose up --build -d
+            sudo docker compose up --build -d
             
             echo '⏳ Aguardando containers iniciarem...'
             sleep 15
             
             echo '📊 Verificando status dos containers...'
-            docker-compose ps
+            sudo docker compose ps
 
-            API_STATUS=$(docker-compose ps -q mobilemed-api | xargs -r docker inspect -f '{{.State.Status}}')
+            API_STATUS=$(sudo docker compose ps -q mobilemed-api | xargs -r docker inspect -f '{{.State.Status}}')
             if [ "$API_STATUS" != "running" ]; then
               echo '❌ ERRO: O container da API não iniciou corretamente. Verificando logs...'
-              docker-compose logs mobilemed-api
+              sudo docker compose logs mobilemed-api
               exit 1
             fi
             
             echo '🧹 Limpando imagens Docker não utilizadas...'
-            docker image prune -f
+            sudo docker image prune -f
             
             echo '✅ Deploy concluído com sucesso!'
             echo '🌐 HealthCore disponível em:'
