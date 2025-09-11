@@ -20,23 +20,49 @@ export default defineConfig({
     cors: true
   },
   optimizeDeps: {
-    force: true,
-    include: ['react', 'react-dom', 'react-router-dom', '@mui/material', '@mui/icons-material']
+    include: [
+      'react', 
+      'react-dom', 
+      'react-router-dom', 
+      '@mui/material', 
+      '@mui/icons-material',
+      '@mui/material/styles',
+      '@mui/material/Button',
+      '@mui/material/TextField',
+      '@mui/material/Dialog',
+      '@mui/material/DialogTitle',
+      '@mui/material/DialogContent',
+      '@mui/material/DialogActions',
+      '@mui/material/Table',
+      '@mui/material/TableBody',
+      '@mui/material/TableCell',
+      '@mui/material/TableContainer',
+      '@mui/material/TableHead',
+      '@mui/material/TableRow',
+      '@mui/material/Paper',
+      '@mui/material/Typography',
+      '@mui/material/Box',
+      '@mui/material/Container',
+      '@mui/material/Grid',
+      '@mui/material/Card',
+      '@mui/material/CardContent'
+    ],
+    entries: ['src/main.tsx']
   },
   build: {
-    // Generate hashed filenames for cache busting with timestamp
+    target: 'esnext',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
-        chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
-        assetFileNames: `assets/[name]-[hash]-${Date.now()}.[ext]`
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          mui: ['@mui/material', '@mui/icons-material'],
+          router: ['react-router-dom']
+        }
       }
     },
-    // Ensure source maps are generated for debugging
-    sourcemap: true,
-    // Optimize chunk size
+    sourcemap: false,
     chunkSizeWarningLimit: 1000,
-    // Force cache invalidation
-    assetsInlineLimit: 0
+    assetsInlineLimit: 4096
   }
 })

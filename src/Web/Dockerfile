@@ -2,11 +2,15 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# Copy package files
+# Install build dependencies
+RUN apk add --no-cache python3 make g++
+
+# Copy package files first for better caching
 COPY src/Web/package*.json ./
 
-# Install dependencies (including devDependencies for build)
-RUN npm ci
+# Install dependencies with optimizations
+RUN npm ci --only=production --no-audit --no-fund && \
+    npm ci --only=development --no-audit --no-fund
 
 # Copy source code
 COPY src/Web/ .
@@ -14,9 +18,11 @@ COPY src/Web/ .
 # Build arguments
 ARG VITE_API_URL=http://localhost:5000
 ENV VITE_API_URL=$VITE_API_URL
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# Build the application
-RUN npm run build
+# Pre-build optimization
+RUN npm run build -- --mode production
 
 # Production stage
 FROM nginx:alpine AS final
