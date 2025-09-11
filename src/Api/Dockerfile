@@ -28,11 +28,15 @@ COPY --from=publish /app/publish .
 # Copy database directory if exists
 COPY src/Api/database/ ./database/
 
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user and set permissions
 RUN adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app && \
     chmod -R 755 /app/log
 USER appuser
+
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
