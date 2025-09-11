@@ -48,7 +48,7 @@ EXPOSE 5000
 # Set environment variables
 ENV ASPNETCORE_URLS=http://+:5000
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ConnectionStrings__DefaultConnection="Data Source=database/mobilemed.db"
+ENV ConnectionStrings__DefaultConnection="Data Source=database/healthcore.db"
 
 # Start the application
 ENTRYPOINT ["dotnet", "HealthCore.Api.dll"]
