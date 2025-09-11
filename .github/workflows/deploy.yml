@@ -44,40 +44,40 @@ jobs:
       - name: Deploy and build on OCI
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
+            set -e
             cd /var/www/DesafioTecnico
             
             echo '🚀 Iniciando deploy do MobileMed...'
             
-            # Parar containers existentes
-            docker-compose down || true
+            echo '🧹 Parando e removendo containers antigos e órfãos...'
+            docker-compose down --remove-orphans || true
             
-            # Build e start dos containers
+            echo '🔓 Forçando a liberação das portas 5000 e 5005...'
+            sudo kill -9 $(sudo lsof -t -i:5000) || true
+            sudo kill -9 $(sudo lsof -t -i:5005) || true
+            sleep 2
+            
             echo '🔨 Fazendo build dos containers...'
             docker-compose up --build -d
             
-            # Aguardar containers iniciarem
             echo '⏳ Aguardando containers iniciarem...'
-            sleep 10
+            sleep 15
             
-            # Verificar status dos containers
-            echo '📊 Status dos containers:'
+            echo '📊 Verificando status dos containers...'
             docker-compose ps
+
+            API_STATUS=$(docker-compose ps -q mobilemed-api | xargs -r docker inspect -f '{{.State.Status}}')
+            if [ "$API_STATUS" != "running" ]; then
+              echo '❌ ERRO: O container da API não iniciou corretamente. Verificando logs...'
+              docker-compose logs mobilemed-api
+              exit 1
+            fi
             
-            # Limpeza de imagens não utilizadas
-            echo '🧹 Limpando imagens não utilizadas...'
+            echo '🧹 Limpando imagens Docker não utilizadas...'
             docker image prune -f
-            
-            # Forçar atualização do cache do navegador
-            echo '🔄 Forçando atualização do cache do navegador...'
-            chmod +x scripts/clear-browser-cache.sh
-            ./scripts/clear-browser-cache.sh
             
             echo '✅ Deploy concluído com sucesso!'
             echo '🌐 HealthCore disponível em:'
             echo '   - API: http://129.153.86.168:5000/health'
             echo '   - Frontend: http://129.153.86.168:5005'
-            echo '💡 Se o cache ainda persistir, instrua os usuários a:'
-            echo '   - Pressionar Ctrl+F5 (Windows/Linux) ou Cmd+Shift+R (Mac)'
-            echo '   - Ou abrir em aba anônima/privada'
-            echo '   - Ou limpar cache do navegador manualmente'
           "
