@@ -46,36 +46,27 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
             set -e
 
-            echo '🔧 Garantindo que as ferramentas lsof e docker compose estejam disponíveis...'
-            sudo apt-get update > /dev/null
-            sudo apt-get install -y lsof > /dev/null
+            echo '🔧 Verificando/Instalando Docker e Docker Compose via script oficial...'
+            if ! command -v docker &> /dev/null || ! docker compose version &> /dev/null;
+            then
+              echo 'Docker ou Docker Compose não funciona corretamente. Instalando a versão mais recente...'
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sudo sh get-docker.sh
+              sudo usermod -aG docker ubuntu
+            fi
 
             cd /var/www/DesafioTecnico
             
             echo '🚀 Iniciando deploy do MobileMed...'
             
-            echo '🧹 Parando e removendo containers antigos e órfãos...'
+            echo '🧹 Parando e removendo containers antigos...'
             sudo docker compose down --remove-orphans || true
             
-            echo '🔓 Forçando a liberação das portas 5000 e 5005...'
-            PORT_5000_PID=$(sudo lsof -t -i:5000 || true)
-            if [ -n "$PORT_5000_PID" ]; then
-              echo "Matando processo $PORT_5000_PID na porta 5000..."
-              sudo kill -9 $PORT_5000_PID
-            fi
-
-            PORT_5005_PID=$(sudo lsof -t -i:5005 || true)
-            if [ -n "$PORT_5005_PID" ]; then
-              echo "Matando processo $PORT_5005_PID na porta 5005..."
-              sudo kill -9 $PORT_5005_PID
-            fi
-            sleep 2
-            
-            echo '🔨 Fazendo build dos containers...'
+            echo '🔨 Fazendo build e iniciando containers...'
             sudo docker compose up --build -d
             
             echo '⏳ Aguardando containers iniciarem...'
-            sleep 15
+            sleep 20
             
             echo '📊 Verificando status dos containers...'
             sudo docker compose ps
@@ -91,7 +82,4 @@ jobs:
             sudo docker image prune -f
             
             echo '✅ Deploy concluído com sucesso!'
-            echo '🌐 HealthCore disponível em:'
-            echo '   - API: http://129.153.86.168:5000/health'
-            echo '   - Frontend: http://129.153.86.168:5005'
           "
