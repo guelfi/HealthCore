@@ -1,5 +1,5 @@
 # =============================================================================
-# Multi-stage Dockerfile for MobileMed API - Production Optimized
+# Multi-stage Dockerfile for HealthCore API - Production Optimized
 # Security-hardened with non-root user and minimal attack surface
 # =============================================================================
 
@@ -11,9 +11,8 @@ WORKDIR /src
 RUN apk add --no-cache ca-certificates
 
 # Copy project files for dependency restoration (layer caching optimization)
-COPY ["src/Api/MobileMed.Api.csproj", "Api/"]
-RUN dotnet restore "Api/MobileMed.Api.csproj" \
-    --runtime linux-musl-x64 \
+COPY ["src/Api/HealthCore.Api.csproj", "Api/"]
+RUN dotnet restore "Api/HealthCore.Api.csproj" \
     --no-cache
 
 # Copy source code
@@ -21,15 +20,9 @@ COPY src/Api/ Api/
 WORKDIR "/src/Api"
 
 # Build and publish the application with optimizations
-RUN dotnet publish "MobileMed.Api.csproj" \
+RUN dotnet publish "HealthCore.Api.csproj" \
     -c Release \
-    -o /app/publish \
-    --runtime linux-musl-x64 \
-    --self-contained false \
-    --no-restore \
-    /p:PublishReadyToRun=true \
-    /p:PublishSingleFile=false \
-    /p:PublishTrimmed=false
+    -o /app/publish
 
 # Remove unnecessary files to reduce image size
 RUN find /app/publish -name "*.pdb" -delete && \
