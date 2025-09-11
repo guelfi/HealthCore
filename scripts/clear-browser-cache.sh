@@ -2,21 +2,33 @@
 
 # Script para forçar atualização do cache do navegador após deploy
 
-echo "🔄 Forçando atualização do cache do navegador..."
+echo "🔄 Forçando atualização completa do cache..."
 
-# Adicionar timestamp ao index.html para forçar reload
-TIMESTAMP=$(date +%s)
-echo "<!-- Cache Buster: $TIMESTAMP -->" >> /var/www/DesafioTecnico/src/Web/dist/index.html
+# Parar todos os containers
+echo "🛑 Parando containers..."
+docker-compose down 2>/dev/null || true
 
-# Reiniciar nginx para aplicar novas configurações
-echo "🔄 Reiniciando nginx..."
-sudo systemctl reload nginx || docker-compose restart nginx
+# Remover imagens antigas para forçar rebuild
+echo "🗑️  Removendo imagens antigas..."
+docker image prune -af 2>/dev/null || true
 
-# Limpar cache do Docker se necessário
-echo "🧹 Limpando cache do Docker..."
-docker system prune -f
+# Rebuild completo sem cache
+echo "🔨 Reconstruindo containers sem cache..."
+docker-compose build --no-cache --pull 2>/dev/null || true
 
-echo "✅ Cache do navegador foi forçado a atualizar!"
+# Iniciar containers
+echo "🚀 Iniciando containers..."
+docker-compose up -d 2>/dev/null || true
+
+# Aguardar containers iniciarem
+echo "⏳ Aguardando containers iniciarem..."
+sleep 15
+
+# Verificar status
+echo "📊 Status dos containers:"
+docker-compose ps 2>/dev/null || true
+
+echo "✅ Cache foi completamente limpo e containers reconstruídos!"
 echo "💡 Dicas para os usuários:"
 echo "   - Pressione Ctrl+F5 (ou Cmd+Shift+R no Mac) para forçar reload"
 echo "   - Ou abra o site em uma aba anônima/privada"
