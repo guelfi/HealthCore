@@ -556,12 +556,45 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: { xs: 320, sm: 280 },
-              boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
-              borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
+              boxShadow: '0 4px 20px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
+              border: '1px solid rgba(226, 232, 240, 0.6)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '4px',
+                height: '100%',
+                background: 'linear-gradient(180deg, #2563eb 0%, #3b82f6 100%)',
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: -30,
+                right: -30,
+                width: '80px',
+                height: '80px',
+                background: 'radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%)',
+                borderRadius: '50%',
+                transition: 'all 0.4s ease',
+              },
               '&:hover': {
-                transform: 'translateY(-3px)',
-                boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
+                transform: 'translateY(-6px) scale(1.02)',
+                boxShadow: '0 12px 40px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                '&::before': {
+                  opacity: 1,
+                },
+                '&::after': {
+                  transform: 'scale(1.2)',
+                  opacity: 0.8,
+                },
               },
             }}
           >
@@ -661,9 +694,9 @@ const AdminDashboard: React.FC = () => {
                         mb: 0.2,
                         p: 0.6,
                         borderRadius: 2,
-                        bgcolor: 'grey.50',
+                        bgcolor: 'primary.50',
                         transition: 'all 0.2s ease',
-                        '&:hover': { bgcolor: 'primary.50' },
+                        '&:hover': { bgcolor: 'primary.100' },
                       }}
                     >
                       <Box
@@ -715,12 +748,45 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: 280,
-              boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
-              borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
+              boxShadow: '0 4px 20px rgba(5, 150, 105, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #ecfdf5 100%)',
+              border: '1px solid rgba(34, 197, 94, 0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '4px',
+                height: '100%',
+                background: 'linear-gradient(180deg, #059669 0%, #22c55e 100%)',
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: -30,
+                right: -30,
+                width: '80px',
+                height: '80px',
+                background: 'radial-gradient(circle, rgba(5, 150, 105, 0.05) 0%, transparent 70%)',
+                borderRadius: '50%',
+                transition: 'all 0.4s ease',
+              },
               '&:hover': {
-                transform: 'translateY(-3px)',
-                boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
+                transform: 'translateY(-6px) scale(1.02)',
+                boxShadow: '0 12px 40px rgba(5, 150, 105, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                '&::before': {
+                  opacity: 1,
+                },
+                '&::after': {
+                  transform: 'scale(1.2)',
+                  opacity: 0.8,
+                },
               },
             }}
           >
@@ -752,9 +818,9 @@ const AdminDashboard: React.FC = () => {
                       mb: 0.2,
                       p: 0.6,
                       borderRadius: 2,
-                      bgcolor: 'grey.50',
+                      bgcolor: 'secondary.50',
                       transition: 'all 0.2s ease',
-                      '&:hover': { bgcolor: 'secondary.50' },
+                      '&:hover': { bgcolor: 'secondary.100' },
                     }}
                   >
                     <Typography
@@ -814,12 +880,45 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: 280,
-              boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
-              borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
+              boxShadow: '0 4px 20px rgba(245, 158, 11, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 50%, #fef3c7 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '4px',
+                height: '100%',
+                background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%)',
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: -30,
+                right: -30,
+                width: '80px',
+                height: '80px',
+                background: 'radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 70%)',
+                borderRadius: '50%',
+                transition: 'all 0.4s ease',
+              },
               '&:hover': {
-                transform: 'translateY(-3px)',
-                boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
+                transform: 'translateY(-6px) scale(1.02)',
+                boxShadow: '0 12px 40px rgba(245, 158, 11, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                '&::before': {
+                  opacity: 1,
+                },
+                '&::after': {
+                  transform: 'scale(1.2)',
+                  opacity: 0.8,
+                },
               },
             }}
           >
@@ -849,9 +948,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'warning.50',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.50' },
+                    '&:hover': { bgcolor: 'warning.100' },
                   }}
                 >
                   <Typography
@@ -878,9 +977,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'warning.50',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.50' },
+                    '&:hover': { bgcolor: 'warning.100' },
                   }}
                 >
                   <Typography
@@ -907,9 +1006,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'warning.50',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.50' },
+                    '&:hover': { bgcolor: 'warning.100' },
                   }}
                 >
                   <Typography
@@ -936,9 +1035,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'warning.50',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.50' },
+                    '&:hover': { bgcolor: 'warning.100' },
                   }}
                 >
                   <Typography
@@ -965,9 +1064,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'warning.50',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.50' },
+                    '&:hover': { bgcolor: 'warning.100' },
                   }}
                 >
                   <Typography

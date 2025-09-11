@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from './infrastructure/utils/theme';
+import { healthCoreTheme } from './styles/healthcore-theme';
 import { useAuthStore } from './application/stores/authStore';
 import { UserProfile } from './domain/enums/UserProfile';
 
@@ -41,7 +41,7 @@ const App: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={healthCoreTheme}>
       <CssBaseline />
       <NetworkErrorBoundary>
         <Router>
