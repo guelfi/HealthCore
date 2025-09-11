@@ -43,11 +43,10 @@ jobs:
 
       - name: Deploy and build on OCI
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} << 'EOF'
             set -e
 
-            if ! command -v docker &> /dev/null || ! docker compose version &> /dev/null;
-            then
+            if ! command -v docker &> /dev/null || ! docker compose version &> /dev/null; then
               echo '🔧 Docker ou Docker Compose não funciona. Realizando instalação limpa...'
               # Remove qualquer configuração de repositório Docker conflitante
               sudo rm -f /etc/apt/sources.list.d/docker.list
@@ -97,4 +96,4 @@ jobs:
             sudo docker image prune -f
             
             echo '✅ Deploy concluído com sucesso!'
-          
+          EOF
