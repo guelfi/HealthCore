@@ -1,6 +1,6 @@
-using MobileMed.Api.Core.Domain.Enums;
+using HealthCore.Api.Core.Domain.Enums;
 
-namespace MobileMed.Api.Core.Domain.Entities
+namespace HealthCore.Api.Core.Domain.Entities
 {
     public class Exame
     {

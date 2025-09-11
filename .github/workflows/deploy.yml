@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy MobileMed to OCI
+    name: Deploy HealthCore to OCI
     runs-on: ubuntu-latest
 
     steps:
@@ -71,7 +71,7 @@ jobs:
 
             cd /var/www/DesafioTecnico
             
-            echo '🚀 Iniciando deploy do MobileMed...'
+            echo '🚀 Iniciando deploy do HealthCore...'
             
             echo '🧹 Limpeza completa de containers e portas...'
             
@@ -86,8 +86,8 @@ jobs:
             sleep 3
             
             # Parar e remover containers específicos
-            sudo docker stop mobilemed-api mobilemed-frontend 2>/dev/null || true
-            sudo docker rm mobilemed-api mobilemed-frontend 2>/dev/null || true
+            sudo docker stop healthcore-api healthcore-frontend 2>/dev/null || true
+            sudo docker rm healthcore-api healthcore-frontend 2>/dev/null || true
             
             # Limpeza completa com Docker Compose
             sudo docker compose down --remove-orphans --volumes || true
@@ -98,7 +98,8 @@ jobs:
             
             # Verificar se as portas estão livres
             echo 'Verificando se as portas estão livres...'
-            if sudo netstat -tulpn | grep -E '(:5000|:5005)' >/dev/null 2>&1; then
+            if sudo netstat -tulpn | grep -E '(:5000|:5005)' >/dev/null 2>&1;
+            then
               echo 'AVISO: Ainda existem processos usando as portas. Forçando limpeza...'
               sudo fuser -k 5000/tcp 2>/dev/null || true
               sudo fuser -k 5005/tcp 2>/dev/null || true
@@ -124,14 +125,15 @@ jobs:
             
             # Verificar API com retry
             for i in {1..10}; do
-              if curl -f -s http://localhost:5000/health >/dev/null 2>&1; then
+              if curl -f -s http://localhost:5000/health >/dev/null 2>&1;
+              then
                 echo '✅ API está respondendo'
                 break
               fi
               if [ $i -eq 10 ]; then
                 echo '❌ API não responde após 10 tentativas'
                 echo '📋 Logs da API:'
-                sudo docker compose logs --tail=20 mobilemed-api
+                sudo docker compose logs --tail=20 healthcore-api
                 exit 1
               fi
               echo "⏳ Aguardando API... (tentativa $i/10)"
@@ -140,14 +142,15 @@ jobs:
             
             # Verificar Frontend
             for i in {1..5}; do
-              if curl -f -s http://localhost:5005 >/dev/null 2>&1; then
+              if curl -f -s http://localhost:5005 >/dev/null 2>&1;
+              then
                 echo '✅ Frontend está acessível'
                 break
               fi
               if [ $i -eq 5 ]; then
                 echo '❌ Frontend não responde após 5 tentativas'
                 echo '📋 Logs do Frontend:'
-                sudo docker compose logs --tail=20 mobilemed-frontend
+                sudo docker compose logs --tail=20 healthcore-frontend
                 exit 1
               fi
               echo "⏳ Aguardando Frontend... (tentativa $i/5)"

@@ -1,7 +1,7 @@
 
 using System;
 
-namespace MobileMed.Api.Core.Application.DTOs
+namespace HealthCore.Api.Core.Application.DTOs
 {
     public class PacienteDto
     {

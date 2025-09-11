@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MobileMed.Api.Core.Domain.Entities
+namespace HealthCore.Api.Core.Domain.Entities
 {
     public class Medico
     {

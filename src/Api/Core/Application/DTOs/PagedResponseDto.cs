@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MobileMed.Api.Core.Application.DTOs
+namespace HealthCore.Api.Core.Application.DTOs
 {
     public class PagedResponseDto<T>
     {

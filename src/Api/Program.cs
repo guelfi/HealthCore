@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using MobileMed.Api.Core.Application.DTOs;
-using MobileMed.Api.Core.Application.DTOs.Auth;
-using MobileMed.Api.Core.Application.DTOs.Admin;
-using MobileMed.Api.Core.Application.Services;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Core.Domain.Enums;
-using MobileMed.Api.Infrastructure.Data;
-using MobileMed.Api.Infrastructure.Middleware;
+using HealthCore.Api.Core.Application.DTOs;
+using HealthCore.Api.Core.Application.DTOs.Auth;
+using HealthCore.Api.Core.Application.DTOs.Admin;
+using HealthCore.Api.Core.Application.Services;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Enums;
+using HealthCore.Api.Infrastructure.Data;
+using HealthCore.Api.Infrastructure.Middleware;
 using Serilog;
 using Serilog.Formatting.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,7 +23,7 @@ using Microsoft.OpenApi.Models;
 var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
 Log.Logger = new LoggerConfiguration()
-    .Enrich.WithProperty("Application", "MobileMed.Api")
+    .Enrich.WithProperty("Application", "HealthCore.Api")
     .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production")
     .Enrich.WithEnvironmentName()
     .WriteTo.Console()
@@ -40,6 +40,9 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Add Memory Cache
 builder.Services.AddMemoryCache();
+
+// Register Health Check services
+builder.Services.AddScoped<HealthCore.Api.Infrastructure.HealthChecks.DatabasePerformanceHealthCheck>();
 
 // Rate limiting removed - package not available
 //builder.Services.AddSwaggerGen();
@@ -58,7 +61,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
 
 // Add Health Checks
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<MobileMedDbContext>(
+    .AddDbContextCheck<HealthCoreDbContext>(
         "database",
         failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
         tags: new[] { "db", "sql", "ready" })
@@ -114,34 +117,9 @@ builder.Services.AddHealthChecks()
         return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
             $"Memory usage normal: Working Set {workingSetMB} MB, GC {gcMB} MB");
     }, tags: new[] { "memory", "live" })
-    .AddCheck("database-performance", () =>
-    {
-        try
-        {
-            using var scope = builder.Services.BuildServiceProvider().CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<MobileMedDbContext>();
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            
-            context.Database.ExecuteSqlRaw("SELECT 1");
-            stopwatch.Stop();
-            
-            var maxResponseTimeMs = builder.Configuration.GetValue<int>("HealthChecks:DatabaseTimeoutSeconds", 5) * 1000;
-            
-            if (stopwatch.ElapsedMilliseconds > maxResponseTimeMs)
-            {
-                return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
-                    $"Database response slow: {stopwatch.ElapsedMilliseconds}ms");
-            }
-            
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
-                $"Database responsive: {stopwatch.ElapsedMilliseconds}ms");
-        }
-        catch (Exception ex)
-        {
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy(
-                "Database performance check failed", ex);
-        }
-    }, tags: new[] { "db", "performance", "ready" })
+    .AddCheck<HealthCore.Api.Infrastructure.HealthChecks.DatabasePerformanceHealthCheck>(
+        "database-performance", 
+        tags: new[] { "db", "performance", "ready" })
     .AddCheck("application-startup", () =>
     {
         var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
@@ -157,7 +135,7 @@ builder.Services.AddHealthChecks()
     }, tags: new[] { "startup", "live" });
 
 // Add Entity Framework
-builder.Services.AddDbContext<MobileMedDbContext>(options =>
+builder.Services.AddDbContext<HealthCoreDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register application services
@@ -461,7 +439,7 @@ app.MapGet("/pacientes", async (PacienteService pacienteService, HttpContext con
         {
             // Buscar o ID do médico baseado no UserId
             using var scope = context.RequestServices.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<MobileMedDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<HealthCoreDbContext>();
             
             var medico = await dbContext.Medicos
                 .FirstOrDefaultAsync(m => m.UserId == Guid.Parse(userId));
@@ -547,7 +525,7 @@ app.MapGet("/pacientes/search", async (PacienteService pacienteService, HttpCont
         if (userRole == UserRole.Medico.ToString() && !string.IsNullOrEmpty(userId))
         {
             using var scope = context.RequestServices.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<MobileMedDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<HealthCoreDbContext>();
             
             var medico = await dbContext.Medicos
                 .FirstOrDefaultAsync(m => m.UserId == Guid.Parse(userId));
@@ -597,7 +575,7 @@ app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameS
     }
 });
 
-app.MapGet("/exames", async (HttpContext context, ExameService exameService, MobileMedDbContext dbContext, int page = 1, int pageSize = 10, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null, ILogger<Program> logger = null!) =>
+app.MapGet("/exames", async (HttpContext context, ExameService exameService, HealthCoreDbContext dbContext, int page = 1, int pageSize = 10, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null, ILogger<Program> logger = null!) =>
 {
     try
     {
@@ -705,7 +683,7 @@ app.MapGet("/exames/modalidades", (ILogger<Program> logger, IMemoryCache cache) 
     }
     
     logger.LogInformation("Listando modalidades de exames disponíveis");
-    var modalidades = Enum.GetValues<MobileMed.Api.Core.Domain.Enums.ModalidadeExame>()
+    var modalidades = Enum.GetValues<HealthCore.Api.Core.Domain.Enums.ModalidadeExame>()
         .Select(m => new { 
             Value = m.ToString(), 
             Description = GetModalidadeDescription(m) 
@@ -771,21 +749,21 @@ app.MapGet("/exames/statistics/periodo", async (ExameService exameService, ILogg
     }
 }).RequireAuthorization();
 
-static string GetModalidadeDescription(MobileMed.Api.Core.Domain.Enums.ModalidadeExame modalidade)
+static string GetModalidadeDescription(HealthCore.Api.Core.Domain.Enums.ModalidadeExame modalidade)
 {
     return modalidade switch
     {
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.CR => "Computed Radiography",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.CT => "Computed Tomography",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.DX => "Digital Radiography",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.MG => "Mammography",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.MR => "Magnetic Resonance",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.NM => "Nuclear Medicine",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.OT => "Other",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.PT => "Positron Emission Tomography (PET)",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.RF => "Radio Fluoroscopy",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.US => "Ultrasound",
-        MobileMed.Api.Core.Domain.Enums.ModalidadeExame.XA => "X-Ray Angiography",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.CR => "Computed Radiography",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.CT => "Computed Tomography",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.DX => "Digital Radiography",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.MG => "Mammography",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.MR => "Magnetic Resonance",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.NM => "Nuclear Medicine",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.OT => "Other",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.PT => "Positron Emission Tomography (PET)",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.RF => "Radio Fluoroscopy",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.US => "Ultrasound",
+        HealthCore.Api.Core.Domain.Enums.ModalidadeExame.XA => "X-Ray Angiography",
         _ => modalidade.ToString()
     };
 }
@@ -1310,7 +1288,7 @@ app.MapDelete("/medicos/{id:guid}", async (Guid id, MedicoService medicoService,
 }).RequireAuthorization();
 
 // Endpoint temporário para debug de médicos
-app.MapGet("/debug/medicos-usuarios", async (MobileMedDbContext context, ILogger<Program> logger) =>
+app.MapGet("/debug/medicos-usuarios", async (HealthCoreDbContext context, ILogger<Program> logger) =>
 {
     logger.LogInformation("Executando debug de médicos e usuários");
     
@@ -1434,7 +1412,7 @@ app.MapGet("/temp/gerar-hash-senha", () =>
 });
 
 // ENDPOINT TEMPORÁRIO - Criar usuário admin
-app.MapPost("/temp/criar-admin", async (MobileMedDbContext context, ILogger<Program> logger) =>
+app.MapPost("/temp/criar-admin", async (HealthCoreDbContext context, ILogger<Program> logger) =>
 {
     try
     {

@@ -1,4 +1,4 @@
-namespace MobileMed.Api.Core.Application.DTOs.Auth
+namespace HealthCore.Api.Core.Application.DTOs.Auth
 {
     public class RefreshTokenRequestDto
     {

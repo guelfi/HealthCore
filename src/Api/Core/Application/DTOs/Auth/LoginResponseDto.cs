@@ -1,6 +1,6 @@
-using MobileMed.Api.Core.Domain.Enums;
+using HealthCore.Api.Core.Domain.Enums;
 
-namespace MobileMed.Api.Core.Application.DTOs.Auth
+namespace HealthCore.Api.Core.Application.DTOs.Auth
 {
     public class LoginResponseDto
     {

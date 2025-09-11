@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace MobileMed.Api.Core.Application.Validations
+namespace HealthCore.Api.Core.Application.Validations
 {
     public class CpfValidationAttribute : ValidationAttribute
     {

@@ -1,4 +1,4 @@
-namespace MobileMed.Api.Infrastructure.Middleware
+namespace HealthCore.Api.Infrastructure.Middleware
 {
     public class SecurityHeadersMiddleware
     {

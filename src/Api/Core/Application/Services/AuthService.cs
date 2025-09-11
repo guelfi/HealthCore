@@ -4,20 +4,20 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using MobileMed.Api.Core.Application.DTOs.Auth;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Core.Domain.Enums;
-using MobileMed.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Application.DTOs.Auth;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Enums;
+using HealthCore.Api.Infrastructure.Data;
 
-namespace MobileMed.Api.Core.Application.Services
+namespace HealthCore.Api.Core.Application.Services
 {
     public class AuthService
     {
-        private readonly MobileMedDbContext _context;
+        private readonly HealthCoreDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(MobileMedDbContext context, IConfiguration configuration, ILogger<AuthService> logger)
+        public AuthService(HealthCoreDbContext context, IConfiguration configuration, ILogger<AuthService> logger)
         {
             _context = context;
             _configuration = configuration;
