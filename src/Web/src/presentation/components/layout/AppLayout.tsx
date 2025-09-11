@@ -160,20 +160,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </IconButton>
           )}
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            MobileMed
+            HealthCore
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'white',
-                fontWeight: 600,
-                display: { xs: 'none', sm: 'block' },
-              }}
-            >
-              {user?.username}
-            </Typography>
             <IconButton onClick={handleUserMenuClick} color="inherit">
               <Avatar
                 sx={{

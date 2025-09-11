@@ -11,14 +11,13 @@ using Serilog;
 using Serilog.Formatting.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Diagnostics;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.OpenApi.Models;
-using System.Threading.RateLimiting;
 
 // Configurar o Serilog
 var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
@@ -26,14 +25,12 @@ var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", "MobileMed.Api")
     .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production")
-    .Enrich.WithMachineName()
-    .Enrich.WithThreadId()
-    .WriteTo.Console(isDevelopment ? null : new JsonFormatter())
+    .Enrich.WithEnvironmentName()
+    .WriteTo.Console()
     .WriteTo.File(
         path: "../log/mobilemed-.log", 
         rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 7,
-        formatter: isDevelopment ? null : new JsonFormatter())
+        retainedFileCountLimit: 7)
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,29 +41,7 @@ builder.Services.AddEndpointsApiExplorer();
 // Add Memory Cache
 builder.Services.AddMemoryCache();
 
-// Add Rate Limiting
-builder.Services.AddRateLimiter(options =>
-{
-    // Global rate limiting
-    options.AddFixedWindowLimiter("GlobalLimit", opt =>
-    {
-        opt.PermitLimit = builder.Configuration.GetValue<int>("RateLimiting:Global:PermitLimit", 100);
-        opt.Window = TimeSpan.FromMinutes(builder.Configuration.GetValue<int>("RateLimiting:Global:WindowMinutes", 1));
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = builder.Configuration.GetValue<int>("RateLimiting:Global:QueueLimit", 10);
-    });
-    
-    // Authentication endpoints rate limiting (more restrictive)
-    options.AddFixedWindowLimiter("AuthLimit", opt =>
-    {
-        opt.PermitLimit = builder.Configuration.GetValue<int>("RateLimiting:Auth:PermitLimit", 10);
-        opt.Window = TimeSpan.FromMinutes(builder.Configuration.GetValue<int>("RateLimiting:Auth:WindowMinutes", 5));
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = builder.Configuration.GetValue<int>("RateLimiting:Auth:QueueLimit", 2);
-    });
-    
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-});
+// Rate limiting removed - package not available
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -139,7 +114,7 @@ builder.Services.AddHealthChecks()
         return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
             $"Memory usage normal: Working Set {workingSetMB} MB, GC {gcMB} MB");
     }, tags: new[] { "memory", "live" })
-    .AddCheck("database-performance", async () =>
+    .AddCheck("database-performance", () =>
     {
         try
         {
@@ -147,7 +122,7 @@ builder.Services.AddHealthChecks()
             var context = scope.ServiceProvider.GetRequiredService<MobileMedDbContext>();
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
-            await context.Database.ExecuteSqlRawAsync("SELECT 1");
+            context.Database.ExecuteSqlRaw("SELECT 1");
             stopwatch.Stop();
             
             var maxResponseTimeMs = builder.Configuration.GetValue<int>("HealthChecks:DatabaseTimeoutSeconds", 5) * 1000;
@@ -314,8 +289,7 @@ if (enableSecurityHeaders)
     app.UseSecurityHeaders();
 }
 
-// Enable Rate Limiting globally
-app.UseRateLimiter();
+// Rate limiting removed - package not available
 
 // Use CORS
 if (app.Environment.IsDevelopment())
@@ -1457,6 +1431,50 @@ app.MapGet("/temp/gerar-hash-senha", () =>
         sqlCommand = $"UPDATE Users SET PasswordHash = '{hash}' WHERE Role = 2;",
         verificacao = BCrypt.Net.BCrypt.Verify(senha, hash)
     });
+});
+
+// ENDPOINT TEMPORÁRIO - Criar usuário admin
+app.MapPost("/temp/criar-admin", async (MobileMedDbContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        // Verificar se já existe um admin
+        var adminExistente = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+        if (adminExistente != null)
+        {
+            return Results.Conflict(new { Message = "Usuário admin já existe" });
+        }
+
+        var admin = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = "admin",
+            Role = UserRole.Administrador,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        
+        admin.SetPassword("@246!588");
+        
+        context.Users.Add(admin);
+        await context.SaveChangesAsync();
+        
+        logger.LogInformation("Usuário admin criado com sucesso: {Id}", admin.Id);
+        
+        return Results.Ok(new
+        {
+            Message = "Usuário admin criado com sucesso",
+            Id = admin.Id,
+            Username = admin.Username,
+            Role = admin.Role,
+            PasswordHashLength = admin.PasswordHash.Length
+        });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao criar usuário admin");
+        return Results.Problem("Erro ao criar usuário admin");
+    }
 });
 
 app.Run();

@@ -48,16 +48,18 @@ namespace MobileMed.Api.Core.Application.Services
 
         public async Task<PagedResponseDto<PacienteDto>> GetPacientesAsync(int page, int pageSize, Guid? medicoId = null)
         {
-            // Criar query base com ordem consistente para paginação
+            // Criar query base
             var query = _context.Pacientes
-                .AsNoTracking()
-                .OrderBy(p => p.Nome);
+                .AsNoTracking();
             
             // Filtrar por médico se especificado
             if (medicoId.HasValue)
             {
                 query = query.Where(p => p.MedicoId == medicoId.Value);
             }
+            
+            // Aplicar ordenação após filtros
+            query = query.OrderBy(p => p.Nome);
             
             // Calcular o total de pacientes (com filtro aplicado)
             var total = await query.CountAsync();

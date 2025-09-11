@@ -47,7 +47,7 @@ const Footer: React.FC<FooterProps> = ({ compact = false }) => {
                 fontSize: '0.8rem',
               }}
             >
-              MobileMed
+              HealthCore
             </Typography>
           </Box>
 
@@ -111,7 +111,7 @@ const Footer: React.FC<FooterProps> = ({ compact = false }) => {
                 fontSize: '0.95rem',
               }}
             >
-              MobileMed
+              HealthCore
             </Typography>
           </Box>
 
@@ -155,7 +155,7 @@ const Footer: React.FC<FooterProps> = ({ compact = false }) => {
               color="text.secondary"
               sx={{ fontSize: '0.8rem' }}
             >
-              {currentYear} MobileMed
+              {currentYear} HealthCore
             </Typography>
           </Box>
         </Box>

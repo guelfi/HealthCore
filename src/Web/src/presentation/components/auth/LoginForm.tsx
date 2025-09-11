@@ -68,7 +68,7 @@ const LoginForm: React.FC = () => {
           <Box textAlign="center" mb={3}>
             <img
               src="/logo.svg"
-              alt="MobileMed Logo"
+              alt="HealthCore Logo"
               style={{ maxWidth: '200px', marginBottom: '1rem' }}
             />
             <Typography variant="body1" color="text.secondary">
