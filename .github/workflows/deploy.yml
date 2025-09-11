@@ -73,7 +73,18 @@ jobs:
             
             echo '🚀 Iniciando deploy do MobileMed...'
             
-            echo '🧹 Limpeza completa de containers...'
+            echo '🧹 Limpeza completa de containers e portas...'
+            
+            # Liberar portas ocupadas por processos externos
+            echo 'Liberando portas 5000 e 5005...'
+            sudo pkill -f 'dotnet.*5000' || true
+            sudo pkill -f 'aspnetcore.*5000' || true
+            sudo pkill -f ':5000' || true
+            sudo pkill -f ':5005' || true
+            
+            # Aguardar liberação das portas
+            sleep 3
+            
             # Parar e remover containers específicos
             sudo docker stop mobilemed-api mobilemed-frontend 2>/dev/null || true
             sudo docker rm mobilemed-api mobilemed-frontend 2>/dev/null || true
@@ -84,6 +95,15 @@ jobs:
             # Remover containers órfãos
             sudo docker container prune -f || true
             sudo docker network prune -f || true
+            
+            # Verificar se as portas estão livres
+            echo 'Verificando se as portas estão livres...'
+            if sudo netstat -tulpn | grep -E '(:5000|:5005)' >/dev/null 2>&1; then
+              echo 'AVISO: Ainda existem processos usando as portas. Forçando limpeza...'
+              sudo fuser -k 5000/tcp 2>/dev/null || true
+              sudo fuser -k 5005/tcp 2>/dev/null || true
+              sleep 3
+            fi
             
             # Aguardar liberação de recursos
             sleep 5
