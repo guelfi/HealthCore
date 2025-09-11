@@ -63,7 +63,7 @@ RUN mkdir -p /app/database /app/logs /app/temp && \
 COPY --from=build --chown=appuser:appuser /app/publish .
 
 # Copy database files if they exist (with error handling)
-COPY --from=build --chown=appuser:appuser /src/Api/database/ ./database/ 2>/dev/null || true
+COPY --from=build --chown=appuser:appuser /src/Api/database/ ./database/
 
 # Security: Set file permissions (no execute on data files)
 RUN find /app -type f -name "*.dll" -exec chmod 644 {} \; && \
@@ -83,7 +83,7 @@ ENV ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_USE_POLLING_FILE_WATCHER=true \
     DOTNET_EnableDiagnostics=0 \
     COMPlus_EnableDiagnostics=0 \
-    ConnectionStrings__DefaultConnection="Data Source=database/mobilemed.db;Cache=Shared;Foreign Keys=true;" \
+    ConnectionStrings__DefaultConnection="Data Source=database/healthcore.db;Cache=Shared;Foreign Keys=true;" \
     Logging__LogLevel__Default=Warning \
     Logging__LogLevel__Microsoft=Error
 
