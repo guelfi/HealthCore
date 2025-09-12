@@ -28,12 +28,12 @@ Certifique-se de ter o seguinte software instalado em sua máquina:
 1.  **Clone o Repositório:**
     ```bash
     git clone <URL_DO_REPOSITORIO>
-    cd DesafioTecnico
+    cd HealthCore
     ```
     *(Substitua `<URL_DO_REPOSITORIO>` pelo URL real do seu repositório Git.)*
 
 2.  **Navegue para a Raiz do Projeto:**
-    Certifique-se de que seu terminal esteja no diretório `DesafioTecnico` (a raiz do projeto). Todos os comandos subsequentes devem ser executados a partir deste diretório.
+    Certifique-se de que seu terminal esteja no diretório `HealthCore` (a raiz do projeto). Todos os comandos subsequentes devem ser executados a partir deste diretório.
 
 ## 4. Configuração e Execução da API (Backend)
 

@@ -3,7 +3,7 @@ set -e # Exit immediately if a command fails.
 
 # --- Configuration ---
 # IMPORTANT: Update this path to your project's location on the OCI server.
-PROJECT_DIR="/var/www/DesafioTecnico"
+PROJECT_DIR="/var/www/HealthCore"
 
 # --- Deployment ---
 echo "Navigating to project directory: $PROJECT_DIR"

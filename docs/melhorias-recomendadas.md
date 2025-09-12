@@ -179,7 +179,7 @@
 ### 1. Correção Imediata no Servidor
 ```bash
 # No servidor de produção
-cd /var/www/DesafioTecnico
+cd /var/www/HealthCore
 chmod +x scripts/corrigir-containers.sh
 ./scripts/corrigir-containers.sh
 ```

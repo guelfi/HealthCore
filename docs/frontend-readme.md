@@ -1,6 +1,6 @@
-# MobileMed Frontend
+# HealthCore Frontend
 
-Frontend da aplicação MobileMed desenvolvido em React + Vite + TypeScript seguindo os princípios de Clean Architecture.
+Frontend da aplicação HealthCore desenvolvido em React + Vite + TypeScript seguindo os princípios de Clean Architecture.
 
 ## 🚀 Tecnologias
 

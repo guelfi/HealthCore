@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Script para configurar Nginx no servidor OCI para MobileMed
+# Script para configurar Nginx no servidor OCI para HealthCore
 # Execute este script no servidor OCI como usuário ubuntu
 
 set -e
 
-echo "🚀 Configurando Nginx para MobileMed na OCI..."
+echo "🚀 Configurando Nginx para HealthCore na OCI..."
 
 # Verificar se está rodando como root ou com sudo
 if [[ $EUID -ne 0 ]]; then
@@ -34,28 +34,28 @@ else
     echo "✅ Certbot já está instalado"
 fi
 
-# Criar diretório para logs do MobileMed
+# Criar diretório para logs do HealthCore
 echo "📁 Criando diretórios de logs..."
 mkdir -p /var/log/nginx
-touch /var/log/nginx/mobilemed_access.log
-touch /var/log/nginx/mobilemed_error.log
-chown www-data:www-data /var/log/nginx/mobilemed_*.log
+touch /var/log/nginx/healthcore_access.log
+touch /var/log/nginx/healthcore_error.log
+chown www-data:www-data /var/log/nginx/healthcore_*.log
 
-# Copiar configuração do MobileMed
-echo "📝 Copiando configuração do MobileMed..."
-if [ -f "/home/ubuntu/mobilemed.conf" ]; then
-    cp /home/ubuntu/mobilemed.conf /etc/nginx/sites-available/
-    echo "✅ Configuração copiada para /etc/nginx/sites-available/mobilemed.conf"
+# Copiar configuração do HealthCore
+echo "📝 Copiando configuração do HealthCore..."
+if [ -f "/home/ubuntu/healthcore.conf" ]; then
+    cp /home/ubuntu/healthcore.conf /etc/nginx/sites-available/
+    echo "✅ Configuração copiada para /etc/nginx/sites-available/healthcore.conf"
 else
-    echo "❌ Arquivo mobilemed.conf não encontrado em /home/ubuntu/"
-    echo "Por favor, copie o arquivo nginx/mobilemed.conf para /home/ubuntu/ primeiro"
+    echo "❌ Arquivo healthcore.conf não encontrado em /home/ubuntu/"
+    echo "Por favor, copie o arquivo nginx/healthcore.conf para /home/ubuntu/ primeiro"
     exit 1
 fi
 
-# Habilitar site do MobileMed
-echo "🔗 Habilitando site do MobileMed..."
-if [ ! -L "/etc/nginx/sites-enabled/mobilemed.conf" ]; then
-    ln -s /etc/nginx/sites-available/mobilemed.conf /etc/nginx/sites-enabled/
+# Habilitar site do HealthCore
+echo "🔗 Habilitando site do HealthCore..."
+if [ ! -L "/etc/nginx/sites-enabled/healthcore.conf" ]; then
+    ln -s /etc/nginx/sites-available/healthcore.conf /etc/nginx/sites-enabled/
     echo "✅ Site habilitado"
 else
     echo "✅ Site já está habilitado"
@@ -86,15 +86,15 @@ echo ""
 echo "🎉 Configuração do Nginx concluída!"
 echo ""
 echo "📋 Próximos passos:"
-echo "1. Configure o DNS para apontar mobilemed.batuara.net para este servidor"
-echo "2. Execute: sudo certbot --nginx -d mobilemed.batuara.net"
+echo "1. Configure o DNS para apontar healthcore.batuara.net para este servidor"
+echo "2. Execute: sudo certbot --nginx -d healthcore.batuara.net"
 echo "3. Abra as portas 5000 e 5005 no painel da OCI"
-echo "4. Execute o deploy do MobileMed via GitHub Actions"
+echo "4. Execute o deploy do HealthCore via GitHub Actions"
 echo ""
 echo "🔗 URLs de acesso:"
 echo "   - Batuara.net: http://$(curl -s ifconfig.me):3000 (existente)"
-echo "   - MobileMed Frontend: http://$(curl -s ifconfig.me):5005"
-echo "   - MobileMed API: http://$(curl -s ifconfig.me):5000"
-echo "   - MobileMed via Nginx: https://mobilemed.batuara.net (após SSL)"
+echo "   - HealthCore Frontend: http://$(curl -s ifconfig.me):5005"
+echo "   - HealthCore API: http://$(curl -s ifconfig.me):5000"
+echo "   - HealthCore via Nginx: https://healthcore.batuara.net (após SSL)"
 echo ""
 echo "⚠️  Lembre-se de configurar as portas no painel da OCI!"

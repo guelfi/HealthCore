@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# MobileMed - Script de Manutenção e Monitoramento
+# HealthCore - Script de Manutenção e Monitoramento
 # Uso: ./maintenance.sh [comando]
 # Comandos: status, logs, backup, cleanup, restart, update, monitor
 
 set -e
 
 # Configurações
-PROJECT_DIR="/var/www/DesafioTecnico"
-BACKUP_DIR="/var/backups/mobilemed"
-LOG_DIR="/var/log/mobilemed"
-DB_PATH="$PROJECT_DIR/backend/mobilemed.db"
+PROJECT_DIR="/var/www/HealthCore"
+BACKUP_DIR="/var/backups/healthcore"
+LOG_DIR="/var/log/healthcore"
+DB_PATH="$PROJECT_DIR/backend/healthcore.db"
 
 # Cores para output
 RED='\033[0;31m'
@@ -48,7 +48,7 @@ setup_directories() {
 
 # Status dos serviços
 status() {
-    log "📊 Status dos serviços MobileMed"
+    log "📊 Status dos serviços HealthCore"
     echo
     
     # Docker status
@@ -120,7 +120,7 @@ backup() {
     fi
     
     local timestamp=$(date +%Y%m%d_%H%M%S)
-    local backup_file="$BACKUP_DIR/mobilemed_backup_$timestamp.db"
+    local backup_file="$BACKUP_DIR/healthcore_backup_$timestamp.db"
     
     # Criar backup
     cp "$DB_PATH" "$backup_file"
@@ -163,7 +163,7 @@ cleanup() {
 
 # Reiniciar serviços
 restart() {
-    log "🔄 Reiniciando serviços MobileMed"
+    log "🔄 Reiniciando serviços HealthCore"
     
     # Parar containers
     docker-compose down
@@ -184,7 +184,7 @@ restart() {
 
 # Atualizar aplicação
 update() {
-    log "🚀 Atualizando aplicação MobileMed"
+    log "🚀 Atualizando aplicação HealthCore"
     
     # Fazer backup antes da atualização
     backup
@@ -207,7 +207,7 @@ monitor() {
     
     while true; do
         clear
-        echo -e "${BLUE}=== MobileMed Monitor - $(date) ===${NC}"
+        echo -e "${BLUE}=== HealthCore Monitor - $(date) ===${NC}"
         echo
         
         status
@@ -222,7 +222,7 @@ monitor() {
 
 # Menu de ajuda
 show_help() {
-    echo -e "${BLUE}MobileMed - Sistema de Manutenção${NC}"
+    echo -e "${BLUE}HealthCore - Sistema de Manutenção${NC}"
     echo
     echo "Uso: $0 [comando] [opções]"
     echo
