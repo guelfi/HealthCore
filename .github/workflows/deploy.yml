@@ -37,8 +37,8 @@ jobs:
       - name: Create project directory on OCI
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
-            sudo mkdir -p /var/www/DesafioTecnico
-            sudo chown ubuntu:ubuntu /var/www/DesafioTecnico
+            sudo mkdir -p /var/www/HealthCore
+        sudo chown ubuntu:ubuntu /var/www/HealthCore
           "
 
       - name: Sync project files to OCI
@@ -50,7 +50,7 @@ jobs:
             --exclude='obj' \
             --exclude='.env.local*' \
             -e "ssh -o StrictHostKeyChecking=no" \
-            ./ ubuntu@${{ secrets.OCI_HOST }}:/var/www/DesafioTecnico/
+            ./ ubuntu@${{ secrets.OCI_HOST }}:/var/www/HealthCore/
 
       - name: Deploy and build on OCI
         run: |
@@ -80,7 +80,7 @@ jobs:
               sudo usermod -aG docker ubuntu
             fi
 
-            cd /var/www/DesafioTecnico
+            cd /var/www/HealthCore
             
             echo '🚀 Iniciando deploy do HealthCore...'
             

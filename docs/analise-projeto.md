@@ -1,8 +1,8 @@
-# 📋 Análise Completa do Projeto MobileMed
+# 📋 Análise Completa do Projeto HealthCore
 
 Sistema de gestão médica moderno com arquitetura Clean e tecnologias avançadas
 
-## 🏥 MobileMed
+## 🏥 HealthCore
 
 **Tech Stack:**
 ![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white) ![.NET](https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white) ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white) ![Material-UI](https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white) ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white) ![SASS](https://img.shields.io/badge/SASS-CC6699?style=for-the-badge&logo=sass&logoColor=white)
@@ -15,7 +15,7 @@ Sistema de gestão médica moderno com arquitetura Clean e tecnologias avançada
 
 ### Objetivo Principal
 
-O **MobileMed** é um sistema completo de gestão médica desenvolvido como desafio técnico, focado no cadastro e consulta de pacientes e exames médicos. Implementa arquitetura moderna seguindo Clean Architecture e princípios DDD.
+O **HealthCore** é um sistema completo de gestão médica desenvolvido como desafio técnico, focado no cadastro e consulta de pacientes e exames médicos. Implementa arquitetura moderna seguindo Clean Architecture e princípios DDD.
 
 ### 🏆 Missão do Sistema
 
@@ -256,7 +256,7 @@ Automação com excelente experiência de desenvolvedor.
 ### Estrutura do Projeto
 
 ```
-DesafioTecnico/
+HealthCore/
 ├── src/
 │   ├── Web/               # Frontend React
 │   ├── API/               # Backend .NET
@@ -293,4 +293,4 @@ DesafioTecnico/
 
 ---
 
-*Documento gerado automaticamente a partir da análise técnica do projeto MobileMed.*
+*Documento gerado automaticamente a partir da análise técnica do projeto HealthCore.*

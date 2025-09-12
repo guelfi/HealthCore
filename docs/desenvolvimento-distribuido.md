@@ -24,7 +24,7 @@
 ```bash
 # 1. Clonar o repositório
 git clone [URL_DO_REPOSITORIO]
-cd DesafioTecnico
+cd HealthCore
 
 # 2. Verificar configuração de rede
 cd scripts

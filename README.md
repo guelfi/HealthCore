@@ -1,4 +1,4 @@
-📝 **Task: Cadastro de Pacientes e Exames Médicos com Modalidades DICOM - MobileMed**
+📝 **Task: Cadastro de Pacientes e Exames Médicos com Modalidades DICOM - HealthCore**
 
 🎯 **Descrição**
 
@@ -72,11 +72,11 @@ Para iniciar os serviços da API e do Frontend, utilize os scripts na raiz do pr
 
 -   **No Linux/macOS:**
     ```bash
-    ./mobilemed.sh start
-    ```
+    ./healthcore.sh start
+```
 -   **No Windows:**
-    ```bash
-    mobilemed.bat start
+```bash
+    healthcore.bat start
     ```
 
 ### Comandos Disponíveis
@@ -91,13 +91,13 @@ Para iniciar os serviços da API e do Frontend, utilize os scripts na raiz do pr
 
 ```bash
 # Iniciar apenas a API
-./mobilemed.sh start api
+./healthcore.sh start api
 
 # Parar apenas o Frontend
-./mobilemed.sh stop frontend
+./healthcore.sh stop frontend
 
 # Visualizar os logs da API
-./mobilemed.sh logs api
+./healthcore.sh logs api
 ```
 
 🔥 **Critérios de Aceite**

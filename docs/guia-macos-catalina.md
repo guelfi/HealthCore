@@ -25,7 +25,7 @@ dotnet --info
 ```bash
 # Clonar repositório
 git clone [URL_DO_REPOSITORIO]
-cd DesafioTecnico
+cd HealthCore
 
 # Testar compilação
 cd src/Api

@@ -1,6 +1,6 @@
-# Requisitos do Projeto MobileMed
+# Requisitos do Projeto HealthCore
 
-Este documento descreve os requisitos funcionais e não funcionais para o projeto MobileMed.
+Este documento descreve os requisitos funcionais e não funcionais para o projeto HealthCore.
 
 ## Requisitos Funcionais
 

@@ -3,7 +3,7 @@
 # Get the directory of the script
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# 🌐 MobileMed Frontend Launcher
+# 🌐 HealthCore Frontend Launcher
 # Gerencia o frontend com parâmetros: start/status/stop
 
 # Cores para output elegante
@@ -104,7 +104,7 @@ start_front() {
     
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${WHITE}                             MobileMed Frontend Manager                      ${PURPLE} ║${NC}"
+    echo -e "${PURPLE}║${WHITE}                             HealthCore Frontend Manager                     ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
@@ -211,7 +211,7 @@ status_front() {
     
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${WHITE}                              Status MobileMed Frontend                      ${PURPLE} ║${NC}"
+    echo -e "${PURPLE}║${WHITE}                              Status HealthCore Frontend                     ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
@@ -263,7 +263,7 @@ stop_front() {
     
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${WHITE}                          Parando MobileMed Frontend                         ${PURPLE} ║${NC}"
+    echo -e "${PURPLE}║${WHITE}                          Parando HealthCore Frontend                        ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     

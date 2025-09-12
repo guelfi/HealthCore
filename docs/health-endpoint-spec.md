@@ -161,4 +161,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 **Criado por:** Marco Guelfi  
 **Data:** 27/08/2025  
 **Para:** Desenvolvedor Backend  
-**Projeto:** MobileMed - DesafioTecnico
+**Projeto:** HealthCore

@@ -73,7 +73,7 @@ echo "Testando a API MobileMed (Testes Unitários)..."
 init_report
 
 # Executa os testes unitários e captura a saída
-TEST_OUTPUT=$(dotnet test /Users/guelfi/Projetos/DesafioTecnico/tests/Api.Tests/MobileMed.Api.Tests.csproj --logger "trx;LogFileName=test_results.trx" --no-build --verbosity normal 2>&1 | grep -v "Compilação" | grep -v "Execução" | grep -v "Copyright" | grep -v "Iniciando")
+TEST_OUTPUT=$(dotnet test /Users/guelfi/Projetos/HealthCore/tests/Api.Tests/HealthCore.Api.Tests.csproj --logger "trx;LogFileName=test_results.trx" --no-build --verbosity normal 2>&1 | grep -v "Compilação" | grep -v "Execução" | grep -v "Copyright" | grep -v "Iniciando")
 TEST_EXIT_CODE=$?
 
 

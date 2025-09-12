@@ -3,7 +3,7 @@
 # Get the directory of the script
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# 🚀 MobileMed API Manager
+# 🚀 HealthCore API Manager
 # Gerencia a API com parâmetros: start/status/stop
 
 # Cores para output elegante
@@ -115,7 +115,7 @@ start_api() {
     
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${WHITE}                             MobileMed API Manager                           ${PURPLE} ║${NC}"
+    echo -e "${PURPLE}║${WHITE}                             HealthCore API Manager                          ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
@@ -229,7 +229,7 @@ status_api() {
     
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${WHITE}                              Status MobileMed API                           ${PURPLE} ║${NC}"
+    echo -e "${PURPLE}║${WHITE}                              Status HealthCore API                          ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
@@ -282,7 +282,7 @@ stop_api() {
     
     # Header elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${WHITE}                          Parando MobileMed API                              ${PURPLE} ║${NC}"
+    echo -e "${PURPLE}║${WHITE}                          Parando HealthCore API                             ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
