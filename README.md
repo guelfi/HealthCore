@@ -1,247 +1,278 @@
-📝 **Task: Cadastro de Pacientes e Exames Médicos com Modalidades DICOM - HealthCore**
+# 🏥 HealthCore
 
-🎯 **Descrição**
+> **Sistema de Gestão Médica Inteligente** - MVP de SaaS para controle de pacientes e exames médicos com modalidades DICOM
 
-Como usuário da plataforma médica,  
-Quero registrar e consultar pacientes e seus exames de forma segura, consistente e com boa experiência de navegação,  
-Para que eu tenha controle sobre o histórico clínico mesmo em situações de reenvio de requisição ou acessos simultâneos.
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET_8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Material-UI](https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
+![Cypress](https://img.shields.io/badge/Cypress-17202C?style=for-the-badge&logo=cypress&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
 
-🔧 **Escopo da Task**
+## 📋 Sobre o Projeto
 
--   Implementar API REST em netcore 8 para cadastro e consulta de pacientes e exames.
--   Garantir idempotência no cadastro de exames.
--   Criar estrutura segura para suportar requisições concorrentes.
--   Implementar paginação para consultas.
--   Integrar com front-end React + Vite.
--   Criar componentes React + Vite para cadastro e listagem de pacientes e exames.
--   Utilizar práticas RESTful, transações ACID e código modular.
+O **HealthCore** é um sistema de gestão médica moderno e inteligente, desenvolvido como MVP de uma solução SaaS para profissionais de saúde. O sistema permite o controle completo de pacientes e seus exames médicos, com suporte a modalidades DICOM e garantias de idempotência para operações críticas.
 
-✅ **Regras de Validações**
+### 🎯 Principais Funcionalidades
 
--   O `documento` do paciente deve ser único.
--   A `idempotencyKey` do exame deve garantir que requisições duplicadas não criem múltiplos registros.
--   Não é permitido cadastrar exame para paciente inexistente.
--   Campos obrigatórios devem ser validados (nome, data de nascimento, modalidade, etc).
+- **Gestão de Pacientes**: Cadastro, consulta, atualização e controle de histórico clínico
+- **Gestão de Exames**: Suporte completo a modalidades DICOM com controle de idempotência
+- **Autenticação Segura**: Sistema JWT com controle de acesso baseado em perfis
+- **Interface Responsiva**: Design moderno e mobile-first com Material-UI
+- **API RESTful**: Endpoints documentados com Swagger/OpenAPI
+- **Conformidade LGPD**: Implementação completa da Lei Geral de Proteção de Dados
 
-📦 **Saída Esperada**
+### 🏥 Modalidades DICOM Suportadas
 
--   Endpoints criados:
-    -   `POST /pacientes`
-    -   `GET /pacientes?page=x&pageSize=y`
+O sistema suporta as principais modalidades de imagem médica definidas pelo padrão DICOM:
 
-<!-- Deploy trigger: optimized build configuration -->
-    -   `POST /exames`
-    -   `GET /exames?page=x&pageSize=y`
--   Dados persistidos de forma segura e idempotente.
--   Front-end com:
-    -   Listagem paginada de pacientes e exames.
-    -   Cadastro funcional via formulários.
-    -   UI amigável com mensagens de erro e loading.
+- **CR** (Computed Radiography) - Radiografia Computadorizada
+- **CT** (Computed Tomography) - Tomografia Computadorizada
+- **DX** (Digital Radiography) - Radiografia Digital
+- **MG** (Mammography) - Mamografia
+- **MR** (Magnetic Resonance) - Ressonância Magnética
+- **NM** (Nuclear Medicine) - Medicina Nuclear
+- **OT** (Other) - Outras modalidades
+- **PT** (Positron Emission Tomography) - Tomografia por Emissão de Pósitrons
+- **RF** (Radio Fluoroscopy) - Radiofluoroscopia
+- **US** (Ultrasound) - Ultrassom
+- **XA** (X-Ray Angiography) - Angiografia por Raios-X
 
-## 🚀 Como Executar o Projeto
+### ⚡ Idempotência
+
+O sistema implementa **idempotência** para operações críticas, especialmente no cadastro de exames. Isso significa que:
+
+- **Requisições duplicadas** não criam registros múltiplos
+- **Chave de idempotência** (`idempotencyKey`) garante unicidade
+- **Operações simultâneas** são tratadas de forma segura
+- **Consistência de dados** é mantida mesmo em cenários de alta concorrência
+
+A idempotência é essencial em sistemas médicos para evitar duplicação de exames e garantir a integridade dos dados clínicos.
+
+## 🚀 Início Rápido
 
 ### Pré-requisitos
 
--   [Node.js](https://nodejs.org/) (versão 18 ou superior)
--   [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
--   [pm2](https://pm2.keymetrics.io/) (gerenciador de processos para Node.js)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js 18+](https://nodejs.org/)
+- [Git](https://git-scm.com/)
 
-### Instalação
-
-1.  **Clone o repositório:**
-    ```bash
-    git clone https://github.com/seu-usuario/desafio-tecnico.git
-    cd desafio-tecnico
-    ```
-
-2.  **Instale as dependências do frontend:**
-    ```bash
-    cd src/Web
-    npm install
-    cd ../..
-    ```
-
-3.  **Instale o pm2 globalmente:**
-    ```bash
-    npm install pm2 -g
-    ```
-
-### Execução
-
-Para iniciar os serviços da API e do Frontend, utilize os scripts na raiz do projeto:
-
--   **No Linux/macOS:**
-    ```bash
-    ./healthcore.sh start
-```
--   **No Windows:**
-```bash
-    healthcore.bat start
-    ```
-
-### Comandos Disponíveis
-
--   `start`: Inicia a API e o Frontend.
--   `stop`: Para a API e o Frontend.
--   `restart`: Reinicia a API e o Frontend.
--   `status`: Mostra o status dos serviços.
--   `logs`: Exibe os logs dos serviços.
-
-**Exemplos:**
+### Instalação para Desenvolvimento
 
 ```bash
-# Iniciar apenas a API
-./healthcore.sh start api
+# 1. Clone o repositório
+git clone https://github.com/seu-usuario/HealthCore.git
+cd HealthCore
 
-# Parar apenas o Frontend
-./healthcore.sh stop frontend
+# 2. Instale dependências do frontend
+cd src/Web
+npm install
+cd ../..
 
-# Visualizar os logs da API
-./healthcore.sh logs api
+# 3. Instale dependências globais
+npm install pm2 -g
+npm install
 ```
 
-🔥 **Critérios de Aceite**
+### Execução Local
 
--   **Dado** que um paciente válido foi cadastrado,  
-    **Quando** for enviado um novo exame com `idempotencyKey` única,  
-    **Então** o exame deverá ser criado com sucesso.
-    
--   **Dado** que um exame com `idempotencyKey` já existe,  
-    **Quando** for enviada uma nova requisição com os mesmos dados,  
-    **Então** o sistema deverá retornar HTTP 200 com o mesmo exame, sem recriá-lo.
-    
--   **Dado** que múltiplas requisições simultâneas com mesma `idempotencyKey` são feitas,  
-    **Quando** processadas,  
-    **Então** apenas um exame deverá ser persistido.
-    
--   **Dado** que o front-end está carregando dados,  
-    **Quando** houver erro de rede,  
-    **Então** deve ser exibida mensagem de erro com botão "Tentar novamente".
+**Opção 1: Scripts Automatizados (Recomendado)**
 
-👥 **Dependências**
+```bash
+# Linux/macOS
+./healthcore.sh start
 
--   Banco de dados com suporte a transações (SQLite).
--   Integração REST entre backend (.netcore 8) e frontend (React + Vite).
--   Validação de campos no front-end e back-end.
--   Definição do enum de modalidades DICOM:
-    -   `CR, CT, DX, MG, MR, NM, OT, PT, RF, US, XA`
+# Windows
+healthcore.bat start
+```
 
-🧪 **Cenários de Teste**
+**Opção 2: Execução Manual**
 
-Cenário
+```bash
+# Terminal 1 - API Backend
+cd src/Api
+dotnet run
 
-Descrição
+# Terminal 2 - Frontend
+cd src/Web
+npm run dev
+```
 
-Resultado Esperado
+### Acesso ao Sistema
 
-1
+- **Frontend**: http://localhost:5005
+- **API**: http://localhost:5000
+- **Swagger**: http://localhost:5000/swagger
+- **Health Check**: http://localhost:5000/health
 
-Criar paciente com dados válidos
+## 📚 Documentação
 
-Paciente salvo com UUID único
+> **Nota**: Alguns documentos podem conter referências a "MobileMed" que correspondem ao nome anterior do projeto, agora chamado **HealthCore**.
 
-2
+### 📖 Documentação Técnica
 
-Criar paciente com CPF já existente
+- **[Arquitetura do Sistema](docs/architecture.md)** - Clean Architecture, DDD e padrões utilizados
+- **[Estrutura do Projeto](docs/structure.md)** - Organização de diretórios e componentes
+- **[Especificações da API](docs/health-endpoint-spec.md)** - Endpoints e contratos de saúde
+- **[Plano de Testes](docs/test-plan.md)** - Estratégias de teste e validação
+- **[Requisitos do Sistema](docs/requirements.md)** - Requisitos funcionais e não funcionais
 
-Erro de validação 409 - duplicidade
+### 🔒 Conformidade e Segurança
 
-3
+- **[Implementação LGPD](docs/lgpd_readme.md)** - Conformidade com Lei Geral de Proteção de Dados
 
-Criar exame com paciente existente e idempotencyKey nova
+### 🚀 Deploy e Infraestrutura
 
-HTTP 201 e exame salvo
+- **[Deploy OCI](docs/OCI_DEPLOYMENT.md)** - Configuração para Oracle Cloud Infrastructure
+- **[Configuração de Rede](docs/network_config.md)** - Configurações de rede e portas
+- **[Configuração Ngrok](docs/ngrok-setup.md)** - Túneis para desenvolvimento
 
-4
+### 🛠️ Desenvolvimento
 
-Reenviar exame com mesma idempotencyKey
+- **[Guia de Contribuição](docs/contributing.md)** - Como contribuir com o projeto
+- **[Integração Backend-Frontend](docs/IntegracaoBackFront.md)** - Comunicação entre camadas
+- **[Guia de Execução](docs/execute.md)** - Instruções detalhadas de execução
+- **[Guia de Scripts](docs/scrips_guide.md)** - Scripts disponíveis para automação
+- **[Lista de Tarefas](docs/tasks.md)** - Tarefas e funcionalidades implementadas
 
-HTTP 200 e retorno do mesmo exame
+## 🏗️ Arquitetura
 
-5
+### Backend (.NET 8)
+- **Clean Architecture** com separação clara de responsabilidades
+- **Domain-Driven Design (DDD)** para modelagem de negócio
+- **Repository Pattern** para acesso a dados
+- **Entity Framework Core** com SQLite
+- **JWT Authentication** com controle de acesso
+- **Serilog** para logging estruturado
+- **Health Checks** para monitoramento
 
-Enviar múltiplas requisições simultâneas com mesma idempotencyKey
+### Frontend (React + TypeScript)
+- **React 19** com hooks modernos
+- **TypeScript** para tipagem estática
+- **Vite** para build e desenvolvimento
+- **Material-UI** para componentes de interface
+- **Zustand** para gerenciamento de estado
+- **React Hook Form** com validação Zod
+- **Axios** para comunicação com API
 
-Apenas um exame persistido
+### Infraestrutura
+- **Docker** para containerização
+- **Nginx** como proxy reverso
+- **GitHub Actions** para CI/CD
+- **Multi-cloud** (OCI, AWS, GCP, Azure)
 
-6
+## 🧪 Testes
 
-Criar exame com paciente inexistente
+### Testes Unitários
+```bash
+# Backend (.NET)
+cd src/Api
+dotnet test
 
-Erro 400 - paciente não encontrado
+# Frontend (Vitest)
+cd src/Web
+npm run test
+npm run test:coverage
+```
 
-7
+### Testes E2E
+```bash
+# Cypress (em desenvolvimento)
+npm run test:e2e
+```
 
-Listar exames com paginação (10 por página)
+### Testes de Conectividade
+```bash
+# Scripts de teste de conectividade
+cd src/Web
+npm run test:connectivity
+npm run test:api
+```
 
-Retorno paginado corretamente
+## 🚀 CI/CD
 
-8
+### GitHub Actions
+O projeto utiliza GitHub Actions para:
+- **Build automatizado** do backend e frontend
+- **Execução de testes** unitários e de integração
+- **Deploy automatizado** para ambientes de produção
+- **Análise de código** e verificação de qualidade
 
-Listar pacientes com paginação
+### Pipeline de Deploy
+1. **Build** - Compilação e otimização
+2. **Test** - Execução de testes automatizados
+3. **Security** - Verificação de vulnerabilidades
+4. **Deploy** - Deploy para ambiente de produção
 
-Lista retornada corretamente
+## 📊 Comandos Disponíveis
 
-9
+### Scripts Principais
+```bash
+# Gerenciamento de serviços
+./healthcore.sh start     # Inicia API e Frontend
+./healthcore.sh stop      # Para todos os serviços
+./healthcore.sh restart   # Reinicia serviços
+./healthcore.sh status    # Status dos serviços
+./healthcore.sh logs      # Visualiza logs
 
-Frontend mostra loading durante chamada
+# Comandos específicos
+./healthcore.sh start api      # Apenas API
+./healthcore.sh start frontend # Apenas Frontend
+./healthcore.sh logs api       # Logs da API
+```
 
-Spinner visível enquanto carrega
+### Scripts de Desenvolvimento
+```bash
+# Frontend
+npm run dev              # Desenvolvimento
+npm run build            # Build de produção
+npm run lint             # Verificação de código
+npm run test             # Testes unitários
 
-10
+# Backend
+dotnet run               # Execução
+dotnet build             # Build
+dotnet test              # Testes
+```
 
-Frontend exibe erro de rede e botão “Tentar novamente”
+## 🤝 Contribuindo
 
-Mensagem visível e reenvio possível
+1. **Fork** o projeto
+2. **Clone** seu fork
+3. **Crie** uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+4. **Commit** suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+5. **Push** para a branch (`git push origin feature/AmazingFeature`)
+6. **Abra** um Pull Request
 
-11
+Leia o [Guia de Contribuição](docs/contributing.md) para mais detalhes.
 
-Enviar exame com modalidade inválida
+## 📄 Licença
 
-Erro 400 - enum inválido
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-12
+## 👥 Equipe
 
-Validação visual dos campos obrigatórios no formulário
+- **Desenvolvimento**: Equipe HealthCore
+- **Arquitetura**: Clean Architecture + DDD
+- **UI/UX**: Material Design System
+- **DevOps**: Docker + GitHub Actions
 
-Campos com feedback de erro
+## 📞 Suporte
 
-13
+Para suporte técnico ou dúvidas sobre LGPD:
+- **Issues**: [GitHub Issues](https://github.com/seu-usuario/HealthCore/issues)
+- **Documentação**: Consulte os arquivos na pasta `/docs`
 
-Cobertura mínima de 80% nos testes unitários e integração
+---
 
-Relatório de cobertura válido
-
-⸻
-
-🧪 **Testes de Integração (Requisito Obrigatório)**
-
--   Devem ser implementados utilizando ferramentas como:
-    -   xUnit.net, NUnit,  MSTes (backend)
-    -   Vitest, **Jest** (frontend React + Vite)
--   Devem cobrir pelo menos:
-    -   Fluxo de criação completo (Paciente → Exame)
-    -   Validações de regra de negócio
-    -   Idempotência em requisições simultâneas
-    -   Respostas corretas de erro
-    -   Listagem paginada
-
-⸻
-
-✨ **Bônus para Diferenciação Técnica**
-
-Os itens a seguir não são obrigatórios, mas serão **altamente valorizados**:
-
--   🐳 **Uso de Docker** para orquestração local:
-    -   Arquivo `docker-compose.yml` com banco e backend
-    -   Script de inicialização da aplicação
--   📜 **Integração com Swagger / OpenAPI**:
-    -   Documentação dos endpoints RESTful
-    -   Disponível via `/api/docs` ou equivalente
--   ⚙️ **Pipeline CI Básico com GitHub Actions**:
-    -   Rodar testes automatizados
-    -   Validar lint ou build
--   📚 **Documentação Técnica**:
-    -   `README.md` com instruções para rodar o projeto localmente
-    -   Scripts de setup e uso da API
-    -   Seções com decisões de arquitetura
+<div align="center">
+  <strong>HealthCore</strong> - Sistema de Gestão Médica Inteligente<br>
+  Desenvolvido com 💙 e 🧠 para profissionais de saúde
+</div>
