@@ -38,7 +38,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.OCI_HOST }} "
             sudo mkdir -p /var/www/HealthCore
-        sudo chown ubuntu:ubuntu /var/www/HealthCore
+            sudo chown ubuntu:ubuntu /var/www/HealthCore
           "
 
       - name: Sync project files to OCI
