@@ -1,0 +1,165 @@
+// 🧭 Navigation - HealthCore Design System
+// Estilos para navegação
+
+// Navbar principal
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background-color: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+// Logo/Brand
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary, #1a1a1a);
+  text-decoration: none;
+}
+
+// Menu de navegação
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+// Item de navegação
+.nav-item {
+  position: relative;
+}
+
+// Link de navegação
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  color: var(--color-text-secondary, #666666);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: var(--color-primary, #2563eb);
+    background-color: var(--color-primary-light, #eff6ff);
+  }
+  
+  &.active {
+    color: var(--color-primary, #2563eb);
+    background-color: var(--color-primary-light, #eff6ff);
+  }
+}
+
+// Sidebar
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background-color: var(--color-surface, #ffffff);
+  border-right: 1px solid var(--color-border, #e5e7eb);
+  padding: 1.5rem 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+// Menu do sidebar
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem;
+}
+
+// Item do sidebar
+.sidebar-item {
+  .nav-link {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+    
+    &:hover,
+    &.active {
+      background-color: var(--color-primary-light, #eff6ff);
+    }
+  }
+}
+
+// Seção do sidebar
+.sidebar-section {
+  margin: 1.5rem 0 0.5rem 0;
+  
+  .sidebar-title {
+    padding: 0 1rem;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted, #9ca3af);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+// Breadcrumb
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  font-size: var(--font-size-sm);
+  
+  .breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    &:not(:last-child)::after {
+      content: '/';
+      color: var(--color-text-muted, #9ca3af);
+    }
+    
+    a {
+      color: var(--color-text-secondary, #666666);
+      text-decoration: none;
+      
+      &:hover {
+        color: var(--color-primary, #2563eb);
+      }
+    }
+    
+    &.active {
+      color: var(--color-text-primary, #1a1a1a);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .navbar-nav {
+    display: none;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}

@@ -1,189 +1,34 @@
-@use './responsive.scss';
-@use './_variables' as *;
-@use './_mixins' as *;
+// 🎨 Main Styles - HealthCore UI/UX
+// Arquivo principal que importa todos os estilos
 
-// Aplicar variáveis CSS customizadas do HealthCore
-:root {
-  // Cores principais HealthCore
-  --primary-color: #{$primary-blue};
-  --secondary-color: #{$primary-green};
-  --accent-color: #{$accent-teal};
-  --background-color: #{$neutral-gray-50};
-  --surface-color: #{$neutral-white};
-  --text-primary: #{$neutral-dark};
-  --text-secondary: #{$neutral-gray-600};
-  --border-color: #{$neutral-gray-200};
-  
-  // Estados
-  --success-color: #{$success-color};
-  --warning-color: #{$warning-color};
-  --error-color: #{$error-color};
-  --info-color: #{$info-color};
-  
-  // Sombras HealthCore
-  --shadow-sm: #{$shadow-sm};
-  --shadow-base: #{$shadow-base};
-  --shadow-md: #{$shadow-md};
-  --shadow-lg: #{$shadow-lg};
-  
-  // Espaçamentos
-  --spacing-xs: #{$spacing-xs};
-  --spacing-sm: #{$spacing-sm};
-  --spacing-md: #{$spacing-md};
-  --spacing-lg: #{$spacing-lg};
-  --spacing-xl: #{$spacing-xl};
-  --spacing-2xl: #{$spacing-2xl};
-  
-  // Bordas
-  --border-radius-sm: #{$border-radius-sm};
-  --border-radius-md: #{$border-radius-md};
-  --border-radius-lg: #{$border-radius-lg};
-  --border-radius-xl: #{$border-radius-xl};
-  
-  // Transições
-  --transition-fast: #{$transition-fast};
-  --transition-base: #{$transition-base};
-  --transition-slow: #{$transition-slow};
-}
+// Design System
+@import './design-system/tokens';
+@import './design-system/breakpoints';
 
-// Reset e estilos base HealthCore
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+// Reset e base
+@import './base/reset';
+@import './base/typography';
 
-html,
-body {
-  font-family: $font-family-primary;
-  font-size: $font-size-base;
-  line-height: $line-height-normal;
-  color: $neutral-dark;
-  background: $gradient-subtle;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  height: 100%;
-  min-height: 100vh;
-  overflow: hidden; // Remove scroll do navegador
-  
-  @include reduced-motion {
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-}
+// Components
+@import './components/buttons';
+@import './components/cards';
+@import './components/dialogs';
+@import './components/forms';
+@import './components/navigation';
+@import './components/tables';
+@import './components/hamburger-menu';
+@import './components/touch-button';
+@import './components/responsive-table';
+@import './components/dialog';
+@import './components/skeleton';
+@import './components/performance-optimization';
 
-#root {
-  height: 100vh;
-  overflow: hidden;
-}
+// Layouts
+@import './layouts/dashboard';
+@import './layouts/crud';
+@import './layouts/responsive';
 
-// Componente App seguindo metodologia BEM
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-
-  &__header {
-    background-color: var(--primary-color);
-    color: white;
-    padding: var(--spacing-lg);
-    text-align: center;
-    box-shadow: var(--elevation-1);
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: var(--spacing-sm);
-    }
-
-    p {
-      font-size: 1.1rem;
-      opacity: 0.9;
-    }
-  }
-
-  &__main {
-    flex: 1;
-    padding: var(--spacing-xl);
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-
-    p {
-      margin-bottom: var(--spacing-md);
-      font-size: 1.1rem;
-    }
-  }
-}
-
-// Responsividade
-@media (max-width: 768px) {
-  .app {
-    &__header {
-      padding: var(--spacing-md);
-
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      p {
-        font-size: 1rem;
-      }
-    }
-
-    &__main {
-      padding: var(--spacing-md);
-    }
-  }
-}
-
-// Global accessibility improvements
-*:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
-
-// Ensure proper contrast for links
-a {
-  color: var(--primary-color);
-  text-decoration: underline;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
-  }
-}
-
-// Improve button accessibility
-button {
-  cursor: pointer;
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-// High contrast mode support
-@media (prefers-contrast: high) {
-  :root {
-    --primary-color: #000000;
-    --secondary-color: #000000;
-    --text-primary: #000000;
-    --text-secondary: #000000;
-  }
-}
-
-// Reduced motion support
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+// Utilitários
+@import './utilities/helpers';
+@import './utilities/animations';
+@import './utilities/accessibility';

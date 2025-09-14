@@ -6,136 +6,186 @@ Antes de iniciar as melhorias de UI/UX, precisamos garantir que o CRUD de Usuár
 
 ## 🔍 Auditoria Atual
 
-### Backend - API Endpoints
-- [ ] **GET /api/usuarios** - Listar usuários
-  - [ ] Paginação implementada
-  - [ ] Filtros de busca funcionando
-  - [ ] Ordenação por campos
-  - [ ] Tratamento de erros
+### Backend - API Endpoints ✅ COMPLETO
+- [x] **GET /admin/usuarios** - Listar usuários - **IMPLEMENTADO**
+  - [x] Paginação implementada
+  - [x] Filtros de busca funcionando
+  - [x] Ordenação por campos
+  - [x] Tratamento de erros
 
-- [ ] **GET /api/usuarios/{id}** - Buscar usuário por ID
-  - [ ] Validação de ID
-  - [ ] Retorno de erro 404 quando não encontrado
-  - [ ] Dados completos no retorno
+- [x] **GET /admin/usuarios/{id}** - Buscar usuário por ID - **IMPLEMENTADO**
+  - [x] Validação de ID
+  - [x] Retorno de erro 404 quando não encontrado
+  - [x] Dados completos no retorno
 
-- [ ] **POST /api/usuarios** - Criar usuário
-  - [ ] Validação de dados obrigatórios
-  - [ ] Validação de email único
-  - [ ] Hash de senha implementado
-  - [ ] Validação de perfil/role
-  - [ ] Retorno do usuário criado
+- [x] **POST /admin/usuarios** - Criar usuário - **IMPLEMENTADO**
+  - [x] Validação de dados obrigatórios
+  - [x] Validação de username único
+  - [x] Hash de senha implementado
+  - [x] Validação de perfil/role
+  - [x] Retorno do usuário criado
 
-- [ ] **PUT /api/usuarios/{id}** - Atualizar usuário
-  - [ ] Validação de existência
-  - [ ] Validação de dados
-  - [ ] Atualização parcial suportada
-  - [ ] Não permitir alteração de email se já existe
+- [x] **PUT /admin/usuarios/{id}** - Atualizar usuário - **IMPLEMENTADO**
+  - [x] Validação de existência
+  - [x] Validação de dados
+  - [x] Atualização parcial suportada
+  - [x] Não permitir alteração de username se já existe
 
-- [ ] **DELETE /api/usuarios/{id}** - Excluir usuário
-  - [ ] Validação de existência
-  - [ ] Soft delete implementado (recomendado)
-  - [ ] Verificação de dependências
-  - [ ] Log de auditoria
+- [x] **PATCH /admin/usuarios/{id}/desativar** - Desativar usuário - **IMPLEMENTADO**
+  - [x] Validação de existência
+  - [x] Soft delete implementado
+  - [x] Verificação de dependências
+  - [x] Log de auditoria
 
-### Modelo de Dados
-- [ ] **Entidade Usuario** completa
-  ```csharp
-  public class Usuario
-  {
-      public int Id { get; set; }
-      public string Nome { get; set; }
-      public string Email { get; set; }
-      public string Senha { get; set; }
-      public string Telefone { get; set; }
-      public string CPF { get; set; }
-      public DateTime DataNascimento { get; set; }
-      public string Endereco { get; set; }
-      public PerfilUsuario Perfil { get; set; }
-      public bool Ativo { get; set; }
-      public DateTime DataCriacao { get; set; }
-      public DateTime? DataAtualizacao { get; set; }
-  }
-  ```
+- [x] **PATCH /admin/usuarios/{id}/ativar** - Ativar usuário - **IMPLEMENTADO**
 
-- [ ] **Enum PerfilUsuario**
-  ```csharp
-  public enum PerfilUsuario
-  {
-      Administrador = 1,
-      Medico = 2,
-      Enfermeiro = 3,
-      Recepcionista = 4,
-      Paciente = 5
-  }
-  ```
+- [x] **GET /admin/usuarios/search** - Buscar por username - **IMPLEMENTADO**
 
-- [ ] **Validações implementadas**
-  - [ ] Email válido e único
-  - [ ] CPF válido e único
-  - [ ] Telefone no formato correto
-  - [ ] Senha com critérios de segurança
-  - [ ] Nome obrigatório (min 2 caracteres)
+### Modelo de Dados ✅ IMPLEMENTADO
 
-### Frontend - Componentes
+#### Entidade User ✅
+- [x] **Propriedades básicas**
+  - [x] Id (Guid) ✅
+  - ❌ Nome (não implementado no backend)
+  - ❌ Email (não implementado no backend)
+  - [x] Username (string, único, obrigatório) ✅
+  - [x] PasswordHash (string, obrigatório) ✅
+  - [x] Role (UserRole enum) ✅
+  - [x] IsActive (boolean, padrão: true) ✅
+  - [x] CreatedAt (DateTime) ✅
+  - ❌ UpdatedAt (não implementado)
 
-#### Lista de Usuários
-- [ ] **Componente UsuariosList**
-  - [ ] Tabela responsiva
-  - [ ] Paginação funcional
-  - [ ] Busca por nome/email
-  - [ ] Filtro por perfil
-  - [ ] Ordenação por colunas
-  - [ ] Ações (Editar, Excluir, Visualizar)
-  - [ ] Loading states
-  - [ ] Estados vazios
+#### Enum UserRole ✅
+- [x] **Valores definidos**
+  - [x] Administrador = 1 ✅
+  - [x] Medico = 2 ✅
 
-#### Formulário de Usuário
-- [ ] **Componente UsuarioForm**
-  - [ ] Campos obrigatórios marcados
-  - [ ] Validação em tempo real
-  - [ ] Máscaras para CPF e telefone
-  - [ ] Seletor de perfil
-  - [ ] Validação de email único
-  - [ ] Confirmação de senha
-  - [ ] Feedback de erro/sucesso
+#### Validações ✅ IMPLEMENTADAS
+- [x] **Regras de negócio**
+  - ❌ Email (não existe no modelo)
+  - [x] Username deve ter pelo menos 3 caracteres ✅
+  - [x] Senha deve ter pelo menos 6 caracteres ✅
+  - [x] Role deve ser válido ✅
+  - [x] Não permitir duplicação de username ✅
+  - [x] Hash de senha com BCrypt ✅
 
-#### Modal/Dialog de Usuário
-- [ ] **Componente UsuarioModal**
-  - [ ] Abertura/fechamento suave
-  - [ ] Formulário integrado
-  - [ ] Modo criação/edição
-  - [ ] Confirmação antes de fechar com dados
-  - [ ] Escape key para fechar
+### Frontend - Componentes ⚠️ PARCIALMENTE IMPLEMENTADO
 
-#### Detalhes do Usuário
+#### Lista de Usuários ✅ IMPLEMENTADO
+- [x] **Componente UsuariosList** ✅
+  - [x] Tabela responsiva ✅
+  - [x] Paginação funcional ✅
+  - [x] Busca por username ✅
+  - [x] Filtro por perfil ✅
+  - [x] Ordenação por colunas ✅
+  - [x] Ações (Editar, Excluir, Ativar/Desativar) ✅
+  - [x] Loading states ✅
+  - [x] Estados vazios ✅
+
+#### Formulário de Usuário ⚠️ PRECISA CORREÇÃO
+- [x] **Componente UsuarioForm** ⚠️
+  - [x] Campos obrigatórios marcados ✅
+  - [x] Validação em tempo real ✅
+  - ❌ Máscaras para CPF e telefone (não aplicável)
+  - [x] Seletor de perfil ✅
+  - ❌ Validação de email único (campo não existe no backend)
+  - [x] Confirmação de senha ✅
+  - [x] Feedback de erro/sucesso ✅
+  - ⚠️ **PROBLEMA**: Usa campos 'nome' e 'email' que não existem no backend
+
+#### Modal/Dialog de Usuário ✅ IMPLEMENTADO
+- [x] **Componente UsuarioModal** ✅
+  - [x] Abertura/fechamento suave ✅
+  - [x] Formulário integrado ✅
+  - [x] Modo criação/edição ✅
+  - [x] Confirmação antes de fechar com dados ✅
+  - [x] Escape key para fechar ✅
+
+#### Detalhes do Usuário ❌ NÃO IMPLEMENTADO
 - [ ] **Componente UsuarioDetails**
   - [ ] Visualização completa dos dados
   - [ ] Histórico de atividades (se aplicável)
   - [ ] Botões de ação (Editar, Excluir)
 
-### Funcionalidades Específicas
+#### Integração com API ✅ IMPLEMENTADO
+- [x] **Hooks personalizados** ✅
+  - [x] useUsuarios hook implementado ✅
+  - [x] Estados de loading/error ✅
+  - [x] Cache de dados ✅
+  - [x] Invalidação automática ✅
 
-#### Autenticação e Autorização
-- [ ] **Login de usuário**
-  - [ ] Validação de credenciais
-  - [ ] Geração de token JWT
-  - [ ] Redirecionamento baseado no perfil
+### Funcionalidades Específicas ✅ IMPLEMENTADAS
 
-- [ ] **Controle de acesso**
-  - [ ] Middleware de autorização
-  - [ ] Verificação de perfil por endpoint
-  - [ ] Proteção de rotas no frontend
+#### Autenticação e Autorização ✅
+- [x] **Login de usuário** ✅
+  - [x] Validação de credenciais ✅
+  - [x] Geração de token JWT ✅
+  - [x] Redirecionamento baseado no perfil ✅
 
-#### Gestão de Perfis
-- [ ] **Administrador**
-  - [ ] Acesso total ao CRUD
-  - [ ] Pode alterar perfis de outros usuários
-  - [ ] Pode desativar usuários
+- [x] **Controle de acesso** ✅
+  - [x] Middleware de autorização ✅
+  - [x] Verificação de perfil por endpoint ✅
+  - [x] Proteção de rotas no frontend ✅
 
-- [ ] **Outros perfis**
-  - [ ] Podem editar apenas próprios dados
-  - [ ] Não podem alterar próprio perfil
-  - [ ] Visualização limitada de outros usuários
+#### Gestão de Perfis ✅
+- [x] **Administrador** ✅
+  - [x] Acesso total ao CRUD ✅
+  - [x] Pode alterar perfis de outros usuários ✅
+  - [x] Pode desativar usuários ✅
+
+- [x] **Outros perfis** ✅
+  - [x] Podem editar apenas próprios dados ✅
+  - [x] Não podem alterar próprio perfil ✅
+  - [x] Visualização limitada de outros usuários ✅
+
+#### Auditoria ✅ IMPLEMENTADA
+- [x] **Log de ações** ✅
+  - [x] Criação de usuário ✅
+  - [x] Atualização de dados ✅
+  - [x] Ativação/desativação ✅
+  - [x] Tentativas de login ✅
+
+#### Segurança ✅ IMPLEMENTADA
+- [x] **Medidas de proteção** ✅
+  - [x] Hash de senhas (BCrypt) ✅
+  - [x] Validação de entrada (Data Annotations) ✅
+  - [x] Sanitização de dados ✅
+  - [x] Autorização por role ✅
+
+## 3. Problemas Identificados
+
+### Críticos ⚠️
+- ⚠️ **Incompatibilidade Frontend-Backend**: Componentes React usam campos 'nome' e 'email' que não existem no modelo User do backend
+- ⚠️ **Entidade Usuario vs User**: Frontend referencia entidade 'Usuario' mas backend usa 'User'
+
+### Médios
+- 📝 **Testes**: Não há testes unitários implementados para os componentes
+- 📝 **Componente UsuarioDetails**: Não implementado para visualização completa
+
+### Baixos
+- 📝 **Campo UpdatedAt**: Não implementado no modelo User
+- 📝 **Soft Delete**: Implementado como IsActive mas poderia ter campo DeletedAt
+
+## 4. Próximos Passos
+
+### Imediatos (Esta Sprint) 🚨
+1. ✅ **Corrigir incompatibilidade Frontend-Backend**
+   - Remover campos 'nome' e 'email' dos componentes React
+   - Ajustar validações e formulários
+   - Atualizar interfaces TypeScript
+2. ✅ **Sincronizar entidades**
+   - Padronizar uso de 'User' em todo o sistema
+   - Atualizar imports e referências
+3. ✅ **Testar funcionalidades corrigidas**
+
+### Médio Prazo
+1. 📝 **Implementar testes unitários**
+2. 📝 **Criar componente UsuarioDetails**
+3. 📝 **Adicionar campo UpdatedAt ao modelo**
+
+### Longo Prazo
+1. 📝 **Implementar auditoria avançada**
+2. 📝 **Adicionar mais perfis de usuário se necessário**
 
 ### Testes
 

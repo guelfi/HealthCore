@@ -1,0 +1,342 @@
+// =============================================================================
+// SKELETON COMPONENTS STYLES
+// =============================================================================
+
+// Base Skeleton Styles
+.base-skeleton {
+  &.MuiSkeleton-root {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.2) 80%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    border-radius: 4px;
+    display: inline-block;
+    line-height: 1;
+    width: 100%;
+    
+    // Animação personalizada
+    animation: skeleton-loading 1.2s ease-in-out infinite;
+    
+    // Tema escuro
+    @media (prefers-color-scheme: dark) {
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.05) 20%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.05) 80%,
+        rgba(255, 255, 255, 0) 100%
+      );
+    }
+  }
+}
+
+// Skeleton multiline
+.base-skeleton-multiline {
+  .MuiSkeleton-root {
+    &:last-child {
+      width: 75% !important; // Última linha mais curta
+    }
+  }
+}
+
+// Card Skeleton Styles
+.card-skeleton {
+  .MuiCard-root {
+    overflow: hidden;
+    
+    .MuiCardContent-root {
+      padding: 16px;
+      
+      @media (max-width: 768px) {
+        padding: 12px;
+      }
+    }
+    
+    .MuiCardActions-root {
+      padding: 8px 16px 16px;
+      
+      @media (max-width: 768px) {
+        padding: 8px 12px 12px;
+        
+        .MuiSkeleton-root {
+          min-height: 44px; // Touch-friendly em mobile
+        }
+      }
+    }
+  }
+}
+
+// List Skeleton Styles
+.list-skeleton {
+  .MuiList-root {
+    padding: 0;
+    
+    .MuiListItem-root {
+      padding: 12px 16px;
+      
+      @media (max-width: 768px) {
+        padding: 16px;
+      }
+      
+      &.MuiListItem-dense {
+        padding: 8px 16px;
+        
+        @media (max-width: 768px) {
+          padding: 12px 16px;
+        }
+      }
+    }
+    
+    .MuiListItemAvatar-root {
+      min-width: 56px;
+      
+      @media (max-width: 768px) {
+        min-width: 48px;
+      }
+    }
+    
+    .MuiDivider-root {
+      margin-left: 72px;
+      
+      @media (max-width: 768px) {
+        margin-left: 64px;
+      }
+    }
+  }
+}
+
+// Form Skeleton Styles
+.form-skeleton {
+  .MuiPaper-root {
+    background-color: var(--mui-palette-background-paper);
+    
+    // Campo de formulário
+    .form-field-skeleton {
+      margin-bottom: 20px;
+      
+      @media (max-width: 768px) {
+        margin-bottom: 24px;
+      }
+      
+      // Label
+      .field-label-skeleton {
+        margin-bottom: 8px;
+        display: block;
+      }
+      
+      // Campo de input
+      .field-input-skeleton {
+        width: 100%;
+        border-radius: 4px;
+        
+        &.textarea {
+          min-height: 80px;
+          
+          @media (max-width: 768px) {
+            min-height: 100px;
+          }
+        }
+        
+        &.mobile-optimized {
+          @media (max-width: 768px) {
+            min-height: 44px; // Touch-friendly
+          }
+        }
+      }
+      
+      // Texto de ajuda
+      .field-help-skeleton {
+        margin-top: 4px;
+        opacity: 0.7;
+      }
+    }
+    
+    // Seções do formulário
+    .form-section-skeleton {
+      margin-bottom: 32px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .section-title-skeleton {
+        margin-bottom: 16px;
+        font-weight: 600;
+      }
+    }
+    
+    // Ações do formulário
+    .form-actions-skeleton {
+      margin-top: 32px;
+      display: flex;
+      gap: 16px;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 12px;
+        
+        .MuiSkeleton-root {
+          width: 100% !important;
+          min-height: 44px;
+        }
+      }
+      
+      @media (min-width: 769px) {
+        justify-content: flex-end;
+      }
+    }
+  }
+}
+
+// Animações
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+// Skeleton com pulso (alternativa)
+.skeleton-pulse {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Skeleton com wave (alternativa)
+.skeleton-wave {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    animation: skeleton-wave 1.6s linear infinite;
+  }
+}
+
+@keyframes skeleton-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// Responsividade geral
+@media (max-width: 768px) {
+  .skeleton-mobile-optimized {
+    .MuiSkeleton-text {
+      font-size: 0.875rem;
+    }
+    
+    .MuiSkeleton-rectangular {
+      min-height: 44px;
+    }
+    
+    .MuiSkeleton-circular {
+      &.avatar-small {
+        width: 32px;
+        height: 32px;
+      }
+      
+      &.avatar-medium {
+        width: 40px;
+        height: 40px;
+      }
+      
+      &.avatar-large {
+        width: 56px;
+        height: 56px;
+      }
+    }
+  }
+}
+
+// Estados especiais
+.skeleton-error {
+  .MuiSkeleton-root {
+    background-color: rgba(244, 67, 54, 0.1);
+    
+    &::after {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(244, 67, 54, 0.2),
+        transparent
+      );
+    }
+  }
+}
+
+.skeleton-success {
+  .MuiSkeleton-root {
+    background-color: rgba(76, 175, 80, 0.1);
+    
+    &::after {
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(76, 175, 80, 0.2),
+        transparent
+      );
+    }
+  }
+}
+
+// Acessibilidade
+@media (prefers-reduced-motion: reduce) {
+  .MuiSkeleton-root {
+    animation: none;
+  }
+  
+  .skeleton-pulse,
+  .skeleton-wave {
+    animation: none;
+  }
+}
+
+// Modo de alto contraste
+@media (prefers-contrast: high) {
+  .MuiSkeleton-root {
+    background-color: rgba(0, 0, 0, 0.2);
+    
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}

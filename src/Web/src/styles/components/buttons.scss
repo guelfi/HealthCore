@@ -1,0 +1,146 @@
+// 🔘 Buttons - HealthCore Design System
+// Estilos para botões do sistema
+
+// Botão base
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:focus {
+    outline: 2px solid var(--color-primary, #2563eb);
+    outline-offset: 2px;
+  }
+}
+
+// Variantes de botão
+.btn-primary {
+  background-color: var(--color-primary, #2563eb);
+  color: white;
+  border-color: var(--color-primary, #2563eb);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary-dark, #1d4ed8);
+    border-color: var(--color-primary-dark, #1d4ed8);
+  }
+}
+
+.btn-secondary {
+  background-color: var(--color-gray-100, #f3f4f6);
+  color: var(--color-gray-700, #374151);
+  border-color: var(--color-gray-300, #d1d5db);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-gray-200, #e5e7eb);
+    border-color: var(--color-gray-400, #9ca3af);
+  }
+}
+
+.btn-success {
+  background-color: var(--color-success, #10b981);
+  color: white;
+  border-color: var(--color-success, #10b981);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-success-dark, #059669);
+    border-color: var(--color-success-dark, #059669);
+  }
+}
+
+.btn-warning {
+  background-color: var(--color-warning, #f59e0b);
+  color: white;
+  border-color: var(--color-warning, #f59e0b);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-warning-dark, #d97706);
+    border-color: var(--color-warning-dark, #d97706);
+  }
+}
+
+.btn-error {
+  background-color: var(--color-error, #ef4444);
+  color: white;
+  border-color: var(--color-error, #ef4444);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-error-dark, #dc2626);
+    border-color: var(--color-error-dark, #dc2626);
+  }
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-primary, #2563eb);
+  border-color: var(--color-primary, #2563eb);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary, #2563eb);
+    color: white;
+  }
+}
+
+// Tamanhos de botão
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: var(--font-size-base);
+}
+
+// Botão de largura total
+.btn-full {
+  width: 100%;
+}
+
+// Botão circular/ícone
+.btn-icon {
+  padding: 0.75rem;
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+// Grupo de botões
+.btn-group {
+  display: inline-flex;
+  
+  .btn {
+    border-radius: 0;
+    
+    &:first-child {
+      border-top-left-radius: 0.5rem;
+      border-bottom-left-radius: 0.5rem;
+    }
+    
+    &:last-child {
+      border-top-right-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+    }
+    
+    &:not(:first-child) {
+      border-left-width: 0;
+    }
+  }
+}

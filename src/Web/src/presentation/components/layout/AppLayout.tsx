@@ -30,6 +30,8 @@ import {
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useUIStore } from '../../../application/stores/uiStore';
 import { UserProfile } from '../../../domain/enums/UserProfile';
+import { HamburgerMenu } from '../../../components/ui/Navigation';
+import type { MenuItem as HamburgerMenuItem } from '../../../components/ui/Navigation';
 import Footer from './Footer';
 
 const drawerWidth = 240;
@@ -69,6 +71,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     navigate('/login');
   };
 
+  // Menu items para desktop sidebar
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
   ];
@@ -90,6 +93,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       { text: 'Exames', icon: <Assignment />, path: '/exames' }
     );
   }
+
+  // Menu items para HamburgerMenu (formato específico)
+  const hamburgerMenuItems: HamburgerMenuItem[] = menuItems.map(item => ({
+    ...item,
+    onClick: () => handleMenuClick(item.path),
+  }));
 
   const handleMenuClick = (path: string) => {
     navigate(path);
@@ -148,17 +157,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}
       >
         <Toolbar>
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={toggleSidebar}
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
+          <HamburgerMenu
+            isOpen={sidebarOpen}
+            onToggle={toggleSidebar}
+            onClose={() => setSidebarOpen(false)}
+            menuItems={hamburgerMenuItems}
+            theme={theme.palette.mode}
+            userInfo={{
+              name: user?.username || 'Usuário',
+              role: user?.role === UserProfile.ADMINISTRADOR ? 'Administrador' : 'Médico',
+            }}
+          />
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             HealthCore
           </Typography>

@@ -1,0 +1,338 @@
+@import '../design-system/tokens';
+@import '../design-system/breakpoints';
+
+// Diálogos base
+.dialog-alert,
+.dialog-confirm,
+.dialog-modal,
+.dialog-bottom-sheet {
+  .MuiDialog-paper {
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--border-radius-lg);
+    
+    // Animações suaves
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .MuiDialogTitle-root {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid var(--color-border-light);
+    
+    .MuiTypography-root {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+  }
+  
+  .MuiDialogContent-root {
+    padding: 24px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+  
+  .MuiDialogActions-root {
+    padding: 16px 24px 24px;
+    border-top: 1px solid var(--color-border-light);
+  }
+}
+
+// Alert específico
+.dialog-alert {
+  .MuiDialog-paper {
+    min-width: 320px;
+    max-width: 400px;
+  }
+  
+  .MuiDialogActions-root {
+    justify-content: center;
+  }
+}
+
+// Confirm específico
+.dialog-confirm {
+  .MuiDialog-paper {
+    min-width: 320px;
+    max-width: 500px;
+  }
+  
+  .MuiDialogActions-root {
+    justify-content: flex-end;
+    gap: 12px;
+  }
+}
+
+// Modal específico
+.dialog-modal {
+  .MuiDialog-paper {
+    max-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .MuiDialogContent-root {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    
+    // Scrollbar customizada
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background-color: var(--color-background-secondary);
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-border);
+      border-radius: 4px;
+      
+      &:hover {
+        background-color: var(--color-text-secondary);
+      }
+    }
+  }
+}
+
+// Bottom Sheet específico
+.dialog-bottom-sheet {
+  .MuiDialog-container {
+    align-items: flex-end;
+  }
+  
+  .MuiDialog-paper {
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    max-height: 80vh;
+    min-height: 200px;
+    width: 100%;
+    
+    // Animação de slide up
+    transform-origin: bottom;
+  }
+  
+  .MuiBackdrop-root {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  // Handle para arrastar
+  .drag-handle {
+    width: 40px;
+    height: 4px;
+    background-color: var(--color-border);
+    border-radius: 2px;
+    margin: 8px auto 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: var(--color-text-secondary);
+    }
+  }
+}
+
+// Responsividade mobile
+@include mobile-only {
+  .dialog-alert,
+  .dialog-confirm {
+    .MuiDialog-paper {
+      margin: 16px;
+      width: calc(100% - 32px);
+      max-width: none;
+      border-radius: var(--border-radius-md);
+    }
+    
+    .MuiDialogTitle-root {
+      padding: 20px 20px 12px;
+      
+      .MuiTypography-root {
+        font-size: 1.25rem;
+      }
+    }
+    
+    .MuiDialogContent-root {
+      padding: 20px;
+      font-size: 1rem;
+    }
+    
+    .MuiDialogActions-root {
+      padding: 12px 20px 20px;
+      flex-direction: column;
+      gap: 8px;
+      
+      .touch-button {
+        width: 100%;
+        min-height: 48px;
+      }
+    }
+  }
+  
+  .dialog-confirm {
+    .MuiDialogActions-root {
+      // Em mobile, botão de confirmar fica em cima
+      flex-direction: column-reverse;
+    }
+  }
+  
+  .dialog-modal {
+    .MuiDialog-paper {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+    
+    .MuiDialogTitle-root {
+      padding: 16px 20px 12px;
+      position: sticky;
+      top: 0;
+      background-color: var(--color-background-paper);
+      z-index: 1;
+      
+      .MuiTypography-root {
+        font-size: 1.25rem;
+      }
+    }
+  }
+  
+  .dialog-bottom-sheet {
+    .MuiDialog-paper {
+      max-height: 90vh;
+      border-radius: 20px 20px 0 0;
+    }
+    
+    .drag-handle {
+      width: 48px;
+      height: 5px;
+      margin: 12px auto 20px;
+    }
+  }
+}
+
+@include tablet-up {
+  .dialog-alert,
+  .dialog-confirm {
+    .MuiDialog-paper {
+      margin: 24px;
+      max-width: 600px;
+    }
+  }
+  
+  .dialog-modal {
+    .MuiDialog-paper {
+      margin: 24px;
+      max-height: calc(100vh - 48px);
+      border-radius: var(--border-radius-lg);
+    }
+  }
+}
+
+// Estados de loading nos diálogos
+.dialog-loading {
+  .MuiDialogContent-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+  }
+}
+
+// Animações personalizadas
+@keyframes dialogSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Aplicar animações
+.dialog-bottom-sheet {
+  .MuiDialog-paper {
+    animation: dialogSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.dialog-alert,
+.dialog-confirm,
+.dialog-modal {
+  .MuiDialog-paper {
+    animation: dialogFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+// Acessibilidade
+.dialog-alert,
+.dialog-confirm,
+.dialog-modal,
+.dialog-bottom-sheet {
+  .MuiDialog-paper {
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+  
+  // Melhora contraste para leitores de tela
+  .MuiDialogTitle-root {
+    .MuiTypography-root {
+      &[aria-describedby] {
+        color: var(--color-text-primary);
+      }
+    }
+  }
+}
+
+// Estados de erro
+.dialog-error {
+  .MuiDialogTitle-root {
+    background-color: var(--color-error-light);
+    color: var(--color-error-dark);
+    border-bottom-color: var(--color-error);
+  }
+  
+  .MuiDialog-paper {
+    border: 2px solid var(--color-error);
+  }
+}
+
+// Estados de sucesso
+.dialog-success {
+  .MuiDialogTitle-root {
+    background-color: var(--color-success-light);
+    color: var(--color-success-dark);
+    border-bottom-color: var(--color-success);
+  }
+  
+  .MuiDialog-paper {
+    border: 2px solid var(--color-success);
+  }
+}
+
+// Estados de aviso
+.dialog-warning {
+  .MuiDialogTitle-root {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning-dark);
+    border-bottom-color: var(--color-warning);
+  }
+  
+  .MuiDialog-paper {
+    border: 2px solid var(--color-warning);
+  }
+}

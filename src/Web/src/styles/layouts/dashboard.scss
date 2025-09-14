@@ -1,0 +1,117 @@
+// 📊 Dashboard Layout - HealthCore Design System
+// Layout para páginas de dashboard
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-background, #f9fafb);
+}
+
+.dashboard-sidebar {
+  flex-shrink: 0;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 280px;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  background-color: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.dashboard-title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.dashboard-subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary, #666666);
+}
+
+.dashboard-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+// Grid de métricas
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  
+  .metric-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary, #666666);
+    margin-bottom: 0.5rem;
+  }
+  
+  .metric-value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary, #1a1a1a);
+    margin-bottom: 0.25rem;
+  }
+  
+  .metric-change {
+    font-size: var(--font-size-xs);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    
+    &.positive {
+      color: var(--color-success, #10b981);
+    }
+    
+    &.negative {
+      color: var(--color-error, #ef4444);
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+  
+  .dashboard-content {
+    padding: 1rem;
+  }
+  
+  .dashboard-header {
+    padding: 1rem;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

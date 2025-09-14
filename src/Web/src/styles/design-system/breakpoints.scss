@@ -1,0 +1,92 @@
+// 📱 Breakpoints Responsivos - HealthCore
+// Sistema de breakpoints mobile-first
+
+@import './tokens.scss';
+
+// Mixins para media queries
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: #{$breakpoint-sm}) and (max-width: #{$breakpoint-lg - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: #{$breakpoint-lg}) {
+    @content;
+  }
+}
+
+@mixin desktop-only {
+  @media (min-width: #{$breakpoint-lg}) and (max-width: #{$breakpoint-xl - 1px}) {
+    @content;
+  }
+}
+
+@mixin large-desktop-up {
+  @media (min-width: #{$breakpoint-xl}) {
+    @content;
+  }
+}
+
+// Mixins combinados para compatibilidade
+@mixin mobile-and-tablet {
+  @media (max-width: #{$breakpoint-lg - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-and-desktop {
+  @media (min-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+// Aliases para compatibilidade com código existente
+@mixin mobile {
+  @include mobile-only {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @include tablet-up {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @include desktop-up {
+    @content;
+  }
+}
+
+// Utilitários de breakpoint
+.mobile-only {
+  @include tablet-up {
+    display: none !important;
+  }
+}
+
+.tablet-up {
+  @include mobile-only {
+    display: none !important;
+  }
+}
+
+.desktop-up {
+  @media (max-width: #{$breakpoint-lg - 1px}) {
+    display: none !important;
+  }
+}
