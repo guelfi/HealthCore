@@ -34,9 +34,7 @@ import { useUsuarios } from '../../hooks/useUsuarios';
 
 // Schema base
 const baseUsuarioSchema = {
-  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   username: z.string().min(3, 'Username deve ter pelo menos 3 caracteres'),
-  email: z.string().email('Email deve ser válido'),
   role: z.nativeEnum(UserProfile, { message: 'Perfil é obrigatório' }),
   isActive: z.boolean().optional(),
 };
@@ -91,9 +89,7 @@ const UsuarioForm: React.FC = () => {
       if (isEditing && id && !initialDataLoaded) {
         try {
           const usuario = await getUsuarioById(id);
-          setValue('nome', usuario.nome);
           setValue('username', usuario.username);
-          setValue('email', usuario.email);
           setValue('password', ''); // Não carregar senha por segurança
           setValue('role', usuario.role);
           setValue('isActive', usuario.isActive);
@@ -118,9 +114,7 @@ const UsuarioForm: React.FC = () => {
       if (isEditing && id) {
         // Atualizar usuário existente
         const updateData: UpdateUsuarioDto = {
-          nome: data.nome,
           username: data.username,
-          email: data.email,
           role: data.role,
           isActive: data.isActive ?? true,
         };
@@ -135,12 +129,9 @@ const UsuarioForm: React.FC = () => {
       } else {
         // Criar novo usuário
         const createData: CreateUsuarioDto = {
-          nome: data.nome,
           username: data.username,
-          email: data.email,
           password: data.password!,
           role: data.role,
-          isActive: data.isActive ?? true,
         };
         
         await createUsuario(createData);
@@ -221,23 +212,7 @@ const UsuarioForm: React.FC = () => {
                 gap: { xs: 1, sm: 1.2 },
               }}
             >
-              <TextField
-                {...register('nome')}
-                fullWidth
-                label="Nome Completo *"
-                error={!!errors.nome}
-                helperText={errors.nome?.message}
-                disabled={loading}
-                size="small"
-                sx={{
-                  '& .MuiInputBase-root': {
-                    padding: '4px 6px',
-                  },
-                  '& .MuiInputBase-input': {
-                    padding: '4px 0',
-                  },
-                }}
-              />
+
 
               <TextField
                 {...register('username')}
@@ -257,24 +232,7 @@ const UsuarioForm: React.FC = () => {
                 }}
               />
 
-              <TextField
-                {...register('email')}
-                fullWidth
-                label="Email *"
-                type="email"
-                error={!!errors.email}
-                helperText={errors.email?.message}
-                disabled={loading}
-                size="small"
-                sx={{
-                  '& .MuiInputBase-root': {
-                    padding: '4px 6px',
-                  },
-                  '& .MuiInputBase-input': {
-                    padding: '4px 0',
-                  },
-                }}
-              />
+
 
               <FormControl
                 fullWidth
@@ -295,11 +253,12 @@ const UsuarioForm: React.FC = () => {
                   label="Perfil *"
                   disabled={loading}
                 >
-                  {Object.values(UserProfile).map(profile => (
-                    <MenuItem key={profile} value={profile}>
-                      {profile}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value={UserProfile.ADMINISTRADOR}>
+                    Administrador
+                  </MenuItem>
+                  <MenuItem value={UserProfile.MEDICO}>
+                    Médico
+                  </MenuItem>
                 </Select>
                 {errors.role && (
                   <Typography

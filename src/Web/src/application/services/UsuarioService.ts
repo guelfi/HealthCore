@@ -196,17 +196,17 @@ export class UsuarioService {
    */
   static async activate(id: string): Promise<Usuario> {
     debug.log('Ativando usuário:', id);
-    const response = await apiClient.patch(`/users/${id}/activate`);
+    const response = await apiClient.patch(`/admin/usuarios/${id}/ativar`);
     debug.log('Usuário ativado:', response.data);
     return response.data;
   }
 
   /**
-   * Desativa um usuário
+   * Desativa um usuário (usando DELETE que desativa)
    */
   static async deactivate(id: string): Promise<Usuario> {
     debug.log('Desativando usuário:', id);
-    const response = await apiClient.patch(`/users/${id}/deactivate`);
+    const response = await apiClient.delete(`/admin/usuarios/${id}`);
     debug.log('Usuário desativado:', response.data);
     return response.data;
   }

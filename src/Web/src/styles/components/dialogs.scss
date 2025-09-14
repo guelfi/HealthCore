@@ -1,0 +1,139 @@
+// 💬 Dialogs - HealthCore Design System
+// Estilos para diálogos e modais
+
+// Overlay do modal
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+// Container do diálogo
+.dialog {
+  background-color: var(--color-surface, #ffffff);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// Header do diálogo
+.dialog-header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+// Corpo do diálogo
+.dialog-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+// Footer do diálogo
+.dialog-footer {
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+// Botão de fechar
+.dialog-close {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  color: var(--color-text-secondary, #666666);
+  
+  &:hover {
+    background-color: var(--color-gray-100, #f3f4f6);
+    color: var(--color-text-primary, #1a1a1a);
+  }
+}
+
+// Variantes de tamanho
+.dialog-sm {
+  max-width: 400px;
+}
+
+.dialog-lg {
+  max-width: 700px;
+}
+
+.dialog-xl {
+  max-width: 900px;
+}
+
+.dialog-full {
+  max-width: 95vw;
+  max-height: 95vh;
+}
+
+// Animações
+@keyframes dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dialog-overlay {
+  animation: dialog-fade-in 0.2s ease-out;
+}
+
+.dialog {
+  animation: dialog-scale-in 0.2s ease-out;
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .dialog {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .dialog-header,
+  .dialog-body,
+  .dialog-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

@@ -69,11 +69,35 @@ class MetricsService {
       return this.adaptAdminMetrics(response.data);
     } catch (error: unknown) {
       console.error('Erro ao buscar métricas administrativas:', error);
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
-      throw new Error(
-        errorResponse?.data?.message ||
-          'Falha ao carregar métricas administrativas'
-      );
+      
+      // Tratamento específico para diferentes tipos de erro
+      if (error && typeof error === 'object') {
+        if ('name' in error) {
+          switch ((error as any).name) {
+            case 'NetworkError':
+              throw new Error('Erro de conectividade: Não foi possível conectar à API. Verifique sua conexão.');
+            case 'AuthenticationError':
+              throw new Error('Acesso negado: Faça login novamente para acessar as métricas.');
+            case 'ServerError':
+              throw new Error('Erro no servidor: Tente novamente em alguns minutos.');
+          }
+        }
+        
+        if ('response' in error) {
+          const errorResponse = (error as ErrorResponse).response;
+          if (errorResponse?.status === 401) {
+            throw new Error('Acesso não autorizado: Verifique suas credenciais.');
+          }
+          if (errorResponse?.status === 403) {
+            throw new Error('Permissão negada: Você não tem acesso a essas métricas.');
+          }
+          if (errorResponse?.data?.message) {
+            throw new Error(errorResponse.data.message);
+          }
+        }
+      }
+      
+      throw new Error('Falha ao carregar métricas administrativas');
     }
   }
 
@@ -86,10 +110,35 @@ class MetricsService {
       return this.adaptMedicoMetrics(response.data);
     } catch (error: unknown) {
       console.error('Erro ao buscar métricas do médico:', error);
-      const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as ErrorResponse).response : undefined;
-      throw new Error(
-        errorResponse?.data?.message || 'Falha ao carregar métricas do médico'
-      );
+      
+      // Tratamento específico para diferentes tipos de erro
+      if (error && typeof error === 'object') {
+        if ('name' in error) {
+          switch ((error as any).name) {
+            case 'NetworkError':
+              throw new Error('Erro de conectividade: Não foi possível conectar à API. Verifique sua conexão.');
+            case 'AuthenticationError':
+              throw new Error('Acesso negado: Faça login novamente para acessar as métricas.');
+            case 'ServerError':
+              throw new Error('Erro no servidor: Tente novamente em alguns minutos.');
+          }
+        }
+        
+        if ('response' in error) {
+          const errorResponse = (error as ErrorResponse).response;
+          if (errorResponse?.status === 401) {
+            throw new Error('Acesso não autorizado: Verifique suas credenciais.');
+          }
+          if (errorResponse?.status === 403) {
+            throw new Error('Permissão negada: Você não tem acesso a essas métricas.');
+          }
+          if (errorResponse?.data?.message) {
+            throw new Error(errorResponse.data.message);
+          }
+        }
+      }
+      
+      throw new Error('Falha ao carregar métricas do médico');
     }
   }
 

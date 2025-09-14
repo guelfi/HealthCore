@@ -24,11 +24,17 @@ export class ApiConfig {
       currentHost.includes('.ngrok-free.app') ||
       currentHost.includes('.ngrok.io') ||
       currentHost.includes('.ngrok.app');
+    
+    // Verificar se está sendo acessado via IP da rede local
+    const isLocalNetworkAccess = currentHost.startsWith('192.168.') || currentHost.startsWith('10.') || currentHost.startsWith('172.');
+    const isLocalhost = currentHost === 'localhost' || currentHost === '127.0.0.1';
 
     console.log('🔍 Detectando configuração da API:', {
       currentHost,
       currentProtocol,
       isNgrok,
+      isLocalNetworkAccess,
+      isLocalhost,
       fullUrl: window.location.href
     });
 
@@ -54,7 +60,15 @@ export class ApiConfig {
       return 'http://192.168.15.119:5000';
     }
 
-    // Se não for ngrok, usar configuração local
+    // Se está sendo acessado via IP da rede local (não localhost)
+    // Usar proxy local para evitar problemas de CORS
+    if (isLocalNetworkAccess) {
+      console.log('🏠 Detectado acesso via IP da rede local');
+      console.log('✅ Usando proxy local para evitar problemas de CORS');
+      return '/api';
+    }
+
+    // Se for localhost, usar configuração local
     const envApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
     if (envApiUrl) {
       console.log('✅ Usando URL da API do .env:', envApiUrl);

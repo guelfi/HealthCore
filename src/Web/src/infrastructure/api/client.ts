@@ -110,12 +110,25 @@ apiClient.interceptors.response.use(
     // Tratamento de erro de rede
     if (!error.response) {
       console.error('Erro de rede:', error.message);
-      // Aqui você pode mostrar uma notificação de erro de conexão
+      const networkError = new Error('Erro de conectividade: Verifique sua conexão com a internet ou se a API está disponível');
+      networkError.name = 'NetworkError';
+      return Promise.reject(networkError);
+    }
+
+    // Tratamento de erro 401 sem retry (usuário não autenticado)
+    if (error.response?.status === 401 && originalRequest._retry) {
+      console.error('Falha na autenticação: Token inválido ou expirado');
+      const authError = new Error('Sessão expirada. Faça login novamente.');
+      authError.name = 'AuthenticationError';
+      return Promise.reject(authError);
     }
 
     // Tratamento de outros erros da API
     if (error.response?.status >= 500) {
       console.error('Erro interno do servidor:', error.response.data);
+      const serverError = new Error('Erro interno do servidor. Tente novamente mais tarde.');
+      serverError.name = 'ServerError';
+      return Promise.reject(serverError);
     }
 
     return Promise.reject(error);

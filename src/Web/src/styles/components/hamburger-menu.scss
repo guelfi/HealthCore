@@ -1,0 +1,214 @@
+// 🍔 Hamburger Menu Mobile Styles
+// Estilos específicos para o menu hambúrguer mobile
+
+@import '../design-system/tokens.scss';
+@import '../design-system/breakpoints.scss';
+
+// ===== HAMBURGER MENU =====
+.hamburger-menu {
+  // Botão hambúrguer
+  &__button {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+    
+    // Só visível em mobile
+    @include tablet-up {
+      display: none;
+    }
+  }
+  
+  // Drawer
+  &__drawer {
+    .MuiDrawer-paper {
+      width: 280px;
+      border-right: 1px solid $neutral-200;
+      
+      // Dark theme
+      &[data-theme="dark"] {
+        background-color: $neutral-900;
+        border-right-color: $neutral-700;
+      }
+    }
+  }
+  
+  // Header do drawer
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid $neutral-200;
+    
+    &[data-theme="dark"] {
+      border-bottom-color: $neutral-700;
+    }
+  }
+  
+  // User info
+  &__user-info {
+    padding: 16px;
+    
+    &-name {
+      font-weight: 600;
+      color: $neutral-900;
+      
+      &[data-theme="dark"] {
+        color: $neutral-100;
+      }
+    }
+    
+    &-role {
+      color: $neutral-600;
+      font-size: 0.875rem;
+      
+      &[data-theme="dark"] {
+        color: $neutral-400;
+      }
+    }
+  }
+  
+  // Menu items
+  &__item {
+    min-height: 48px;
+    padding: 0 20px;
+    border-radius: 8px;
+    margin: 0 8px;
+    transition: all 0.2s ease-in-out;
+    
+    &:hover {
+      background-color: $neutral-100;
+    }
+    
+    &:active {
+      background-color: $neutral-200;
+    }
+    
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: -2px;
+    }
+    
+    // Dark theme
+    &[data-theme="dark"] {
+      &:hover {
+        background-color: $neutral-800;
+      }
+      
+      &:active {
+        background-color: $neutral-700;
+      }
+    }
+  }
+  
+  // Icon
+  &__icon {
+    min-width: 40px;
+    color: $neutral-600;
+    
+    &[data-theme="dark"] {
+      color: $neutral-400;
+    }
+  }
+  
+  // Text
+  &__text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: $neutral-900;
+    
+    &[data-theme="dark"] {
+      color: $neutral-100;
+    }
+  }
+}
+
+// ===== BACKDROP =====
+.hamburger-backdrop {
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  
+  // Só visível em mobile
+  @include tablet-up {
+    display: none;
+  }
+}
+
+// ===== ANIMAÇÕES =====
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+// Aplicar animações
+.hamburger-menu__drawer {
+  .MuiDrawer-paper {
+    &.MuiDrawer-paperAnchorLeft {
+      animation: slideInLeft 0.3s ease-out;
+    }
+  }
+}
+
+// ===== ACESSIBILIDADE =====
+.hamburger-menu {
+  // Focus trap
+  &__drawer[aria-hidden="false"] {
+    .MuiDrawer-paper {
+      // Primeiro elemento focável
+      .hamburger-menu__close-button {
+        &:focus {
+          outline: 2px solid $primary;
+          outline-offset: 2px;
+        }
+      }
+    }
+  }
+  
+  // Indicadores de estado
+  &__button {
+    &[aria-expanded="true"] {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+// ===== RESPONSIVIDADE =====
+@include mobile-only {
+  .hamburger-menu {
+    &__drawer .MuiDrawer-paper {
+      width: 100vw;
+      max-width: 320px;
+    }
+  }
+}
+
+// Para telas muito pequenas
+@media (max-width: 360px) {
+  .hamburger-menu {
+    &__drawer .MuiDrawer-paper {
+      width: calc(100vw - 40px);
+    }
+  }
+}

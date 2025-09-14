@@ -1,0 +1,359 @@
+// =============================================================================
+// PERFORMANCE OPTIMIZATION COMPONENTS STYLES
+// =============================================================================
+
+// Optimized Image Styles
+.optimized-image-container {
+  position: relative;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease-in-out;
+    
+    // Reduz transições em dispositivos de baixa performance
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+  
+  // Estados de loading
+  &.loading {
+    background-color: var(--mui-palette-grey-100);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+      );
+      animation: shimmer 1.5s infinite;
+    }
+  }
+}
+
+.optimized-image-skeleton {
+  background-color: var(--mui-palette-grey-100);
+  border-radius: 4px;
+  
+  .MuiSkeleton-root {
+    border-radius: inherit;
+  }
+}
+
+.optimized-image-error {
+  background-color: var(--mui-palette-grey-50);
+  border: 1px dashed var(--mui-palette-grey-300);
+  color: var(--mui-palette-grey-500);
+  
+  .MuiIconButton-root {
+    background-color: var(--mui-palette-background-paper);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+    &:hover {
+      background-color: var(--mui-palette-grey-50);
+    }
+  }
+}
+
+// Avatar otimizado
+.optimized-avatar {
+  &.circular {
+    border-radius: 50%;
+  }
+  
+  &.rounded {
+    border-radius: 8px;
+  }
+  
+  &.square {
+    border-radius: 0;
+  }
+}
+
+// Virtualized List Styles
+.virtualized-list {
+  // Otimizações de scroll para mobile
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  
+  // Remove scroll behavior em dispositivos de baixa performance
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+  
+  // Scrollbar customizada
+  &::-webkit-scrollbar {
+    width: 8px;
+    
+    @media (max-width: 768px) {
+      width: 4px;
+    }
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--mui-palette-grey-100);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--mui-palette-grey-400);
+    border-radius: 4px;
+    
+    &:hover {
+      background: var(--mui-palette-grey-500);
+    }
+  }
+  
+  // Itens virtualizados
+  .virtual-item {
+    position: absolute;
+    left: 0;
+    right: 0;
+    
+    // Otimização de rendering
+    will-change: transform;
+    contain: layout style paint;
+  }
+  
+  // Loading indicator
+  .virtual-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    
+    .MuiCircularProgress-root {
+      // Remove animação em dispositivos de baixa performance
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
+    }
+  }
+}
+
+// Lazy Wrapper Styles
+.lazy-wrapper {
+  position: relative;
+  
+  // Loading states
+  .lazy-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    
+    .MuiCircularProgress-root {
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
+    }
+  }
+  
+  // Error states
+  .lazy-error {
+    padding: 16px;
+    
+    .MuiAlert-root {
+      border-radius: 8px;
+    }
+  }
+  
+  // Skeleton placeholder
+  .lazy-skeleton {
+    padding: 16px;
+    
+    .MuiSkeleton-root {
+      margin-bottom: 16px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Performance Animations
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Performance-aware animations
+.performance-animation {
+  &.fade-in {
+    animation: fadeIn 0.3s ease-out;
+    
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+  
+  &.slide-up {
+    animation: slideUp 0.4s ease-out;
+    
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+}
+
+// Mobile-specific optimizations
+@media (max-width: 768px) {
+  .optimized-image-container {
+    // Força aceleração de hardware em mobile
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  .virtualized-list {
+    // Otimizações específicas para mobile
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    
+    .virtual-item {
+      // Força layer de composição
+      will-change: transform;
+      transform: translateZ(0);
+    }
+  }
+  
+  .lazy-wrapper {
+    // Otimizações de touch
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .optimized-image-error {
+    border-color: var(--mui-palette-text-primary);
+    background-color: var(--mui-palette-background-paper);
+  }
+  
+  .virtualized-list {
+    &::-webkit-scrollbar-thumb {
+      background: var(--mui-palette-text-primary);
+    }
+  }
+}
+
+// Dark theme optimizations
+@media (prefers-color-scheme: dark) {
+  .optimized-image-skeleton {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .optimized-image-error {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .virtualized-list {
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+    }
+  }
+}
+
+// Low performance device optimizations
+.low-performance-device {
+  .optimized-image-container {
+    img {
+      transition: none;
+    }
+    
+    &.loading::before {
+      animation: none;
+    }
+  }
+  
+  .virtualized-list {
+    scroll-behavior: auto;
+  }
+  
+  .performance-animation {
+    animation: none !important;
+  }
+  
+  .MuiSkeleton-root {
+    animation: none !important;
+  }
+}
+
+// Intersection Observer fallback
+.no-intersection-observer {
+  .lazy-wrapper {
+    .lazy-skeleton {
+      display: none;
+    }
+  }
+  
+  .optimized-image-skeleton {
+    display: none;
+  }
+}
+
+// Print styles
+@media print {
+  .virtualized-list {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  
+  .lazy-wrapper {
+    .lazy-loading,
+    .lazy-skeleton {
+      display: none;
+    }
+  }
+  
+  .optimized-image-container {
+    .loading-overlay {
+      display: none;
+    }
+  }
+}
