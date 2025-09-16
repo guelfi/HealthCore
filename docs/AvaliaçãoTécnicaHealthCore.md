@@ -36,6 +36,8 @@ O **HealthCore** é um sistema de gestão médica inteligente desenvolvido como 
 - Ferramentas de desenvolvimento atualizadas (Vite, TypeScript)
 
 ### **3. Recursos Críticos para Saúde**
+- **Arquitetura de Dados Reais**: Sistema 100% baseado em API, sem dados mockados
+- **SQLite Database**: Banco de dados persistente com Entity Framework Core 8.0
 - **Idempotência**: Implementação correta para operações críticas
 - **Modalidades DICOM**: Suporte completo às modalidades médicas padrão
 - **Conformidade LGPD**: Implementação de proteção de dados
