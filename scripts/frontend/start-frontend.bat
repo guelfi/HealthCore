@@ -1,5 +1,5 @@
 @echo off
-echo Iniciando MobileMed Frontend...
+echo Iniciando HealthCore Frontend...
 echo.
 
 REM Verificar se o diretorio existe

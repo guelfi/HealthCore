@@ -1,6 +1,6 @@
 # Deploy na Oracle Cloud Infrastructure (OCI)
 
-Este documento descreve como fazer o deploy da aplicação MobileMed na Oracle Cloud Infrastructure usando containers Docker via GitHub Actions.
+Este documento descreve como fazer o deploy da aplicação HealthCore na Oracle Cloud Infrastructure usando containers Docker via GitHub Actions.
 
 ## Pré-requisitos
 
@@ -28,7 +28,7 @@ OCI_TENANCY=<tenancy namespace da OCI>
 
 A aplicação é composta por dois containers principais que coexistem com o Batuara.net:
 
-### 1. API Container (mobilemed-api)
+### 1. API Container (healthcore-api)
 - **Porta**: 5000 (não conflita com Batuara.net:3000)
 - **Base**: mcr.microsoft.com/dotnet/aspnet:8.0
 - **Funcionalidades**:
@@ -38,7 +38,7 @@ A aplicação é composta por dois containers principais que coexistem com o Bat
   - Health checks configurados
   - Logs estruturados
 
-### 2. Frontend Container (mobilemed-frontend)
+### 2. Frontend Container (healthcore-frontend)
 - **Porta**: 5005 (não conflita com Batuara.net:3000)
 - **Base**: nginx:alpine
 - **Funcionalidades**:
@@ -49,7 +49,7 @@ A aplicação é composta por dois containers principais que coexistem com o Bat
 
 ### 3. Coexistência com Batuara.net
 - **Batuara.net**: Continua rodando na porta 3000
-- **MobileMed**: Roda nas portas 5000 (API) e 5005 (Frontend)
+- **HealthCore**: Roda nas portas 5000 (API) e 5005 (Frontend)
 - **Nginx**: Configurado para proxy reverso de ambos os projetos
 
 ## Deploy Automático via GitHub Actions
@@ -75,7 +75,7 @@ sudo usermod -aG docker ubuntu
 
 ```bash
 # Copiar arquivo de configuração do repositório
-scp -i ~/.ssh/oci-key nginx/mobilemed.conf ubuntu@129.153.86.168:~/
+scp -i ~/.ssh/oci-key nginx/healthcore.conf ubuntu@129.153.86.168:~/
 
 # Executar script de configuração
 scp -i ~/.ssh/oci-key scripts/setup-nginx-oci.sh ubuntu@129.153.86.168:~/
@@ -92,8 +92,8 @@ No painel da Oracle Cloud Infrastructure:
 4. Adicione as seguintes regras de Ingress:
 
 ```
-Porta 5000 (TCP) - Source: 0.0.0.0/0 - MobileMed API
-Porta 5005 (TCP) - Source: 0.0.0.0/0 - MobileMed Frontend
+Porta 5000 (TCP) - Source: 0.0.0.0/0 - HealthCore API
+Porta 5005 (TCP) - Source: 0.0.0.0/0 - HealthCore Frontend
 ```
 
 ### 4. Deploy via GitHub Actions
@@ -103,7 +103,7 @@ O deploy é automático quando você faz push para a branch main:
 ```bash
 # Fazer alterações no código
 git add .
-git commit -m "Deploy MobileMed to OCI"
+git commit -m "Deploy HealthCore to OCI"
 git push origin main
 ```
 
@@ -121,14 +121,14 @@ O GitHub Actions irá:
 Após o deploy bem-sucedido, a aplicação estará disponível em:
 
 ### Acesso Direto (via IP)
-- **MobileMed Frontend**: http://129.153.86.168:5005
-- **MobileMed API**: http://129.153.86.168:5000
+- **HealthCore Frontend**: http://129.153.86.168:5005
+- **HealthCore API**: http://129.153.86.168:5000
 - **Health Check**: http://129.153.86.168:5000/health
 - **Batuara.net**: http://129.153.86.168:3000 (continua funcionando)
 
 ### Acesso via Nginx (após configurar DNS)
-- **MobileMed**: https://mobilemed.batuara.net
-- **MobileMed API**: https://mobilemed.batuara.net/api
+- **HealthCore**: https://healthcore.batuara.net
+- **HealthCore API**: https://healthcore.batuara.net/api
 
 ## Deploy Automático via GitHub Actions
 
@@ -170,7 +170,7 @@ O deploy é executado automaticamente quando:
 docker-compose logs
 
 # Verificar imagens
-docker images | grep mobilemed
+docker images | grep healthcore
 
 # Recriar containers
 docker-compose down
@@ -192,7 +192,7 @@ sudo ufw status
 #### 3. Frontend não carrega
 ```bash
 # Verificar container do frontend
-docker logs mobilemed-frontend
+docker logs healthcore-frontend
 
 # Verificar configuração nginx
 sudo nginx -t
@@ -211,7 +211,7 @@ docker stop <container_id>
 ### Comandos Úteis
 
 ```bash
-# Reiniciar apenas o MobileMed (mantém Batuara.net rodando)
+# Reiniciar apenas o HealthCore (mantém Batuara.net rodando)
 docker-compose restart
 
 # Atualizar imagens
@@ -259,10 +259,10 @@ docker stats
 docker-compose logs -f
 
 # Apenas API
-docker-compose logs -f mobilemed-api
+docker-compose logs -f healthcore-api
 
 # Apenas Frontend
-docker-compose logs -f mobilemed-frontend
+docker-compose logs -f healthcore-frontend
 ```
 
 ### Health Checks
@@ -283,10 +283,10 @@ curl http://localhost:80/health
 ### Backup do banco
 ```bash
 # Backup
-docker-compose exec mobilemed-api cp /app/database/mobilemed.db /app/database/backup_$(date +%Y%m%d_%H%M%S).db
+docker-compose exec healthcore-api cp /app/database/healthcore.db /app/database/backup_$(date +%Y%m%d_%H%M%S).db
 
 # Restaurar
-docker-compose exec mobilemed-api cp /app/database/backup_YYYYMMDD_HHMMSS.db /app/database/mobilemed.db
+docker-compose exec healthcore-api cp /app/database/backup_YYYYMMDD_HHMMSS.db /app/database/healthcore.db
 ```
 
 ## Troubleshooting

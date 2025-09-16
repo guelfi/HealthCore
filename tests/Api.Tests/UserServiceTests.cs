@@ -7,16 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 using FluentAssertions;
-using MobileMed.Api.Core.Application.Services;
-using MobileMed.Api.Infrastructure.Data;
-using MobileMed.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Application.Services;
+using HealthCore.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Domain.Entities;
 
-namespace MobileMed.Api.Tests
+namespace HealthCore.Api.Tests
 {
     public class UserServiceTests
     {
         private readonly UserService _userService;
-        private readonly Mock<MobileMedDbContext> _mockContext;
+        private readonly Mock<HealthCoreDbContext> _mockContext;
         private readonly Mock<DbSet<User>> _mockUserDbSet;
         private readonly List<User> _users;
 
@@ -35,10 +35,10 @@ namespace MobileMed.Api.Tests
             _mockUserDbSet.Setup(d => d.FindAsync(It.IsAny<object[]>()))
                 .Returns<object[]>(ids => new ValueTask<User?>(_users.FirstOrDefault(d => d.Id == (Guid)ids[0])));
 
-            var options = new DbContextOptionsBuilder<MobileMedDbContext>()
+            var options = new DbContextOptionsBuilder<HealthCoreDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
-            _mockContext = new Mock<MobileMedDbContext>(options);
+            _mockContext = new Mock<HealthCoreDbContext>(options);
             _mockContext.Setup(c => c.Users).Returns(_mockUserDbSet.Object);
             _mockContext.Setup(c => c.SaveChangesAsync(default)).ReturnsAsync(1);
 

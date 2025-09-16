@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script para criar usuário administrador via API MobileMed
+# Script para criar usuário administrador via API HealthCore
 # Uso: ./create-admin-api.sh
 
 # Cores para output
@@ -17,7 +17,7 @@ API_URL="http://localhost:5000"
 USERNAME="guelfi"
 PASSWORD="@246!588"
 
-echo -e "${CYAN}🔧 MobileMed - Criador de Usuário Administrador via API${NC}"
+echo -e "${CYAN}🔧 HealthCore - Criador de Usuário Administrador via API${NC}"
 echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
@@ -59,7 +59,7 @@ if [ "$HTTP_CODE" -eq 201 ]; then
     # Agora atualiza a role diretamente no banco para torná-lo administrador
     echo -e "${YELLOW}🔧 Atualizando role para Administrador...${NC}"
     
-    DB_PATH="../src/Api/database/mobilemed.db"
+    DB_PATH="../src/Api/database/healthcore.db"
     
     if [ -f "$DB_PATH" ]; then
         sqlite3 "$DB_PATH" "UPDATE Users SET Role = 1 WHERE Username = '$USERNAME';"

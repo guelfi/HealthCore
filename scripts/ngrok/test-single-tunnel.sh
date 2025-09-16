@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🧪 Test Single Tunnel - MobileMed
+# 🧪 Test Single Tunnel - HealthCore
 # Testa a configuração de túnel único do ngrok
 
 # Cores para output
@@ -197,8 +197,8 @@ fi
 
 echo ""
 echo -e "${BLUE}📄 Logs disponíveis:${NC}"
-echo "   • API: /tmp/mobilemed-api.log"
-echo "   • Frontend: /tmp/mobilemed-frontend.log"
+echo "   • API: /tmp/healthcore-api.log"
+echo "   • Frontend: /tmp/healthcore-frontend.log"
 echo "   • ngrok: scripts/ngrok/ngrok-frontend.log"
 echo "   • Sessão atual: scripts/ngrok/current-session.txt"
 echo ""

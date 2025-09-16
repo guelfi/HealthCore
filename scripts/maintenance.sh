@@ -238,7 +238,7 @@ show_help() {
     echo
     echo "Exemplos:"
     echo "  $0 status"
-    echo "  $0 logs mobilemed-api"
+    echo "  $0 logs healthcore-api"
     echo "  $0 backup"
     echo "  $0 monitor"
 }

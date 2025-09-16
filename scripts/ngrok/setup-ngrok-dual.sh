@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 Setup Dual ngrok - MobileMed
+# 🚀 Setup Dual ngrok - HealthCore
 # Configura ngrok para API e Frontend simultaneamente
 
 # Cores para output

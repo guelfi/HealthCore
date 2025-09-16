@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🌐 MobileMed - Teste de Conectividade Distribuída
+# 🌐 HealthCore - Teste de Conectividade Distribuída
 # Script para testar a conexão entre frontend e backend em máquinas diferentes
 
 # Cores para output elegante
@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 show_header() {
     clear
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${BOLD}${WHITE}              🌐 MobileMed - Teste de Conectividade           ${NC}${PURPLE}║${NC}"
+    echo -e "${PURPLE}║${BOLD}${WHITE}              🌐 HealthCore - Teste de Conectividade           ${NC}${PURPLE}║${NC}"
     echo -e "${PURPLE}║${WHITE}                   Desenvolvimento Distribuído                ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""

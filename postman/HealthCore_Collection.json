@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "f2c2a8f8-11a1-4e8c-8f8f-3d1d1d1d1d1d",
-		"name": "MobileMed API - Complete",
-		"description": "Collection completa para a API MobileMed, incluindo todos os endpoints e casos de teste.",
+		"name": "HealthCore API - Complete",
+		"description": "Collection completa para a API HealthCore, incluindo todos os endpoints e casos de teste.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [

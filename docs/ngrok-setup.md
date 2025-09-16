@@ -1,6 +1,6 @@
-# 🔗 Configuração do Ngrok - MobileMed
+# 🔗 Configuração do Ngrok - HealthCore
 
-Guia completo para configurar e usar o ngrok com o projeto MobileMed, incluindo soluções para o erro **ERR_NGROK_8012**.
+Guia completo para configurar e usar o ngrok com o projeto HealthCore, incluindo soluções para o erro **ERR_NGROK_8012**.
 
 ## 📋 Índice
 
@@ -196,7 +196,7 @@ tunnels:
     bind_tls: true
     inspect: true
     host_header: localhost:5005
-    subdomain: mobilemed-dev  # Requer conta paga
+    subdomain: healthcore-dev  # Requer conta paga
 ```
 
 ### Usar Configuração Personalizada
@@ -221,7 +221,7 @@ Crie `.env.ngrok` no diretório `src/Web`:
 VITE_NGROK_URL=https://your-ngrok-url.ngrok-free.app
 VITE_API_BASE_URL=http://localhost:5000
 VITE_API_TIMEOUT=30000
-VITE_APP_NAME=MobileMed Frontend
+VITE_APP_NAME=HealthCore Frontend
 VITE_APP_VERSION=1.0.0
 VITE_DEV_MODE=true
 ```
@@ -232,7 +232,7 @@ VITE_DEV_MODE=true
 
 ```bash
 # Com subdomínio personalizado
-ngrok http 5005 --subdomain=mobilemed
+ngrok http 5005 --subdomain=healthcore
 
 # Com domínio próprio
 ngrok http 5005 --hostname=app.seudominio.com
@@ -280,7 +280,7 @@ curl http://localhost:4040/api/tunnels
 Se os problemas persistirem:
 
 1. Execute o diagnóstico completo: `npm run fix:ngrok`
-2. Verifique os logs em `/tmp/mobilemed-*.log`
+2. Verifique os logs em `/tmp/healthcore-*.log`
 3. Consulte a documentação oficial: https://ngrok.com/docs
 4. Verifique o painel do ngrok: http://localhost:4040
 

@@ -11,7 +11,7 @@
 ### 💻 Aplicação Front end web
 | Componente | Tecnologia | Descrição |
 |------------|------------|-----------|
-| **Framework** | React + Vite | Sistema MobileMed para gestão de pacientes e exames médicos |
+| **Framework** | React + Vite | Sistema HealthCore para gestão de pacientes e exames médicos |
 | **UI Library** | React UI Library (e.g., Material UI for React or Ant Design) | Componentes Material Design |
 
 ### 🎨 Estilização e Design

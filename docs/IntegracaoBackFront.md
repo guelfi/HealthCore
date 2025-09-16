@@ -1,8 +1,8 @@
-# 🔗 Análise de Integração Backend-Frontend - MobileMed
+# 🔗 Análise de Integração Backend-Frontend - HealthCore
 
 ## 📋 Resumo Executivo
 
-Esta análise identifica os pontos críticos de integração entre o backend .NET Core 8 e o frontend React + Vite do sistema MobileMed. O frontend está bem estruturado seguindo Clean Architecture, mas atualmente utiliza dados mockados que precisam ser substituídos por integrações reais com a API.
+Esta análise identifica os pontos críticos de integração entre o backend .NET Core 8 e o frontend React + Vite do sistema HealthCore. O frontend está bem estruturado seguindo Clean Architecture, mas atualmente utiliza dados mockados que precisam ser substituídos por integrações reais com a API.
 
 ## 🎯 Pontos de Integração Identificados
 

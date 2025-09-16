@@ -36,6 +36,8 @@ O **HealthCore** é um sistema de gestão médica inteligente desenvolvido como 
 - Ferramentas de desenvolvimento atualizadas (Vite, TypeScript)
 
 ### **3. Recursos Críticos para Saúde**
+- **Arquitetura de Dados Reais**: Sistema 100% baseado em API, sem dados mockados
+- **SQLite Database**: Banco de dados persistente com Entity Framework Core 8.0
 - **Idempotência**: Implementação correta para operações críticas
 - **Modalidades DICOM**: Suporte completo às modalidades médicas padrão
 - **Conformidade LGPD**: Implementação de proteção de dados
@@ -71,13 +73,13 @@ src/
 - Sugere consolidação da configuração de ambiente
 
 ### **4. Migração de Nomenclatura**
-- Ainda existem referências ao nome antigo "MobileMed"
+- Ainda existem referências ao nome antigo "HealthCore"
 - Processo de migração para "HealthCore" não está totalmente completo
 
 ## 🚀 **Recomendações de Melhoria**
 
 ### **Imediatas (1-2 semanas)**
-1. **Limpar referências legadas**: Completar migração de "MobileMed" para "HealthCore"
+1. **Limpar referências legadas**: Completar migração de "HealthCore" para "HealthCore"
 2. **Consolidar configurações**: Unificar arquivos de ambiente
 3. **Atualizar documentação**: Garantir consistência na nomenclatura
 

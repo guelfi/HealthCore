@@ -7,27 +7,27 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using FluentAssertions;
-using MobileMed.Api.Core.Application.Services;
-using MobileMed.Api.Core.Application.DTOs.Admin;
-using MobileMed.Api.Infrastructure.Data;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Core.Domain.Enums;
+using HealthCore.Api.Core.Application.Services;
+using HealthCore.Api.Core.Application.DTOs.Admin;
+using HealthCore.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Enums;
 
-namespace MobileMed.Api.Tests
+namespace HealthCore.Api.Tests
 {
     public class AdminServiceTests : IDisposable
     {
-        private readonly MobileMedDbContext _context;
+        private readonly HealthCoreDbContext _context;
         private readonly AdminService _adminService;
         private readonly Mock<ILogger<AdminService>> _mockLogger;
 
         public AdminServiceTests()
         {
-            var options = new DbContextOptionsBuilder<MobileMedDbContext>()
+            var options = new DbContextOptionsBuilder<HealthCoreDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new MobileMedDbContext(options);
+            _context = new HealthCoreDbContext(options);
             _mockLogger = new Mock<ILogger<AdminService>>();
             _adminService = new AdminService(_context, _mockLogger.Object);
         }

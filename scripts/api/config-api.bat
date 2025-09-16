@@ -1,14 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: 🔧 MobileMed - Configurador de API (Windows)
+:: 🔧 HealthCore - Configurador de API (Windows)
 :: Script para atualizar rapidamente a URL da API no arquivo .env
 
-title MobileMed - Configurador de API
+title HealthCore - Configurador de API
 
 echo.
 echo ================================================================
-echo               MobileMed - Configurador de API
+echo               HealthCore - Configurador de API
 echo ================================================================
 echo.
 

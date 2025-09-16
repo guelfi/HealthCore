@@ -114,7 +114,7 @@ npm run dev
 
 ## 📚 Documentação
 
-> **Nota**: Alguns documentos podem conter referências a "MobileMed" que correspondem ao nome anterior do projeto, agora chamado **HealthCore**.
+> **Nota**: Alguns documentos podem conter referências a "HealthCore" que correspondem ao nome anterior do projeto, agora chamado **HealthCore**.
 
 ### 📖 Documentação Técnica
 

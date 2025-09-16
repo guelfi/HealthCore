@@ -1,4 +1,4 @@
-# Lista de Tarefas - MobileMed
+# Lista de Tarefas - HealthCore
 
 ## 1. Requisitos Funcionais
 

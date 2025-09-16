@@ -199,17 +199,17 @@ test_docker_build() {
     fi
     
     print_info "Testando build da imagem da API..."
-    if docker build -f src/Api/Dockerfile -t mobilemed-api:test . &> /dev/null; then
+    if docker build -f src/Api/Dockerfile -t healthcore-api:test . &> /dev/null; then
         print_success "Build da API OK"
-        docker rmi mobilemed-api:test &> /dev/null
+        docker rmi healthcore-api:test &> /dev/null
     else
         print_error "Falha no build da API"
     fi
     
     print_info "Testando build da imagem do Frontend..."
-    if docker build -f src/Web/Dockerfile -t mobilemed-frontend:test . &> /dev/null; then
+    if docker build -f src/Web/Dockerfile -t healthcore-frontend:test . &> /dev/null; then
         print_success "Build do Frontend OK"
-        docker rmi mobilemed-frontend:test &> /dev/null
+        docker rmi healthcore-frontend:test &> /dev/null
     else
         print_error "Falha no build do Frontend"
     fi
@@ -242,8 +242,8 @@ OCI_TENANCY=<tenancy-namespace>
 OKE_CLUSTER_ID=ocid1.cluster.oc1..aaaaaaaa...
 
 # === Application ===
-DOMAIN_NAME=mobilemed.example.com
-VITE_API_URL=https://mobilemed.example.com/api
+DOMAIN_NAME=healthcore.example.com
+VITE_API_URL=https://healthcore.example.com/api
 
 # === Database (Opcional) ===
 DATABASE_CONNECTION_STRING=Server=...;Database=...;User Id=...;Password=...;
