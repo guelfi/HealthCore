@@ -161,16 +161,16 @@ if [[ "$response" =~ ^[Ss]$ ]]; then
     if [ "$API_HTTP_OK" = false ]; then
         echo "📡 Iniciando API..."
         cd ../Api
-        nohup dotnet run > /tmp/mobilemed-api.log 2>&1 &
-        echo "API iniciada em background (log: /tmp/mobilemed-api.log)"
+        nohup dotnet run > /tmp/healthcore-api.log 2>&1 &
+        echo "API iniciada em background (log: /tmp/healthcore-api.log)"
         cd ../Web
         sleep 3
     fi
     
     if [ "$FRONTEND_HTTP_OK" = false ]; then
         echo "🌐 Iniciando Frontend..."
-        nohup npm run dev > /tmp/mobilemed-frontend.log 2>&1 &
-        echo "Frontend iniciado em background (log: /tmp/mobilemed-frontend.log)"
+        nohup npm run dev > /tmp/healthcore-frontend.log 2>&1 &
+        echo "Frontend iniciado em background (log: /tmp/healthcore-frontend.log)"
         sleep 3
     fi
     

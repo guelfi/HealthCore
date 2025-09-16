@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 Script para iniciar API - MobileMed
+# 🚀 Script para iniciar API - HealthCore
 # Configura automaticamente para usar IP da máquina
 
 # Cores para output
@@ -22,7 +22,7 @@ get_local_ip() {
 
 LOCAL_IP=$(get_local_ip)
 
-echo -e "${BLUE}🚀 Iniciando API MobileMed${NC}"
+echo -e "${BLUE}🚀 Iniciando API HealthCore${NC}"
 echo "=================================="
 echo -e "🌐 IP Local: ${GREEN}$LOCAL_IP${NC}"
 echo -e "🔗 API URL: ${GREEN}http://$LOCAL_IP:5000${NC}"

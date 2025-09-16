@@ -1,10 +1,10 @@
-# Guia de Execução Local do Projeto MobileMed
+# Guia de Execução Local do Projeto HealthCore
 
-Este guia detalha os passos necessários para configurar e executar o projeto MobileMed localmente, incluindo a API (backend) e o Frontend (React).
+Este guia detalha os passos necessários para configurar e executar o projeto HealthCore localmente, incluindo a API (backend) e o Frontend (React).
 
 ## 1. Visão Geral do Projeto
 
-O MobileMed é uma aplicação para gerenciamento de pacientes e exames, com funcionalidades de cadastro, consulta, atualização e exclusão, além de um sistema de autenticação baseado em JWT.
+O HealthCore é uma aplicação para gerenciamento de pacientes e exames, com funcionalidades de cadastro, consulta, atualização e exclusão, além de um sistema de autenticação baseado em JWT.
 
 ## 2. Pré-requisitos
 
@@ -50,7 +50,7 @@ A API é desenvolvida em .NET 8 e utiliza SQLite como banco de dados.
     ```
 
 3.  **Aplique as Migrações do Banco de Dados:**
-    Certifique-se de que o banco de dados SQLite (`mobilemed.db`) seja criado e as tabelas sejam configuradas.
+    Certifique-se de que o banco de dados SQLite (`healthcore.db`) seja criado e as tabelas sejam configuradas.
     ```bash
     dotnet ef database update
     ```
@@ -130,11 +130,11 @@ Certifique-se de que a API esteja em execução. Execute o script de teste cURL 
 
 1.  **Importe a Coleção e o Ambiente:**
     *   Abra o Postman.
-    *   Clique em `File > Import` e selecione os arquivos `postman/MobileMed_Collection.json` e `postman/MobileMed_Environment.json` do seu repositório clonado.
+    *   Clique em `File > Import` e selecione os arquivos `postman/HealthCore_Collection.json` e `postman/HealthCore_Environment.json` do seu repositório clonado.
 2.  **Selecione o Ambiente:**
-    No canto superior direito do Postman, selecione "MobileMed Environment".
+    No canto superior direito do Postman, selecione "HealthCore Environment".
 3.  **Execute as Requisições:**
-    A coleção "MobileMed API" contém pastas para "Authentication", "Pacientes" e "Exames".
+    A coleção "HealthCore API" contém pastas para "Authentication", "Pacientes" e "Exames".
     *   Comece executando as requisições em "Authentication" para registrar um usuário e obter um `auth_token`. O token será automaticamente salvo no ambiente.
     *   Em seguida, execute as requisições nas pastas "Pacientes" e "Exames". Elas usarão o `auth_token` salvo para autenticar as requisições.
 
@@ -173,7 +173,7 @@ Para gerar um relatório detalhado dos testes da API em formato Markdown, siga o
 ## 7. Funcionalidades Implementadas na API
 
 
-A API MobileMed oferece os seguintes recursos:
+A API HealthCore oferece os seguintes recursos:
 
 *   **Gerenciamento de Pacientes:**
     *   `POST /pacientes`: Cadastra um novo paciente.

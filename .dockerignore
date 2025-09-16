@@ -103,7 +103,7 @@ packages/
 
 # Scripts and utilities
 scripts/
-mobilemed.*
+healthcore.*
 ecosystem.config.js
 
 # Postman collections

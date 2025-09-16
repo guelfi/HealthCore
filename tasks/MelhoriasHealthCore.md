@@ -13,7 +13,7 @@ Este documento apresenta um plano estruturado de melhorias para o projeto Health
 **Responsável**: Equipe de Desenvolvimento
 
 #### 📝 Descrição
-Completar a migração de todas as referências do nome antigo "MobileMed" para "HealthCore" em todo o projeto.
+Completar a migração de todas as referências do nome antigo "HealthCore" para "HealthCore" em todo o projeto.
 
 #### 🎯 Objetivos
 - Consistência total da nomenclatura
@@ -21,14 +21,14 @@ Completar a migração de todas as referências do nome antigo "MobileMed" para 
 - Profissionalizar a imagem do projeto
 
 #### ✅ Tarefas
-- [ ] Buscar e substituir todas as ocorrências de "MobileMed" nos arquivos
+- [ ] Buscar e substituir todas as ocorrências de "HealthCore" nos arquivos
 - [ ] Atualizar comentários de código e documentação
 - [ ] Revisar nomes de variáveis e métodos
 - [ ] Atualizar metadados dos projetos (.csproj, package.json)
 - [ ] Verificar strings de configuração e logs
 
 #### 📏 Critérios de Aceitação
-- Nenhuma referência a "MobileMed" deve existir no código
+- Nenhuma referência a "HealthCore" deve existir no código
 - Todos os arquivos de documentação devem usar "HealthCore"
 - Build e testes devem passar sem erros
 

@@ -1,8 +1,8 @@
-# 🌐 Configuração ngrok - MobileMed
+# 🌐 Configuração ngrok - HealthCore
 
 ## 📋 Visão Geral
 
-Esta pasta contém todos os scripts e configurações relacionadas ao ngrok para o projeto MobileMed. A solução foi desenvolvida para contornar a **limitação da conta gratuita do ngrok** que permite apenas 1 túnel simultâneo.
+Esta pasta contém todos os scripts e configurações relacionadas ao ngrok para o projeto HealthCore. A solução foi desenvolvida para contornar a **limitação da conta gratuita do ngrok** que permite apenas 1 túnel simultâneo.
 
 ## 🚨 Problema Identificado
 
@@ -111,7 +111,7 @@ bash scripts/ngrok/test-single-tunnel.sh
    ngrok config add-authtoken YOUR_TOKEN
    ```
 
-2. **Serviços do MobileMed**:
+2. **Serviços do HealthCore**:
    - API rodando na porta 5000
    - Frontend rodando na porta 5005
 
@@ -251,10 +251,10 @@ bash scripts/ngrok/start-ngrok-dual-tunnels.sh
 
 ```bash
 # Logs da API
-tail -f /tmp/mobilemed-api.log
+tail -f /tmp/healthcore-api.log
 
 # Logs do Frontend
-tail -f /tmp/mobilemed-frontend.log
+tail -f /tmp/healthcore-frontend.log
 
 # Logs do ngrok
 tail -f scripts/ngrok/ngrok-frontend.log

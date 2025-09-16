@@ -1,4 +1,4 @@
-# 🌐 Guia de Desenvolvimento Distribuído - MobileMed
+# 🌐 Guia de Desenvolvimento Distribuído - HealthCore
 
 ## 📋 Cenário de Desenvolvimento
 
@@ -73,7 +73,7 @@ Edite o arquivo `src/Web/.env`:
 VITE_API_BASE_URL=http://192.168.1.100:5000
 
 # Application Configuration
-VITE_APP_NAME=MobileMed Frontend
+VITE_APP_NAME=HealthCore Frontend
 VITE_APP_VERSION=1.0.0
 
 # Development Configuration

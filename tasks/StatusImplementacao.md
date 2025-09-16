@@ -56,7 +56,7 @@ Este relatório compara o status atual do projeto com as recomendações dos doc
 #### ✅ **CONCLUÍDO COM SUCESSO** (16/09/2025):
 - ✅ **Arquivos C# Críticos**: ExameServiceTests, AdminServiceTests, UserServiceTests
 - ✅ **MockDbSet.cs**: Namespace corrigido para HealthCore.Api.Tests
-- ✅ **Program.cs**: Logs migrados de "mobilemed-.log" → "healthcore-.log"
+- ✅ **Program.cs**: Logs migrados de "healthcore-.log" → "healthcore-.log"
 - ✅ **Migrations**: MigrarUsuariosMedicos.cs namespace e emails atualizados
 - ✅ **Database Scripts**: Todos SQLs com emails @healthcore.com
 - ✅ **Configuração**: .env.example com app name correto
@@ -104,7 +104,7 @@ src/Web/
 - Deploy em OCI
 
 #### ❌ **Precisa Atualização**:
-- [ ] **Consistência de nomenclatura** (MobileMed → HealthCore)
+- [ ] **Consistência de nomenclatura** (HealthCore → HealthCore)
 - [ ] **Links quebrados** verificação necessária
 - [ ] **Screenshots desatualizados** 
 - [ ] **Versões de dependências** mencionadas
@@ -217,7 +217,7 @@ src/Web/
 
 ### **Semana 1-2: Limpeza e Consistência**
 - [ ] ✅ **Migração EF Core 9.0 → 8.0** (CONCLUÍDA)
-- [ ] **Limpar todas as 25 referências "MobileMed"**
+- [ ] **Limpar todas as 25 referências "HealthCore"**
 - [ ] **Consolidar arquivos .env** (8 → 3)
 - [ ] **Verificar e corrigir links quebrados**
 

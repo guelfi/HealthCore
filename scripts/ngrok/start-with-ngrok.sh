@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🚀 Iniciando MobileMed Frontend com configuração Ngrok"
+echo "🚀 Iniciando HealthCore Frontend com configuração Ngrok"
 
 # Verificar se o ngrok URL foi fornecido
 if [ -n "$1" ]; then
@@ -35,7 +35,7 @@ else
 VITE_NGROK_URL=https://your-ngrok-url.ngrok-free.app
 VITE_API_BASE_URL=http://192.168.15.119:5000
 VITE_API_TIMEOUT=30000
-VITE_APP_NAME=MobileMed Frontend
+VITE_APP_NAME=HealthCore Frontend
 VITE_APP_VERSION=1.0.0
 VITE_DEV_MODE=true
 EOF

@@ -1,4 +1,4 @@
-# 🧪 Plano de Testes de Conectividade - MobileMed
+# 🧪 Plano de Testes de Conectividade - HealthCore
 
 ## 📋 **Cenários de Teste**
 

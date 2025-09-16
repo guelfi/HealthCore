@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🔧 Configure Frontend Environment - MobileMed
+# 🔧 Configure Frontend Environment - HealthCore
 # Configura o ambiente do frontend para trabalhar com ngrok
 
 # Cores para output
@@ -32,7 +32,7 @@ fi
 # Criar configuração otimizada para ngrok
 echo "📝 Criando configuração .env.local..."
 cat > .env.local << 'EOF'
-# 🌐 Configuração MobileMed - Ngrok Single Tunnel
+# 🌐 Configuração HealthCore - Ngrok Single Tunnel
 # Gerado automaticamente em $(date)
 
 # ====================================================================
@@ -47,9 +47,9 @@ VITE_API_TIMEOUT=30000
 # ====================================================================
 # CONFIGURAÇÃO DA APLICAÇÃO
 # ====================================================================
-VITE_APP_NAME=MobileMed Frontend
+VITE_APP_NAME=HealthCore Frontend
 VITE_APP_VERSION=1.0.0
-VITE_APP_TITLE=MobileMed
+VITE_APP_TITLE=HealthCore
 
 # ====================================================================
 # CONFIGURAÇÃO DE DESENVOLVIMENTO

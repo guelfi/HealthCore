@@ -1,4 +1,4 @@
-namespace MobileMed.Api.Tests;
+namespace HealthCore.Api.Tests;
 
 public class UnitTest1
 {

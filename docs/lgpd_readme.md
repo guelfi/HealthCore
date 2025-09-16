@@ -1,6 +1,6 @@
-# 🔒 Implementação LGPD - MobileMed
+# 🔒 Implementação LGPD - HealthCore
 
-Implementação completa da Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018) no sistema MobileMed.
+Implementação completa da Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018) no sistema HealthCore.
 
 ## 📋 Funcionalidades Implementadas
 
@@ -50,7 +50,7 @@ Implementação completa da Lei Geral de Proteção de Dados (LGPD - Lei 13.709/
 
 ## 🛡️ Conformidade Legal
 
-O sistema MobileMed está em total conformidade com:
+O sistema HealthCore está em total conformidade com:
 - **LGPD** (Lei 13.709/2018) - Brasil
 - **Princípios de Privacidade by Design**
 - **Transparência no tratamento de dados**
@@ -81,7 +81,7 @@ O sistema MobileMed está em total conformidade com:
 Para exercer seus direitos ou esclarecer dúvidas sobre o tratamento de dados:
 
 **Encarregado de Proteção de Dados (DPO)**
-- Email: dpo@mobilemed.com.br
+- Email: dpo@healthcore.com.br
 - Telefone: (11) 9999-9999
 - Endereço: [Endereço da empresa]
 

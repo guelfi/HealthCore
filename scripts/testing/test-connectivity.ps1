@@ -1,4 +1,4 @@
-# 🌐 MobileMed - Teste de Conectividade Distribuída (Windows PowerShell)
+# 🌐 healthcore - Teste de Conectividade Distribuída (Windows PowerShell)
 # Script para testar a conexão entre frontend e backend em máquinas diferentes
 
 param(
@@ -20,7 +20,7 @@ $Colors = @{
 function Show-Header {
     Clear-Host
     Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
-    Write-Host "║              🌐 MobileMed - Teste de Conectividade           ║" -ForegroundColor Magenta
+    Write-Host "║              🌐 healthcore - Teste de Conectividade           ║" -ForegroundColor Magenta
     Write-Host "║                   Desenvolvimento Distribuído                ║" -ForegroundColor Magenta
     Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
     Write-Host ""

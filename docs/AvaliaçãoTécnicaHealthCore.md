@@ -73,13 +73,13 @@ src/
 - Sugere consolidação da configuração de ambiente
 
 ### **4. Migração de Nomenclatura**
-- Ainda existem referências ao nome antigo "MobileMed"
+- Ainda existem referências ao nome antigo "HealthCore"
 - Processo de migração para "HealthCore" não está totalmente completo
 
 ## 🚀 **Recomendações de Melhoria**
 
 ### **Imediatas (1-2 semanas)**
-1. **Limpar referências legadas**: Completar migração de "MobileMed" para "HealthCore"
+1. **Limpar referências legadas**: Completar migração de "HealthCore" para "HealthCore"
 2. **Consolidar configurações**: Unificar arquivos de ambiente
 3. **Atualizar documentação**: Garantir consistência na nomenclatura
 

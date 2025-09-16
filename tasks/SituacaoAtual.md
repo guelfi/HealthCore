@@ -23,14 +23,14 @@
 - ✅ `tests/Api.Tests/PacienteServiceTests.cs` - Namespace + DbContext
 - ✅ `src/Web/.env.example` - App name
 
-#### **❌ Ainda com Referências MobileMed (75% Restante):**
-**📊 85+ arquivos encontrados com referências "MobileMed/mobilemed"**
+#### **❌ Ainda com Referências HealthCore (75% Restante):**
+**📊 85+ arquivos encontrados com referências "HealthCore/healthcore"**
 
 **Críticos que precisam ser corrigidos:**
-- `tests/Api.Tests/ExameServiceTests.cs` - **10 referências MobileMed** 🔴
-- `src/Api/Program.cs` - **Caminho de log ainda "mobilemed-.log"** 🔴
-- `tests/Api.Tests/AdminServiceTests.cs` - **9 referências MobileMed** 🔴
-- `tests/Api.Tests/UserServiceTests.cs` - **7 referências MobileMed** 🔴
+- `tests/Api.Tests/ExameServiceTests.cs` - **10 referências HealthCore** 🔴
+- `src/Api/Program.cs` - **Caminho de log ainda "healthcore-.log"** 🔴
+- `tests/Api.Tests/AdminServiceTests.cs` - **9 referências HealthCore** 🔴
+- `tests/Api.Tests/UserServiceTests.cs` - **7 referências HealthCore** 🔴
 
 ---
 
@@ -39,17 +39,17 @@
 ### **📁 Arquivos de Código C# (Crítico)**
 ```
 ❌ tests/Api.Tests/ExameServiceTests.cs:
-   - namespace MobileMed.Api.Tests
-   - using MobileMed.Api.*
-   - MobileMedDbContext usage
+   - namespace HealthCore.Api.Tests
+   - using HealthCore.Api.*
+   - HealthCoreDbContext usage
 
 ❌ src/Api/Program.cs:
-   - Log path: "mobilemed-.log"
+   - Log path: "healthcore-.log"
    - Outras referências internas
 ```
 
 ### **📄 Arquivos de Configuração**
-- ❌ Múltiplos arquivos `.env*` com URLs "mobilemed"
+- ❌ Múltiplos arquivos `.env*` com URLs "healthcore"
 - ❌ Arquivos JSON do Postman com referências
 - ❌ VS Code configs
 
@@ -64,7 +64,7 @@
 
 ### **🔴 Alto Impacto (Funcionamento):**
 1. **Testes quebrados** - `ExameServiceTests.cs` não compila
-2. **Logs incorretos** - Program.cs criando logs "mobilemed"
+2. **Logs incorretos** - Program.cs criando logs "healthcore"
 3. **DbContext errado** - Referências ao contexto antigo
 
 ### **🟡 Médio Impacto (Profissionalismo):**
@@ -83,8 +83,8 @@
 ```bash
 # No WSL (se funcionar)
 cd /mnt/c/Users/SP-MGUELFI/Projetos/HealthCore
-chmod +x clean-mobilemed.sh
-./clean-mobilemed.sh
+chmod +x clean-healthcore.sh
+./clean-healthcore.sh
 ```
 
 ### **🔧 Opção 2: Comandos Diretos (Mais Confiável)**
@@ -94,7 +94,7 @@ Usar o arquivo `COMANDOS-LIMPEZA-DIRETA.md` criado:
 - Resultado esperado: 0 referências restantes
 
 ### **📊 Resultado Esperado:**
-- ✅ **0 referências** MobileMed restantes
+- ✅ **0 referências** HealthCore restantes
 - ✅ **Todos os testes** funcionando
 - ✅ **Logs corretos** sendo gerados
 - ✅ **Aplicação** 100% consistente

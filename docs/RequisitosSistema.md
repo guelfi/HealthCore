@@ -1,8 +1,8 @@
-# 💻 Requisitos de Sistema - MobileMed
+# 💻 Requisitos de Sistema - HealthCore
 
 ## 📋 Desenvolvimento Distribuído
 
-Este documento detalha os requisitos específicos de sistema para o desenvolvimento distribuído do projeto MobileMed, onde o frontend e backend são desenvolvidos em máquinas diferentes.
+Este documento detalha os requisitos específicos de sistema para o desenvolvimento distribuído do projeto HealthCore, onde o frontend e backend são desenvolvidos em máquinas diferentes.
 
 ---
 
@@ -198,4 +198,4 @@ scripts\config-api.bat
 ---
 
 **📧 Desenvolvido por Marco Guelfi**  
-*Requisitos de Sistema - MobileMed Desenvolvimento Distribuído*
+*Requisitos de Sistema - HealthCore Desenvolvimento Distribuído*

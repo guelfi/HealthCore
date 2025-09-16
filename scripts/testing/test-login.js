@@ -16,7 +16,7 @@ const CREDENTIALS_TO_TEST = [
   { username: 'guelfi', password: '@246!588' },
   { email: 'guelfi', password: '@246!588' },
   { email: 'guelfi@admin.com', password: '@246!588' },
-  { email: 'admin@mobilemed.com', password: '@246!588' },
+  { email: 'admin@healthcore.com', password: '@246!588' },
   { usuario: 'guelfi', senha: '@246!588' },
   { login: 'guelfi', password: '@246!588' },
   { user: 'guelfi', pass: '@246!588' }
