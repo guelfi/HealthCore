@@ -41,7 +41,7 @@ namespace HealthCore.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30) });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30), DataCriacao = DateTime.UtcNow });
             await _context.SaveChangesAsync();
 
             var idempotencyKey = Guid.NewGuid().ToString();
@@ -115,8 +115,7 @@ namespace HealthCore.Api.Tests
             };
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(() => _pacienteService.CreatePacienteAsync(createPacienteDto));
-            exception.Should().NotBeNull();
+            await Assert.ThrowsAsync<ArgumentException>(() => _pacienteService.CreatePacienteAsync(createPacienteDto));
         }
 
         [Fact]
@@ -143,7 +142,7 @@ namespace HealthCore.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30) });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "98765432100", DataNascimento = DateTime.Now.AddYears(-30), DataCriacao = DateTime.UtcNow });
             await _context.SaveChangesAsync();
 
             var createExameDto = new CreateExameDto
@@ -183,7 +182,7 @@ namespace HealthCore.Api.Tests
                 {
                     Id = Guid.NewGuid(),
                     Nome = $"Paciente {i}",
-                    Documento = $"{i:D11}",
+                    Documento = $"{(20000000000 + i):D11}", // Garantir documentos únicos e válidos
                     DataNascimento = DateTime.Now.AddYears(-30)
                 });
             }
@@ -217,7 +216,7 @@ namespace HealthCore.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30) });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "11122233344", DataNascimento = DateTime.Now.AddYears(-30), DataCriacao = DateTime.UtcNow });
             await _context.SaveChangesAsync();
 
             var modalidadesValidas = new[] { "CR", "CT", "DX", "MG", "MR", "NM", "OT", "PT", "RF", "US", "XA" };
@@ -255,7 +254,7 @@ namespace HealthCore.Api.Tests
                         var createDto = new CreatePacienteDto
                         {
                             Nome = $"Paciente Concorrente {index}",
-                            Documento = $"{index:D11}",
+                            Documento = $"{(10000000000 + index):D11}", // Garantir documentos únicos e válidos
                             DataNascimento = DateTime.Now.AddYears(-25)
                         };
                         return await _pacienteService.CreatePacienteAsync(createDto);
@@ -302,12 +301,13 @@ namespace HealthCore.Api.Tests
             };
 
             // Act & Assert
-            foreach (var nome in nomesEspeciais)
+            for (int i = 0; i < nomesEspeciais.Length; i++)
             {
+                var nome = nomesEspeciais[i];
                 var createDto = new CreatePacienteDto
                 {
                     Nome = nome,
-                    Documento = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 11),
+                    Documento = $"{(30000000000 + i):D11}", // Garantir documento único e válido
                     DataNascimento = DateTime.Now.AddYears(-30)
                 };
 
