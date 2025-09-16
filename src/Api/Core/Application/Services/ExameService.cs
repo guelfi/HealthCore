@@ -172,6 +172,12 @@ namespace HealthCore.Api.Core.Application.Services
 
         public async Task<ExameDto?> GetExameByIdAsync(Guid id)
         {
+            // Validação de entrada
+            if (id == Guid.Empty)
+            {
+                throw new ArgumentException("ID do exame não pode ser vazio.", nameof(id));
+            }
+
             var exame = await _context.Exames
                 .Include(e => e.Paciente)
                 .FirstOrDefaultAsync(e => e.Id == id);
