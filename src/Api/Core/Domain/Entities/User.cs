@@ -11,7 +11,6 @@ namespace HealthCore.Api.Core.Domain.Entities
         public UserRole Role { get; set; } = UserRole.Medico;
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public void SetPassword(string password)
         {
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);

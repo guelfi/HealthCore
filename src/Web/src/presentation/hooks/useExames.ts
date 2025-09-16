@@ -70,14 +70,19 @@ export const useExames = (): UseExamesState & UseExamesActions => {
   }, [setError]);
 
   const updateExamesState = useCallback((response: ExameListResponse) => {
+    // Garantir que exames seja sempre um array
+    const examesArray = Array.isArray(response.data) ? response.data : [];
+    
     setState(prev => ({
       ...prev,
-      exames: response.data,
-      total: response.total,
-      currentPage: response.page,
-      totalPages: response.totalPages,
+      exames: examesArray,
+      total: response.total || 0,
+      currentPage: response.page || 1,
+      totalPages: response.totalPages || 0,
       loading: false,
     }));
+    
+    console.log("🎣 [useExames] Estado final - exames:", examesArray.length, "isArray:", Array.isArray(examesArray));
   }, []);
 
   const fetchExames = useCallback(

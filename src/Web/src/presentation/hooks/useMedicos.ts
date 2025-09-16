@@ -80,14 +80,19 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
           await MedicoService.list(params);
         debug.log('Resposta recebida:', response);
 
+        // Garantir que medicos seja sempre um array
+        const medicosArray = Array.isArray(response.data) ? response.data : [];
+        
         setState(prev => ({
           ...prev,
-          medicos: response.data,
-          total: response.total,
-          currentPage: response.page,
-          totalPages: response.totalPages,
+          medicos: medicosArray,
+          total: response.total || 0,
+          currentPage: response.page || 1,
+          totalPages: response.totalPages || 0,
           loading: false,
         }));
+        
+        debug.log("Estado final - médicos:", medicosArray.length, "isArray:", Array.isArray(medicosArray));
 
         debug.log('Estado atualizado com sucesso');
       } catch (error: any) {
