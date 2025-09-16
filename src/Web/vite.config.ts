@@ -23,37 +23,31 @@ export default defineConfig({
     },
   },
   build: {
-            outDir: 'dist',
-            rollupOptions: {
-                output: {
-                    manualChunks: (id) => {
-                        if (id.includes('node_modules')) {
-                            if (id.includes('react') || id.includes('react-dom')) {
-                                return 'react-vendor';
-                            }
-                            if (id.includes('@mui/material') || id.includes('@emotion')) {
-                                return 'mui-core';
-                            }
-                            if (id.includes('@mui/icons-material')) {
-                                return 'mui-icons';
-                            }
-                            if (id.includes('@mui/x-data-grid')) {
-                                return 'mui-datagrid';
-                            }
-                            if (id.includes('axios')) {
-                                return 'http-vendor';
-                            }
-                            return 'vendor';
-                        }
-                    },
-                    chunkFileNames: 'assets/[name]-[hash].js',
-                    entryFileNames: 'assets/[name]-[hash].js',
-                    assetFileNames: 'assets/[name]-[hash].[ext]'
-                }
-            },
-            chunkSizeWarningLimit: 1000,
-            minify: 'esbuild'
+    outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React e ReactDOM juntos
+          'react-vendor': ['react', 'react-dom'],
+          // MUI Material separado do Emotion
+          'mui-material': ['@mui/material'],
+          // Emotion separado
+          'emotion-vendor': ['@emotion/react', '@emotion/styled'],
+          // MUI Icons separado
+          'mui-icons': ['@mui/icons-material'],
+          // MUI DataGrid separado
+          'mui-datagrid': ['@mui/x-data-grid'],
+          // Outras bibliotecas
+          'utils-vendor': ['axios']
         },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+    minify: 'esbuild'
+  },
   server: {
     port: 5005,
     host: '0.0.0.0', // Permite acesso de qualquer IP da rede

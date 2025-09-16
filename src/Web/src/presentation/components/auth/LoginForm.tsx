@@ -102,6 +102,9 @@ const LoginForm: React.FC = () => {
               error={!!errors.password}
               helperText={errors.password?.message}
               disabled={isLoading}
+              inputProps={{
+                autoComplete: 'current-password'
+              }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
