@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-echo "🔧 MobileMed - Correção de Conflito de Containers"
+echo "🔧 HealthCore - Correção de Conflito de Containers"
 echo "=================================================="
 
 # Cores para output
@@ -34,15 +34,15 @@ if [ ! -f "docker-compose.yml" ]; then
 fi
 
 log "1. Verificando containers existentes..."
-echo "📋 Containers com nome 'mobilemed':"
-docker ps -a --filter name=mobilemed --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" || true
+echo "📋 Containers com nome 'healthcore':"
+docker ps -a --filter name=healthcore --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" || true
 
 echo ""
 log "2. Parando e removendo containers conflitantes..."
 
 # Parar e remover containers específicos
-docker stop mobilemed-api mobilemed-frontend 2>/dev/null || warning "Alguns containers já estavam parados"
-docker rm mobilemed-api mobilemed-frontend 2>/dev/null || warning "Alguns containers não existiam"
+docker stop healthcore-api healthcore-frontend 2>/dev/null || warning "Alguns containers já estavam parados"
+docker rm healthcore-api healthcore-frontend 2>/dev/null || warning "Alguns containers não existiam"
 
 # Usar docker-compose para limpeza completa
 log "3. Limpeza completa com Docker Compose..."
@@ -56,12 +56,12 @@ docker image prune -f 2>/dev/null || true
 
 echo ""
 log "5. Verificando limpeza..."
-remaining=$(docker ps -a --filter name=mobilemed --format "{{.Names}}" | wc -l)
+remaining=$(docker ps -a --filter name=healthcore --format "{{.Names}}" | wc -l)
 if [ "$remaining" -eq 0 ]; then
     log "✅ Todos os containers conflitantes foram removidos"
 else
-    warning "Ainda existem $remaining containers com nome 'mobilemed'"
-    docker ps -a --filter name=mobilemed --format "table {{.Names}}\t{{.Status}}"
+    warning "Ainda existem $remaining containers com nome 'healthcore'"
+    docker ps -a --filter name=healthcore --format "table {{.Names}}\t{{.Status}}"
 fi
 
 echo ""

@@ -5,7 +5,7 @@ using System.Threading;
 using Microsoft.EntityFrameworkCore.Query;
 using Moq;
 
-namespace MobileMed.Api.Tests
+namespace HealthCore.Api.Tests
 {
     public class TestAsyncQueryProvider<TEntity>(IQueryProvider inner) : IAsyncQueryProvider
     {

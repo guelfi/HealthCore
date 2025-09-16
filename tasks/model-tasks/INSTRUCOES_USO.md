@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo
 
-Este template fornece uma estrutura padronizada para gerenciar implementações e funcionalidades no projeto MobileMed, permitindo:
+Este template fornece uma estrutura padronizada para gerenciar implementações e funcionalidades no projeto HealthCore, permitindo:
 
 - ✅ Controle de progresso de tarefas
 - 📊 Visualização de status em tempo real

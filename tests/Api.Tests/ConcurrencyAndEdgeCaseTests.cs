@@ -6,27 +6,27 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using FluentAssertions;
-using MobileMed.Api.Core.Application.Services;
-using MobileMed.Api.Core.Application.DTOs;
-using MobileMed.Api.Infrastructure.Data;
-using MobileMed.Api.Core.Domain.Entities;
-using MobileMed.Api.Core.Domain.Enums;
+using HealthCore.Api.Core.Application.Services;
+using HealthCore.Api.Core.Application.DTOs;
+using HealthCore.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Domain.Enums;
 
-namespace MobileMed.Api.Tests
+namespace HealthCore.Api.Tests
 {
     public class ConcurrencyAndEdgeCaseTests : IDisposable
     {
-        private readonly MobileMedDbContext _context;
+        private readonly HealthCoreDbContext _context;
         private readonly ExameService _exameService;
         private readonly PacienteService _pacienteService;
 
         public ConcurrencyAndEdgeCaseTests()
         {
-            var options = new DbContextOptionsBuilder<MobileMedDbContext>()
+            var options = new DbContextOptionsBuilder<HealthCoreDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new MobileMedDbContext(options);
+            _context = new HealthCoreDbContext(options);
             _exameService = new ExameService(_context);
             _pacienteService = new PacienteService(_context);
         }
@@ -41,7 +41,7 @@ namespace MobileMed.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30) });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30), DataCriacao = DateTime.UtcNow });
             await _context.SaveChangesAsync();
 
             var idempotencyKey = Guid.NewGuid().ToString();
@@ -115,8 +115,7 @@ namespace MobileMed.Api.Tests
             };
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(() => _pacienteService.CreatePacienteAsync(createPacienteDto));
-            exception.Should().NotBeNull();
+            await Assert.ThrowsAsync<ArgumentException>(() => _pacienteService.CreatePacienteAsync(createPacienteDto));
         }
 
         [Fact]
@@ -143,7 +142,7 @@ namespace MobileMed.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30) });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "98765432100", DataNascimento = DateTime.Now.AddYears(-30), DataCriacao = DateTime.UtcNow });
             await _context.SaveChangesAsync();
 
             var createExameDto = new CreateExameDto
@@ -183,7 +182,7 @@ namespace MobileMed.Api.Tests
                 {
                     Id = Guid.NewGuid(),
                     Nome = $"Paciente {i}",
-                    Documento = $"{i:D11}",
+                    Documento = $"{(20000000000 + i):D11}", // Garantir documentos únicos e válidos
                     DataNascimento = DateTime.Now.AddYears(-30)
                 });
             }
@@ -217,7 +216,7 @@ namespace MobileMed.Api.Tests
         {
             // Arrange
             var pacienteId = Guid.NewGuid();
-            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "12345678901", DataNascimento = DateTime.Now.AddYears(-30) });
+            await _context.Pacientes.AddAsync(new Paciente { Id = pacienteId, Nome = "Teste", Documento = "11122233344", DataNascimento = DateTime.Now.AddYears(-30), DataCriacao = DateTime.UtcNow });
             await _context.SaveChangesAsync();
 
             var modalidadesValidas = new[] { "CR", "CT", "DX", "MG", "MR", "NM", "OT", "PT", "RF", "US", "XA" };
@@ -255,7 +254,7 @@ namespace MobileMed.Api.Tests
                         var createDto = new CreatePacienteDto
                         {
                             Nome = $"Paciente Concorrente {index}",
-                            Documento = $"{index:D11}",
+                            Documento = $"{(10000000000 + index):D11}", // Garantir documentos únicos e válidos
                             DataNascimento = DateTime.Now.AddYears(-25)
                         };
                         return await _pacienteService.CreatePacienteAsync(createDto);
@@ -302,12 +301,13 @@ namespace MobileMed.Api.Tests
             };
 
             // Act & Assert
-            foreach (var nome in nomesEspeciais)
+            for (int i = 0; i < nomesEspeciais.Length; i++)
             {
+                var nome = nomesEspeciais[i];
                 var createDto = new CreatePacienteDto
                 {
                     Nome = nome,
-                    Documento = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 11),
+                    Documento = $"{(30000000000 + i):D11}", // Garantir documento único e válido
                     DataNascimento = DateTime.Now.AddYears(-30)
                 };
 

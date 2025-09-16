@@ -3,7 +3,7 @@
 # Get the directory of the script
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# 🚀 MobileMed Full Stack Launcher
+# 🚀 HealthCore Full Stack Launcher
 # Gerencia API e Frontend com parâmetros: start/status/stop
 
 # Cores para output elegante
@@ -38,7 +38,7 @@ get_local_ip() {
 start_servers() {
     # Header principal elegante
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${BOLD}${WHITE}                    🏥 MobileMed Platform                     ${NC}${PURPLE}  ║${NC}"
+    echo -e "${PURPLE}║${BOLD}${WHITE}                    🏥 HealthCore Platform                     ${NC}${PURPLE}  ║${NC}"
     echo -e "${PURPLE}║${WHITE}                   Full Stack Deployment                     ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
@@ -103,7 +103,7 @@ echo -e "${WHITE}━━━━━━━━━━━━━━━━━━━━━
         echo -e "   ${WHITE}• Parar Ambos:${NC} ${YELLOW}$SCRIPT_DIR/servers.sh stop${NC}"
         echo -e "   ${WHITE}• Ver Logs:${NC} ${YELLOW}tail -f log/*.log${NC}"
         echo ""
-        echo -e "${GREEN}✨ Plataforma MobileMed está pronta para uso!${NC}"
+        echo -e "${GREEN}✨ Plataforma HealthCore está pronta para uso!${NC}"
     else
         echo -e "${RED}╔══════════════════════════════════════════════════════════════╗${NC}"
         echo -e "${RED}║${BOLD}${WHITE}                    ❌ ERRO NO DEPLOY                        ${NC}${RED} ║${NC}"
@@ -134,9 +134,9 @@ is_api_running() {
     # Se o arquivo PID não existe ou está desatualizado, procura por processo .NET na porta
     API_PID_ON_PORT=$(lsof -t -i:$API_PORT 2>/dev/null | head -n 1)
     if [ -n "$API_PID_ON_PORT" ]; then
-        # Verifica se é um processo .NET (MobileMed)
+        # Verifica se é um processo .NET (HealthCore)
         PROCESS_CMD=$(ps -p "$API_PID_ON_PORT" -o comm= 2>/dev/null)
-        if echo "$PROCESS_CMD" | grep -q "MobileMed\|dotnet"; then
+        if echo "$PROCESS_CMD" | grep -q "HealthCore\|dotnet"; then
             # Atualiza o arquivo PID com o PID correto
             echo "$API_PID_ON_PORT" > "$API_PID_FILE"
             echo "$API_PID_ON_PORT"
@@ -206,11 +206,11 @@ show_api_status() {
         # Verifica se há processo na porta que não seja reconhecido como API
         PID_ON_PORT=$(lsof -t -i:$API_PORT 2>/dev/null)
         if [ -n "$PID_ON_PORT" ]; then
-            # Verifica se algum dos processos é .NET/MobileMed
+            # Verifica se algum dos processos é .NET/HealthCore
             IS_API_PROCESS=false
             for PID in $PID_ON_PORT; do
                 PROCESS_CMD=$(ps -p "$PID" -o comm= 2>/dev/null)
-                if echo "$PROCESS_CMD" | grep -q "MobileMed\|dotnet"; then
+                if echo "$PROCESS_CMD" | grep -q "HealthCore\|dotnet"; then
                     IS_API_PROCESS=true
                     break
                 fi
@@ -281,7 +281,7 @@ show_frontend_status() {
 status_servers() {
     clear
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${BOLD}${WHITE}                  🏥 MobileMed Platform                     ${NC}${PURPLE}  ║${NC}"
+    echo -e "${PURPLE}║${BOLD}${WHITE}                  🏥 HealthCore Platform                     ${NC}${PURPLE}  ║${NC}"
     echo -e "${PURPLE}║${WHITE}                   Status dos Serviços                       ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
@@ -307,7 +307,7 @@ status_servers() {
 stop_servers() {
     clear
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${BOLD}${WHITE}                  🏥 MobileMed Platform                     ${NC}${PURPLE}  ║${NC}"
+    echo -e "${PURPLE}║${BOLD}${WHITE}                  🏥 HealthCore Platform                     ${NC}${PURPLE}  ║${NC}"
     echo -e "${PURPLE}║${WHITE}                   Parando Serviços                        ${PURPLE} ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""

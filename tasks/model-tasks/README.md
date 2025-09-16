@@ -2,7 +2,7 @@
 
 ## 📁 Estrutura de Arquivos Template
 
-Esta pasta serve como modelo para criação de novas tarefas de implementação no projeto MobileMed.
+Esta pasta serve como modelo para criação de novas tarefas de implementação no projeto HealthCore.
 
 ### 🎯 Como Usar Este Template
 
@@ -114,4 +114,4 @@ Cada sessão de trabalho gera um arquivo JSON com o formato:
 
 ---
 
-**Nota**: Este template foi criado baseado no padrão estabelecido nas implementações anteriores do projeto MobileMed.
+**Nota**: Este template foi criado baseado no padrão estabelecido nas implementações anteriores do projeto HealthCore.

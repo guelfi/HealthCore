@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 Script para iniciar API + Frontend - MobileMed
+# 🚀 Script para iniciar API + Frontend - HealthCore
 # Inicia ambos os serviços usando IP da máquina
 
 # Cores para output
@@ -23,7 +23,7 @@ get_local_ip() {
 
 LOCAL_IP=$(get_local_ip)
 
-echo -e "${BLUE}🚀 Iniciando MobileMed Completo${NC}"
+echo -e "${BLUE}🚀 Iniciando HealthCore Completo${NC}"
 echo "=================================="
 echo -e "🌐 IP Local: ${GREEN}$LOCAL_IP${NC}"
 echo -e "🔗 API: ${GREEN}http://$LOCAL_IP:5000${NC}"
@@ -63,7 +63,7 @@ echo "🔧 Configurando Frontend..."
 cd src/Web
 cat > .env.local << EOF
 VITE_API_URL=http://$LOCAL_IP:5000
-VITE_APP_TITLE=MobileMed
+VITE_APP_TITLE=HealthCore
 EOF
 echo -e "${GREEN}✅ Frontend configurado para API: http://$LOCAL_IP:5000${NC}"
 cd ../..

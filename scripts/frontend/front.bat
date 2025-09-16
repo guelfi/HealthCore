@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM MobileMed Frontend Launcher (Windows Batch)
+REM HealthCore Frontend Launcher (Windows Batch)
 REM Uso: front.bat [start|status|stop]
 
 REM Configuracoes
@@ -15,7 +15,7 @@ if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
 REM Mostrar header
 echo ===============================================================================
-echo                        MobileMed Frontend Manager
+echo                        HealthCore Frontend Manager
 echo ===============================================================================
 echo.
 
@@ -78,7 +78,7 @@ echo   Local: http://localhost:%FRONTEND_PORT%
 echo.
 
 REM Iniciar em nova janela
-start "MobileMed Frontend" cmd /k "npm run dev"
+start "HealthCore Frontend" cmd /k "npm run dev"
 
 REM Aguardar um pouco para o servidor iniciar
 echo Aguardando servidor iniciar...

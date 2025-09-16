@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🧪 Teste de ngrok - MobileMed
+# 🧪 Teste de ngrok - HealthCore
 # Verifica se o ngrok está configurado corretamente
 
 # Cores para output

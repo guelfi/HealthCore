@@ -200,4 +200,4 @@ Se encontrar problemas com o Catalina:
 ---
 
 **📧 Desenvolvido por Marco Guelfi**  
-*Guia para macOS Catalina 10.15.7 - MobileMed Backend*
+*Guia para macOS Catalina 10.15.7 - HealthCore Backend*

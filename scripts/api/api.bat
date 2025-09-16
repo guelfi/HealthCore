@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM 🚀 MobileMed API Manager (Windows Batch)
+REM 🚀 HealthCore API Manager (Windows Batch)
 REM Gerencia a API com parâmetros: start/status/stop
 
 REM Definir codepage para UTF-8
@@ -17,7 +17,7 @@ REM Função para mostrar header
 :show_header
 cls
 echo ╔══════════════════════════════════════════════════════════════════════════════╗
-echo ║                             MobileMed API Manager                           ║
+echo ║                             HealthCore API Manager                           ║
 echo ╚══════════════════════════════════════════════════════════════════════════════╝
 echo.
 goto :eof

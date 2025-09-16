@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🌐 Script para iniciar MobileMed com ngrok
+# 🌐 Script para iniciar HealthCore com ngrok
 # Configura automaticamente ambos os túneis ngrok
 
 # Cores para output
@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🌐 Configurando MobileMed com ngrok${NC}"
+echo -e "${BLUE}🌐 Configurando HealthCore com ngrok${NC}"
 echo "====================================="
 
 # Verificar se ngrok está instalado
@@ -111,7 +111,7 @@ cat > .env.local << EOF
 VITE_API_URL=http://192.168.15.119:5000
 VITE_API_BASE_URL=http://192.168.15.119:5000
 VITE_NGROK_API_URL=$API_NGROK_URL
-VITE_APP_TITLE=MobileMed
+VITE_APP_TITLE=HealthCore
 VITE_API_TIMEOUT=30000
 EOF
 

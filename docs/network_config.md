@@ -1,4 +1,4 @@
-# Configuração de Rede - MobileMed
+# Configuração de Rede - HealthCore
 
 ## Portas Configuradas
 
@@ -47,8 +47,8 @@ sudo lsof -i :5005
 ### Windows
 ```cmd
 # Adicionar regras de firewall
-netsh advfirewall firewall add rule name="MobileMed API" dir=in action=allow protocol=TCP localport=5000
-netsh advfirewall firewall add rule name="MobileMed Web" dir=in action=allow protocol=TCP localport=5005
+netsh advfirewall firewall add rule name="HealthCore API" dir=in action=allow protocol=TCP localport=5000
+netsh advfirewall firewall add rule name="HealthCore Web" dir=in action=allow protocol=TCP localport=5005
 ```
 
 ### Linux

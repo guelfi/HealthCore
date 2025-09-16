@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🔧 Configurando Ngrok para MobileMed Frontend"
+echo "🔧 Configurando Ngrok para HealthCore Frontend"
 
 # Verificar se ngrok está instalado
 if ! command -v ngrok &> /dev/null; then

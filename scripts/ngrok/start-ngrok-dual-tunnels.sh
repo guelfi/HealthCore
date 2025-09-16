@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 Start Dual ngrok Tunnels - MobileMed
+# 🚀 Start Dual ngrok Tunnels - HealthCore
 # Inicia ngrok para API e Frontend simultaneamente
 # Suporta conta gratuita (alternando) e conta paga (simultâneo)
 
@@ -53,7 +53,7 @@ if [ "$API_RUNNING" = false ] || [ "$FRONTEND_RUNNING" = false ]; then
     if [ "$API_RUNNING" = false ]; then
         echo "📡 Iniciando API..."
         cd src/Api
-        nohup dotnet run > /tmp/mobilemed-api.log 2>&1 &
+        nohup dotnet run > /tmp/healthcore-api.log 2>&1 &
         API_PID=$!
         echo "API iniciada com PID: $API_PID"
         cd ../..
@@ -74,7 +74,7 @@ if [ "$API_RUNNING" = false ] || [ "$FRONTEND_RUNNING" = false ]; then
     if [ "$FRONTEND_RUNNING" = false ]; then
         echo "🌐 Iniciando Frontend..."
         cd src/Web
-        nohup npm run dev > /tmp/mobilemed-frontend.log 2>&1 &
+        nohup npm run dev > /tmp/healthcore-frontend.log 2>&1 &
         FRONTEND_PID=$!
         echo "Frontend iniciado com PID: $FRONTEND_PID"
         cd ../..
@@ -97,8 +97,8 @@ fi
 if [ "$API_RUNNING" = false ] || [ "$FRONTEND_RUNNING" = false ]; then
     echo -e "${RED}❌ Erro ao iniciar os serviços${NC}"
     echo "📋 Verifique os logs:"
-    echo "   API: tail -f /tmp/mobilemed-api.log"
-    echo "   Frontend: tail -f /tmp/mobilemed-frontend.log"
+    echo "   API: tail -f /tmp/healthcore-api.log"
+    echo "   Frontend: tail -f /tmp/healthcore-frontend.log"
     exit 1
 fi
 
