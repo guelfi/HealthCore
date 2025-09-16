@@ -25,6 +25,9 @@ export class ApiConfig {
       currentHost.includes('.ngrok.io') ||
       currentHost.includes('.ngrok.app');
     
+    // Verificar se está sendo acessado via IP da OCI (produção)
+    const isOciProduction = currentHost === '129.153.86.168';
+    
     // Verificar se está sendo acessado via IP da rede local
     const isLocalNetworkAccess = currentHost.startsWith('192.168.') || currentHost.startsWith('10.') || currentHost.startsWith('172.');
     const isLocalhost = currentHost === 'localhost' || currentHost === '127.0.0.1';
@@ -33,10 +36,18 @@ export class ApiConfig {
       currentHost,
       currentProtocol,
       isNgrok,
+      isOciProduction,
       isLocalNetworkAccess,
       isLocalhost,
       fullUrl: window.location.href
     });
+
+    // Se for acesso via IP da OCI (produção), usar IP público da OCI
+    if (isOciProduction) {
+      console.log('🚀 Detectado acesso via OCI (produção)');
+      console.log('✅ Usando IP público da OCI para API');
+      return 'http://129.153.86.168:5000';
+    }
 
     // Se for ngrok, precisamos usar a URL do ngrok da API
     if (isNgrok) {
