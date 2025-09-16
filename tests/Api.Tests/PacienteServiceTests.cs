@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 using FluentAssertions;
-using MobileMed.Api.Core.Application.Services;
-using MobileMed.Api.Core.Application.DTOs;
-using MobileMed.Api.Infrastructure.Data;
-using MobileMed.Api.Core.Domain.Entities;
+using HealthCore.Api.Core.Application.Services;
+using HealthCore.Api.Core.Application.DTOs;
+using HealthCore.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Domain.Entities;
 
-namespace MobileMed.Api.Tests
+namespace HealthCore.Api.Tests
 {
     public class PacienteServiceTests : IDisposable
     {
-        private readonly MobileMedDbContext _context;
+        private readonly HealthCoreDbContext _context;
         private readonly PacienteService _pacienteService;
 
         public PacienteServiceTests()
         {
-            var options = new DbContextOptionsBuilder<MobileMedDbContext>()
+            var options = new DbContextOptionsBuilder<HealthCoreDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new MobileMedDbContext(options);
+            _context = new HealthCoreDbContext(options);
             _pacienteService = new PacienteService(_context);
         }
 
