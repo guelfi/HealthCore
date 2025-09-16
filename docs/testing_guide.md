@@ -1,4 +1,4 @@
-# 🧪 Guia de Testes - MobileMed
+# 🧪 Guia de Testes - HealthCore
 
 ## 🚀 **Início Rápido**
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 Setup Single Tunnel - MobileMed
+# 🚀 Setup Single Tunnel - HealthCore
 # Solução para limitação da conta gratuita do ngrok
 # Usa proxy reverso para permitir frontend e API no mesmo túnel
 
@@ -46,7 +46,7 @@ if [ "$API_RUNNING" = false ] || [ "$FRONTEND_RUNNING" = false ]; then
     if [ "$API_RUNNING" = false ]; then
         echo "📡 Iniciando API..."
         cd src/Api
-        nohup dotnet run --urls="http://0.0.0.0:5000" > /tmp/mobilemed-api.log 2>&1 &
+        nohup dotnet run --urls="http://0.0.0.0:5000" > /tmp/healthcore-api.log 2>&1 &
         API_PID=$!
         echo "API iniciada com PID: $API_PID"
         cd ../..
@@ -73,7 +73,7 @@ if [ "$API_RUNNING" = false ] || [ "$FRONTEND_RUNNING" = false ]; then
         export VITE_API_BASE_URL="http://localhost:5000"
         export VITE_API_URL="http://localhost:5000"
         
-        nohup npm run dev -- --host 0.0.0.0 --port 5005 > /tmp/mobilemed-frontend.log 2>&1 &
+        nohup npm run dev -- --host 0.0.0.0 --port 5005 > /tmp/healthcore-frontend.log 2>&1 &
         FRONTEND_PID=$!
         echo "Frontend iniciado com PID: $FRONTEND_PID"
         cd ../..
@@ -96,7 +96,7 @@ fi
 # Verificar se ambos os serviços estão rodando
 if [ "$API_RUNNING" = false ] || [ "$FRONTEND_RUNNING" = false ]; then
     echo -e "${RED}❌ Erro: Nem todos os serviços estão rodando${NC}"
-    echo "💡 Verifique os logs em /tmp/mobilemed-*.log"
+    echo "💡 Verifique os logs em /tmp/healthcore-*.log"
     exit 1
 fi
 

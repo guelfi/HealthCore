@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Api/MobileMed.Api.csproj",
+                "${workspaceFolder}/src/Api/HealthCore.Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/src/Api/MobileMed.Api.csproj",
+                "${workspaceFolder}/src/Api/HealthCore.Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/src/Api/MobileMed.Api.csproj"
+                "${workspaceFolder}/src/Api/HealthCore.Api.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

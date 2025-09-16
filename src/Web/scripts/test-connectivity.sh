@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🔍 Testando Conectividade - MobileMed API${NC}"
+echo -e "${BLUE}🔍 Testando Conectividade - HealthCore API${NC}"
 echo "================================================"
 
 # Determinar URL da API

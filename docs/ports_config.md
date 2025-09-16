@@ -1,4 +1,4 @@
-# 🔧 Configuração de Portas - MobileMed
+# 🔧 Configuração de Portas - HealthCore
 
 ## ✅ **Portas Definidas**
 

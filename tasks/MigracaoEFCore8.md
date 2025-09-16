@@ -66,7 +66,7 @@ Migrar o Entity Framework Core da versão 9.0.8 para 8.0.x para garantir total c
 git checkout -b feature/ef-core-8-migration
 
 # 2. Backup do banco
-copy "src\Api\mobilemed.db" "src\Api\mobilemed.db.backup"
+copy "src\Api\healthcore.db" "src\Api\healthcore.db.backup"
 
 # 3. Verificar build atual
 dotnet build src/Api/HealthCore.Api.csproj
@@ -125,7 +125,7 @@ Caso algo dê errado:
 git checkout HEAD -- src/Api/HealthCore.Api.csproj
 
 # 2. Restaurar banco
-copy "src\Api\mobilemed.db.backup" "src\Api\mobilemed.db"
+copy "src\Api\healthcore.db.backup" "src\Api\healthcore.db"
 
 # 3. Restore packages
 dotnet restore src/Api/HealthCore.Api.csproj

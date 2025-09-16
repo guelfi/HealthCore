@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 ngrok Simple - MobileMed
+# 🚀 ngrok Simple - HealthCore
 # Solução para conta gratuita sem comprometer arquitetura de produção
 
 # Cores para output

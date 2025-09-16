@@ -59,7 +59,7 @@ public class HealthCoreDbContext : DbContext
 
 #### **Connection String:**
 - **Provider**: SQLite
-- **Arquivo**: `mobilemed.db` (será renomeado para `healthcore.db`)
+- **Arquivo**: `healthcore.db` (será renomeado para `healthcore.db`)
 - **Localização**: `src/Api/`
 
 ---
@@ -203,7 +203,7 @@ dotnet ef migrations add NomeDaMigration --project src/Api/HealthCore.Api.csproj
 ## 🎯 **Próximos Passos**
 
 ### **Melhorias Planejadas:**
-1. **Renomear Database**: `mobilemed.db` → `healthcore.db`
+1. **Renomear Database**: `healthcore.db` → `healthcore.db`
 2. **Cache Distribuído**: Migrar para Redis
 3. **Database Sharding**: Para alta escala
 4. **Read Replicas**: Separar leitura/escrita

@@ -2,7 +2,7 @@
 
 ## 🎯 Visão Geral
 
-Este documento contém o plano completo de implementação das melhorias identificadas para otimizar a experiência do usuário no sistema de gestão médica MobileMed, com foco especial em responsividade mobile e padronização de componentes.
+Este documento contém o plano completo de implementação das melhorias identificadas para otimizar a experiência do usuário no sistema de gestão médica HealthCore, com foco especial em responsividade mobile e padronização de componentes.
 
 ## 📊 Estrutura de Prioridades
 
@@ -595,7 +595,7 @@ Usuários perdem contexto de localização em navegação profunda.
 
 ## 🎯 Considerações Finais
 
-Este plano foi estruturado para maximizar o impacto na experiência do usuário do sistema MobileMed, priorizando melhorias que afetam diretamente a usabilidade mobile e a consistência da interface.
+Este plano foi estruturado para maximizar o impacto na experiência do usuário do sistema HealthCore, priorizando melhorias que afetam diretamente a usabilidade mobile e a consistência da interface.
 
 ### **Princípios Fundamentais**
 - **Mobile-First**: Sempre pensar em mobile primeiro
@@ -625,4 +625,4 @@ A implementação deve ser incremental, com testes rigorosos em cada etapa e com
 **Documento criado em**: Janeiro 2025  
 **Versão**: 1.0  
 **Status**: Pronto para implementação  
-**Projeto**: MobileMed - Sistema de Gestão Médica
+**Projeto**: HealthCore - Sistema de Gestão Médica

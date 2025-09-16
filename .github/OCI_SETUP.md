@@ -120,7 +120,7 @@ spec:
 ### 4. Criar Secrets do Kubernetes
 ```bash
 # Database connection
-kubectl create secret generic mobilemed-secrets \
+kubectl create secret generic healthcore-secrets \
   --from-literal=database-connection="Server=...;Database=...;User Id=...;Password=...;"
 ```
 
@@ -147,10 +147,10 @@ kubectl create secret generic mobilemed-secrets \
 ### Logs
 ```bash
 # API logs
-kubectl logs -l app=mobilemed-api -f
+kubectl logs -l app=healthcore-api -f
 
 # Frontend logs
-kubectl logs -l app=mobilemed-frontend -f
+kubectl logs -l app=healthcore-frontend -f
 
 # Ingress logs
 kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx -f

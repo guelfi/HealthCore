@@ -1,4 +1,4 @@
-# 🚀 Guia de Scripts MobileMed
+# 🚀 Guia de Scripts HealthCore
 
 ## Scripts Disponíveis
 

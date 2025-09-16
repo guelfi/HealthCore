@@ -1,4 +1,4 @@
-# Melhorias Recomendadas - MobileMed
+# Melhorias Recomendadas - HealthCore
 
 ## ✅ Correções Críticas Implementadas
 
@@ -88,7 +88,7 @@
 - [ ] **Backups automáticos SQLite**
   ```bash
   # Crontab para backup diário
-  0 2 * * * /opt/mobilemed/backup-db.sh
+  0 2 * * * /opt/healthcore/backup-db.sh
   ```
 
 - [ ] **Migração para PostgreSQL** (produção de alta escala)
@@ -117,7 +117,7 @@
   - name: Scan de vulnerabilidades
     uses: aquasecurity/trivy-action@master
     with:
-      image-ref: 'mobilemed-api:latest'
+      image-ref: 'healthcore-api:latest'
   ```
 
 - [ ] **Gerenciamento de secrets com Docker Secrets**

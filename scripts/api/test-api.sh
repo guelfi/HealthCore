@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# O banco de dados mobilemed.db não é usado pelos testes unitários, que utilizam um banco de dados em memória.
-# Portanto, a remoção do arquivo mobilemed.db antes dos testes não é necessária.
-# DB_PATH="./src/Api/database/mobilemed.db"
+# O banco de dados healthcore.db não é usado pelos testes unitários, que utilizam um banco de dados em memória.
+# Portanto, a remoção do arquivo healthcore.db antes dos testes não é necessária.
+# DB_PATH="./src/Api/database/healthcore.db"
 # if [ -f "$DB_PATH" ]; then
 #     echo "Removendo banco de dados existente: $DB_PATH" >&2
 #     rm "$DB_PATH"
@@ -11,7 +11,7 @@
 # fi
 # echo "" >&2 # Adiciona uma linha em branco para melhor legibilidade
 
-# Script para executar testes unitários da API MobileMed e gerar relatório
+# Script para executar testes unitários da API HealthCore e gerar relatório
 
 # Variáveis para o relatório
 REPORT_DIR="reports"
@@ -21,7 +21,7 @@ REPORT_FILE="" # Será definido com data e hora
 init_report() {
     mkdir -p "$REPORT_DIR"
     REPORT_FILE="$REPORT_DIR/UNITEST_$(date +%d%m%y_%H%M).md"
-    echo "# Relatório de Testes Unitários da API MobileMed" > "$REPORT_FILE"
+    echo "# Relatório de Testes Unitários da API HealthCore" > "$REPORT_FILE"
     echo "" >> "$REPORT_FILE"
     echo "Data da Execução: $(date +'%Y-%m-%d %H:%M:%S')" >> "$REPORT_FILE"
     echo "" >> "$REPORT_FILE"
@@ -67,7 +67,7 @@ add_detailed_test_results() {
     echo "" >> "$REPORT_FILE"
 }
 
-echo "Testando a API MobileMed (Testes Unitários)..."
+echo "Testando a API HealthCore (Testes Unitários)..."
 
 # Inicializa o relatório
 init_report

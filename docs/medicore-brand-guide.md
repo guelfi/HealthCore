@@ -109,7 +109,7 @@
 
 ## 🚀 Próximos Passos
 
-1. **Atualizar título da aplicação** de "MobileMed" para "MediCore"
+1. **Atualizar título da aplicação** de "HealthCore" para "MediCore"
 2. **Substituir referências** nos arquivos de configuração
 3. **Atualizar documentação** com novo nome
 4. **Testar legibilidade** em diferentes dispositivos

@@ -1,6 +1,6 @@
 {
   "id": "a9e9b1a2-4f8c-4a4e-b1e0-a3b3a3e3e3e3",
-  "name": "MobileMed API Environment",
+  "name": "HealthCore API Environment",
   "values": [
     {
       "key": "base_url",

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 Start ngrok Complete - MobileMed
+# 🚀 Start ngrok Complete - HealthCore
 # Inicia ngrok para API e Frontend com configuração automática
 
 # Cores para output
@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 Iniciando ngrok completo - MobileMed${NC}"
+echo -e "${BLUE}🚀 Iniciando ngrok completo - HealthCore${NC}"
 echo "============================================="
 
 # Verificar se os serviços estão rodando

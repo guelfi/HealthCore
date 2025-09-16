@@ -1,4 +1,4 @@
-# ✅ Limpeza Completa - MobileMed → HealthCore
+# ✅ Limpeza Completa - HealthCore → HealthCore
 
 ## 📋 **Status da Migração**
 **Data**: 16 de Setembro de 2025  
@@ -12,35 +12,35 @@
 
 #### **1. Migrations de Banco de Dados**
 - ✅ `src/Api/Infrastructure/Data/Migrations/MigrarUsuariosMedicos.cs`
-  - Namespace: `MobileMed.Api` → `HealthCore.Api`
-  - Emails: `@mobilemed.com` → `@healthcore.com` (6 ocorrências)
+  - Namespace: `HealthCore.Api` → `HealthCore.Api`
+  - Emails: `@healthcore.com` → `@healthcore.com` (6 ocorrências)
 
 - ✅ `database/migrations/sqlite-migrar-usuarios.sql`
-  - Emails: `@mobilemed.com` → `@healthcore.com` (6 ocorrências)
+  - Emails: `@healthcore.com` → `@healthcore.com` (6 ocorrências)
 
 - ✅ `database/migrations/migrar-usuarios-medicos.sql`
-  - Emails: `@mobilemed.com` → `@healthcore.com` (6 ocorrências)
+  - Emails: `@healthcore.com` → `@healthcore.com` (6 ocorrências)
 
 #### **2. Arquivos de Teste C#**
 - ✅ `tests/Api.Tests/ConcurrencyAndEdgeCaseTests.cs`
-  - Namespaces: `MobileMed.Api` → `HealthCore.Api`
-  - Namespace: `MobileMed.Api.Tests` → `HealthCore.Api.Tests`
-  - DbContext: `MobileMedDbContext` → `HealthCoreDbContext`
+  - Namespaces: `HealthCore.Api` → `HealthCore.Api`
+  - Namespace: `HealthCore.Api.Tests` → `HealthCore.Api.Tests`
+  - DbContext: `HealthCoreDbContext` → `HealthCoreDbContext`
 
 - ✅ `tests/Api.Tests/PacienteServiceTests.cs`
-  - Namespaces: `MobileMed.Api` → `HealthCore.Api`
-  - Namespace: `MobileMed.Api.Tests` → `HealthCore.Api.Tests`
-  - DbContext: `MobileMedDbContext` → `HealthCoreDbContext`
+  - Namespaces: `HealthCore.Api` → `HealthCore.Api`
+  - Namespace: `HealthCore.Api.Tests` → `HealthCore.Api.Tests`
+  - DbContext: `HealthCoreDbContext` → `HealthCoreDbContext`
 
 #### **3. Arquivos de Configuração**
 - ✅ `src/Web/.env.example`
-  - App Name: `MobileMed Frontend` → `HealthCore Frontend`
+  - App Name: `HealthCore Frontend` → `HealthCore Frontend`
 
 ---
 
 ## 🛠️ **SCRIPT DE AUTOMAÇÃO CRIADO**
 
-### **📁 Arquivo: `fix-mobilemed-references.sh`**
+### **📁 Arquivo: `fix-healthcore-references.sh`**
 **Script completo que processa automaticamente**:
 
 #### **1. Arquivos de Código C# Restantes**
@@ -86,15 +86,15 @@
 cd /mnt/c/Users/SP-MGUELFI/Projetos/HealthCore
 
 # Dar permissão ao script
-chmod +x fix-mobilemed-references.sh
+chmod +x fix-healthcore-references.sh
 
 # Executar o script completo
-./fix-mobilemed-references.sh
+./fix-healthcore-references.sh
 ```
 
 ### **Output Esperado:**
 ```
-🔄 Iniciando migração completa MobileMed → HealthCore
+🔄 Iniciando migração completa HealthCore → HealthCore
 ====================================================
 📁 Processando arquivos de código C#...
 ✓ Namespaces em ExameServiceTests: tests/Api.Tests/ExameServiceTests.cs (15 alterações)
@@ -157,7 +157,7 @@ chmod +x fix-mobilemed-references.sh
 
 ### **1. Executar Script Automatizado** (5 minutos)
 ```bash
-./fix-mobilemed-references.sh
+./fix-healthcore-references.sh
 ```
 
 ### **2. Validação** (10 minutos)
@@ -168,7 +168,7 @@ chmod +x fix-mobilemed-references.sh
 ### **3. Commit das Alterações**
 ```bash
 git add .
-git commit -m "feat: migrate all MobileMed references to HealthCore
+git commit -m "feat: migrate all HealthCore references to HealthCore
 
 - Updated namespaces in C# files
 - Fixed email domains in migrations  
@@ -187,7 +187,7 @@ git commit -m "feat: migrate all MobileMed references to HealthCore
 - ✅ Fazer backup antes de executar em produção
 
 ### **2. Banco de Dados**
-- 🔴 **Atenção**: Emails `@mobilemed.com` em migrations
+- 🔴 **Atenção**: Emails `@healthcore.com` em migrations
 - 💡 **Impacto**: Apenas dados de seed/exemplo
 - ✅ **Não afeta**: Usuários reais em produção
 

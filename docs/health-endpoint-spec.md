@@ -55,7 +55,7 @@ GET /health
 ```csharp
 // Health checks
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<MobileMedDbContext>("database")
+    .AddDbContextCheck<HealthCoreDbContext>("database")
     .AddCheck("api", () => HealthCheckResult.Healthy("API is running"));
 
 // Configure health check endpoint
@@ -112,14 +112,14 @@ private static string GetUptime()
 ### **1. Scripts de Deploy (OCI):**
 ```bash
 # Verificar se API está saudável antes do deploy
-curl -f http://api.mobilemed.com/health || exit 1
+curl -f http://api.healthcore.com/health || exit 1
 ```
 
 ### **2. Monitoramento:**
 ```bash
 # Check contínuo da saúde da API
 while true; do
-  curl -s http://api.mobilemed.com/health | jq '.status'
+  curl -s http://api.healthcore.com/health | jq '.status'
   sleep 30
 done
 ```

@@ -1,14 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: 🌐 MobileMed - Teste de Conectividade Distribuída (Windows Batch)
+:: 🌐 HealthCore - Teste de Conectividade Distribuída (Windows Batch)
 :: Script simples para testar conectividade com a API
 
-title MobileMed - Teste de Conectividade
+title HealthCore - Teste de Conectividade
 
 echo.
 echo ================================================================
-echo               MobileMed - Teste de Conectividade
+echo               HealthCore - Teste de Conectividade
 echo                   Desenvolvimento Distribuido
 echo ================================================================
 echo.

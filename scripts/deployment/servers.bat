@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM 🚀 MobileMed Full Stack Launcher (Windows Batch)
+REM 🚀 HealthCore Full Stack Launcher (Windows Batch)
 REM Gerencia API e Frontend com parâmetros: start/status/stop
 
 REM Definir codepage para UTF-8
@@ -30,7 +30,7 @@ REM Função START
 REM Header principal elegante
 cls
 echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                    🏥 MobileMed Platform                     ║
+echo ║                    🏥 HealthCore Platform                     ║
 echo ║                   Full Stack Deployment                     ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.
@@ -93,7 +93,7 @@ if %API_STATUS% equ 0 if %FRONTEND_STATUS% equ 0 (
     echo    • Parar Ambos: %SCRIPT_DIR%servers.bat stop
     echo    • Ver Logs: type log\*.log
     echo.
-    echo ✨ Plataforma MobileMed está pronta para uso!
+    echo ✨ Plataforma HealthCore está pronta para uso!
 ) else (
     echo ╔══════════════════════════════════════════════════════════════╗
     echo ║                    ❌ ERRO NO DEPLOY                        ║
@@ -114,7 +114,7 @@ REM Função STATUS
 :status_servers
 cls
 echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                  🏥 MobileMed Platform                     ║
+echo ║                  🏥 HealthCore Platform                     ║
 echo ║                   Status dos Serviços                       ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.
@@ -134,7 +134,7 @@ REM Função STOP
 :stop_servers
 cls
 echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                  🏥 MobileMed Platform                     ║
+echo ║                  🏥 HealthCore Platform                     ║
 echo ║                   Parando Serviços                        ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.
