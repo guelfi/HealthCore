@@ -1476,8 +1476,7 @@ app.MapPost("/temp/criar-guelfi", async (HealthCoreDbContext context, ILogger<Pr
             Username = "guelfi",
             PasswordHash = passwordHash,
             Role = UserRole.Administrador,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            IsActive = true
         };
         
         context.Users.Add(guelfi);
