@@ -1477,10 +1477,7 @@ app.MapPost("/temp/criar-guelfi", async (HealthCoreDbContext context, ILogger<Pr
             PasswordHash = passwordHash,
             Role = UserRole.Administrador,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            CreatedBy = "system",
-            UpdatedBy = "system"
+            CreatedAt = DateTime.UtcNow
         };
         
         context.Users.Add(guelfi);
