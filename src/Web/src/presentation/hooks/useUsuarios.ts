@@ -79,7 +79,7 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
 
         setState(prev => ({
           ...prev,
-          usuarios: response.data,
+          usuarios: Array.isArray(response.data) ? response.data : [],
           total: response.total,
           currentPage: response.page,
           totalPages: response.totalPages,

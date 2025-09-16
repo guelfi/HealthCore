@@ -83,13 +83,7 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
           loading: false,
         }));
         
-        debug.log('Estado final atualizado:', {
-          pacientes: pacientesArray.length,
-          total: response.total,
-          isArray: Array.isArray(pacientesArray)
-        });
-
-        debug.log('Estado atualizado - pacientes:', response.data.length);
+        debug.log('Estado atualizado - pacientes:', pacientesArray.length);
       } catch (error: any) {
         debug.log('Erro ao buscar pacientes:', {
           message: error.message,

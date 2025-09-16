@@ -197,7 +197,7 @@ builder.Services.AddCors(options =>
         {
             if (string.IsNullOrWhiteSpace(origin)) return false;
             
-            // Permitir localhost e 127.0.0.1
+            // Permitir localhost e 127.0.0.1 em qualquer porta
             if (origin.StartsWith("http://localhost:") || origin.StartsWith("http://127.0.0.1:"))
                 return true;
             
@@ -222,8 +222,25 @@ builder.Services.AddCors(options =>
                 return true;
             }
             
+            // Permitir desenvolvimento local com IP específico
+            if (host == "0.0.0.0" || host == "192.168.15.119")
+                return true;
+            
             return false;
         })
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials()
+        .SetPreflightMaxAge(TimeSpan.FromMinutes(10)); // Cache preflight por 10 minutos
+    });
+    
+    // Política específica para produção (mais restritiva)
+    options.AddPolicy("AllowProduction", policy =>
+    {
+        policy.WithOrigins(
+            "https://healthcore.example.com", // Substitua pela URL de produção
+            "http://129.153.86.168:5005"      // OCI Frontend IP
+        )
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials();
@@ -1175,6 +1192,113 @@ app.MapGet("/users/search", async (AdminService adminService, HttpContext contex
     }
 }).RequireAuthorization();
 
+// Endpoints de Usuários com prefixo /api (para compatibilidade com frontend)
+app.MapGet("/api/usuarios", async (AdminService adminService, HttpContext context, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
+{
+    try
+    {
+        logger.LogInformation("Listando usuários via /api/usuarios - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+        var users = await adminService.GetUsersAsync(page, pageSize);
+        logger.LogInformation("Listagem de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
+        return Results.Ok(users);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao listar usuários via /api/usuarios");
+        return Results.Problem("Erro inesperado ao listar usuários.");
+    }
+}).RequireAuthorization();
+
+app.MapGet("/api/usuarios/{id:guid}", async (Guid id, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        var user = await adminService.GetUserByIdAsync(id);
+        if (user == null)
+        {
+            logger.LogWarning("Usuário não encontrado via /api/usuarios: {Id}", id);
+            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+        }
+
+        return Results.Ok(user);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao buscar usuário via /api/usuarios: {Id}", id);
+        return Results.Problem("Erro inesperado ao buscar usuário.");
+    }
+}).RequireAuthorization();
+
+app.MapPost("/api/usuarios", async (CreateUserDto createUserDto, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Criando usuário via /api/usuarios: {Username}", createUserDto.Username);
+        var user = await adminService.CreateUserAsync(createUserDto);
+        logger.LogInformation("Usuário criado com sucesso via /api/usuarios: {Id}", user.Id);
+        return Results.Created($"/api/usuarios/{user.Id}", user);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning("Erro de validação ao criar usuário via /api/usuarios: {Message}", ex.Message);
+        return Results.Conflict(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao criar usuário via /api/usuarios");
+        return Results.Problem("Erro inesperado ao criar usuário.");
+    }
+}).RequireAuthorization();
+
+app.MapPut("/api/usuarios/{id:guid}", async (Guid id, UpdateUserDto updateUserDto, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Atualizando usuário via /api/usuarios: {Id}", id);
+        var user = await adminService.UpdateUserAsync(id, updateUserDto);
+        if (user == null)
+        {
+            logger.LogWarning("Usuário não encontrado para atualização via /api/usuarios: {Id}", id);
+            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+        }
+
+        logger.LogInformation("Usuário atualizado com sucesso via /api/usuarios: {Id}", id);
+        return Results.Ok(user);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning("Erro de validação ao atualizar usuário via /api/usuarios: {Message}", ex.Message);
+        return Results.Conflict(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao atualizar usuário via /api/usuarios: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar usuário.");
+    }
+}).RequireAuthorization();
+
+app.MapDelete("/api/usuarios/{id:guid}", async (Guid id, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Desativando usuário via /api/usuarios: {Id}", id);
+        var result = await adminService.DeactivateUserAsync(id);
+        if (!result)
+        {
+            logger.LogWarning("Usuário não encontrado para desativação via /api/usuarios: {Id}", id);
+            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+        }
+
+        logger.LogInformation("Usuário desativado com sucesso via /api/usuarios: {Id}", id);
+        return Results.Ok(new { Message = "Usuário desativado com sucesso." });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao desativar usuário via /api/usuarios: {Id}", id);
+        return Results.Problem("Erro inesperado ao desativar usuário.");
+    }
+}).RequireAuthorization();
+
 // Endpoints de Médicos
 app.MapPost("/medicos", async (CreateMedicoDto createMedicoDto, MedicoService medicoService, ILogger<Program> logger) =>
 {
@@ -1287,55 +1411,6 @@ app.MapDelete("/medicos/{id:guid}", async (Guid id, MedicoService medicoService,
     }
 }).RequireAuthorization();
 
-// Endpoint temporário para debug de médicos
-app.MapGet("/debug/medicos-usuarios", async (HealthCoreDbContext context, ILogger<Program> logger) =>
-{
-    logger.LogInformation("Executando debug de médicos e usuários");
-    
-    // 1. Usuários com role de médico
-    var usuariosMedicos = await context.Users
-        .Where(u => u.Role == UserRole.Medico)
-        .Select(u => new { u.Id, u.Username, u.Role, u.IsActive, u.CreatedAt })
-        .ToListAsync();
-    
-    // 2. Total de médicos na tabela
-    var totalMedicos = await context.Medicos.CountAsync();
-    
-    // 3. Médicos existentes
-    var medicosExistentes = await context.Medicos
-        .Include(m => m.User)
-        .Select(m => new { 
-            m.Id, 
-            m.UserId, 
-            m.Nome, 
-            m.Documento, 
-            m.CRM, 
-            m.Especialidade,
-            Username = m.User != null ? m.User.Username : null,
-            IsActive = m.User != null ? m.User.IsActive : false
-        })
-        .ToListAsync();
-    
-    // 4. Usuários médicos sem registro na tabela Médicos
-    var usuariosSemMedico = await context.Users
-        .Where(u => u.Role == UserRole.Medico)
-        .Where(u => !context.Medicos.Any(m => m.UserId == u.Id))
-        .Select(u => new { u.Id, u.Username, u.Role, u.IsActive, u.CreatedAt })
-        .ToListAsync();
-    
-    var resultado = new
-    {
-        UsuariosMedicos = usuariosMedicos,
-        TotalMedicos = totalMedicos,
-        MedicosExistentes = medicosExistentes,
-        UsuariosSemMedico = usuariosSemMedico
-    };
-    
-    logger.LogInformation("Debug concluído - Usuários médicos: {Count1}, Médicos na tabela: {Count2}, Usuários sem médico: {Count3}", 
-        usuariosMedicos.Count, totalMedicos, usuariosSemMedico.Count);
-    
-    return Results.Ok(resultado);
-});
 
 // Endpoints de Métricas
 app.MapGet("/admin/metrics", async (AdminService adminService, HttpContext context, ILogger<Program> logger) =>
@@ -1396,109 +1471,5 @@ app.MapGet("/medico/metrics", async (AdminService adminService, HttpContext cont
     }
 }).RequireAuthorization();
 
-// ENDPOINT TEMPORÁRIO - Gerar hash da senha para médicos
-app.MapGet("/temp/gerar-hash-senha", () =>
-{
-    string senha = "@246!588";
-    string hash = BCrypt.Net.BCrypt.HashPassword(senha);
-    
-    return Results.Ok(new
-    {
-        senha = senha,
-        hash = hash,
-        sqlCommand = $"UPDATE Users SET PasswordHash = '{hash}' WHERE Role = 2;",
-        verificacao = BCrypt.Net.BCrypt.Verify(senha, hash)
-    });
-});
-
-// ENDPOINT TEMPORÁRIO - Criar usuário admin
-app.MapPost("/temp/criar-admin", async (HealthCoreDbContext context, ILogger<Program> logger) =>
-{
-    try
-    {
-        // Verificar se já existe um admin
-        var adminExistente = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
-        if (adminExistente != null)
-        {
-            return Results.Conflict(new { Message = "Usuário admin já existe" });
-        }
-
-        var admin = new User
-        {
-            Id = Guid.NewGuid(),
-            Username = "admin",
-            Role = UserRole.Administrador,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
-        
-        admin.SetPassword("@246!588");
-        
-        context.Users.Add(admin);
-        await context.SaveChangesAsync();
-        
-        logger.LogInformation("Usuário admin criado com sucesso: {Id}", admin.Id);
-        
-        return Results.Ok(new
-        {
-            Message = "Usuário admin criado com sucesso",
-            Id = admin.Id,
-            Username = admin.Username,
-            Role = admin.Role,
-            PasswordHashLength = admin.PasswordHash.Length
-        });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro ao criar usuário admin");
-        return Results.Problem("Erro ao criar usuário admin");
-    }
-});
-
-// ENDPOINT TEMPORÁRIO - Criar usuário guelfi
-app.MapPost("/temp/criar-guelfi", async (HealthCoreDbContext context, ILogger<Program> logger) =>
-{
-    try
-    {
-        // Usar hash gerado pelo endpoint anterior
-        var passwordHash = "$2a$11$4u6sid5bv5sTjyBqtGetCueW/taQH9E1bwPjVTMGnsdvGMSzD0PiC";
-        
-        // Limpar usuário existente se houver
-        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "guelfi");
-        if (existingUser != null)
-        {
-            context.Users.Remove(existingUser);
-        }
-
-        var guelfi = new User
-        {
-            Id = Guid.NewGuid(),
-            Username = "guelfi",
-            PasswordHash = passwordHash,
-            Role = UserRole.Administrador,
-            IsActive = true
-        };
-        
-        context.Users.Add(guelfi);
-        await context.SaveChangesAsync();
-        
-        logger.LogInformation("Usuário guelfi criado com sucesso: {Id}", guelfi.Id);
-        
-        return Results.Ok(new
-        {
-            Message = "Usuário guelfi criado com sucesso",
-            Id = guelfi.Id,
-            Username = guelfi.Username,
-            Role = guelfi.Role.ToString(),
-            IsActive = guelfi.IsActive,
-            PasswordHashLength = guelfi.PasswordHash.Length
-        });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro ao criar usuário guelfi: {Error}", ex.Message);
-        return Results.Problem($"Erro ao criar usuário guelfi: {ex.Message}");
-    }
-});
 
 app.Run();
