@@ -29,16 +29,16 @@ export default defineConfig({
         manualChunks: {
           // React e ReactDOM juntos
           'react-vendor': ['react', 'react-dom'],
-          // MUI Material separado do Emotion
-          'mui-material': ['@mui/material'],
           // Emotion separado
-          'emotion-vendor': ['@emotion/react', '@emotion/styled'],
+          'emotion-vendor': ['@emotion/react', '@emotion/styled', '@emotion/cache'],
+          // MUI Material separado do Emotion
+          'mui-material': ['@mui/material', '@mui/system'],
           // MUI Icons separado
           'mui-icons': ['@mui/icons-material'],
           // MUI DataGrid separado
           'mui-datagrid': ['@mui/x-data-grid'],
           // Outras bibliotecas
-          'utils-vendor': ['axios']
+          'utils-vendor': ['axios', 'react-router-dom', 'zustand']
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
