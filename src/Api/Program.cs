@@ -788,7 +788,7 @@ app.MapPost("/auth/register", async (LoginRequestDto registerDto, UserService us
         logger.LogError(ex, "An unexpected error occurred during user registration for {Username}.", registerDto.Username);
         return Results.Problem("An unexpected error occurred during registration.");
     }
-}).RequireRateLimiting("AuthLimit");
+});
 
 app.MapPost("/auth/login", async (LoginRequestDto loginDto, AuthService authService, ILogger<Program> logger) =>
 {
@@ -812,7 +812,7 @@ app.MapPost("/auth/login", async (LoginRequestDto loginDto, AuthService authServ
         logger.LogError(ex, "Erro inesperado durante login para usuário: {Username}", loginDto.Username);
         return Results.Problem("Erro inesperado durante o login.");
     }
-}).RequireRateLimiting("AuthLimit");
+});
 
 app.MapPost("/auth/refresh", async (RefreshTokenRequestDto refreshDto, AuthService authService, ILogger<Program> logger) =>
 {
