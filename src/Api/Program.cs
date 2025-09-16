@@ -1455,4 +1455,54 @@ app.MapPost("/temp/criar-admin", async (HealthCoreDbContext context, ILogger<Pro
     }
 });
 
+// ENDPOINT TEMPORÁRIO - Criar usuário guelfi
+app.MapPost("/temp/criar-guelfi", async (HealthCoreDbContext context, ILogger<Program> logger) =>
+{
+    try
+    {
+        // Usar hash gerado pelo endpoint anterior
+        var passwordHash = "$2a$11$4u6sid5bv5sTjyBqtGetCueW/taQH9E1bwPjVTMGnsdvGMSzD0PiC";
+        
+        // Limpar usuário existente se houver
+        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "guelfi");
+        if (existingUser != null)
+        {
+            context.Users.Remove(existingUser);
+        }
+
+        var guelfi = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = "guelfi",
+            PasswordHash = passwordHash,
+            Role = UserRole.Administrador,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            CreatedBy = "system",
+            UpdatedBy = "system"
+        };
+        
+        context.Users.Add(guelfi);
+        await context.SaveChangesAsync();
+        
+        logger.LogInformation("Usuário guelfi criado com sucesso: {Id}", guelfi.Id);
+        
+        return Results.Ok(new
+        {
+            Message = "Usuário guelfi criado com sucesso",
+            Id = guelfi.Id,
+            Username = guelfi.Username,
+            Role = guelfi.Role.ToString(),
+            IsActive = guelfi.IsActive,
+            PasswordHashLength = guelfi.PasswordHash.Length
+        });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao criar usuário guelfi: {Error}", ex.Message);
+        return Results.Problem($"Erro ao criar usuário guelfi: {ex.Message}");
+    }
+});
+
 app.Run();
