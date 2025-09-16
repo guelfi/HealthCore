@@ -50,12 +50,12 @@ SELECT
         ELSE '(11) 99999-0000'
     END as Telefone,
     CASE 
-        WHEN u.Username = 'doutor1' THEN 'doutor1@mobilemed.com'
-        WHEN u.Username = 'doutor2' THEN 'doutor2@mobilemed.com'
-        WHEN u.Username = 'oscar' THEN 'oscar@mobilemed.com'
-        WHEN u.Username = 'antonio' THEN 'antonio@mobilemed.com'
-        WHEN u.Username = 'marta' THEN 'marta@mobilemed.com'
-        ELSE u.Username + '@mobilemed.com'
+                        WHEN u.Username = 'doutor1' THEN 'doutor1@healthcore.com'
+                        WHEN u.Username = 'doutor2' THEN 'doutor2@healthcore.com'
+                        WHEN u.Username = 'oscar' THEN 'oscar@healthcore.com'
+                        WHEN u.Username = 'antonio' THEN 'antonio@healthcore.com'
+                        WHEN u.Username = 'marta' THEN 'marta@healthcore.com'
+                        ELSE u.Username + '@healthcore.com'
     END as Email,
     CASE 
         WHEN u.Username = 'doutor1' THEN 'Rua das Flores, 123 - São Paulo/SP'

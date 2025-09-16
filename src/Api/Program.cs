@@ -28,7 +28,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithEnvironmentName()
     .WriteTo.Console()
     .WriteTo.File(
-        path: "../log/mobilemed-.log", 
+        path: "../log/healthcore-.log", 
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 7)
     .CreateLogger();
@@ -254,7 +254,7 @@ static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MobileMed API v1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HealthCore API v1");
     c.RoutePrefix = "swagger"; // Swagger disponível em /swagger
 });
 
@@ -373,7 +373,7 @@ app.MapGet("/health/info", () =>
     {
         application = new
         {
-            name = "MobileMed API",
+            name = "HealthCore API",
             version = "1.0.0",
             environment = app.Environment.EnvironmentName,
             startTime = startTime,
