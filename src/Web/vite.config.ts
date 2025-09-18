@@ -60,21 +60,19 @@ export default defineConfig({
     // Configuração de proxy para redirecionar chamadas /api para a API
     proxy: {
       '/api': {
-        target: process.env.NODE_ENV === 'production' 
-          ? 'http://129.153.86.168:5000'  // IP público da OCI em produção
-          : 'http://localhost:5000',      // Localhost em desenvolvimento
+        target: 'http://129.153.86.168:5000',  // Sempre usar API da OCI
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
-            console.log('🔴 Erro no proxy:', err.message);
+            console.log('🔴 Proxy error:', err);
           });
           proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('🔄 Proxy request:', req.method, req.url, '→', proxyReq.path);
+            console.log('🚀 Sending Request to OCI API:', req.method, req.url);
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('✅ Proxy response:', req.url, '→', proxyRes.statusCode);
+            console.log('✅ Received Response from OCI API:', proxyRes.statusCode, req.url);
           });
         },
       },

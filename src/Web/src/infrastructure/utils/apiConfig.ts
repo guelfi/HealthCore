@@ -49,26 +49,11 @@ export class ApiConfig {
       return 'http://129.153.86.168:5000';
     }
 
-    // Se for ngrok, precisamos usar a URL do ngrok da API
+    // Se for ngrok, usar proxy local para evitar Mixed Content
     if (isNgrok) {
       console.log('🌐 Detectado acesso via ngrok');
-      
-      // Verificar se há uma URL específica da API ngrok no .env
-      const ngrokApiUrl = import.meta.env.VITE_NGROK_API_URL;
-      if (ngrokApiUrl && ngrokApiUrl !== 'https://SUA_URL_NGROK_DA_API.ngrok-free.app') {
-        console.log('✅ Usando URL ngrok da API do .env:', ngrokApiUrl);
-        return ngrokApiUrl;
-      }
-
-      // Fallback especial para ngrok: mostrar mensagem de instrução
-      console.warn('⚠️ Acesso via ngrok detectado, mas API ngrok não está configurada');
-      console.warn('💡 Para usar via ngrok:');
-      console.warn('   1. Execute: ngrok http 5000 (em outro terminal)');
-      console.warn('   2. Configure VITE_NGROK_API_URL no .env.local');
-      console.warn('   3. Ou use o IP da máquina: http://192.168.15.119:5005');
-      
-      // Tentar usar IP local como fallback (pode não funcionar via ngrok devido a Mixed Content)
-      return 'http://192.168.15.119:5000';
+      console.log('🔧 Usando proxy local para evitar Mixed Content (HTTPS → HTTP)');
+      return '/api';
     }
 
     // Se está sendo acessado via IP da rede local (não localhost)
