@@ -11,7 +11,6 @@ import {
   Typography,
   Divider,
   useTheme,
-  Backdrop,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -99,6 +98,13 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         variant="temporary"
         ModalProps={{
           keepMounted: true, // Melhor performance em mobile
+          // Configurações do backdrop integrado
+          BackdropProps: {
+            sx: {
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              backdropFilter: 'blur(2px)',
+            },
+          },
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
@@ -209,18 +215,6 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           </List>
         </Box>
       </Drawer>
-
-      {/* Backdrop personalizado para melhor UX */}
-      <Backdrop
-        open={isOpen}
-        onClick={onClose}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          zIndex: muiTheme.zIndex.drawer - 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(2px)',
-        }}
-      />
     </>
   );
 };
