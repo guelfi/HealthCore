@@ -54,6 +54,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   React.useEffect(() => {
     if (!isMobile) {
       setSidebarOpen(true);
+    } else {
+      // Em mobile, o sidebar deve começar fechado
+      setSidebarOpen(false);
     }
   }, [isMobile, setSidebarOpen]);
 
@@ -216,23 +219,25 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       </AppBar>
 
       <Box sx={{ display: 'flex', flex: 1 }}>
-        <Drawer
-          variant={isMobile ? 'temporary' : 'permanent'}
-          open={sidebarOpen}
-          onClose={toggleSidebar}
-          sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: {
+        {/* Drawer Desktop - só renderiza em desktop */}
+        {!isMobile && (
+          <Drawer
+            variant="permanent"
+            open={sidebarOpen}
+            sx={{
               width: drawerWidth,
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column',
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
+              flexShrink: 0,
+              [`& .MuiDrawer-paper`]: {
+                width: drawerWidth,
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+              },
+            }}
+          >
+            {drawerContent}
+          </Drawer>
+        )}
 
         <Box
           component="main"
