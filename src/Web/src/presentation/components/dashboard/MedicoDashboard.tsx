@@ -12,6 +12,7 @@ import {
 import { People, Assignment, TrendingUp, Refresh } from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useMetrics } from '../../hooks/useMetrics';
+import DashboardScrollIndicators from '../../../components/ui/Navigation/DashboardScrollIndicators';
 
 const MedicoDashboard: React.FC = () => {
   const { user } = useAuthStore();
@@ -37,7 +38,9 @@ const MedicoDashboard: React.FC = () => {
     const examesMes = metrics.crescimento.exames.find(
       item => item.mes.toLowerCase() === mesAtual.toLowerCase()
     );
-    return examesMes?.total || Math.floor(metrics.exames.totalExames * 0.4);
+    return typeof examesMes?.total === 'number' 
+      ? examesMes.total 
+      : Math.floor(metrics.exames.totalExames * 0.4);
   };
 
   // Obter nome do mês atual
@@ -171,7 +174,7 @@ const MedicoDashboard: React.FC = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ pb: 4 }}> {/* Adicionar padding bottom para scroll completo */}
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
         <Typography variant="h4" component="h1">
           Dashboard Médico
@@ -446,7 +449,8 @@ const MedicoDashboard: React.FC = () => {
           <Card
             sx={{
               flex: 1,
-              height: 230,
+              minHeight: 230,
+              height: 'auto',
               boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
               borderRadius: 3,
               transition: 'all 0.3s ease-in-out',
@@ -473,7 +477,7 @@ const MedicoDashboard: React.FC = () => {
               >
                 Exames
               </Typography>
-              <Box sx={{ flex: 1, overflow: 'auto' }}>
+              <Box sx={{ flex: 1 }}>
                 {metrics.crescimento.exames.map((item, index) => (
                   <Box
                     key={item.mes}
@@ -536,11 +540,13 @@ const MedicoDashboard: React.FC = () => {
                             index > 0 &&
                             typeof item.total === 'number' &&
                             typeof metrics.crescimento.exames[index - 1]?.total === 'number'
-                              ? item.total > (metrics.crescimento.exames[index - 1]?.total || 0)
+                              ? (typeof metrics.crescimento.exames[index - 1]?.total === 'number')
+                                ? (item.total as number) > (metrics.crescimento.exames[index - 1].total as number)
                                 ? 'success.main'
-                                : item.total < (metrics.crescimento.exames[index - 1]?.total || 0)
+                                : (item.total as number) < (metrics.crescimento.exames[index - 1].total as number)
                                 ? 'error.main'
                                 : 'warning.main'
+                                : 'text.secondary'
                               : 'text.secondary'
                           }
                           sx={{ fontSize: '1em', minWidth: '20px', textAlign: 'center' }}
@@ -548,10 +554,12 @@ const MedicoDashboard: React.FC = () => {
                           {index > 0 &&
                           typeof item.total === 'number' &&
                           typeof metrics.crescimento.exames[index - 1]?.total === 'number'
-                            ? item.total > (metrics.crescimento.exames[index - 1]?.total || 0)
-                              ? '↗'
-                              : item.total < (metrics.crescimento.exames[index - 1]?.total || 0)
-                              ? '↘'
+                            ? (typeof metrics.crescimento.exames[index - 1]?.total === 'number')
+                              ? ((item.total as number) > (metrics.crescimento.exames[index - 1].total as number)
+                                ? '↗'
+                                : (item.total as number) < (metrics.crescimento.exames[index - 1].total as number)
+                                  ? '↘'
+                                  : '→')
                               : '→'
                             : '→'}
                         </Typography>
@@ -566,7 +574,8 @@ const MedicoDashboard: React.FC = () => {
           <Card
             sx={{
               flex: 1,
-              height: 230,
+              minHeight: 230,
+              height: 'auto',
               boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
               borderRadius: 3,
               transition: 'all 0.3s ease-in-out',
@@ -593,7 +602,7 @@ const MedicoDashboard: React.FC = () => {
               >
                 Atividades
               </Typography>
-              <Box sx={{ flex: 1, overflow: 'auto' }}>
+              <Box sx={{ flex: 1 }}>
                 <Box
                   display="flex"
                   justifyContent="space-between"
@@ -744,6 +753,9 @@ const MedicoDashboard: React.FC = () => {
           </Card>
         </Box>
       </Box>
+
+      {/* Indicadores de Scroll para Mobile */}
+      <DashboardScrollIndicators />
     </Box>
   );
 };

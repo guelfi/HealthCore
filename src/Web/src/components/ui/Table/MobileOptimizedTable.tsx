@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -64,8 +64,17 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
   });
 
   const getVisibleColumns = useCallback(() => {
+    if (isMobile) {
+      // Em mobile: máximo 2 colunas + ações
+      const actionsColumn = columns.find(col => col.id === 'actions');
+      const dataColumns = columns.filter(col => 
+        col.id !== 'actions' && col.mobileVisible !== false
+      ).slice(0, 2); // Máximo 2 colunas de dados
+      
+      return actionsColumn ? [actionsColumn, ...dataColumns] : dataColumns;
+    }
+    
     return columns.filter(column => {
-      if (isMobile) return column.mobileVisible !== false;
       if (isTablet) return column.tabletVisible !== false;
       return column.desktopVisible !== false;
     });
@@ -211,6 +220,14 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
           scrollBehavior: 'smooth',
+          // Mobile: container compacto dentro do card
+          ...(isMobile && {
+            maxHeight: 'none',
+            boxShadow: 'none',
+            border: 'none',
+            borderRadius: 0,
+            bgcolor: 'transparent',
+          }),
           '&::-webkit-scrollbar': {
             height: 6,
             width: 6,
@@ -227,7 +244,9 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
         <Table
           stickyHeader={stickyHeader}
           sx={{
-            minWidth: isMobile ? 600 : 'auto',
+            // Mobile: tabela mais compacta para caber no card
+            minWidth: isMobile ? 'auto' : 600,
+            width: '100%',
           }}
         >
           <TableHead>
@@ -237,12 +256,24 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
                   key={column.id}
                   align={column.align || 'left'}
                   sx={{
-                    minWidth: column.minWidth || (isMobile ? 120 : 'auto'),
+                    // Mobile: colunas mais compactas
+                    minWidth: isMobile 
+                      ? (column.id === 'actions' ? 50 : 100) 
+                      : (column.minWidth || 'auto'),
+                    maxWidth: isMobile 
+                      ? (column.id === 'actions' ? 50 : 150) 
+                      : 'none',
                     fontWeight: 600,
                     backgroundColor: alpha(theme.palette.primary.main, 0.08),
                     position: column.sticky ? 'sticky' : 'static',
                     left: column.sticky ? 0 : 'auto',
                     zIndex: column.sticky ? 10 : 'auto',
+                    // Mobile: padding reduzido
+                    ...(isMobile && {
+                      px: 1,
+                      py: 1,
+                      fontSize: '0.875rem',
+                    }),
                   }}
                 >
                   {column.label}
@@ -276,11 +307,26 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
                     key={column.id}
                     align={column.align || 'left'}
                     sx={{
-                      minWidth: column.minWidth || (isMobile ? 120 : 'auto'),
+                      // Mobile: células mais compactas
+                      minWidth: isMobile 
+                        ? (column.id === 'actions' ? 50 : 100) 
+                        : (column.minWidth || 'auto'),
+                      maxWidth: isMobile 
+                        ? (column.id === 'actions' ? 50 : 150) 
+                        : 'none',
                       position: column.sticky ? 'sticky' : 'static',
                       left: column.sticky ? 0 : 'auto',
                       zIndex: column.sticky ? 5 : 'auto',
                       backgroundColor: column.sticky ? theme.palette.background.paper : 'transparent',
+                      // Mobile: padding reduzido e texto menor
+                      ...(isMobile && {
+                        px: 1,
+                        py: 1,
+                        fontSize: '0.875rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }),
                     }}
                   >
                     {column.render 

@@ -19,6 +19,7 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { useMetrics } from '../../hooks/useMetrics';
+import DashboardScrollIndicators from '../../../components/ui/Navigation/DashboardScrollIndicators';
 
 const AdminDashboard: React.FC = () => {
   const { metrics, isLoading, isInitialLoading, error, refreshMetrics } =
@@ -183,7 +184,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ pb: 4 }}> {/* Adicionar padding bottom para scroll completo */}
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
         <Typography variant="h4" component="h1">
           Dashboard Administrativo
@@ -543,7 +544,7 @@ const AdminDashboard: React.FC = () => {
       </Box>
 
       {/* Cards Inferiores - Estatísticas */}
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}> {/* Adicionar margin bottom */}
         <Box
           sx={{
             display: 'flex',
@@ -555,7 +556,8 @@ const AdminDashboard: React.FC = () => {
           <Card
             sx={{
               flex: 1,
-              height: { xs: 320, sm: 280 },
+              minHeight: { xs: 320, sm: 280 }, // minHeight em vez de height fixa
+              height: 'auto', // Altura auto para expandir conforme conteúdo
               boxShadow: '0 4px 20px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
               borderRadius: 4,
               background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
@@ -615,7 +617,7 @@ const AdminDashboard: React.FC = () => {
               >
                 Médicos
               </Typography>
-              <Box sx={{ flex: 1, overflow: 'auto' }}>
+              <Box sx={{ flex: 1 }}> {/* Remover overflow: auto para não cortar conteúdo */}
                 {metrics.crescimento.usuarios.map((item, index) => {
                   let comparacao = '';
                   let corComparacao = 'text.secondary';
@@ -747,7 +749,8 @@ const AdminDashboard: React.FC = () => {
           <Card
             sx={{
               flex: 1,
-              height: 280,
+              minHeight: { xs: 320, sm: 280 },
+              height: 'auto',
               boxShadow: '0 4px 20px rgba(5, 150, 105, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
               borderRadius: 4,
               background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #ecfdf5 100%)',
@@ -807,7 +810,7 @@ const AdminDashboard: React.FC = () => {
               >
                 Pacientes e Exames
               </Typography>
-              <Box sx={{ flex: 1, overflow: 'auto' }}>
+              <Box sx={{ flex: 1 }}>
                 {metrics.crescimento.pacientes.map((item, index) => (
                   <Box
                     key={item.mes}
@@ -879,7 +882,8 @@ const AdminDashboard: React.FC = () => {
           <Card
             sx={{
               flex: 1,
-              height: 280,
+              minHeight: { xs: 320, sm: 280 },
+              height: 'auto',
               boxShadow: '0 4px 20px rgba(245, 158, 11, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
               borderRadius: 4,
               background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 50%, #fef3c7 100%)',
@@ -939,7 +943,7 @@ const AdminDashboard: React.FC = () => {
               >
                 Atividades
               </Typography>
-              <Box sx={{ flex: 1, overflow: 'auto' }}>
+              <Box sx={{ flex: 1 }}>
                 <Box
                   display="flex"
                   justifyContent="space-between"
@@ -1090,6 +1094,9 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </Box>
       </Box>
+
+      {/* Indicadores de Scroll para Mobile */}
+      <DashboardScrollIndicators />
     </Box>
   );
 };

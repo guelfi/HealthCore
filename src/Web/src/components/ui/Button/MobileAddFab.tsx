@@ -22,6 +22,9 @@ interface MobileAddFabProps {
     left?: number;
     top?: number;
   };
+  // Novo: posicionamento relativo ao container
+  positionType?: 'fixed' | 'absolute';
+  containerRelative?: boolean;
 }
 
 const MobileAddFab: React.FC<MobileAddFabProps> = ({
@@ -32,6 +35,8 @@ const MobileAddFab: React.FC<MobileAddFabProps> = ({
   color = 'primary',
   size = 'large',
   position = { bottom: 24, right: 24 },
+  positionType = 'fixed',
+  containerRelative = false,
 }) => {
   const theme = useTheme();
   const { isMobile, isTablet, isTouchDevice } = useResponsive();
@@ -42,8 +47,8 @@ const MobileAddFab: React.FC<MobileAddFabProps> = ({
   }
 
   const fabStyles = {
-    position: 'fixed' as const,
-    zIndex: 1000,
+    position: (containerRelative ? 'absolute' : positionType) as const,
+    zIndex: containerRelative ? 100 : 1000,
     bottom: position.bottom,
     right: position.right,
     left: position.left,
