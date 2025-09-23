@@ -25,6 +25,7 @@ import ExameEditPage from './presentation/pages/ExameEditPage';
 import MedicosPageTable from './presentation/pages/MedicosPageTable';
 import UsuariosPageTable from './presentation/pages/UsuariosPageTable';
 import DiagnosticPage from './presentation/pages/DiagnosticPage';
+import MobileDebugger from './components/dev/MobileDebugger';
 
 // Componente para proteger rotas administrativas
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -166,6 +167,9 @@ const App: React.FC = () => {
             />
           </Routes>
         </Router>
+        
+        {/* Mobile Debugger - só em desenvolvimento */}
+        <MobileDebugger enabled={import.meta.env.DEV} />
       </NetworkErrorBoundary>
     </ThemeProvider>
   );

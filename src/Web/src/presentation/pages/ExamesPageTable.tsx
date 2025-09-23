@@ -38,6 +38,7 @@ import type { Paciente } from '../../domain/entities/Paciente';
 import { ModalidadeDicomLabels } from '../../domain/enums/ModalidadeDicom';
 import ExameForm from '../components/common/ExameForm';
 import CustomPagination from '../components/common/CustomPagination';
+import ResponsiveTableHeader from '../../components/ui/Layout/ResponsiveTableHeader';
 import {
   DeleteConfirmationDialog,
   SuccessDialog,
@@ -180,34 +181,26 @@ const ExamesPageTable: React.FC = () => {
       {/* Card Principal */}
       <Card sx={standardCardStyles}>
         <CardContent sx={standardCardContentStyles}>
-          {/* Cabeçalho do Grid */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 3,
-            }}
-          >
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddNew}
-              size={isMobile ? 'small' : 'medium'}
-              sx={standardAddButtonStyles}
-            >
-              Adicionar Exame
-            </Button>
-
-            <CustomPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              itemsPerPage={pageSize}
-              onPageChange={handlePageChange}
-              size="small"
-            />
-          </Box>
+          {/* Header Responsivo com FAB Mobile */}
+          <ResponsiveTableHeader
+            onAddClick={handleAddNew}
+            addButtonText="Adicionar Exame"
+            addButtonDisabled={loading}
+            paginationComponent={
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={pageSize}
+                onPageChange={handlePageChange}
+                size="small"
+              />
+            }
+            totalItems={totalItems}
+            itemName="exames"
+            showTotalOnMobile={false}
+            fabTooltip="Adicionar Exame"
+          />
 
           {/* Estado de carregamento */}
           {loading && (

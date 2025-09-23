@@ -54,6 +54,7 @@ import {
   SuccessDialog,
 } from '../components/common/ConfirmationDialogs';
 import StandardDialogButtons from '../components/common/StandardDialogButtons';
+import ResponsiveTableHeader from '../../components/ui/Layout/ResponsiveTableHeader';
 
 const UsuariosPageTable: React.FC = () => {
   const theme = useTheme();
@@ -245,33 +246,12 @@ const UsuariosPageTable: React.FC = () => {
       {/* Card Principal */}
       <Card sx={standardCardStyles}>
         <CardContent sx={standardCardContentStyles}>
-          {/* Cabeçalho do Grid */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 3,
-            }}
-          >
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddNew}
-              size={isMobile ? 'small' : 'medium'}
-              sx={standardAddButtonStyles}
-            >
-              Adicionar Usuário
-            </Button>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-              >
-                Total: {total}
-              </Typography>
+          {/* Header Responsivo com FAB Mobile */}
+          <ResponsiveTableHeader
+            onAddClick={handleAddNew}
+            addButtonText="Adicionar Usuário"
+            addButtonDisabled={loading || saving}
+            paginationComponent={
               <Pagination
                 count={totalPages}
                 page={currentPage}
@@ -279,8 +259,12 @@ const UsuariosPageTable: React.FC = () => {
                 size="small"
                 color="primary"
               />
-            </Box>
-          </Box>
+            }
+            totalItems={total}
+            itemName="usuários"
+            showTotalOnMobile={false}
+            fabTooltip="Adicionar Usuário"
+          />
 
           {/* Mensagem de Erro */}
           {error && (

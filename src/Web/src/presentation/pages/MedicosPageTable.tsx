@@ -55,6 +55,7 @@ import {
   SuccessDialog,
 } from '../components/common/ConfirmationDialogs';
 import StandardDialogButtons from '../components/common/StandardDialogButtons';
+import ResponsiveTableHeader from '../../components/ui/Layout/ResponsiveTableHeader';
 
 const MedicosPageTable: React.FC = () => {
   const theme = useTheme();
@@ -108,7 +109,7 @@ const MedicosPageTable: React.FC = () => {
       nome: medico.nome,
       documento: applyCPFMask(medico.documento),
       crm: medico.crm,
-      especialidade: medico.especialidade,
+      especialidade: medico.especialidade || '',
       telefone: medico.telefone ? applyPhoneMask(medico.telefone) : '',
       email: medico.email || '',
       username: medico.username || '',
@@ -173,10 +174,10 @@ const MedicosPageTable: React.FC = () => {
       await fetchMedicos({ page, pageSize });
     } catch (error) {
       console.error('Erro ao salvar médico:', error);
-      addNotification({
-        type: 'error',
-        message: `Erro ao ${dialogMode === 'add' ? 'adicionar' : 'atualizar'} médico. Tente novamente.`,
-      });
+      addNotification(
+        `Erro ao ${dialogMode === 'add' ? 'adicionar' : 'atualizar'} médico. Tente novamente.`,
+        'error'
+      );
     } finally {
       setSaving(false);
     }
@@ -199,10 +200,10 @@ const MedicosPageTable: React.FC = () => {
         await fetchMedicos({ page, pageSize });
       } catch (error) {
         console.error('Erro ao deletar médico:', error);
-        addNotification({
-          type: 'error',
-          message: 'Erro ao excluir médico. Tente novamente.',
-        });
+        addNotification(
+          'Erro ao excluir médico. Tente novamente.',
+          'error'
+        );
       } finally {
         setSaving(false);
       }
@@ -252,39 +253,12 @@ const MedicosPageTable: React.FC = () => {
       {/* Card Principal */}
       <Card sx={standardCardStyles}>
         <CardContent sx={standardCardContentStyles}>
-          {/* Cabeçalho do Grid */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 3,
-            }}
-          >
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddNew}
-              size={isMobile ? 'small' : 'medium'}
-              sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                '&:hover': {
-                  background:
-                    'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                },
-              }}
-            >
-              Adicionar Médico
-            </Button>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-              >
-                Total: {total}
-              </Typography>
+          {/* Header Responsivo com FAB Mobile */}
+          <ResponsiveTableHeader
+            onAddClick={handleAddNew}
+            addButtonText="Adicionar Médico"
+            addButtonDisabled={loading || saving}
+            paginationComponent={
               <Pagination
                 count={totalPages}
                 page={currentPage}
@@ -292,8 +266,12 @@ const MedicosPageTable: React.FC = () => {
                 size="small"
                 color="primary"
               />
-            </Box>
-          </Box>
+            }
+            totalItems={total}
+            itemName="médicos"
+            showTotalOnMobile={false}
+            fabTooltip="Adicionar Médico"
+          />
 
           {/* Mensagem de Erro */}
           {error && (
