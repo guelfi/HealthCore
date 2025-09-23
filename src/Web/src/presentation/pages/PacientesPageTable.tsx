@@ -13,13 +13,6 @@ import {
   DialogActions,
   TextField,
   Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   CircularProgress,
   Alert,
   Pagination,
@@ -28,7 +21,6 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Visibility,
   Person as PersonIcon,
   Save,
   Close,
@@ -44,7 +36,6 @@ import {
 import type { Paciente } from '../../domain/entities/Paciente';
 import { usePacientes } from '../hooks/usePacientes';
 import { useUIStore } from '../../application/stores/uiStore';
-
 import {
   formatCPF,
   formatPhone,
@@ -60,6 +51,72 @@ import {
 } from '../components/common/ConfirmationDialogs';
 import StandardDialogButtons from '../components/common/StandardDialogButtons';
 import CustomPagination from '../components/common/CustomPagination';
+import MobileOptimizedTable from '../../components/ui/Table/MobileOptimizedTable';
+import MobileOptimizedDialog from '../../components/ui/Dialog/MobileOptimizedDialog';
+import ResponsiveTableHeader from '../../components/ui/Layout/ResponsiveTableHeader';
+import { Visibility } from '@mui/icons-material';
+
+// Configuração das colunas da tabela
+const getTableColumns = () => [
+  {
+    id: 'actions',
+    label: '',
+    minWidth: 60,
+    align: 'center' as const,
+    sticky: false,
+    mobileVisible: true,
+    render: (value: any, row: any) => (
+      <Visibility
+        color="action"
+        sx={{
+          fontSize: '1.5rem', // Maior para touch
+          cursor: 'pointer',
+          '&:hover': { color: 'primary.main' },
+        }}
+      />
+    ),
+  },
+  {
+    id: 'nome',
+    label: 'Nome',
+    minWidth: 150,
+    mobileVisible: true,
+    tabletVisible: true,
+    desktopVisible: true,
+  },
+  {
+    id: 'documento',
+    label: 'Documento',
+    minWidth: 120,
+    mobileVisible: true,
+    render: (value: string) => formatCPF(value),
+  },
+  {
+    id: 'dataNascimento',
+    label: 'Data de Nascimento',
+    minWidth: 130,
+    mobileVisible: false, // Oculta em mobile para economizar espaço
+    tabletVisible: true,
+    render: (value: string) => formatDateBR(value),
+  },
+  {
+    id: 'telefone',
+    label: 'Telefone',
+    minWidth: 120,
+    mobileVisible: false,
+    tabletVisible: true,
+    render: (value: string) => formatPhone(value || ''),
+  },
+  {
+    id: 'email',
+    label: 'E-mail',
+    minWidth: 150,
+    mobileVisible: false,
+    tabletVisible: false,
+    desktopVisible: true,
+    render: (value: string) => value || '-',
+  },
+];
 
 const PacientesPageTable: React.FC = () => {
   const theme = useTheme();
@@ -237,34 +294,26 @@ const PacientesPageTable: React.FC = () => {
       {/* Card Principal */}
       <Card sx={standardCardStyles}>
         <CardContent sx={standardCardContentStyles}>
-          {/* Cabeçalho do Grid */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 3,
-            }}
-          >
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddNew}
-              size={isMobile ? 'small' : 'medium'}
-              sx={standardAddButtonStyles}
-            >
-              Adicionar Paciente
-            </Button>
-
-            <CustomPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={total}
-              itemsPerPage={pageSize}
-              onPageChange={handlePageChange}
-              size="small"
-            />
-          </Box>
+          {/* Header Responsivo com FAB Mobile */}
+          <ResponsiveTableHeader
+            onAddClick={handleAddNew}
+            addButtonText="Adicionar Paciente"
+            addButtonDisabled={loading}
+            paginationComponent={
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={total}
+                itemsPerPage={pageSize}
+                onPageChange={handlePageChange}
+                size="small"
+              />
+            }
+            totalItems={total}
+            itemName="pacientes"
+            showTotalOnMobile={false}
+            fabTooltip="Adicionar Paciente"
+          />
 
           {/* Estado de carregamento */}
           {loading && (
@@ -273,127 +322,32 @@ const PacientesPageTable: React.FC = () => {
             </Box>
           )}
 
-          {/* Tabela de Dados */}
+          {/* Tabela Otimizada para Mobile */}
           {!loading && (
-            <TableContainer
-              component={Paper}
-              sx={{
-                boxShadow: 'none',
-                border: '1px solid',
-                borderColor: 'divider',
-                maxHeight: 450,
-              }}
-            >
-              <Table size="small">
-                <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
-                  <TableRow>
-                    <TableCell align="center" sx={{ width: 50 }}></TableCell>
-                    <TableCell>
-                      <strong>Nome</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>Documento</strong>
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                    >
-                      <strong>Data de Nascimento</strong>
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', sm: 'table-cell' } }}
-                    >
-                      <strong>Telefone</strong>
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                    >
-                      <strong>E-mail</strong>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {pacientes.map(paciente => (
-                    <TableRow
-                      key={paciente.id}
-                      onClick={() => handleRowClick(paciente)}
-                      sx={{
-                        cursor: 'pointer',
-                        height: 31,
-                        '&:hover': {
-                          backgroundColor: 'rgba(102, 126, 234, 0.04)',
-                        },
-                      }}
-                    >
-                      <TableCell align="center">
-                        <Visibility
-                          color="action"
-                          sx={{
-                            fontSize: '1.1rem',
-                            cursor: 'pointer',
-                            '&:hover': { color: 'primary.main' },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>{paciente.nome}</TableCell>
-                      <TableCell>
-                        {formatCPF(paciente.documento)}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          display: { xs: 'none', md: 'table-cell' },
-                        }}
-                      >
-                        {formatDateBR(paciente.dataNascimento)}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          display: { xs: 'none', sm: 'table-cell' },
-                        }}
-                      >
-                        {formatPhone(paciente.telefone || '')}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          display: { xs: 'none', md: 'table-cell' },
-                        }}
-                      >
-                        {paciente.email || '-'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {pacientes.length === 0 && !loading && (
-                    <TableRow>
-                      <TableCell colSpan={5} align="center">
-                        <Typography
-                          variant="body1"
-                          color="text.secondary"
-                          sx={{ py: 4 }}
-                        >
-                          Nenhum paciente encontrado
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <MobileOptimizedTable
+              columns={getTableColumns()}
+              data={pacientes}
+              onRowClick={handleRowClick}
+              loading={loading}
+              emptyMessage="Nenhum paciente encontrado"
+              rowHeight={48} // Altura otimizada para touch
+              stickyHeader
+              showScrollIndicators
+              touchOptimized
+            />
           )}
         </CardContent>
       </Card>
 
-      {/* Dialog de Manutenção */}
-      <Dialog
+      {/* Dialog de Manutenção Otimizado para Mobile */}
+      <MobileOptimizedDialog
         open={openDialog}
         onClose={handleCloseDialog}
         maxWidth="sm"
         fullWidth
-        sx={{
-          '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '600px' },
-            maxWidth: '600px',
-            margin: { xs: 1, sm: 3 },
-          },
-        }}
+        enableBottomSheet
+        touchOptimized
+        mobileFullScreen={false}
       >
         <DialogTitle sx={standardDialogTitleStyles}>
           <PersonIcon />
@@ -534,7 +488,7 @@ const PacientesPageTable: React.FC = () => {
            saveLoading={saving}
            saveText={dialogMode === 'add' ? 'Adicionar' : 'Salvar'}
          />
-      </Dialog>
+      </MobileOptimizedDialog>
 
       {/* Diálogo de Confirmação de Exclusão */}
       <DeleteConfirmationDialog

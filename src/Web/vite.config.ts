@@ -56,7 +56,13 @@ export default defineConfig({
       port: 5005,
       host: 'localhost', // Força HMR a usar localhost
     },
-    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app'],
+    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app', '.ngrok.com'],
+    // Configurações otimizadas para mobile
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
     // Configuração de proxy para redirecionar chamadas /api para a API
     proxy: {
       '/api': {
