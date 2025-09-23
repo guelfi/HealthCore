@@ -11,7 +11,11 @@ const API_BASE_URL = apiConfig.getBaseUrl();
 const API_TIMEOUT = apiConfig.getTimeout();
 
 // Log da configuração para debug
-console.log('🔧 Configuração da API:', apiConfig.getDebugInfo());
+console.log('🔧 Configuração da API:', {
+  baseUrl: API_BASE_URL,
+  timeout: API_TIMEOUT,
+  debugInfo: apiConfig.getDebugInfo()
+});
 
 // Criar instância do Axios
 export const apiClient: AxiosInstance = axios.create({
@@ -25,6 +29,13 @@ export const apiClient: AxiosInstance = axios.create({
 // Interceptador de requisição para adicionar token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    console.log('🚀 Fazendo requisição:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullUrl: `${config.baseURL}${config.url}`
+    });
+
     // Obter token do Zustand store
     try {
       const authStore = JSON.parse(localStorage.getItem('auth-store') || '{}');
@@ -32,6 +43,9 @@ apiClient.interceptors.request.use(
 
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔑 Token adicionado à requisição');
+      } else {
+        console.log('ℹ️ Requisição sem token');
       }
     } catch (error) {
       console.warn('Erro ao obter token do auth store:', error);
@@ -40,6 +54,7 @@ apiClient.interceptors.request.use(
     return config;
   },
   error => {
+    console.error('❌ Erro no interceptador de requisição:', error);
     return Promise.reject(error);
   }
 );
@@ -47,9 +62,29 @@ apiClient.interceptors.request.use(
 // Interceptador de resposta para tratamento de erros e refresh token
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    console.log('✅ Resposta recebida:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config.url
+    });
     return response;
   },
   async error => {
+    console.log('⚠️ Erro na resposta:', {
+      message: error.message,
+      code: error.code,
+      response: error.response ? {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      } : 'Sem resposta',
+      request: error.request ? 'Request feito' : 'Sem request',
+      config: {
+        method: error.config?.method,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL
+      }
+    });
     const originalRequest = error.config;
 
     // Tratamento de erro 401 (Unauthorized) - Token expirado
@@ -109,7 +144,12 @@ apiClient.interceptors.response.use(
 
     // Tratamento de erro de rede
     if (!error.response) {
-      console.error('Erro de rede:', error.message);
+      console.error('❌ Erro de rede detectado:', {
+        message: error.message,
+        code: error.code,
+        request: !!error.request,
+        stack: error.stack
+      });
       const networkError = new Error('Erro de conectividade: Verifique sua conexão com a internet ou se a API está disponível');
       networkError.name = 'NetworkError';
       return Promise.reject(networkError);

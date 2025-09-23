@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API Config - HealthCore</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-box {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .warning { border-left: 4px solid #ff9800; }
+        .info { border-left: 4px solid #2196F3; }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.ok { background: #4CAF50; color: white; }
+        .status.error { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug API Config - HealthCore</h1>
+    
+    <div class="debug-box info">
+        <h3>📍 Informações de Localização</h3>
+        <p><strong>URL Atual:</strong> <span id="current-url"></span></p>
+        <p><strong>Host:</strong> <span id="current-host"></span></p>
+        <p><strong>Protocolo:</strong> <span id="current-protocol"></span></p>
+        <p><strong>Porta:</strong> <span id="current-port"></span></p>
+    </div>
+
+    <div class="debug-box warning">
+        <h3>⚙️ Configuração Detectada</h3>
+        <p><strong>Tipo de Acesso:</strong> <span id="access-type"></span></p>
+        <p><strong>URL da API:</strong> <span id="api-url"></span></p>
+        <p><strong>Timeout:</strong> <span id="api-timeout"></span></p>
+    </div>
+
+    <div class="debug-box info">
+        <h3>🔧 Variáveis de Ambiente</h3>
+        <pre id="env-vars"></pre>
+    </div>
+
+    <div class="debug-box">
+        <h3>🧪 Testes de Conectividade</h3>
+        <button onclick="testHealth()">Testar /health</button>
+        <button onclick="testAuth()">Testar Autenticação</button>
+        <button onclick="testPacientes()">Testar /pacientes</button>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Detectar configuração atual
+        function detectConfiguration() {
+            const currentHost = window.location.hostname;
+            const currentProtocol = window.location.protocol;
+            const currentPort = window.location.port;
+            
+            document.getElementById('current-url').textContent = window.location.href;
+            document.getElementById('current-host').textContent = currentHost;
+            document.getElementById('current-protocol').textContent = currentProtocol;
+            document.getElementById('current-port').textContent = currentPort || 'padrão';
+
+            // Lógica de detecção (mesmo do apiConfig.ts)
+            const isNgrok = currentHost.includes('.ngrok-free.app') || 
+                           currentHost.includes('.ngrok.io') || 
+                           currentHost.includes('.ngrok.app');
+            
+            const isOciProduction = currentHost === '129.153.86.168';
+            const isLocalNetworkAccess = currentHost.startsWith('192.168.') || 
+                                       currentHost.startsWith('10.') || 
+                                       currentHost.startsWith('172.');
+            const isLocalhost = currentHost === 'localhost' || currentHost === '127.0.0.1';
+
+            let apiUrl, accessType;
+            
+            if (isOciProduction) {
+                apiUrl = 'http://129.153.86.168:5000';
+                accessType = '🚀 OCI (Produção)';
+            } else if (isNgrok) {
+                apiUrl = '/api';
+                accessType = '🌐 ngrok (Proxy Local)';
+            } else if (isLocalNetworkAccess) {
+                apiUrl = '/api';
+                accessType = '🏠 IP da Rede Local (Proxy)';
+            } else if (isLocalhost) {
+                // Simular variáveis de ambiente
+                const envApiUrl = 'http://129.153.86.168:5000'; // Do .env.local
+                apiUrl = envApiUrl || '/api';
+                accessType = '🏠 Localhost (Environment)';
+            } else {
+                apiUrl = 'http://192.168.15.119:5000';
+                accessType = '⚡ Fallback IP';
+            }
+
+            document.getElementById('access-type').textContent = accessType;
+            document.getElementById('api-url').textContent = apiUrl;
+            document.getElementById('api-timeout').textContent = '30000ms';
+
+            // Simular variáveis de ambiente
+            const envVars = {
+                'VITE_API_BASE_URL': 'http://129.153.86.168:5000',
+                'VITE_API_URL': 'http://129.153.86.168:5000',
+                'VITE_API_TIMEOUT': '30000',
+                'VITE_ENABLE_DEBUGGER': 'true',
+                'VITE_APP_ENVIRONMENT': 'development'
+            };
+            
+            document.getElementById('env-vars').textContent = JSON.stringify(envVars, null, 2);
+        }
+
+        // Testar conectividade
+        async function testEndpoint(endpoint, method = 'GET', body = null) {
+            const results = document.getElementById('test-results');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'debug-box';
+            
+            try {
+                testDiv.innerHTML = `<p>🔄 Testando ${endpoint}...</p>`;
+                results.appendChild(testDiv);
+
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(endpoint, options);
+                const data = await response.text();
+                
+                testDiv.className = response.ok ? 'debug-box success' : 'debug-box error';
+                testDiv.innerHTML = `
+                    <h4>${endpoint}</h4>
+                    <p><span class="status ${response.ok ? 'ok' : 'error'}">
+                        ${response.status} ${response.statusText}
+                    </span></p>
+                    <pre>${data.substring(0, 500)}${data.length > 500 ? '...' : ''}</pre>
+                `;
+            } catch (error) {
+                testDiv.className = 'debug-box error';
+                testDiv.innerHTML = `
+                    <h4>${endpoint}</h4>
+                    <p><span class="status error">ERRO</span></p>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+
+        function testHealth() {
+            testEndpoint('/api/health');
+        }
+
+        function testAuth() {
+            testEndpoint('/api/auth/login', 'POST', {
+                username: 'guelfi',
+                password: '@246!588'
+            });
+        }
+
+        function testPacientes() {
+            testEndpoint('/api/pacientes');
+        }
+
+        // Inicializar
+        detectConfiguration();
+    </script>
+</body>
+</html>
