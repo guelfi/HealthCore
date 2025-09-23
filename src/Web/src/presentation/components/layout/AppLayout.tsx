@@ -256,27 +256,43 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         >
           {/* Container wrapper que inicia logo abaixo do header */}
           <Box
+            data-scroll-container
             sx={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
-              height: '120vh', // 120% da viewport para comportar todo conteúdo
-              overflowY: 'auto', // Scroll interno apenas
-              overflowX: 'hidden', // Remove scroll horizontal
+              bottom: 0,
+              overflowY: 'auto',
+              overflowX: 'hidden',
               '&::-webkit-scrollbar': {
-                display: 'none', // Oculta scrollbar no webkit
+                width: '8px',
               },
-              scrollbarWidth: 'none', // Oculta scrollbar no Firefox
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: 'rgba(0,0,0,0.1)',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0,0,0,0.3)',
+                borderRadius: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                },
+              },
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(0,0,0,0.3) rgba(0,0,0,0.1)',
             }}
           >
             {/* Container de conteúdo das páginas */}
             <Box
               sx={{
                 p: 3,
-                pb: isDashboard && !isMobile ? 1 : 3,
-                mb: isDashboard && !isMobile ? 2 : 0,
-                minHeight: '100%', // Garante altura mínima
+                pb: isDashboard && !isMobile ? 3 : 3,
+                minHeight: 'calc(100vh - 64px)', // Altura mínima considerando header
+                // Dashboards: permitir scroll completo dos cards
+                ...(isDashboard && {
+                  minHeight: 'auto',
+                  pb: 4, // Mais espaço no final para scroll completo
+                }),
               }}
             >
               {children}

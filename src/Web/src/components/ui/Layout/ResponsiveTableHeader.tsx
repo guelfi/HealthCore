@@ -27,6 +27,10 @@ interface ResponsiveTableHeaderProps {
   // Layout customization
   showTotalOnMobile?: boolean;
   fabTooltip?: string;
+  
+  // FAB positioning
+  fabRelativeToTable?: boolean;
+  tableContainerRef?: React.RefObject<HTMLElement>;
 }
 
 const ResponsiveTableHeader: React.FC<ResponsiveTableHeaderProps> = ({
@@ -40,6 +44,8 @@ const ResponsiveTableHeader: React.FC<ResponsiveTableHeaderProps> = ({
   itemName,
   showTotalOnMobile = false,
   fabTooltip,
+  fabRelativeToTable = false,
+  tableContainerRef,
 }) => {
   const theme = useTheme();
   const { isMobile, isTablet } = useResponsive();
@@ -122,7 +128,7 @@ const ResponsiveTableHeader: React.FC<ResponsiveTableHeaderProps> = ({
         </Box>
       </Box>
 
-      {/* FAB para Mobile */}
+      {/* FAB para Mobile - posicionado próximo ao rodapé da tabela */}
       {useFab && (
         <MobileAddFab
           onClick={onAddClick}
@@ -130,9 +136,11 @@ const ResponsiveTableHeader: React.FC<ResponsiveTableHeaderProps> = ({
           loading={addButtonLoading}
           tooltip={fabTooltip || addButtonText}
           position={{ 
-            bottom: 100, // Acima da área de navegação mobile
-            right: 24 
+            bottom: fabRelativeToTable ? 16 : 20,
+            right: 16 
           }}
+          containerRelative={fabRelativeToTable}
+          positionType={fabRelativeToTable ? 'absolute' : 'fixed'}
         />
       )}
     </>
