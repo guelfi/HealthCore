@@ -64,7 +64,14 @@ export class ApiConfig {
       return '/api';
     }
 
-    // Se for localhost, usar configuração local
+    // Se for localhost, usar proxy local (mais confiável)
+    if (isLocalhost) {
+      console.log('🏠 Detectado acesso via localhost');
+      console.log('✅ Usando proxy local /api para conectividade com OCI');
+      return '/api';
+    }
+
+    // Verificar variáveis de ambiente apenas se não for localhost
     const envApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
     if (envApiUrl) {
       console.log('✅ Usando URL da API do .env:', envApiUrl);
