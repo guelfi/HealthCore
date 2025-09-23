@@ -26,6 +26,9 @@ import MedicosPageTable from './presentation/pages/MedicosPageTable';
 import UsuariosPageTable from './presentation/pages/UsuariosPageTable';
 import DiagnosticPage from './presentation/pages/DiagnosticPage';
 
+// Debug components (only in development)
+import MobileDebugger from './components/dev/MobileDebugger';
+
 // Componente para proteger rotas administrativas
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuthStore();
@@ -166,6 +169,9 @@ const App: React.FC = () => {
             />
           </Routes>
         </Router>
+        
+        {/* Mobile Debugger - apenas em desenvolvimento */}
+        <MobileDebugger />
       </NetworkErrorBoundary>
     </ThemeProvider>
   );
