@@ -67,13 +67,13 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
     if (isMobile) {
       // Em mobile: máximo 2 colunas + ações
       const actionsColumn = columns.find(col => col.id === 'actions');
-      const dataColumns = columns.filter(col => 
+      const dataColumns = columns.filter(col =>
         col.id !== 'actions' && col.mobileVisible !== false
       ).slice(0, 2); // Máximo 2 colunas de dados
-      
+
       return actionsColumn ? [actionsColumn, ...dataColumns] : dataColumns;
     }
-    
+
     return columns.filter(column => {
       if (isTablet) return column.tabletVisible !== false;
       return column.desktopVisible !== false;
@@ -84,7 +84,7 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
 
   const checkScrollState = useCallback(() => {
     if (!tableRef.current) return;
-    
+
     const { scrollLeft, scrollWidth, clientWidth } = tableRef.current;
     setScrollState({
       canScrollLeft: scrollLeft > 0,
@@ -94,12 +94,12 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
 
   const scrollHorizontal = (direction: 'left' | 'right') => {
     if (!tableRef.current) return;
-    
+
     const scrollAmount = 200;
-    const targetScroll = direction === 'left' 
+    const targetScroll = direction === 'left'
       ? tableRef.current.scrollLeft - scrollAmount
       : tableRef.current.scrollLeft + scrollAmount;
-    
+
     tableRef.current.scrollTo({
       left: targetScroll,
       behavior: 'smooth',
@@ -143,47 +143,7 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
 
   return (
     <Box sx={{ position: 'relative', width: '100%' }}>
-      {/* Scroll indicators */}
-      {showScrollIndicators && (isMobile || isTablet) && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 10,
-            display: 'flex',
-            gap: 0.5,
-          }}
-        >
-          <IconButton
-            size="small"
-            onClick={() => scrollHorizontal('left')}
-            disabled={!scrollState.canScrollLeft}
-            sx={{
-              bgcolor: alpha(theme.palette.background.paper, 0.9),
-              backdropFilter: 'blur(4px)',
-              minWidth: 36,
-              minHeight: 36,
-            }}
-          >
-            <KeyboardArrowLeft fontSize="small" />
-          </IconButton>
-          
-          <IconButton
-            size="small"
-            onClick={() => scrollHorizontal('right')}
-            disabled={!scrollState.canScrollRight}
-            sx={{
-              bgcolor: alpha(theme.palette.background.paper, 0.9),
-              backdropFilter: 'blur(4px)',
-              minWidth: 36,
-              minHeight: 36,
-            }}
-          >
-            <KeyboardArrowRight fontSize="small" />
-          </IconButton>
-        </Box>
-      )}
+
 
       {/* Touch hint */}
       {isTouchDevice && scrollState.canScrollRight && (
@@ -257,11 +217,11 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
                   align={column.align || 'left'}
                   sx={{
                     // Mobile: colunas mais compactas
-                    minWidth: isMobile 
-                      ? (column.id === 'actions' ? 50 : 100) 
+                    minWidth: isMobile
+                      ? (column.id === 'actions' ? 50 : 100)
                       : (column.minWidth || 'auto'),
-                    maxWidth: isMobile 
-                      ? (column.id === 'actions' ? 50 : 150) 
+                    maxWidth: isMobile
+                      ? (column.id === 'actions' ? 50 : 150)
                       : 'none',
                     fontWeight: 600,
                     backgroundColor: alpha(theme.palette.primary.main, 0.08),
@@ -281,7 +241,7 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
               ))}
             </TableRow>
           </TableHead>
-          
+
           <TableBody>
             {data.map((row, index) => (
               <TableRow
@@ -308,11 +268,11 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
                     align={column.align || 'left'}
                     sx={{
                       // Mobile: células mais compactas
-                      minWidth: isMobile 
-                        ? (column.id === 'actions' ? 50 : 100) 
+                      minWidth: isMobile
+                        ? (column.id === 'actions' ? 50 : 100)
                         : (column.minWidth || 'auto'),
-                      maxWidth: isMobile 
-                        ? (column.id === 'actions' ? 50 : 150) 
+                      maxWidth: isMobile
+                        ? (column.id === 'actions' ? 50 : 150)
                         : 'none',
                       position: column.sticky ? 'sticky' : 'static',
                       left: column.sticky ? 0 : 'auto',
@@ -329,7 +289,7 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
                       }),
                     }}
                   >
-                    {column.render 
+                    {column.render
                       ? column.render(row[column.id], row)
                       : row[column.id]
                     }
