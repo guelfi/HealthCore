@@ -304,5 +304,27 @@ namespace HealthCore.Api.Tests
             result.PageSize.Should().Be(2);
             result.TotalPages.Should().Be(2);
         }
+
+        [Fact]
+        public async Task GetAdminMetricsAsync_ShouldReturnCorrectTotalEspecialidades()
+        {
+            // Arrange
+            var especialidades = new List<Especialidade>
+            {
+                new Especialidade { Id = Guid.NewGuid(), Nome = "Cardiologia", Ativa = true },
+                new Especialidade { Id = Guid.NewGuid(), Nome = "Pediatria", Ativa = true },
+                new Especialidade { Id = Guid.NewGuid(), Nome = "Dermatologia", Ativa = false }
+            };
+
+            await _context.Especialidades.AddRangeAsync(especialidades);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _adminService.GetAdminMetricsAsync();
+
+            // Assert
+            result.Should().NotBeNull();
+            result.TotalEspecialidades.Should().Be(3);
+        }
     }
 }

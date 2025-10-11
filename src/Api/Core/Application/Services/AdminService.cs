@@ -257,6 +257,7 @@ namespace HealthCore.Api.Core.Application.Services
                 var totalAdministradores = await _context.Users.CountAsync(u => u.Role == UserRole.Administrador);
                 var totalPacientes = await _context.Pacientes.CountAsync();
                 var totalExames = await _context.Exames.CountAsync();
+                var totalEspecialidades = await _context.Especialidades.CountAsync();
 
                 // Pacientes por médico (simulado - seria necessário relacionamento real)
                 var pacientesPorMedico = await _context.Users
@@ -305,6 +306,7 @@ namespace HealthCore.Api.Core.Application.Services
                     TotalAdministradores = totalAdministradores,
                     TotalPacientes = totalPacientes,
                     TotalExames = totalExames,
+                    TotalEspecialidades = totalEspecialidades,
                     PacientesPorMedico = pacientesPorMedico,
                     CrescimentoBaseDados = crescimento,
                     ExamesPorPeriodo = examesPorPeriodo

@@ -2,33 +2,33 @@
 // Arquivo principal que importa todos os estilos
 
 // Design System
-@import './design-system/tokens';
-@import './design-system/breakpoints';
+@use './design-system/tokens';
+@use './design-system/breakpoints';
 
 // Reset e base
-@import './base/reset';
-@import './base/typography';
+@use './base/reset';
+@use './base/typography';
 
 // Components
-@import './components/buttons';
-@import './components/cards';
-@import './components/dialogs';
-@import './components/forms';
-@import './components/navigation';
-@import './components/tables';
-@import './components/hamburger-menu';
-@import './components/touch-button';
-@import './components/responsive-table';
-@import './components/dialog';
-@import './components/skeleton';
-@import './components/performance-optimization';
+@use './components/buttons';
+@use './components/cards';
+@use './components/dialogs';
+@use './components/forms';
+@use './components/navigation';
+@use './components/tables';
+@use './components/hamburger-menu';
+@use './components/touch-button';
+@use './components/responsive-table';
+@use './components/dialog';
+@use './components/skeleton';
+@use './components/performance-optimization';
 
 // Layouts
-@import './layouts/dashboard';
-@import './layouts/crud';
-@import './layouts/responsive';
+@use './layouts/dashboard';
+@use './layouts/crud';
+@use './layouts/responsive';
 
 // Utilitários
-@import './utilities/helpers';
-@import './utilities/animations';
-@import './utilities/accessibility';
+@use './utilities/helpers';
+@use './utilities/animations';
+@use './utilities/accessibility';

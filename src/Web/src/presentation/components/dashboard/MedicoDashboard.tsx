@@ -9,7 +9,7 @@ import {
   Alert,
   Skeleton,
 } from '@mui/material';
-import { People, Assignment, TrendingUp, Refresh } from '@mui/icons-material';
+import { People, Assignment, TrendingUp, Refresh, MedicalServices } from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useMetrics } from '../../hooks/useMetrics';
 import DashboardScrollIndicators from '../../../components/ui/Navigation/DashboardScrollIndicators';
@@ -92,17 +92,18 @@ const MedicoDashboard: React.FC = () => {
         {/* Skeleton dos cards superiores */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
           <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              gap: 2,
-              width: '90%',
-            }}
-          >
-            <MetricCardSkeleton />
-            <MetricCardSkeleton />
-            <MetricCardSkeleton />
-          </Box>
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 2,
+            width: '90%',
+          }}
+        >
+          <MetricCardSkeleton />
+          <MetricCardSkeleton />
+          <MetricCardSkeleton />
+          <MetricCardSkeleton />
+        </Box>
         </Box>
 
         {/* Skeleton dos cards inferiores */}
@@ -429,6 +430,80 @@ const MedicoDashboard: React.FC = () => {
                   }}
                 >
                   <TrendingUp sx={{ fontSize: 26, color: 'white' }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Card
+            sx={{
+              flex: 1,
+              height: 110,
+              background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+              color: 'white',
+              boxShadow: '0 4px 18px rgba(168, 237, 234, 0.3)',
+              borderRadius: 3,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 28px rgba(168, 237, 234, 0.4)',
+              },
+            }}
+          >
+            <CardContent
+              sx={{
+                p: 2,
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                width="100%"
+              >
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    color="rgba(255,255,255,0.8)"
+                    variant="caption"
+                    fontWeight={500}
+                    sx={{ fontSize: '0.8rem', display: 'block' }}
+                  >
+                    Total Especialidades
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    component="div"
+                    fontWeight="bold"
+                    sx={{
+                      lineHeight: 1.1,
+                      my: 0.3,
+                      fontSize: { xs: '1.8rem', sm: '2.5rem' },
+                    }}
+                  >
+                    {metrics.totalEspecialidades}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="rgba(255,255,255,0.9)"
+                    sx={{ fontSize: '0.75rem', display: 'block' }}
+                  >
+                    Disponíveis no sistema
+                  </Typography>
+                </Box>
+                <Avatar
+                  sx={{
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    width: 50,
+                    height: 50,
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    ml: 1,
+                  }}
+                >
+                  <MedicalServices sx={{ fontSize: 26, color: 'white' }} />
                 </Avatar>
               </Box>
             </CardContent>

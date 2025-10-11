@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using HealthCore.Api.Core.Domain.Entities;
-
 namespace HealthCore.Api.Infrastructure.Data
 {
     public class HealthCoreDbContext(DbContextOptions<HealthCoreDbContext> options) : DbContext(options)
@@ -9,6 +8,7 @@ namespace HealthCore.Api.Infrastructure.Data
         public virtual DbSet<Paciente> Pacientes { get; set; } = null!;
         public virtual DbSet<Exame> Exames { get; set; } = null!;
         public virtual DbSet<Medico> Medicos { get; set; } = null!;
+        public virtual DbSet<Especialidade> Especialidades { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public virtual DbSet<BlacklistedToken> BlacklistedTokens { get; set; } = null!;
@@ -16,6 +16,37 @@ namespace HealthCore.Api.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Configuração da entidade Especialidade
+            modelBuilder.Entity<Especialidade>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.Property(e => e.Nome)
+                    .IsRequired()
+                    .HasMaxLength(100);
+                
+                entity.HasIndex(e => e.Nome)
+                    .IsUnique();
+                
+                entity.Property(e => e.Descricao)
+                    .HasMaxLength(500);
+                
+                entity.Property(e => e.Ativa)
+                    .IsRequired()
+                    .HasDefaultValue(true);
+                
+                entity.HasIndex(e => e.Ativa);
+                
+                entity.Property(e => e.DataCriacao)
+                    .IsRequired();
+                
+                // Relacionamento 1:N com Médicos
+                entity.HasMany(e => e.Medicos)
+                    .WithOne(m => m.EspecialidadeNavigation)
+                    .HasForeignKey(m => m.EspecialidadeId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
             // Configuração da entidade Paciente
             modelBuilder.Entity<Paciente>(entity =>
@@ -104,6 +135,12 @@ namespace HealthCore.Api.Infrastructure.Data
                 entity.Property(m => m.CRM).IsRequired().HasMaxLength(20);
                 entity.Property(m => m.Especialidade).IsRequired().HasMaxLength(100);
                 entity.Property(m => m.DataCriacao).IsRequired();
+                
+                // FK para Especialidade (nullable - opcional)
+                entity.Property(m => m.EspecialidadeId)
+                    .IsRequired(false);
+                
+                entity.HasIndex(m => m.EspecialidadeId);
                 
                 // Relacionamento com User
                 entity.HasOne(m => m.User)

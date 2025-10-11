@@ -5,7 +5,7 @@ import type {
   LoginDto,
   AuthResponse,
 } from '../../domain/entities/Usuario';
-import { UserProfile } from '../../domain/enums/UserProfile';
+import { UserProfile, stringToUserProfile } from '../../domain/enums/UserProfile';
 import { apiClient } from '../../infrastructure/api/client';
 
 interface AuthState {
@@ -53,9 +53,11 @@ export const useAuthStore = create<AuthStore>()(
           const user: Usuario = {
             id: authData.user.id,
             username: authData.user.username,
-            role: authData.user.role as UserProfile, // Converter número para UserProfile
+            role: authData.user.role as UserProfile, // O backend já envia como número (1 ou 2)
             isActive: authData.user.isActive,
           };
+
+
 
           // const expiresAt = typeof authData.expiresAt === 'string'
           //   ? new Date(authData.expiresAt)

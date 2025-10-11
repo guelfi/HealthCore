@@ -20,6 +20,7 @@ interface AdminMetricsDto {
   totalAdministradores: number;
   totalPacientes: number;
   totalExames: number;
+  totalEspecialidades: number;
   pacientesPorMedico: PacientesPorMedicoDto[];
   crescimentoBaseDados: CrescimentoDto[];
   examesPorPeriodo: ExamesPorPeriodoDto[];
@@ -205,6 +206,7 @@ class MetricsService {
         ),
         exames: this.garantir6MesesDados(data.crescimentoBaseDados, 'exames'),
       },
+      totalEspecialidades: data.totalEspecialidades,
     };
   }
 
@@ -253,6 +255,7 @@ class MetricsService {
         ),
         exames: this.gerarCrescimentoBasico('exames', data.totalExames),
       },
+      totalEspecialidades: 0, // Médicos não precisam desta informação
     };
   }
 

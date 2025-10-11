@@ -15,6 +15,7 @@ import { UserProfile } from './domain/enums/UserProfile';
 import LoginForm from './presentation/components/auth/LoginForm';
 import AppLayout from './presentation/components/layout/AppLayout';
 import NetworkErrorBoundary from './presentation/components/common/NetworkErrorBoundary';
+import AdminOrMedicoRoute from './presentation/components/common/AdminOrMedicoRoute';
 
 // Pages
 import DashboardPage from './presentation/pages/DashboardPage';
@@ -24,6 +25,7 @@ import ExameAddPage from './presentation/pages/ExameAddPage';
 import ExameEditPage from './presentation/pages/ExameEditPage';
 import MedicosPageTable from './presentation/pages/MedicosPageTable';
 import UsuariosPageTable from './presentation/pages/UsuariosPageTable';
+import EspecialidadesPageTable from './presentation/pages/EspecialidadesPageTable';
 import DiagnosticPage from './presentation/pages/DiagnosticPage';
 
 // Debug components (only in development)
@@ -118,6 +120,19 @@ const App: React.FC = () => {
                 isAuthenticated ? (
                   <AppLayout>
                     <ExameEditPage />
+                  </AppLayout>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/especialidades"
+              element={
+                isAuthenticated ? (
+                  <AppLayout>
+                    <EspecialidadesPageTable />
                   </AppLayout>
                 ) : (
                   <Navigate to="/login" replace />

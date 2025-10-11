@@ -32,3 +32,10 @@ export type {
   ExameMetrics,
   CrescimentoMetrics,
 } from './Metrics';
+export type {
+  Especialidade,
+  CreateEspecialidadeDto,
+  UpdateEspecialidadeDto,
+  PaginatedEspecialidades,
+  EspecialidadeFilter,
+} from './Especialidade';

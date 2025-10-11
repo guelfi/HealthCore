@@ -17,6 +17,7 @@ import {
   TrendingDown,
   TrendingFlat,
   Refresh,
+  MedicalServices,
 } from '@mui/icons-material';
 import { useMetrics } from '../../hooks/useMetrics';
 import DashboardScrollIndicators from '../../../components/ui/Navigation/DashboardScrollIndicators';
@@ -256,9 +257,15 @@ const AdminDashboard: React.FC = () => {
                     color="rgba(255,255,255,0.8)"
                     variant="caption"
                     fontWeight={500}
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
                   >
-                    Total de Médicos
+                    Médicos
                   </Typography>
                   <Typography
                     variant="h4"
@@ -301,6 +308,87 @@ const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Card para Especialidades */}
+          <Card
+            sx={{
+              flex: 1,
+              height: 100,
+              background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+              color: 'white',
+              boxShadow: '0 3px 12px rgba(142, 45, 226, 0.3)',
+              borderRadius: 2,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 6px 18px rgba(142, 45, 226, 0.4)',
+              },
+            }}
+          >
+            <CardContent
+              sx={{
+                p: 1.5,
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                width="100%"
+              >
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    color="rgba(255,255,255,0.8)"
+                    variant="caption"
+                    fontWeight={500}
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    Especialidades
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    component="div"
+                    fontWeight="bold"
+                    sx={{
+                      lineHeight: 1.1,
+                      my: 0.3,
+                      fontSize: { xs: '1.5rem', sm: '2rem' },
+                    }}
+                  >
+                    {metrics.totalEspecialidades}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="rgba(255,255,255,0.9)"
+                    sx={{ fontSize: '0.7rem', display: 'block' }}
+                  >
+                    médicas
+                  </Typography>
+                </Box>
+                <Avatar
+                  sx={{
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    width: 40,
+                    height: 40,
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    ml: 1,
+                  }}
+                >
+                  <MedicalServices sx={{ fontSize: 20, color: 'white' }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+
           <Card
             sx={{
               flex: 1,
@@ -335,9 +423,15 @@ const AdminDashboard: React.FC = () => {
                     color="rgba(255,255,255,0.8)"
                     variant="caption"
                     fontWeight={500}
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
                   >
-                    Total de Pacientes
+                    Pacientes
                   </Typography>
                   <Typography
                     variant="h4"
@@ -409,9 +503,15 @@ const AdminDashboard: React.FC = () => {
                     color="rgba(255,255,255,0.8)"
                     variant="caption"
                     fontWeight={500}
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
                   >
-                    Total de Exames
+                    Exames
                   </Typography>
                   <Typography
                     variant="h4"
@@ -483,9 +583,15 @@ const AdminDashboard: React.FC = () => {
                     color="rgba(255,255,255,0.8)"
                     variant="caption"
                     fontWeight={500}
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
                   >
-                    Crescimento Mensal
+                    Crescimento Semanal
                   </Typography>
                   <Typography
                     variant="h4"

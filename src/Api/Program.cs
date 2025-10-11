@@ -142,6 +142,7 @@ builder.Services.AddDbContext<HealthCoreDbContext>(options =>
 builder.Services.AddScoped<PacienteService>();
 builder.Services.AddScoped<ExameService>();
 builder.Services.AddScoped<MedicoService>();
+builder.Services.AddScoped<EspecialidadeService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AdminService>();
@@ -1410,6 +1411,358 @@ app.MapDelete("/medicos/{id:guid}", async (Guid id, MedicoService medicoService,
         return Results.Problem("Erro inesperado ao excluir médico.");
     }
 }).RequireAuthorization();
+
+// ==================== ENDPOINTS DE ESPECIALIDADES ====================
+
+// GET /especialidades - Listar especialidades com paginação e filtros
+app.MapGet("/especialidades", async (
+    EspecialidadeService especialidadeService,
+    ILogger<Program> logger,
+    int page = 1,
+    int pageSize = 10,
+    bool? ativa = null,
+    string? search = null) =>
+{
+    try
+    {
+        logger.LogInformation("Listando especialidades - Page: {Page}, PageSize: {PageSize}, Ativa: {Ativa}, Search: {Search}",
+            page, pageSize, ativa, search);
+
+        var result = await especialidadeService.GetAllAsync(page, pageSize, ativa, search);
+        return Results.Ok(result);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao listar especialidades");
+        return Results.Problem("Erro ao listar especialidades.");
+    }
+}).RequireAuthorization();
+
+// GET /especialidades/{id} - Buscar especialidade por ID
+app.MapGet("/especialidades/{id:guid}", async (
+    Guid id,
+    EspecialidadeService especialidadeService,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Buscando especialidade por ID: {Id}", id);
+
+        var especialidade = await especialidadeService.GetByIdAsync(id);
+
+        if (especialidade == null)
+        {
+            logger.LogWarning("Especialidade não encontrada: {Id}", id);
+            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
+        }
+
+        return Results.Ok(especialidade);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao buscar especialidade: {Id}", id);
+        return Results.Problem("Erro ao buscar especialidade.");
+    }
+}).RequireAuthorization();
+
+// POST /especialidades - Criar nova especialidade (apenas Admin)
+app.MapPost("/especialidades", async (
+    CreateEspecialidadeDto dto,
+    EspecialidadeService especialidadeService,
+    HttpContext context,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        // Verificar se o usuário é administrador
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRole != UserRole.Administrador.ToString())
+        {
+            logger.LogWarning("Tentativa de criar especialidade sem permissão de administrador");
+            return Results.Forbid();
+        }
+
+        logger.LogInformation("Criando nova especialidade: {Nome}", dto.Nome);
+
+        var especialidade = await especialidadeService.CreateAsync(dto);
+        return Results.Created($"/especialidades/{especialidade.Id}", especialidade);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning(ex, "Erro de validação ao criar especialidade");
+        return Results.BadRequest(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao criar especialidade");
+        return Results.Problem("Erro inesperado ao criar especialidade.");
+    }
+}).RequireAuthorization();
+
+// PUT /especialidades/{id} - Atualizar especialidade (apenas Admin)
+app.MapPut("/especialidades/{id:guid}", async (
+    Guid id,
+    UpdateEspecialidadeDto dto,
+    EspecialidadeService especialidadeService,
+    HttpContext context,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        // Verificar se o usuário é administrador
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRole != UserRole.Administrador.ToString())
+        {
+            logger.LogWarning("Tentativa de atualizar especialidade sem permissão de administrador");
+            return Results.Forbid();
+        }
+
+        logger.LogInformation("Atualizando especialidade: {Id}", id);
+
+        var especialidade = await especialidadeService.UpdateAsync(id, dto);
+        return Results.Ok(especialidade);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning(ex, "Erro de validação ao atualizar especialidade: {Id}", id);
+        return Results.BadRequest(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao atualizar especialidade: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar especialidade.");
+    }
+}).RequireAuthorization();
+
+// DELETE /especialidades/{id} - Excluir especialidade (apenas Admin)
+app.MapDelete("/especialidades/{id:guid}", async (
+    Guid id,
+    EspecialidadeService especialidadeService,
+    HttpContext context,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        // Verificar se o usuário é administrador
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRole != UserRole.Administrador.ToString())
+        {
+            logger.LogWarning("Tentativa de excluir especialidade sem permissão de administrador");
+            return Results.Forbid();
+        }
+
+        logger.LogInformation("Excluindo especialidade: {Id}", id);
+
+        var deleted = await especialidadeService.DeleteAsync(id);
+
+        if (!deleted)
+        {
+            logger.LogWarning("Especialidade não encontrada para exclusão: {Id}", id);
+            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
+        }
+
+        logger.LogInformation("Especialidade excluída com sucesso: {Id}", id);
+        return Results.NoContent();
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning(ex, "Erro de validação ao excluir especialidade: {Id}", id);
+        return Results.BadRequest(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao excluir especialidade: {Id}", id);
+        return Results.Problem("Erro inesperado ao excluir especialidade.");
+    }
+}).RequireAuthorization();
+
+// ==================== FIM ENDPOINTS DE ESPECIALIDADES ====================
+
+// ==================== ENDPOINTS DE ESPECIALIDADES COM PREFIXO /API ====================
+
+// GET /api/especialidades - Listar especialidades com paginação e filtros
+app.MapGet("/api/especialidades", async (
+    EspecialidadeService especialidadeService,
+    ILogger<Program> logger,
+    int page = 1,
+    int pageSize = 10,
+    bool? ativa = null,
+    string? search = null) =>
+{
+    try
+    {
+        logger.LogInformation("Listando especialidades via /api/especialidades - Page: {Page}, PageSize: {PageSize}, Ativa: {Ativa}, Search: {Search}",
+            page, pageSize, ativa, search);
+
+        var result = await especialidadeService.GetAllAsync(page, pageSize, ativa, search);
+        return Results.Ok(result);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao listar especialidades via /api/especialidades");
+        return Results.Problem("Erro ao listar especialidades.");
+    }
+}).RequireAuthorization();
+
+// GET /api/especialidades/{id} - Buscar especialidade por ID
+app.MapGet("/api/especialidades/{id:guid}", async (
+    Guid id,
+    EspecialidadeService especialidadeService,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        logger.LogInformation("Buscando especialidade por ID via /api/especialidades: {Id}", id);
+
+        var especialidade = await especialidadeService.GetByIdAsync(id);
+
+        if (especialidade == null)
+        {
+            logger.LogWarning("Especialidade não encontrada via /api/especialidades: {Id}", id);
+            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
+        }
+
+        return Results.Ok(especialidade);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao buscar especialidade por ID via /api/especialidades: {Id}", id);
+        return Results.Problem("Erro ao buscar especialidade.");
+    }
+}).RequireAuthorization();
+
+// POST /api/especialidades - Criar nova especialidade (apenas administradores)
+app.MapPost("/api/especialidades", async (
+    CreateEspecialidadeDto createEspecialidadeDto,
+    EspecialidadeService especialidadeService,
+    HttpContext context,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        // Verificar se o usuário é administrador
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRole != UserRole.Administrador.ToString())
+        {
+            logger.LogWarning("Tentativa de criar especialidade sem permissão de administrador via /api/especialidades");
+            return Results.Forbid();
+        }
+
+        // Validar modelo
+        var (isValid, errorResult) = ValidateModel(createEspecialidadeDto);
+        if (!isValid)
+            return errorResult!;
+
+        logger.LogInformation("Criando especialidade via /api/especialidades: {Nome}", createEspecialidadeDto.Nome);
+
+        var especialidade = await especialidadeService.CreateAsync(createEspecialidadeDto);
+
+        logger.LogInformation("Especialidade criada com sucesso via /api/especialidades: {Id}", especialidade.Id);
+        return Results.Created($"/api/especialidades/{especialidade.Id}", especialidade);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning(ex, "Erro de validação ao criar especialidade via /api/especialidades");
+        return Results.BadRequest(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao criar especialidade via /api/especialidades");
+        return Results.Problem("Erro inesperado ao criar especialidade.");
+    }
+}).RequireAuthorization();
+
+// PUT /api/especialidades/{id} - Atualizar especialidade (apenas administradores)
+app.MapPut("/api/especialidades/{id:guid}", async (
+    Guid id,
+    UpdateEspecialidadeDto updateEspecialidadeDto,
+    EspecialidadeService especialidadeService,
+    HttpContext context,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        // Verificar se o usuário é administrador
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRole != UserRole.Administrador.ToString())
+        {
+            logger.LogWarning("Tentativa de atualizar especialidade sem permissão de administrador via /api/especialidades");
+            return Results.Forbid();
+        }
+
+        // Validar modelo
+        var (isValid, errorResult) = ValidateModel(updateEspecialidadeDto);
+        if (!isValid)
+            return errorResult!;
+
+        logger.LogInformation("Atualizando especialidade via /api/especialidades: {Id}", id);
+
+        var especialidade = await especialidadeService.UpdateAsync(id, updateEspecialidadeDto);
+
+        if (especialidade == null)
+        {
+            logger.LogWarning("Especialidade não encontrada para atualização via /api/especialidades: {Id}", id);
+            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
+        }
+
+        logger.LogInformation("Especialidade atualizada com sucesso via /api/especialidades: {Id}", id);
+        return Results.Ok(especialidade);
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning(ex, "Erro de validação ao atualizar especialidade via /api/especialidades: {Id}", id);
+        return Results.BadRequest(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao atualizar especialidade via /api/especialidades: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar especialidade.");
+    }
+}).RequireAuthorization();
+
+// DELETE /api/especialidades/{id} - Excluir especialidade (apenas administradores)
+app.MapDelete("/api/especialidades/{id:guid}", async (
+    Guid id,
+    EspecialidadeService especialidadeService,
+    HttpContext context,
+    ILogger<Program> logger) =>
+{
+    try
+    {
+        // Verificar se o usuário é administrador
+        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRole != UserRole.Administrador.ToString())
+        {
+            logger.LogWarning("Tentativa de excluir especialidade sem permissão de administrador via /api/especialidades");
+            return Results.Forbid();
+        }
+
+        logger.LogInformation("Excluindo especialidade via /api/especialidades: {Id}", id);
+
+        var deleted = await especialidadeService.DeleteAsync(id);
+
+        if (!deleted)
+        {
+            logger.LogWarning("Especialidade não encontrada para exclusão via /api/especialidades: {Id}", id);
+            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
+        }
+
+        logger.LogInformation("Especialidade excluída com sucesso via /api/especialidades: {Id}", id);
+        return Results.NoContent();
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning(ex, "Erro de validação ao excluir especialidade via /api/especialidades: {Id}", id);
+        return Results.BadRequest(new { Message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro inesperado ao excluir especialidade via /api/especialidades: {Id}", id);
+        return Results.Problem("Erro inesperado ao excluir especialidade.");
+    }
+}).RequireAuthorization();
+
+// ==================== FIM ENDPOINTS DE ESPECIALIDADES COM PREFIXO /API ====================
 
 
 // Endpoints de Métricas
