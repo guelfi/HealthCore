@@ -54,19 +54,19 @@ export default defineConfig({
     strictPort: true, // Força o uso da porta especificada
     hmr: {
       port: 5005,
-      host: 'localhost', // Força HMR a usar localhost
+      host: '0.0.0.0', // Permite HMR via qualquer IP da rede
     },
-    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app', '.ngrok.com'],
+    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app', '.ngrok.com', '192.168.15.120', '172.17.158.1', 'localhost'],
     // Configurações otimizadas para mobile
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
-    // Configuração de proxy para redirecionar chamadas /api para a API
+    // Configuração de proxy para redirecionar chamadas /api para a API local
     proxy: {
       '/api': {
-        target: 'http://129.153.86.168:5000',  // Sempre usar API da OCI
+        target: 'http://172.17.158.1:5000',  // API no WSL acessível via IP do WSL
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
@@ -74,11 +74,11 @@ export default defineConfig({
           proxy.on('error', (err, _req, _res) => {
             console.log('🔴 Proxy error:', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('🚀 Sending Request to OCI API:', req.method, req.url);
+          proxy.on('proxyReq', (_, req, _res) => {
+            console.log('🚀 Sending Request to Local API:', req.method, req.url);
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('✅ Received Response from OCI API:', proxyRes.statusCode, req.url);
+            console.log('✅ Received Response from Local API:', proxyRes.statusCode, req.url);
           });
         },
       },

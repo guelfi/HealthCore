@@ -75,7 +75,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         aria-label="menu"
         onClick={onToggle}
         sx={{
-          display: { xs: 'block', md: 'none' },
+          display: { xs: 'block', sm: 'none' },
           mr: 2,
           '&:hover': {
             backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -107,7 +107,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           },
         }}
         sx={{
-          display: { xs: 'block', md: 'none' },
+          display: { xs: 'block', sm: 'none' },
           '& .MuiDrawer-paper': {
             width: 280,
             boxSizing: 'border-box',

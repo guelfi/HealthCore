@@ -9,6 +9,7 @@ namespace HealthCore.Api.Core.Application.Services
     public class ExameService(HealthCoreDbContext context)
     {
         private readonly HealthCoreDbContext _context = context;
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> _idempotencyLocks = new();
 
         public async Task<ExameDto> CreateExameAsync(CreateExameDto createExameDto)
         {
@@ -19,48 +20,60 @@ namespace HealthCore.Api.Core.Application.Services
                 throw new InvalidOperationException("Paciente não encontrado.");
             }
 
-            // Verificar idempotência
-            var exameExistente = await _context.Exames
-                .FirstOrDefaultAsync(e => e.IdempotencyKey == createExameDto.IdempotencyKey);
-
-            if (exameExistente != null)
+            // Verificar idempotência com lock por chave (cobre provedores sem unique index, ex.: InMemory)
+            var key = createExameDto.IdempotencyKey;
+            var sem = _idempotencyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
+            await sem.WaitAsync();
+            try
             {
+                var exameExistente = await _context.Exames
+                    .FirstOrDefaultAsync(e => e.IdempotencyKey == key);
+
+                if (exameExistente != null)
+                {
+                    return new ExameDto
+                    {
+                        Id = exameExistente.Id,
+                        PacienteId = exameExistente.PacienteId,
+                        IdempotencyKey = exameExistente.IdempotencyKey,
+                        Modalidade = exameExistente.Modalidade.ToString(),
+                        DataCriacao = exameExistente.DataCriacao
+                    };
+                }
+                
+                // Converter string para enum e validar que é um valor definido
+                if (!Enum.TryParse(createExameDto.Modalidade, true, out ModalidadeExame modalidadeEnum) ||
+                    !Enum.IsDefined(typeof(ModalidadeExame), modalidadeEnum))
+                {
+                    throw new ArgumentException("Modalidade de exame inválida.");
+                }
+
+                var exame = new Exame
+                {
+                    Id = Guid.NewGuid(),
+                    PacienteId = createExameDto.PacienteId,
+                    IdempotencyKey = key,
+                    Modalidade = modalidadeEnum,
+                    DataCriacao = DateTime.UtcNow
+                };
+
+                _context.Exames.Add(exame);
+                await _context.SaveChangesAsync();
+
                 return new ExameDto
                 {
-                    Id = exameExistente.Id,
-                    PacienteId = exameExistente.PacienteId,
-                    IdempotencyKey = exameExistente.IdempotencyKey,
-                    Modalidade = exameExistente.Modalidade.ToString(), // Convert enum to string for DTO
-                    DataCriacao = exameExistente.DataCriacao
+                    Id = exame.Id,
+                    PacienteId = exame.PacienteId,
+                    IdempotencyKey = exame.IdempotencyKey,
+                    Modalidade = exame.Modalidade.ToString(),
+                    DataCriacao = exame.DataCriacao
                 };
             }
-
-            // Convert string modalidade to enum
-            if (!Enum.TryParse(createExameDto.Modalidade, true, out ModalidadeExame modalidadeEnum))
+            finally
             {
-                throw new ArgumentException("Modalidade de exame inválida.");
+                sem.Release();
+                _idempotencyLocks.TryRemove(key, out _);
             }
-
-            var exame = new Exame
-            {
-                Id = Guid.NewGuid(),
-                PacienteId = createExameDto.PacienteId,
-                IdempotencyKey = createExameDto.IdempotencyKey,
-                Modalidade = modalidadeEnum, // Assign enum value
-                DataCriacao = DateTime.UtcNow
-            };
-
-            _context.Exames.Add(exame);
-            await _context.SaveChangesAsync();
-
-            return new ExameDto
-            {
-                Id = exame.Id,
-                PacienteId = exame.PacienteId,
-                IdempotencyKey = exame.IdempotencyKey,
-                Modalidade = exame.Modalidade.ToString(), // Convert enum to string for DTO
-                DataCriacao = exame.DataCriacao
-            };
         }
 
         public async Task<PagedResponseDto<ExameDto>> GetExamesAsync(int page, int pageSize, string? modalidade = null, Guid? pacienteId = null, DateTime? dataInicio = null, DateTime? dataFim = null, Guid? medicoId = null)
@@ -148,8 +161,9 @@ namespace HealthCore.Api.Core.Application.Services
                 throw new InvalidOperationException("Já existe outro exame com esta idempotencyKey.");
             }
 
-            // Convert string modalidade to enum
-            if (!Enum.TryParse(updateExameDto.Modalidade, true, out ModalidadeExame modalidadeEnum))
+            // Converter string para enum e validar que é um valor definido
+            if (!Enum.TryParse(updateExameDto.Modalidade, true, out ModalidadeExame modalidadeEnum) ||
+                !Enum.IsDefined(typeof(ModalidadeExame), modalidadeEnum))
             {
                 throw new ArgumentException("Modalidade de exame inválida.");
             }

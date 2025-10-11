@@ -1,4 +1,5 @@
-import React, { Suspense, lazy, ComponentType } from 'react';
+import * as React from 'react';
+import { Suspense, lazy, type ComponentType } from 'react';
 import { Box, CircularProgress, Alert } from '@mui/material';
 import { ErrorBoundary } from 'react-error-boundary';
 import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization';
@@ -18,28 +19,21 @@ export interface LazyWrapperProps {
 
 // Componente de loading padrão
 const DefaultLoadingComponent: React.FC = () => {
-  const { optimizations } = usePerformanceOptimization();
-  
   return (
     <Box
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight={200}
       p={3}
+      minHeight="200px"
     >
-      <CircularProgress 
-        size={40}
-        sx={{
-          animation: optimizations.shouldReduceAnimations ? 'none' : undefined
-        }}
-      />
+      <CircularProgress size={40} />
     </Box>
   );
 };
 
 // Componente de erro padrão
-const DefaultErrorComponent: React.FC<{ error: Error; resetErrorBoundary: () => void }> = ({ 
+const DefaultErrorComponent: React.FC<{ error: any; resetErrorBoundary: () => void }> = ({ 
   error, 
   resetErrorBoundary 
 }) => (
@@ -73,88 +67,89 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
   fallback,
   errorFallback = DefaultErrorComponent,
   loadingComponent = DefaultLoadingComponent,
-  retryable = true,
+  retryable: _retryable = true, // Prefixado com _ para indicar que não é usado
   preload = false,
   className,
   children
-}) => {
+}: LazyWrapperProps) => {
   const { optimizations } = usePerformanceOptimization();
   
   // Usa lazy loading baseado nas otimizações de performance
   const shouldUseLazyLoading = !preload && optimizations.shouldLazyLoadImages;
   
-  if (shouldUseLazyLoading) {
-    const {
-      ref,
-      Component,
-      isLoading,
-      error,
-      isVisible
-    } = useLazyComponent({
-      loader,
-      fallback,
-      threshold: 0.1,
-      rootMargin: '100px'
-    });
+  // SEMPRE chama os hooks, independente da condição
+  const {
+    ref,
+    Component,
+    isLoading,
+    error,
+    isVisible
+  } = useLazyComponent({
+    loader,
+    fallback,
+    threshold: 0.1,
+    rootMargin: '100px'
+  });
 
-    if (!isVisible) {
-      return (
-        <Box ref={ref} className={className}>
-          <ComponentSkeleton />
-        </Box>
-      );
-    }
-
-    if (isLoading) {
-      return (
-        <Box className={className}>
-          {React.createElement(loadingComponent)}
-        </Box>
-      );
-    }
-
-    if (error) {
-      return (
-        <Box className={className}>
-          {React.createElement(errorFallback, { 
-            error, 
-            resetErrorBoundary: () => window.location.reload() 
-          })}
-        </Box>
-      );
-    }
-
-    if (Component) {
-      return (
-        <Box className={className}>
+  // Se não deve usar lazy loading, renderiza diretamente
+  if (!shouldUseLazyLoading) {
+    const LazyComponent = lazy(loader);
+    return (
+      <Box className={className}>
+        <Suspense fallback={React.createElement(loadingComponent)}>
           <ErrorBoundary
             FallbackComponent={errorFallback}
             onReset={() => window.location.reload()}
           >
-            <Component>{children}</Component>
+            <LazyComponent>{children}</LazyComponent>
           </ErrorBoundary>
-        </Box>
-      );
-    }
-
-    return null;
+        </Suspense>
+      </Box>
+    );
   }
 
-  // Fallback para React.lazy tradicional
-  const LazyComponent = lazy(loader);
+  // Lógica de lazy loading com intersection observer
+  if (!isVisible) {
+    return (
+      <Box ref={ref} className={className}>
+        <ComponentSkeleton />
+      </Box>
+    );
+  }
 
-  return (
-    <ErrorBoundary
-      FallbackComponent={errorFallback}
-      onReset={() => window.location.reload()}
-    >
-      <Suspense fallback={React.createElement(loadingComponent)}>
-        <Box className={className}>
-          <LazyComponent>{children}</LazyComponent>
-        </Box>
-      </Suspense>
-    </ErrorBoundary>
-  );
+  if (isLoading) {
+    return (
+      <Box className={className}>
+        {React.createElement(loadingComponent)}
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className={className}>
+        {React.createElement(errorFallback, { 
+          error, 
+          resetErrorBoundary: () => window.location.reload() 
+        })}
+      </Box>
+    );
+  }
+
+  if (Component) {
+    return (
+      <Box className={className}>
+        <ErrorBoundary
+          FallbackComponent={errorFallback}
+          onReset={() => window.location.reload()}
+        >
+          <Component>{children}</Component>
+        </ErrorBoundary>
+      </Box>
+    );
+  }
+
+  return null;
 };
 
 // HOC para criar componentes lazy
@@ -162,7 +157,7 @@ export const withLazyLoading = <P extends object>(
   loader: () => Promise<{ default: ComponentType<P> }>,
   options: Omit<LazyWrapperProps, 'loader' | 'children'> = {}
 ) => {
-  return (props: P) => (
+  return (_props: P) => ( // Prefixado com _ para indicar que não é usado
     <LazyWrapper loader={loader} {...options}>
       {/* Props são passadas para o componente lazy */}
     </LazyWrapper>
@@ -170,7 +165,7 @@ export const withLazyLoading = <P extends object>(
 };
 
 // Componente para lazy loading de rotas
-export interface LazyRouteProps extends LazyWrapperProps {
+export interface LazyRouteProps extends Omit<LazyWrapperProps, 'loader'> {
   component: () => Promise<{ default: ComponentType<any> }>;
   routeProps?: any;
 }
@@ -179,7 +174,7 @@ export const LazyRoute: React.FC<LazyRouteProps> = ({
   component,
   routeProps,
   ...wrapperProps
-}) => {
+}: LazyRouteProps) => {
   return (
     <LazyWrapper
       loader={component}

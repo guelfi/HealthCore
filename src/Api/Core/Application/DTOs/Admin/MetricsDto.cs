@@ -7,6 +7,7 @@ namespace HealthCore.Api.Core.Application.DTOs.Admin
         public int TotalAdministradores { get; set; }
         public int TotalPacientes { get; set; }
         public int TotalExames { get; set; }
+        public int TotalEspecialidades { get; set; }
         public List<PacientesPorMedicoDto> PacientesPorMedico { get; set; } = new();
         public List<CrescimentoDto> CrescimentoBaseDados { get; set; } = new();
         public List<ExamesPorPeriodoDto> ExamesPorPeriodo { get; set; } = new();

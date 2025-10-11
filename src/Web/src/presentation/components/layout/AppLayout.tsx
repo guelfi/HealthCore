@@ -26,6 +26,7 @@ import {
   LocalHospital,
   Logout,
   Menu as MenuIcon,
+  MedicalServices,
 } from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useUIStore } from '../../../application/stores/uiStore';
@@ -46,7 +47,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const userMenuOpen = Boolean(anchorEl);
@@ -82,6 +83,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   if (user?.role === UserProfile.ADMINISTRADOR) {
     menuItems.push(
       { text: 'Médicos', icon: <LocalHospital />, path: '/admin/medicos' },
+      { text: 'Especialidades', icon: <MedicalServices />, path: '/especialidades' },
       { text: 'Pacientes', icon: <People />, path: '/pacientes' },
       { text: 'Exames', icon: <Assignment />, path: '/exames' },
       {
@@ -92,6 +94,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     );
   } else {
     menuItems.push(
+      { text: 'Especialidades', icon: <MedicalServices />, path: '/especialidades' },
       { text: 'Pacientes', icon: <People />, path: '/pacientes' },
       { text: 'Exames', icon: <Assignment />, path: '/exames' }
     );

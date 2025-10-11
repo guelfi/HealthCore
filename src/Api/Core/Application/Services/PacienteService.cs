@@ -9,6 +9,7 @@ namespace HealthCore.Api.Core.Application.Services
     public class PacienteService
     {
         private readonly HealthCoreDbContext _context;
+        private static readonly SemaphoreSlim _createPacienteSemaphore = new(1, 1);
 
         public PacienteService(HealthCoreDbContext context)
         {
@@ -36,34 +37,51 @@ namespace HealthCore.Api.Core.Application.Services
                 throw new ArgumentException("Data de nascimento não pode ser uma data futura.", nameof(createPacienteDto.DataNascimento));
             }
 
-            // Verificar se já existe um paciente com o mesmo documento
-            var pacienteExistente = await _context.Pacientes
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Documento == createPacienteDto.Documento);
+            await _createPacienteSemaphore.WaitAsync();
+            try
+            {
+                // Verificar se já existe um paciente com o mesmo documento (região crítica)
+                var pacienteExistente = await _context.Pacientes
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.Documento == createPacienteDto.Documento);
                 
-            if (pacienteExistente != null)
-            {
-                throw new InvalidOperationException("Já existe um paciente cadastrado com este documento.");
+                if (pacienteExistente != null)
+                {
+                    throw new InvalidOperationException("Já existe um paciente cadastrado com este documento.");
+                }
+
+                var paciente = new Paciente
+                {
+                    Id = Guid.NewGuid(),
+                    Nome = createPacienteDto.Nome,
+                    DataNascimento = createPacienteDto.DataNascimento,
+                    Documento = createPacienteDto.Documento
+                };
+
+                _context.Pacientes.Add(paciente);
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    // Em cenários concorrentes, o índice único pode ser violado
+                    // Tratar como documento duplicado para consistência de regra de negócio
+                    throw new InvalidOperationException("Já existe um paciente cadastrado com este documento.");
+                }
+
+                return new PacienteDto
+                {
+                    Id = paciente.Id,
+                    Nome = paciente.Nome,
+                    DataNascimento = paciente.DataNascimento,
+                    Documento = paciente.Documento
+                };
             }
-
-            var paciente = new Paciente
+            finally
             {
-                Id = Guid.NewGuid(),
-                Nome = createPacienteDto.Nome,
-                DataNascimento = createPacienteDto.DataNascimento,
-                Documento = createPacienteDto.Documento
-            };
-
-            _context.Pacientes.Add(paciente);
-            await _context.SaveChangesAsync();
-
-            return new PacienteDto
-            {
-                Id = paciente.Id,
-                Nome = paciente.Nome,
-                DataNascimento = paciente.DataNascimento,
-                Documento = paciente.Documento
-            };
+                _createPacienteSemaphore.Release();
+            }
         }
 
         public async Task<PagedResponseDto<PacienteDto>> GetPacientesAsync(int page, int pageSize, Guid? medicoId = null)

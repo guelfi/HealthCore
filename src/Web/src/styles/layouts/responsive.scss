@@ -1,61 +1,65 @@
-// 📱 Responsive Layout - HealthCore Design System
-// Utilitários e layouts responsivos
+// 📱 Responsive Layout - HealthCore UI/UX
+// Sistema de grid responsivo e utilitários
 
-// Breakpoints
-$breakpoints: (
-  xs: 0,
-  sm: 576px,
-  md: 768px,
-  lg: 992px,
-  xl: 1200px,
-  xxl: 1400px
-);
+@use 'sass:math';
 
-// Container responsivo
+// Container principal
 .container {
   width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
   margin-right: auto;
-  
-  @media (min-width: 576px) {
+  margin-left: auto;
+}
+
+// Breakpoints do container
+@media (min-width: 576px) {
+  .container {
     max-width: 540px;
   }
-  
-  @media (min-width: 768px) {
+}
+
+@media (min-width: 768px) {
+  .container {
     max-width: 720px;
   }
-  
-  @media (min-width: 992px) {
+}
+
+@media (min-width: 992px) {
+  .container {
     max-width: 960px;
   }
-  
-  @media (min-width: 1200px) {
+}
+
+@media (min-width: 1200px) {
+  .container {
     max-width: 1140px;
   }
-  
-  @media (min-width: 1400px) {
+}
+
+@media (min-width: 1400px) {
+  .container {
     max-width: 1320px;
   }
 }
 
-.container-fluid {
-  width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-// Grid system
+// Sistema de Grid
 .row {
   display: flex;
   flex-wrap: wrap;
-  margin-left: -0.75rem;
   margin-right: -0.75rem;
+  margin-left: -0.75rem;
 }
 
 .col {
-  flex: 1;
+  flex: 1 0 0%;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.col-auto {
+  flex: 0 0 auto;
+  width: auto;
   padding-left: 0.75rem;
   padding-right: 0.75rem;
 }
@@ -63,8 +67,8 @@ $breakpoints: (
 // Colunas específicas
 @for $i from 1 through 12 {
   .col-#{$i} {
-    flex: 0 0 percentage($i / 12);
-    max-width: percentage($i / 12);
+    flex: 0 0 math.percentage(math.div($i, 12));
+    max-width: math.percentage(math.div($i, 12));
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
@@ -74,8 +78,8 @@ $breakpoints: (
 @media (min-width: 576px) {
   @for $i from 1 through 12 {
     .col-sm-#{$i} {
-      flex: 0 0 percentage($i / 12);
-      max-width: percentage($i / 12);
+      flex: 0 0 math.percentage(math.div($i, 12));
+      max-width: math.percentage(math.div($i, 12));
     }
   }
 }
@@ -83,8 +87,8 @@ $breakpoints: (
 @media (min-width: 768px) {
   @for $i from 1 through 12 {
     .col-md-#{$i} {
-      flex: 0 0 percentage($i / 12);
-      max-width: percentage($i / 12);
+      flex: 0 0 math.percentage(math.div($i, 12));
+      max-width: math.percentage(math.div($i, 12));
     }
   }
 }
@@ -92,8 +96,8 @@ $breakpoints: (
 @media (min-width: 992px) {
   @for $i from 1 through 12 {
     .col-lg-#{$i} {
-      flex: 0 0 percentage($i / 12);
-      max-width: percentage($i / 12);
+      flex: 0 0 math.percentage(math.div($i, 12));
+      max-width: math.percentage(math.div($i, 12));
     }
   }
 }

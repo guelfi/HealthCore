@@ -46,9 +46,14 @@ export interface CrescimentoMetrics {
   }>;
 }
 
+export interface EspecialidadeMetrics {
+  totalEspecialidades: number;
+}
+
 export interface DashboardMetrics {
   usuarios: UsuarioMetrics;
   pacientes: PacienteMetrics;
   exames: ExameMetrics;
   crescimento: CrescimentoMetrics;
+  totalEspecialidades: number;
 }

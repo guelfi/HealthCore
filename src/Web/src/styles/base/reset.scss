@@ -1,6 +1,8 @@
 // 🔄 CSS Reset - HealthCore
 // Reset moderno e acessível
 
+@use '../design-system/tokens' as *;
+
 *,
 *::before,
 *::after {

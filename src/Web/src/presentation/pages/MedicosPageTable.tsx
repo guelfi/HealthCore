@@ -33,6 +33,12 @@ import {
   Save,
 } from '@mui/icons-material';
 import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import {
   standardCardStyles,
   standardCardContentStyles,
   standardDialogButtonStyles,
@@ -41,6 +47,7 @@ import {
   standardAddButtonStyles,
 } from '../styles/cardStyles';
 import { useMedicos } from '../hooks/useMedicos';
+import { useEspecialidadesForDropdown } from '../hooks/useEspecialidadesForDropdown';
 import type { Medico, CreateMedicoDto, UpdateMedicoDto } from '../../domain/entities/Medico';
 import { useUIStore } from '../../application/stores/uiStore';
 import {
@@ -74,6 +81,12 @@ const MedicosPageTable: React.FC = () => {
     deleteMedico,
     clearError,
   } = useMedicos();
+
+  const {
+    especialidades,
+    loading: especialidadesLoading,
+    error: especialidadesError,
+  } = useEspecialidadesForDropdown();
 
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
@@ -450,12 +463,8 @@ const MedicosPageTable: React.FC = () => {
                 }}
               />
             </Box>
-            <TextField
+            <FormControl
               fullWidth
-              label="Especialidade"
-              value={formData.especialidade}
-              onChange={(e) => handleInputChange('especialidade', e.target.value)}
-              variant="outlined"
               size="small"
               required
               sx={{
@@ -466,7 +475,24 @@ const MedicosPageTable: React.FC = () => {
                   padding: '4px 0',
                 },
               }}
-            />
+            >
+              <InputLabel>Especialidade</InputLabel>
+              <Select
+                value={formData.especialidade}
+                onChange={(e) => handleInputChange('especialidade', e.target.value)}
+                label="Especialidade"
+                disabled={especialidadesLoading}
+              >
+                <MenuItem value="">
+                  <em>Selecione uma especialidade</em>
+                </MenuItem>
+                {especialidades.map((especialidade) => (
+                  <MenuItem key={especialidade.id} value={especialidade.nome}>
+                    {especialidade.nome}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
               <TextField
                 fullWidth
