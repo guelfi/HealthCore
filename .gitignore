@@ -151,4 +151,31 @@ scripts/*.pid
 .kiro/
 
 # Banco de dados
-#*.db
+*.db
+src/Api/database/*.db
+src/Api/database/*.sqlite
+src/Api/*.db
+
+# IDEs
+.idea/
+
+# Logs adicionais
+log/
+logs/
+*.log
+
+# Backups e temporários
+*.bak
+*.backup
+*.tmp
+*~
+
+# Docker artefatos
+.docker/
+*.tar
+
+# Ambiente locais
+.env.development.local
+.env.production.local
+.env.test.local
+.env.local.*
