@@ -75,10 +75,6 @@ cd HealthCore
 cd src/Web
 npm install
 cd ../..
-
-# 3. Instale dependências globais
-npm install pm2 -g
-npm install
 ```
 
 ### Execução Local
@@ -103,6 +99,19 @@ dotnet run
 # Terminal 2 - Frontend
 cd src/Web
 npm run dev
+```
+
+### Deploy com Docker (Produção/Servidor)
+
+```bash
+# Construir e subir os serviços
+docker compose up -d --build
+
+# Verificar status
+docker compose ps
+
+# Logs (opcional)
+docker compose logs -f
 ```
 
 ### Acesso ao Sistema
