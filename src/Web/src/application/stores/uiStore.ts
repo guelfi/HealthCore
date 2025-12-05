@@ -9,6 +9,10 @@ interface UIState {
     message: string;
     type: 'success' | 'error' | 'warning' | 'info';
     timestamp: Date;
+    duration?: number;
+    position?: { vertical: 'top' | 'bottom'; horizontal: 'left' | 'right' | 'center' };
+    ariaLive?: 'polite' | 'assertive';
+    action?: { label: string; onClick: () => void };
   }>;
 }
 
@@ -18,7 +22,13 @@ interface UIActions {
   toggleTheme: () => void;
   addNotification: (
     message: string,
-    type: 'success' | 'error' | 'warning' | 'info'
+    type: 'success' | 'error' | 'warning' | 'info',
+    options?: {
+      duration?: number;
+      position?: { vertical: 'top' | 'bottom'; horizontal: 'left' | 'right' | 'center' };
+      ariaLive?: 'polite' | 'assertive';
+      action?: { label: string; onClick: () => void };
+    }
   ) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
@@ -44,22 +54,27 @@ export const useUIStore = create<UIStore>()(
           theme: state.theme === 'light' ? 'dark' : 'light',
         })),
 
-      addNotification: (message, type) => {
+      addNotification: (message, type, options) => {
         const id = Date.now().toString();
         const notification = {
           id,
           message,
           type,
           timestamp: new Date(),
+          duration: options?.duration,
+          position: options?.position,
+          ariaLive: options?.ariaLive,
+          action: options?.action,
         };
         set(state => ({
           notifications: [...state.notifications, notification],
         }));
 
         // Auto-remove notification after 5 seconds
+        const timeout = options?.duration ?? 5000;
         setTimeout(() => {
           get().removeNotification(id);
-        }, 5000);
+        }, timeout);
       },
 
       removeNotification: id =>

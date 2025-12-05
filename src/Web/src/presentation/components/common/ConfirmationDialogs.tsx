@@ -318,8 +318,99 @@ export const SuccessDialog: React.FC<SuccessDialogProps> = ({
   );
 };
 
+// Dialog de erro informativo e acessível
+interface ErrorInfoDialogProps {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  reason?: string;
+  actions?: Array<{ label: string; onClick: () => void }>;
+}
+
+export const ErrorInfoDialog: React.FC<ErrorInfoDialogProps> = ({
+  open,
+  onClose,
+  title = 'Não foi possível excluir',
+  reason,
+  actions = [],
+}) => {
+  const theme = useTheme();
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      TransitionComponent={SlideTransition}
+      maxWidth="sm"
+      fullWidth
+      aria-labelledby="error-info-title"
+      aria-describedby="error-info-description"
+      sx={{
+        '& .MuiDialog-paper': {
+          borderRadius: 3,
+          overflow: 'visible',
+          boxShadow: '0 8px 32px rgba(244, 67, 54, 0.18)',
+        },
+      }}
+    >
+      <DialogContent sx={{ p: 0 }}>
+        <Card elevation={0} sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ textAlign: 'center', p: 4 }}>
+            <Box sx={{ mb: 2 }}>
+              <Error sx={{ color: theme.palette.error.main, fontSize: 56 }} />
+            </Box>
+            <Typography
+              id="error-info-title"
+              variant="h5"
+              component="h2"
+              gutterBottom
+              sx={{ fontWeight: 600, color: theme.palette.error.main }}
+            >
+              {title}
+            </Typography>
+            {reason && (
+              <Typography
+                id="error-info-description"
+                variant="body1"
+                color="text.secondary"
+                sx={{ mb: 3, lineHeight: 1.6 }}
+              >
+                {reason}
+              </Typography>
+            )}
+          </CardContent>
+        </Card>
+      </DialogContent>
+      <DialogActions sx={{ p: 3, gap: 1, justifyContent: 'center' }}>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          sx={{
+            borderColor: theme.palette.grey[300],
+            color: theme.palette.text.secondary,
+            '&:hover': { borderColor: theme.palette.grey[400], backgroundColor: theme.palette.grey[50] },
+          }}
+        >
+          Fechar
+        </Button>
+        {actions.map((action, idx) => (
+          <Button
+            key={idx}
+            onClick={action.onClick}
+            variant="contained"
+            color="primary"
+          >
+            {action.label}
+          </Button>
+        ))}
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 export default {
   ConfirmationDialog,
   DeleteConfirmationDialog,
   SuccessDialog,
+  ErrorInfoDialog,
 };

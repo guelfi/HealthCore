@@ -174,77 +174,14 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(); // Add Authorization services
 
-// Configure CORS
+// Configure CORS for Nginx Proxy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowProxy", policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:5005",
-            "http://127.0.0.1:5005",
-            "http://0.0.0.0:5005",
-            "http://192.168.15.119:5005",
-            "http://129.153.86.168:5005"  // OCI Frontend IP
-        )
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
-    });
-    
-    // Política mais flexível para desenvolvimento distribuído
-    options.AddPolicy("AllowDevelopment", policy =>
-    {
-        policy.SetIsOriginAllowed(origin =>
-        {
-            if (string.IsNullOrWhiteSpace(origin)) return false;
-            
-            // Permitir localhost e 127.0.0.1 em qualquer porta
-            if (origin.StartsWith("http://localhost:") || origin.StartsWith("http://127.0.0.1:"))
-                return true;
-            
-            // Permitir HTTPS localhost
-            if (origin.StartsWith("https://localhost:") || origin.StartsWith("https://127.0.0.1:"))
-                return true;
-            
-            // Permitir ngrok URLs
-            if (origin.Contains(".ngrok-free.app") || origin.Contains(".ngrok.io") || origin.Contains(".ngrok.app"))
-                return true;
-            
-            // Permitir IPs da rede local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-            var uri = new Uri(origin);
-            var host = uri.Host;
-            
-            if (host.StartsWith("192.168.") || 
-                host.StartsWith("10.") || 
-                (host.StartsWith("172.") && 
-                 int.TryParse(host.Split('.')[1], out int second) && 
-                 second >= 16 && second <= 31))
-            {
-                return true;
-            }
-            
-            // Permitir desenvolvimento local com IP específico
-            if (host == "0.0.0.0" || host == "192.168.15.119")
-                return true;
-            
-            return false;
-        })
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials()
-        .SetPreflightMaxAge(TimeSpan.FromMinutes(10)); // Cache preflight por 10 minutos
-    });
-    
-    // Política específica para produção (mais restritiva)
-    options.AddPolicy("AllowProduction", policy =>
-    {
-        policy.WithOrigins(
-            "https://healthcore.example.com", // Substitua pela URL de produção
-            "http://129.153.86.168:5005"      // OCI Frontend IP
-        )
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
@@ -267,12 +204,15 @@ static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : 
     return (true, null);
 }
 
+// Configure PathBase for Nginx Proxy
+app.UsePathBase("/healthcore-api");
+
 // Configure the HTTP request pipeline.
 // Habilitar Swagger em produção para facilitar testes e documentação
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HealthCore API v1");
+    c.SwaggerEndpoint("/healthcore-api/swagger/v1/swagger.json", "HealthCore API V1");
     c.RoutePrefix = "swagger"; // Swagger disponível em /swagger
 });
 
@@ -288,14 +228,7 @@ if (enableSecurityHeaders)
 // Rate limiting removed - package not available
 
 // Use CORS
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors("AllowDevelopment"); // Política flexível para desenvolvimento
-}
-else
-{
-    app.UseCors("AllowFrontend"); // Política restrita para produção
-}
+app.UseCors("AllowProxy");
 
 app.UseAuthentication(); // Use Authentication middleware
 app.UseMiddleware<TokenBlacklistMiddleware>(); // Use Token Blacklist middleware
@@ -1404,6 +1337,12 @@ app.MapDelete("/medicos/{id:guid}", async (Guid id, MedicoService medicoService,
 
         logger.LogInformation("Médico excluído com sucesso: {Id}", id);
         return Results.NoContent();
+    }
+    catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+    {
+        // Quando há restrição de FK (pacientes/exames vinculados), o EF lança DbUpdateException
+        logger.LogWarning(ex, "Exclusão de médico bloqueada por relacionamentos: {Id}", id);
+        return Results.Conflict(new { Message = "Não é possível excluir este médico pois existem registros vinculados (pacientes ou exames)" });
     }
     catch (Exception ex)
     {
