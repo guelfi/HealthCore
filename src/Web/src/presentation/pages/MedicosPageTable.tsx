@@ -12,6 +12,8 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  InputAdornment,
+  IconButton,
   Chip,
   Table,
   TableBody,
@@ -49,7 +51,7 @@ import {
 import { useMedicos } from '../hooks/useMedicos';
 import { useEspecialidadesForDropdown } from '../hooks/useEspecialidadesForDropdown';
 import type { Medico, CreateMedicoDto, UpdateMedicoDto } from '../../domain/entities/Medico';
-import { useUIStore } from '../../application/stores/uiStore';
+import NotificationService from '@/application/services/NotificationService';
 import {
   formatCPF,
   applyCPFMask,
@@ -60,9 +62,11 @@ import {
 import {
   DeleteConfirmationDialog,
   SuccessDialog,
+  ErrorInfoDialog,
 } from '../components/common/ConfirmationDialogs';
 import StandardDialogButtons from '../components/common/StandardDialogButtons';
 import ResponsiveTableHeader from '../../components/ui/Layout/ResponsiveTableHeader';
+import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
 
 const MedicosPageTable: React.FC = () => {
   const theme = useTheme();
@@ -108,8 +112,11 @@ const MedicosPageTable: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorDialogReason, setErrorDialogReason] = useState<string | undefined>(undefined);
 
-  const { addNotification } = useUIStore();
+  // Notificações via serviço reutilizável
 
   // Carregar médicos ao montar o componente
   useEffect(() => {
@@ -209,14 +216,32 @@ const MedicosPageTable: React.FC = () => {
         handleCloseDialog();
         setSuccessMessage('Médico excluído com sucesso!');
         setSuccessDialogOpen(true);
+        // Toast de sucesso contextual (top-right, suave)
+        NotificationService.success('Médico excluído com sucesso.', {
+          duration: 5000,
+          position: { vertical: 'top', horizontal: 'right' },
+          ariaLive: 'polite',
+        });
         // Recarregar a lista
         await fetchMedicos({ page, pageSize });
       } catch (error) {
         console.error('Erro ao deletar médico:', error);
-        addNotification(
-          'Erro ao excluir médico. Tente novamente.',
-          'error'
-        );
+        const specificMessage =
+          (error as any)?.message || 'Erro ao excluir médico';
+        setErrorDialogReason(specificMessage);
+        setErrorDialogOpen(true);
+        // Toast complementar com mensagens contextualizadas e ação de retry
+        // Mapeamento de erro e toast consistente no topo-direita
+        const status = (error as any)?.response?.status;
+        const msg = (error as any)?.response?.data?.message || specificMessage;
+        if (status === 409 || /vinculad|associad|relacionament/i.test(msg)) {
+          NotificationService.medicoDeleteBlocked();
+        } else {
+          NotificationService.handleApiError(error, {
+            entity: 'medico',
+            retry: () => handleDeleteConfirm(),
+          });
+        }
       } finally {
         setSaving(false);
       }
@@ -551,12 +576,35 @@ const MedicosPageTable: React.FC = () => {
               <TextField
                 fullWidth
                 label="Senha"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 variant="outlined"
                 size="small"
                 required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                        onClick={() => setShowPassword(prev => !prev)}
+                        edge="end"
+                        size="small"
+                        sx={{
+                          color: showPassword ? 'primary.main' : 'text.secondary',
+                          '&:hover': { color: 'primary.main' },
+                          transition: 'color 0.2s ease',
+                        }}
+                      >
+                        {showPassword ? (
+                          <VisibilityOffIcon fontSize="small" />
+                        ) : (
+                          <VisibilityIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
                 sx={{
                   '& .MuiInputBase-root': {
                     padding: '4px 6px',
@@ -618,6 +666,23 @@ const MedicosPageTable: React.FC = () => {
         onClose={() => setSuccessDialogOpen(false)}
         title="Sucesso!"
         message={successMessage}
+      />
+
+      {/* Diálogo de Erro Contextual */}
+      <ErrorInfoDialog
+        open={errorDialogOpen}
+        onClose={() => setErrorDialogOpen(false)}
+        title="Não foi possível excluir"
+        reason={errorDialogReason}
+        actions={[
+          {
+            label: 'Ver pacientes associados',
+            onClick: () => {
+              // Navegar para pacientes
+              window.location.href = '/pacientes';
+            },
+          },
+        ]}
       />
     </Box>
   );

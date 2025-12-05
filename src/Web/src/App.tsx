@@ -30,6 +30,7 @@ import DiagnosticPage from './presentation/pages/DiagnosticPage';
 
 // Debug components (only in development)
 import MobileDebugger from './components/dev/MobileDebugger';
+import NotificationSystem from './presentation/components/common/NotificationSystem';
 
 // Componente para proteger rotas administrativas
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -188,6 +189,8 @@ const App: React.FC = () => {
         {/* Mobile Debugger - apenas em desenvolvimento */}
         <MobileDebugger />
       </NetworkErrorBoundary>
+      {/* Toast notifications globais */}
+      <NotificationSystem />
     </ThemeProvider>
   );
 };

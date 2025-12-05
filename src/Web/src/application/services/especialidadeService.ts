@@ -8,7 +8,7 @@ import type {
 } from '../../domain/entities';
 
 export class EspecialidadeService {
-  private static readonly BASE_URL = '/api/especialidades';
+  private static readonly BASE_URL = '/especialidades';
 
   /**
    * Busca especialidades com paginação e filtros

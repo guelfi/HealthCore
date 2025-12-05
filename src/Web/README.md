@@ -35,6 +35,42 @@ src/
 
 ## 🛠️ Scripts Disponíveis
 
+## 🔔 Sistema de Toast Notifications
+
+- Disparo de toasts
+  - `addNotification('Operação bem-sucedida', 'success')`
+  - `addNotification('Falha na operação', 'error')`
+  - `addNotification('Verifique os dados', 'warning')`
+  - `addNotification('Informação atualizada', 'info')`
+
+- Opções de customização
+  - `duration`: tempo em ms para auto-fechamento. Ex.: `duration: 7000`
+  - `position`: `{ vertical: 'top' | 'bottom', horizontal: 'left' | 'right' | 'center' }`
+  - `ariaLive`: `'polite' | 'assertive'` para leitores de tela
+  - `action`: `{ label: string, onClick: () => void }` para ação opcional
+
+- Exemplos
+  - Sucesso padrão: `addNotification('Médico excluído com sucesso.', 'success')`
+  - Erro com retry: 
+    ```ts
+    addNotification('Falha de conexão com o servidor.', 'error', {
+      duration: 7000,
+      position: { vertical: 'top', horizontal: 'center' },
+      ariaLive: 'assertive',
+      action: { label: 'Tentar novamente', onClick: retryFn }
+    })
+    ```
+
+- Comportamento responsivo
+  - Desktop: `bottom-right` por padrão
+  - Mobile: `top-center` por padrão
+
+- Boas práticas
+  - Mensagens curtas e claras com contexto do erro
+  - Use `ariaLive='assertive'` apenas para erros críticos
+  - Evite toasts encadeados; prefira uma mensagem consolidada
+  - Use `action` para caminhos comuns (ex.: "Tentar novamente")
+
 - `npm run dev` - Inicia o servidor de desenvolvimento
 - `npm run build` - Gera build de produção
 - `npm run lint` - Executa linting do código
