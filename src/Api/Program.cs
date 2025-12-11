@@ -26,9 +26,9 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", "HealthCore.Api")
     .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production")
     .Enrich.WithEnvironmentName()
-    .WriteTo.Console()
+    .WriteTo.Console(new JsonFormatter())
     .WriteTo.File(
-        path: "../log/healthcore-.log", 
+        path: "log/healthcore-.log", 
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 7)
     .CreateLogger();
@@ -134,9 +134,17 @@ builder.Services.AddHealthChecks()
             $"Application running: {uptime.TotalMinutes:F1} minutes");
     }, tags: new[] { "startup", "live" });
 
-// Add Entity Framework
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=database/healthcore.db";
+var dataSourcePrefix = "Data Source=";
+var dbFilePath = defaultConnection.StartsWith(dataSourcePrefix) ? defaultConnection.Substring(dataSourcePrefix.Length) : defaultConnection;
+if (!Path.IsPathRooted(dbFilePath))
+{
+    var absolutePath = Path.Combine(builder.Environment.ContentRootPath, dbFilePath);
+    defaultConnection = $"{dataSourcePrefix}{absolutePath}";
+}
+
 builder.Services.AddDbContext<HealthCoreDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(defaultConnection));
 
 // Register application services
 builder.Services.AddScoped<PacienteService>();
@@ -189,6 +197,20 @@ builder.WebHost.UseUrls("http://0.0.0.0:5000"); // Configure Kestrel to listen o
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<HealthCoreDbContext>();
+    try
+    {
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Falha ao aplicar migrations do banco SQLite");
+        throw;
+    }
+}
+
 // Helper method for model validation
 static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : class
 {
@@ -217,6 +239,8 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
 
 // Security headers (enable by config)
 var enableSecurityHeaders = builder.Configuration.GetValue<bool>("Security:EnableSecurityHeaders", true);

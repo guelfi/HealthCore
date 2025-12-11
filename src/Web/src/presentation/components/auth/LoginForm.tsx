@@ -67,7 +67,7 @@ const LoginForm: React.FC = () => {
         <CardContent sx={{ p: 4 }}>
           <Box textAlign="center" mb={3}>
             <img
-              src="/logo.svg"
+              src={`${import.meta.env.BASE_URL}logo.svg`}
               alt="HealthCore Logo"
               style={{ maxWidth: '200px', marginBottom: '1rem' }}
             />

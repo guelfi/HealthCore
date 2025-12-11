@@ -42,11 +42,32 @@ export class ApiConfig {
       fullUrl: window.location.href
     });
 
-    // Se for acesso via IP da OCI (produção), usar IP público da OCI
+    // Ambientes locais ou via rede: usar proxy local /api para evitar CORS
+    if (isLocalhost || isLocalNetworkAccess) {
+      console.log('🏠 Ambiente local detectado (localhost ou IP de rede)');
+      console.log('✅ Usando proxy local /api');
+      return '/api';
+    }
+
+    // Acesso via ngrok: usar /api para evitar Mixed Content (HTTPS → HTTP)
+    if (isNgrok) {
+      console.log('🌐 Detectado acesso via ngrok');
+      console.log('✅ Usando proxy local /api (evita Mixed Content)');
+      return '/api';
+    }
+
+    // Produção na OCI: usar proxy relativo para mesma origem
     if (isOciProduction) {
       console.log('🚀 Detectado acesso via OCI (produção)');
-      console.log('✅ Usando IP público da OCI para API');
-      return 'http://129.153.86.168:5000';
+      console.log('✅ Usando proxy relativo /healthcore-api para mesma origem');
+      return '/healthcore-api';
+    }
+
+    // Fora da OCI: permitir configuração via variáveis de ambiente
+    const envApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+    if (envApiUrl) {
+      console.log('✅ Usando URL da API do .env:', envApiUrl);
+      return envApiUrl;
     }
 
     // Se for ngrok, usar proxy local para evitar Mixed Content
@@ -71,12 +92,7 @@ export class ApiConfig {
       return '/api';
     }
 
-    // Verificar variáveis de ambiente apenas se não for localhost
-    const envApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
-    if (envApiUrl) {
-      console.log('✅ Usando URL da API do .env:', envApiUrl);
-      return envApiUrl;
-    }
+    // Nenhuma variável definida – continuar detecção automática
 
     // Fallback para IP da máquina (preferencial)
     console.log('✅ Usando IP da máquina como fallback');
