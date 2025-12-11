@@ -4,14 +4,6 @@ import react from '@vitejs/plugin-react';
 // https://vite.dev/config/
 export default defineConfig({
   base: '/healthcore-frontend/',
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-    },
-  },
   plugins: [react()],
   resolve: {
     alias: {
@@ -75,7 +67,7 @@ export default defineConfig({
     // Configuração de proxy para redirecionar chamadas /api para a API local
     proxy: {
       '/api': {
-        target: 'http://172.17.158.1:5000',  // API no WSL acessível via IP do WSL
+        target: 'http://172.17.158.1:5000',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),

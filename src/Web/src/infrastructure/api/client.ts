@@ -129,9 +129,9 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         console.error('Erro ao renovar token:', refreshError);
 
-        // Limpar dados de autenticação e redirecionar para login
+        // Limpar dados de autenticação e redirecionar para login respeitando subpath
         localStorage.removeItem('auth-store');
-        window.location.href = '/login';
+        window.location.href = `${import.meta.env.BASE_URL}login`;
         return Promise.reject(refreshError);
       }
     }

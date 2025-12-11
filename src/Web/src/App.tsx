@@ -50,7 +50,7 @@ const App: React.FC = () => {
     <ThemeProvider theme={healthCoreTheme}>
       <CssBaseline />
       <NetworkErrorBoundary>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route
               path="/login"
