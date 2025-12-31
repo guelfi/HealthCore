@@ -193,7 +193,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.WebHost.UseUrls("http://0.0.0.0:5000"); // Configure Kestrel to listen on all interfaces
+builder.WebHost.UseUrls("http://0.0.0.0:5005"); // Configure Kestrel to listen on all interfaces
 
 var app = builder.Build();
 
