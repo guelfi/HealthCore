@@ -50,11 +50,11 @@ export default defineConfig({
     minify: 'esbuild'
   },
   server: {
-    port: 5005,
+    port: 5000,
     host: '0.0.0.0', // Permite acesso de qualquer IP da rede
     strictPort: true, // Força o uso da porta especificada
     hmr: {
-      port: 5005,
+      port: 5000,
       host: '0.0.0.0', // Permite HMR via qualquer IP da rede
     },
     allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app', '.ngrok.com', '192.168.15.120', '172.17.158.1', 'localhost'],
@@ -67,10 +67,10 @@ export default defineConfig({
     // Configuração de proxy para redirecionar chamadas /api para a API local
     proxy: {
       '/api': {
-        target: 'http://172.17.158.1:5000',
+        target: 'http://localhost:5005',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, '/healthcore-api'),
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
             console.log('🔴 Proxy error:', err);

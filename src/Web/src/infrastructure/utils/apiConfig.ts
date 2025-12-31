@@ -24,10 +24,10 @@ export class ApiConfig {
       currentHost.includes('.ngrok-free.app') ||
       currentHost.includes('.ngrok.io') ||
       currentHost.includes('.ngrok.app');
-    
+
     // Verificar se está sendo acessado via IP da OCI (produção)
     const isOciProduction = currentHost === '129.153.86.168';
-    
+
     // Verificar se está sendo acessado via IP da rede local
     const isLocalNetworkAccess = currentHost.startsWith('192.168.') || currentHost.startsWith('10.') || currentHost.startsWith('172.');
     const isLocalhost = currentHost === 'localhost' || currentHost === '127.0.0.1';
@@ -45,8 +45,17 @@ export class ApiConfig {
     // Ambientes locais ou via rede: usar proxy local /api para evitar CORS
     if (isLocalhost || isLocalNetworkAccess) {
       console.log('🏠 Ambiente local detectado (localhost ou IP de rede)');
-      console.log('✅ Usando proxy local /api');
-      return '/api';
+      const port = window.location.port;
+
+      // Se estiver rodando na porta do Vite (5000), usar /api (proxy do Vite)
+      if (port === '5000') {
+        console.log('✅ Usando proxy local /api (Vite Dev Server)');
+        return '/api';
+      }
+
+      // Se estiver rodando sem porta (80/443) ou outra porta, assumir Nginx/Produção
+      console.log('✅ Usando proxy direto /healthcore-api (Nginx/Produção)');
+      return `${window.location.origin}/healthcore-api`;
     }
 
     // Acesso via ngrok: usar /api para evitar Mixed Content (HTTPS → HTTP)
@@ -60,7 +69,7 @@ export class ApiConfig {
     if (isOciProduction) {
       console.log('🚀 Detectado acesso via OCI (produção)');
       console.log('✅ Usando proxy relativo /healthcore-api para mesma origem');
-      return '/healthcore-api';
+      return '/healthcore-api'; // Manter relativo na OCI ou mudar para absolute também se quiser
     }
 
     // Fora da OCI: permitir configuração via variáveis de ambiente
