@@ -19,36 +19,38 @@ RUN dotnet publish "HealthCore.Api.csproj" -c Release -o /app/publish /p:UseAppH
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Create directories for database and logs
-RUN mkdir -p /app/database /app/log
+# Criar diretórios necessários
+RUN mkdir -p /app/database /app/log /app/seed
 
-# Copy published app
+# Copiar aplicação publicada
 COPY --from=publish /app/publish .
 
-# Copy database directory if exists
-COPY src/Api/database/ ./database/
+# Copiar o banco de dados de SEED para um local separado
+COPY src/Api/database/healthcore.db /app/seed/
 
-# Install curl for health checks
+# Copiar e preparar o entrypoint script
+COPY src/Api/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Instalar curl para health checks
 RUN apt-get update && apt-get install -y curl --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user and set permissions
+# Criar usuário não-root e definir permissões
 RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app && \
-    chmod -R 755 /app/log
+    chown -R appuser:appuser /app
 USER appuser
 
+# Health check (corrigido para a porta 5005 e caminho correto)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:5005/healthcore-api/health || exit 1
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/healthcore-api/health || exit 1
+# Expor a porta correta
+EXPOSE 5005
 
-# Expose port
-EXPOSE 5000
-
-# Set environment variables
-ENV ASPNETCORE_URLS=http://+:5000
+# Definir variáveis de ambiente (corrigido para a porta 5005)
+ENV ASPNETCORE_URLS=http://+:5005
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ConnectionStrings__DefaultConnection="Data Source=/app/database/healthcore.db"
 
-# Start the application
-ENTRYPOINT ["dotnet", "HealthCore.Api.dll"]
+# Iniciar a aplicação usando o entrypoint
+ENTRYPOINT ["/app/entrypoint.sh", "dotnet", "HealthCore.Api.dll"]
