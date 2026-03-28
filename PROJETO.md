@@ -9,8 +9,8 @@
 
 | Componente | Porta | URL Local | URL Produção |
 |------------|-------|-----------|--------------|
-| API | 5005 | http://localhost:5005 | /healthcore-api/ |
-| Frontend | 5000 | http://localhost/healthcore-frontend/ | /healthcore-frontend/ |
+| API | 5000 | http://localhost:5000 | /healthcore-api/ |
+| Frontend | 5005 | http://localhost:5005 | /healthcore-frontend/ |
 
 ## 🗄️ BANCO DE DADOS
 
@@ -18,6 +18,7 @@
 **Credenciais Produção:** `oscar` / `246588`
 
 ⚠️ **IMPORTANTE:** HealthCore usa SQLite, não PostgreSQL!
+⚠️ **PORTAS:** API=5000, Frontend=5005 (padrão padronizado em 28/03/2026)
 
 ## 🚀 DEPLOY
 

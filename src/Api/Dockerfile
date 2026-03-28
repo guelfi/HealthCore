@@ -40,15 +40,15 @@ RUN adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
-# Health check (corrigido para a porta 5005 e caminho correto)
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:5005/healthcore-api/health || exit 1
+  CMD curl -f http://localhost:5000/health || exit 1
 
 # Expor a porta correta
-EXPOSE 5005
+EXPOSE 5000
 
-# Definir variáveis de ambiente (corrigido para a porta 5005)
-ENV ASPNETCORE_URLS=http://+:5005
+# Definir variáveis de ambiente
+ENV ASPNETCORE_URLS=http://+:5000
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ConnectionStrings__DefaultConnection="Data Source=/app/database/healthcore.db"
 
