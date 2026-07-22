@@ -112,6 +112,12 @@ jobs:
         run: docker compose up -d --build
 
       - name: Wait for frontend readiness
+        env:
+          HEALTHCORE_JWT_KEY: ci-only-e2e-key-012345678901234567890
+          HEALTHCORE_ENVIRONMENT: E2E
+          HEALTHCORE_E2E_USERNAME: e2e-admin
+          HEALTHCORE_E2E_PASSWORD: ci-only-e2e-password-012345678901
+          HEALTHCORE_SECURE_COOKIES: false
         run: |
           for attempt in $(seq 1 30); do
             if curl --fail --silent --show-error http://127.0.0.1:5005/health >/dev/null; then
