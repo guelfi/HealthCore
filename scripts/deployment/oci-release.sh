@@ -122,6 +122,31 @@ sudo perl -0pi -e 's!location /healthcore/api/ [{].*?^[ ]{4}[}]!location /health
       proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto \$scheme;
     }!ms' "$NGINX_CONF"
+# Normalize the public Swagger prefix before forwarding. The explicit rewrite
+# avoids the double slash produced by a proxy_pass URI with a trailing slash.
+sudo perl -0pi -e 's!location /healthcore/swagger \{.*?\n[ \t]*\}!location /healthcore/swagger {
+      rewrite ^/healthcore/swagger/?(.*)$ /swagger/\$1 break;
+      proxy_pass http://healthcore-api:5000;
+      proxy_set_header Host healthcore.batuara.net;
+      proxy_set_header X-Real-IP \$remote_addr;
+      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto \$scheme;
+    }!ms' "$NGINX_CONF"
+sudo perl -0pi -e 's!location /healthcore/api/ \{.*?\n[ \t]*\}!location /healthcore/api/ {
+      rewrite ^/healthcore/api/(.*)$ /api/\$1 break;
+      proxy_pass http://healthcore-api:5000;
+      proxy_set_header Host healthcore.batuara.net;
+      proxy_set_header X-Real-IP \$remote_addr;
+      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto \$scheme;
+    }!ms' "$NGINX_CONF"
+for expected in   'rewrite ^/healthcore/swagger/?(.*)$ /swagger/$1 break;'   'proxy_pass http://healthcore-api:5000;'   'proxy_set_header Host healthcore.batuara.net;'; do
+  grep -Fq "$expected" "$NGINX_CONF" || {
+    echo "HealthCore Swagger Nginx directive is missing: $expected" >&2
+    sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
+    exit 1
+  }
+done
 grep -Fq 'location /healthcore/swagger' "$NGINX_CONF" || {
   echo 'HealthCore Swagger Nginx route is missing' >&2
   sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
