@@ -48,10 +48,24 @@ public static class HealthCoreSecurityExtensions
             };
         });
 
+        var openApiEnabled = environment.IsDevelopment() ||
+            configuration.GetValue<bool>("OpenApi:Enabled", false);
+
         services.AddAuthorization(options =>
         {
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
+                .RequireAssertion(context =>
+                {
+                    if (openApiEnabled &&
+                        context.Resource is HttpContext httpContext &&
+                        (httpContext.Request.Path.StartsWithSegments("/swagger") ||
+                         httpContext.Request.Path.StartsWithSegments("/healthcore-api/swagger")))
+                    {
+                        return true;
+                    }
+
+                    return context.User.Identity?.IsAuthenticated == true;
+                })
                 .Build();
         });
 
