@@ -74,36 +74,93 @@ NGINX_CONF="/var/www/nginx/nginx.conf"
 NGINX_BACKUP="${NGINX_CONF}.healthcore-${STAMP}.bak"
 sudo cp -p "$NGINX_CONF" "$NGINX_BACKUP"
 
+# A single-file bind mount keeps the old inode when the host file is replaced.
+# Edit the mounted file in place and recreate only the shared Nginx proxy so the
+# new configuration is actually loaded without touching any application project.
 if grep -Fq 'set $upstream_healthcore_front http://healthcore-frontend:80;' "$NGINX_CONF"; then
   sudo sed -i 's#http://healthcore-frontend:80;#http://healthcore-frontend:8080;#' "$NGINX_CONF"
 fi
 
 if ! grep -Fq 'set $upstream_healthcore_front http://healthcore-frontend:8080;' "$NGINX_CONF"; then
   echo 'HealthCore Nginx upstream is not configured for port 8080' >&2
-  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
+  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
   exit 1
 fi
 
 # Keep IP-based access compatible with the API's production AllowedHosts.
 # Scope these edits to HealthCore locations only; shared project routes remain untouched.
-sudo sed -i '/location \/healthcore\/swagger {/,/^    }/ { s#proxy_pass http://healthcore-api:5000/swagger/;#proxy_pass http://healthcore-api:5000/healthcore-api/swagger/;#; s/proxy_set_header Host \\$host;/proxy_set_header Host healthcore.batuara.net;/; }' "$NGINX_CONF"
-sudo sed -i '/location \/healthcore\/api\/ {/,/^    }/ s/proxy_set_header Host \\$host;/proxy_set_header Host healthcore.batuara.net;/' "$NGINX_CONF"
+sudo sed -i '/location \/healthcore\/swagger {/,/^    }/ { s#proxy_pass http://healthcore-api:5000/swagger/;#proxy_pass http://healthcore-api:5000/healthcore-api/swagger/;#; s#proxy_set_header Host .*;#proxy_set_header Host healthcore.batuara.net;#; }' "$NGINX_CONF"
+sudo sed -i '/location \/healthcore\/api\/ {/,/^    }/ s#proxy_set_header Host .*;#proxy_set_header Host healthcore.batuara.net;#' "$NGINX_CONF"
 
 grep -Fq 'location /healthcore/swagger' "$NGINX_CONF" || {
   echo 'HealthCore Swagger Nginx route is missing' >&2
-  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
+  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
   exit 1
 }
 grep -Fq 'location /healthcore/api/' "$NGINX_CONF" || {
   echo 'HealthCore API Nginx route is missing' >&2
-  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
+  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
   exit 1
 }
 
-if ! docker exec nginx-proxy nginx -t; then
-  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
+if ! docker run --rm --network none \
+  -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
+  -v /etc/letsencrypt:/etc/letsencrypt:ro \
+  -v /etc/ssl/hako:/etc/ssl/hako:ro \
+  nginx:stable-alpine nginx -t; then
+  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
   exit 1
 fi
+
+recreate_nginx_proxy() {
+  local previous_name="nginx-proxy-healthcore-previous"
+  local network
+  local networks=()
+
+  while IFS= read -r network; do
+    [[ -n "$network" ]] && networks+=("$network")
+  done < <(docker inspect nginx-proxy --format '{{range $network, $_ := .NetworkSettings.Networks}}{{$network}}{{"\n"}}{{end}}')
+
+  ((${#networks[@]} > 0)) || {
+    echo 'Nginx proxy has no Docker networks; refusing recreation' >&2
+    return 1
+  }
+
+  docker stop nginx-proxy
+  docker rename nginx-proxy "$previous_name"
+
+  restore_previous_nginx() {
+    docker rm -f nginx-proxy >/dev/null 2>&1 || true
+    docker rename "$previous_name" nginx-proxy
+    docker start nginx-proxy >/dev/null
+  }
+
+  if ! docker create --name nginx-proxy --restart unless-stopped --network none \
+      -p 80:80 -p 443:443 \
+      -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
+      -v /etc/letsencrypt:/etc/letsencrypt:ro \
+      -v /etc/ssl/hako:/etc/ssl/hako:ro \
+      nginx:stable-alpine nginx -g 'daemon off;'; then
+    restore_previous_nginx
+    return 1
+  fi
+
+  for network in "${networks[@]}"; do
+    if ! docker network connect "$network" nginx-proxy; then
+      restore_previous_nginx
+      return 1
+    fi
+  done
+
+  if ! docker start nginx-proxy >/dev/null || ! docker exec nginx-proxy nginx -t; then
+    restore_previous_nginx
+    return 1
+  fi
+
+  docker rm -f "$previous_name" >/dev/null
+}
+
+recreate_nginx_proxy
 
 # A previous HealthCore compose project may have left the published frontend
 # container behind under a different project name. Reclaim only containers that
