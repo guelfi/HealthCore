@@ -52,7 +52,7 @@ jobs:
     environment: production
     env:
       OCI_HOST: ${{ secrets.OCI_HOST }}
-      OCI_USER: ${{ secrets.OCI_USER }}
+      OCI_USER: ${{ secrets.OCI_USER || 'ubuntu' }}
       RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       RECONCILE_REMOTE_DIRTY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_reconcile_dirty == 'YES' && 'true' || 'false' }}
     steps:
