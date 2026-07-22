@@ -124,7 +124,7 @@ sudo perl -0pi -e 's!location /healthcore/api/ [{].*?^[ ]{4}[}]!location /health
     }!ms' "$NGINX_CONF"
 # Normalize the public Swagger prefix before forwarding. The explicit rewrite
 # avoids the double slash produced by a proxy_pass URI with a trailing slash.
-sudo perl -0pi -e 's!location /healthcore/swagger \{.*?\n[ \t]*\}!location /healthcore/swagger {
+sudo perl -0pi -e 's![ \t]*location /healthcore/swagger \{.*?\n[ \t]*\}!location /healthcore/swagger {
       rewrite ^/healthcore/swagger/?(.*)$ /swagger/\$1 break;
       proxy_pass http://healthcore-api:5000;
       proxy_set_header Host healthcore.batuara.net;
@@ -132,7 +132,7 @@ sudo perl -0pi -e 's!location /healthcore/swagger \{.*?\n[ \t]*\}!location /heal
       proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto \$scheme;
     }!ms' "$NGINX_CONF"
-sudo perl -0pi -e 's!location /healthcore/api/ \{.*?\n[ \t]*\}!location /healthcore/api/ {
+sudo perl -0pi -e 's![ \t]*location /healthcore/api/ \{.*?\n[ \t]*\}!location /healthcore/api/ {
       rewrite ^/healthcore/api/(.*)$ /api/\$1 break;
       proxy_pass http://healthcore-api:5000;
       proxy_set_header Host healthcore.batuara.net;
