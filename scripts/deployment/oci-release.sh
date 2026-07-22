@@ -111,9 +111,10 @@ replace_healthcore_nginx_locations() {
   sudo awk '
     /^[[:space:]]*location \/healthcore\/swagger \{$/ {
       print "    location /healthcore/swagger {"
-      print "      rewrite ^/healthcore/swagger/?(.*)$ /swagger/" "$" "1 break;"
+      print "      rewrite ^/healthcore/swagger/?(.*)$ /healthcore-api/swagger/" "$" "1 break;"
       print "      proxy_pass http://healthcore-api:5000;"
       print "      proxy_set_header Host healthcore.batuara.net;"
+      print "      proxy_redirect /healthcore-api/swagger/ /healthcore/swagger/;"
       print "      proxy_set_header X-Real-IP \\$remote_addr;"
       print "      proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;"
       print "      proxy_set_header X-Forwarded-Proto \\$scheme;"
@@ -146,7 +147,7 @@ replace_healthcore_nginx_locations() {
 replace_healthcore_nginx_locations
 
 for expected in \
-  'rewrite ^/healthcore/swagger/?(.*)$ /swagger/$1 break;' \
+  'rewrite ^/healthcore/swagger/?(.*)$ /healthcore-api/swagger/$1 break;' \
   'proxy_pass http://healthcore-api:5000;' \
   'proxy_set_header Host healthcore.batuara.net;'; do
   grep -Fq "$expected" "$NGINX_CONF" || {
