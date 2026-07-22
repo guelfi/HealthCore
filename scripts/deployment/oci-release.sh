@@ -63,7 +63,7 @@ else
   echo "HealthCore API service container is missing; refusing deployment without a database backup" >&2
   exit 1
 fi
-[[ -s "$BACKUP_PATH" ]] || { echo "SQLite backup was not created" >&2; exit 1; }
+sudo test -s "$BACKUP_PATH" || { echo "SQLite backup was not created" >&2; exit 1; }
 
 # Build before changing the running containers. The Nginx edit is restricted to
 # the existing HealthCore upstream and is reverted if nginx validation fails.
