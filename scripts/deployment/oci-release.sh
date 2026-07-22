@@ -42,6 +42,9 @@ if [[ "$(git rev-parse HEAD)" != "$RELEASE_SHA" ]]; then
 fi
 
 BACKUP_DIR="/var/backups/healthcore"
+RELEASE_METADATA_DIR="$BACKUP_DIR/releases"
+CURRENT_RELEASE_FILE="$RELEASE_METADATA_DIR/current-release.sha"
+PREVIOUS_RELEASE_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_PATH="$BACKUP_DIR/healthcore-${STAMP}-${RELEASE_SHA:0:12}.db"
 TEMP_BACKUP="/tmp/healthcore-${STAMP}.db"
@@ -50,7 +53,11 @@ if docker inspect healthcore-api >/dev/null 2>&1; then
   docker cp healthcore-api:/app/database/healthcore.db "$TEMP_BACKUP"
   sudo install -m 600 "$TEMP_BACKUP" "$BACKUP_PATH"
   rm -f "$TEMP_BACKUP"
+else
+  echo "HealthCore API container is missing; refusing deployment without a database backup" >&2
+  exit 1
 fi
+[[ -s "$BACKUP_PATH" ]] || { echo "SQLite backup was not created" >&2; exit 1; }
 
 # Build before changing the running containers. The Nginx edit is restricted to
 # the existing HealthCore upstream and is reverted if nginx validation fails.
@@ -116,6 +123,14 @@ batuara_status="$(curl --fail --silent --show-error --output /dev/null --write-o
 healthcore_status="$(curl --fail --silent --show-error --insecure --output /dev/null --write-out '%{http_code}' --max-time 15 https://127.0.0.1/healthcore/)"
 [[ "$healthcore_status" == "200" ]] || { echo "HealthCore Nginx route failed: $healthcore_status" >&2; exit 1; }
 
+sudo install -d -m 700 "$RELEASE_METADATA_DIR"
+printf '%s\n' "$RELEASE_SHA" | sudo tee "$CURRENT_RELEASE_FILE" >/dev/null
+printf '%s\n' "$RELEASE_SHA" | sudo tee "$RELEASE_METADATA_DIR/$STAMP.sha" >/dev/null
+if [[ -n "$PREVIOUS_RELEASE_SHA" && "$PREVIOUS_RELEASE_SHA" != "$RELEASE_SHA" ]]; then
+  printf '%s\n' "$PREVIOUS_RELEASE_SHA" | sudo tee "$RELEASE_METADATA_DIR/previous-release.sha" >/dev/null
+fi
+
 echo "HealthCore release $RELEASE_SHA deployed"
 echo "SQLite backup: $BACKUP_PATH"
+echo "Previous release: \${PREVIOUS_RELEASE_SHA:-unknown}"
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep -E 'batuara-net|healthcore|nginx-proxy' || true

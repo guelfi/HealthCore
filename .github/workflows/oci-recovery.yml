@@ -1,0 +1,98 @@
+name: HealthCore OCI Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Select validate-backup or rollback
+        required: true
+        type: choice
+        options:
+          - validate-backup
+          - rollback
+        default: validate-backup
+      confirm:
+        description: Type YES to authorize the HealthCore recovery operation
+        required: true
+        type: string
+      target_sha:
+        description: Full 40-character commit SHA for rollback; leave empty for backup validation
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: healthcore-oci-recovery
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Validate recovery gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate inputs
+        shell: bash
+        env:
+          ACTION: ${{ github.event.inputs.action }}
+          CONFIRM: ${{ github.event.inputs.confirm }}
+          TARGET_SHA: ${{ github.event.inputs.target_sha }}
+        run: |
+          set -euo pipefail
+          confirmation="$(printf '%s' "$CONFIRM" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')"
+          [[ "$confirmation" == "YES" ]] || { echo "confirm must be YES" >&2; exit 1; }
+          [[ "$ACTION" == "validate-backup" || "$ACTION" == "rollback" ]] || { echo "Unsupported recovery action" >&2; exit 1; }
+          if [[ "$ACTION" == "rollback" ]]; then
+            [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "target_sha must be a full lowercase 40-character commit SHA" >&2; exit 1; }
+          fi
+
+  recover:
+    name: Recover HealthCore only
+    runs-on: ubuntu-latest
+    needs: gate
+    environment: production
+    env:
+      OCI_HOST: ${{ secrets.OCI_HOST }}
+      OCI_USER: ${{ secrets.OCI_USER || 'ubuntu' }}
+      ACTION: ${{ github.event.inputs.action }}
+      TARGET_SHA: ${{ github.event.inputs.target_sha }}
+    steps:
+      - name: Checkout recovery tooling
+        uses: actions/checkout@v4
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+
+      - name: Add OCI host to known hosts
+        run: ssh-keyscan -H "$OCI_HOST" >> "$HOME/.ssh/known_hosts"
+
+      - name: Validate OCI and Batuara before recovery
+        run: |
+          set -euo pipefail
+          test -n "$OCI_HOST"; test -n "$OCI_USER"
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "set -e; test -d /var/www/HealthCore; docker exec nginx-proxy nginx -t; test \"\$(curl -fsS -o /dev/null -w '%{http_code}' https://batuara.org.br/)\" = 200; docker ps --filter name=batuara-net-api --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-db"
+
+      - name: Upload recovery tooling and environment
+        env:
+          HEALTHCORE_JWT_KEY: ${{ secrets.HEALTHCORE_JWT_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$HEALTHCORE_JWT_KEY"
+          umask 077
+          env_file="$RUNNER_TEMP/healthcore-production.env"
+          printf 'HEALTHCORE_ENVIRONMENT=Production\nHEALTHCORE_JWT_KEY=%s\nHEALTHCORE_SECURE_COOKIES=true\nHEALTHCORE_BASE_PATH=/healthcore/\nHEALTHCORE_API_URL=/healthcore/api/v1\n' "$HEALTHCORE_JWT_KEY" > "$env_file"
+          scp scripts/deployment/oci-recovery.sh "$OCI_USER@$OCI_HOST:/tmp/healthcore-oci-recovery.sh"
+          scp "$env_file" "$OCI_USER@$OCI_HOST:/tmp/healthcore-production.env"
+
+      - name: Execute HealthCore recovery
+        run: |
+          set -euo pipefail
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "chmod 700 /tmp/healthcore-oci-recovery.sh /tmp/healthcore-production.env && ACTION='$ACTION' TARGET_SHA='$TARGET_SHA' HEALTHCORE_DIR=/var/www/HealthCore HEALTHCORE_ENV_FILE=/tmp/healthcore-production.env /tmp/healthcore-oci-recovery.sh"
+
+      - name: Remove temporary recovery files
+        if: always()
+        run: ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" 'rm -f /tmp/healthcore-oci-recovery.sh /tmp/healthcore-production.env'
