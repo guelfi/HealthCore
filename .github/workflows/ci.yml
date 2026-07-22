@@ -138,6 +138,16 @@ jobs:
           mcr.microsoft.com/playwright:v1.61.1-noble
           sh -c "npm ci --ignore-scripts --no-fund && npx playwright test"
 
+      - name: Show E2E API diagnostics
+        if: always()
+        env:
+          HEALTHCORE_JWT_KEY: ci-only-e2e-key-012345678901234567890
+          HEALTHCORE_ENVIRONMENT: E2E
+          HEALTHCORE_E2E_USERNAME: e2e-admin
+          HEALTHCORE_E2E_PASSWORD: ci-only-e2e-password-012345678901
+          HEALTHCORE_SECURE_COOKIES: false
+        run: docker compose logs --tail=200 healthcore-api
+
       - name: Stop HealthCore stack
         if: always()
         env:
