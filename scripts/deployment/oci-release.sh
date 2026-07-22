@@ -106,9 +106,22 @@ fi
 # Scope these edits to HealthCore locations only; shared project routes remain untouched.
 # Normalize the public Swagger prefix before forwarding. The explicit rewrite
 # avoids the double slash produced by a proxy_pass URI with a trailing slash.
-sudo perl -0pi -e 's#location /healthcore/swagger \\{.*?^    \\}#location /healthcore/swagger {\n      rewrite ^/healthcore/swagger/?(.*)$ /swagger/$1 break;\n      proxy_pass http://healthcore-api:5000;\n      proxy_set_header Host healthcore.batuara.net;\n      proxy_set_header X-Real-IP $remote_addr;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n      proxy_set_header X-Forwarded-Proto $scheme;\n    }#ms' "$NGINX_CONF"
-sudo perl -0pi -e 's#location /healthcore/api/ \\{.*?^    \\}#location /healthcore/api/ {\n      rewrite ^/healthcore/api/(.*)$ /api/$1 break;\n      proxy_pass http://healthcore-api:5000;\n      proxy_set_header Host healthcore.batuara.net;\n      proxy_set_header X-Real-IP $remote_addr;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n      proxy_set_header X-Forwarded-Proto $scheme;\n    }#ms' "$NGINX_CONF"
-
+sudo perl -0pi -e 's!location /healthcore/swagger [{].*?^[ ]{4}[}]!location /healthcore/swagger {
+      rewrite ^/healthcore/swagger/?(.*)$ /swagger/\$1 break;
+      proxy_pass http://healthcore-api:5000;
+      proxy_set_header Host healthcore.batuara.net;
+      proxy_set_header X-Real-IP \$remote_addr;
+      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto \$scheme;
+    }!ms' "$NGINX_CONF"
+sudo perl -0pi -e 's!location /healthcore/api/ [{].*?^[ ]{4}[}]!location /healthcore/api/ {
+      rewrite ^/healthcore/api/(.*)$ /api/\$1 break;
+      proxy_pass http://healthcore-api:5000;
+      proxy_set_header Host healthcore.batuara.net;
+      proxy_set_header X-Real-IP \$remote_addr;
+      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto \$scheme;
+    }!ms' "$NGINX_CONF"
 grep -Fq 'location /healthcore/swagger' "$NGINX_CONF" || {
   echo 'HealthCore Swagger Nginx route is missing' >&2
   sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
