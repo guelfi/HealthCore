@@ -3,64 +3,33 @@
 | Field | Value |
 | --- | --- |
 | Updated | 2026-07-22 |
-| Active session | 2026-07-22-011 (in progress) |
-| Branch | `codex/healthcore-hardening` |
-| Baseline commit | `21d1c2adbc3e8f47e039e830d7e4e9d0f8ff642a` |
-| Active phase | P02/P09/P13/P14/P15/P16 |
-| Overall state | Local implementation threshold reached; external gates open |
-| Production changes | None |
+| Active session | 2026-07-22-013 |
+| Branch | `main` |
+| Current production release | `d914f1d9e523c0f53fc2069b5579fbf37fe63966` |
+| Latest repository commit | `b3c64373a81e39d31a1fb42c77f2fe37e5d8c035` |
+| Overall estimate | 90% complete |
+| Overall state | Production publish and tested rollback complete; credential rotation and final closure remain |
 
-## Progress
+## Completed Evidence
 
-- Work items: 22 of 28 done locally (78.6%), 0 in progress, 6 pending (21.4%).
-- Weighted execution estimate: 78.6% complete locally; 21.4% remains in external approval, infrastructure, release, and history gates.
-- OCI inspection was read-only: SSH access succeeded, Batuara containers and public site were healthy, and the containerized Nginx configuration passed `nginx -t`. No OCI configuration, reload, deployment, or Batuara resource was changed.
+- Main history normalization and force-push were completed; current GitHub contributor attribution does not show verified commits from `mmcarvaxd`, `qwen-coder`, or `warp-agent`. GitHub contributor cards cannot be manually deleted.
+- Root sanitation is complete: only `README.md` remains as root Markdown; project documentation and control records are under `docs/`.
+- The local SSH key `ssh-key-2025-08-28.pem` is ignored and protected by restrictive Windows ACLs; its contents were never exposed.
+- Container-first CI is green in GitHub Actions, including API build/tests in a .NET SDK container, frontend checks/build, Compose validation, dependency audit, and Browser E2E.
+- Security hardening and duplicate endpoint/code cleanup are implemented and covered by automated checks.
+- The public route is `/healthcore/`; `-frontend` remains internal only.
+- OCI deployment run `29935488551` succeeded on main commit `ffa89e5...`, with SQLite backup, API/frontend health checks, Nginx validation, and Batuara preflight/post-checks.
+- OCI recovery validation run `29935334880` passed SQLite integrity and isolated restore validation.
+- OCI rollback run `29936316021` succeeded, restoring production from `b3c6437...` to known-good `d914f1d...`; temporary recovery files were removed.
+- Batuara public availability, Nginx syntax, and Batuara API/public-site/database container health passed before and after HealthCore operations. No Batuara configuration or files were changed.
 
-## Completed This Cycle
+## Remaining Gates
 
-- Removed tracked databases, logs, PIDs, backups, invalid `.grok` data, stale root reports, obsolete task trees, and unused frontend modules.
-- Kept only the repository `README.md` at root; project Markdown is organized under `docs/`.
-- Added and actionlint-validated container-first GitHub Actions CI with pinned .NET SDK, frontend checks, dependency audits, image builds, Compose validation, and Playwright E2E. The workflow has no OCI or SSH mutation step.
-- Hardened JWT validation, CORS, authorization defaults, Swagger exposure, rate limiting, health responses, and registration permissions.
-- Added patient/exam resource authorization and doctor ownership tests; doctors cannot access unrelated patients or exams.
-- Removed duplicate `/api/usuarios` and `/api/especialidades` endpoint blocks. Current frontend contracts remain `/users` and `/especialidades`.
-- Changed frontend access tokens to memory-only storage, moved refresh tokens to an HttpOnly cookie with rotation/revocation, removed the public diagnostic surface and PII/debug storage checks, and aligned the client fallback with the Nginx `/api/` proxy.
-- Updated .NET 8 packages to 8.0.22, pinned Docker images to healthy SDK/runtime tags, and kept npm/NuGet audits clean.
-- Hardened the frontend image to non-root Nginx on port 8080, restricted headers/CSP, fixed health-location security headers, and corrected API proxy path/host forwarding.
-- Removed the local SSH private-key copy and redacted the legacy documentation sample. Current working tree Gitleaks scan reports no leaks.
-- Split API bootstrap into platform, security, persistence, and E2E extension modules without changing endpoint behavior.
-- Added the canonical `/api/v1/` proxy contract while retaining the legacy `/api/` compatibility path during migration.
-- Added isolated E2E-only user seeding; Production never invokes the seeder and receives empty E2E credentials.
-- Reorganized frontend route pages by feature and validated the resulting Docker production image.
-- Completed local CORS, rate-limit, security-header, health, logging, and Swagger hardening validation.
-- Protected the local OCI SSH key with an explicit ignore rule and restrictive Windows ACL; the key is not tracked.
-- Standardized the frontend public route to `/healthcore/`; `-frontend` remains only an internal service/container name. The Vite base path, image, Compose arguments, Nginx compatibility path, favicon, and route E2E smoke test are aligned.
-- Added the OCI CD workflow and release script with main-branch gating, explicit confirmation, dirty-tree refusal, Batuara preflight checks, SQLite backup, targeted Nginx validation, HealthCore health checks, and rollback of an invalid Nginx edit. The workflow has not been triggered or published from this workspace.
-- OCI read-only database evidence: the remote HealthCore API is healthy and reports healthy database, filesystem, and database-performance checks; the production volume is present. Backup/restore and post-release persistence remain unvalidated.
+- Rotate the real OCI authorized SSH key and revoke the historical key after installing the replacement. This requires a newly generated key pair and a controlled secret update.
+- Rotate any application/admin credentials that may have existed in historical material, invalidate active sessions, and record the new secret identifiers without storing values in Git.
+- Decide whether a separate OCI staging stack is mandatory. Containerized CI staging is complete; a separately isolated OCI staging resource was not provisioned.
+- Complete the closure audit and publish the final verification report after credential rotation.
 
-## Validation Evidence
+## Next Session
 
-- API build and final image build: pass in .NET SDK/Docker containers.
-- API tests: `85/85` pass, zero failures/skips, including the refresh-cookie contract.
-- Frontend install, type-check, lint, tests, and production build: pass; lint has 0 errors and 0 warnings, and Sass has no internal import deprecations.
-- Compose config: pass with an ephemeral JWT key.
-- API smoke: `/health/live` 200, `/health` 200, protected `/pacientes` 401 without token.
-- Integrated API/frontend smoke: API/frontend health 200, application page 200, `/auth/refresh` 401 without cookie, `/api/pacientes` 401 through the corrected proxy, frontend user `nginx`.
-- Browser E2E: `5/5` passed against rebuilt API/frontend images, including cookie refresh rotation and logout revocation.
-- GitHub Actions workflow: `actionlint` pass after adding the isolated E2E environment. Local release preflight syntax pass.
-- Trivy final-image scan: API and frontend report zero HIGH/CRITICAL vulnerabilities with `--ignore-unfixed` after Docker recovery.
-- Gitleaks current tree: no leaks. Historical scan: 8 findings in old commits/paths; Gate B remains required for rotation and history rewrite.
-- Current route smoke: `/healthcore` redirects to `/healthcore/`, the application and frontend health return 200, and protected `/api/v1/pacientes` returns 401 without authentication.
-
-## Open Items
-
-- Rotate exposed historical credentials and invalidate sessions, only after Gate B approval.
-- Execute Git history rewrite, only after Gate B approval and backup.
-- Validate the production database target and persistence/backup policy through the approved OCI read-only gate.
-- Create isolated HealthCore OCI staging resources through Gate C.
-- Promote with backup, smoke tests, and rollback evidence through Gate D.
-- Complete the closure audit and release report after all external gates.
-
-## Next Action
-
-Complete the route/CD documentation and static validation in this session, then obtain authenticated GitHub validation and Gate B/C/D approvals before any production mutation.
+Execute credential rotation with the new values supplied/approved by the operator, then run the final audit and mark the plan complete only after the remaining gates have evidence.
