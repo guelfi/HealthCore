@@ -103,7 +103,7 @@ grep -Fq 'location /healthcore/api/' "$NGINX_CONF" || {
   exit 1
 }
 
-if ! docker run --rm --network none \
+if ! docker run --rm --network healthcore_default \
   -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
   -v /etc/letsencrypt:/etc/letsencrypt:ro \
   -v /etc/ssl/hako:/etc/ssl/hako:ro \
