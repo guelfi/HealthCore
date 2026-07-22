@@ -59,6 +59,7 @@ public static class HealthCoreSecurityExtensions
                     if (openApiEnabled &&
                         context.Resource is HttpContext httpContext &&
                         (httpContext.Request.Path.StartsWithSegments("/swagger") ||
+                         httpContext.Request.Path.StartsWithSegments("/healthcore/swagger") ||
                          httpContext.Request.Path.StartsWithSegments("/healthcore-api/swagger")))
                     {
                         return true;
