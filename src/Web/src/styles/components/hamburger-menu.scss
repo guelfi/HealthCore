@@ -1,8 +1,8 @@
 // 🍔 Hamburger Menu Mobile Styles
 // Estilos específicos para o menu hambúrguer mobile
 
-@import '../design-system/tokens.scss';
-@import '../design-system/breakpoints.scss';
+@use '../design-system/tokens' as *;
+@use '../design-system/breakpoints' as *;
 
 // ===== HAMBURGER MENU =====
 .hamburger-menu {

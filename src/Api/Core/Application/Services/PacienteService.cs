@@ -16,7 +16,7 @@ namespace HealthCore.Api.Core.Application.Services
             _context = context;
         }
 
-        public async Task<PacienteDto> CreatePacienteAsync(CreatePacienteDto createPacienteDto)
+        public async Task<PacienteDto> CreatePacienteAsync(CreatePacienteDto createPacienteDto, Guid? medicoId = null)
         {
             // Validações de entrada
             if (string.IsNullOrWhiteSpace(createPacienteDto.Nome))
@@ -55,7 +55,8 @@ namespace HealthCore.Api.Core.Application.Services
                     Id = Guid.NewGuid(),
                     Nome = createPacienteDto.Nome,
                     DataNascimento = createPacienteDto.DataNascimento,
-                    Documento = createPacienteDto.Documento
+                    Documento = createPacienteDto.Documento,
+                    MedicoId = medicoId
                 };
 
                 _context.Pacientes.Add(paciente);

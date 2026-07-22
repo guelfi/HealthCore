@@ -1,17 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { clearSession, setSession } from '../../infrastructure/api/authSession';
 import type {
   Usuario,
   LoginDto,
   AuthResponse,
 } from '../../domain/entities/Usuario';
-import { UserProfile, stringToUserProfile } from '../../domain/enums/UserProfile';
+import { UserProfile } from '../../domain/enums/UserProfile';
 import { apiClient } from '../../infrastructure/api/client';
 
 interface AuthState {
   user: Usuario | null;
   token: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -19,10 +19,10 @@ interface AuthState {
 
 interface AuthActions {
   login: (credentials: LoginDto) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
   setUser: (user: Usuario) => void;
-  setTokens: (token: string, refreshToken: string) => void;
+  setTokens: (token: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
@@ -33,45 +33,35 @@ type AuthStore = AuthState & AuthActions;
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
-      // State
       user: null,
       token: null,
-      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
 
-      // Actions
       login: async (credentials: LoginDto) => {
         set({ isLoading: true, error: null });
 
         try {
           const response = await apiClient.post('/auth/login', credentials);
           const authData: AuthResponse = response.data;
-
-          // Converter dados do backend para formato frontend
           const user: Usuario = {
             id: authData.user.id,
             username: authData.user.username,
-            role: authData.user.role as UserProfile, // O backend já envia como número (1 ou 2)
+            role: authData.user.role as UserProfile,
             isActive: authData.user.isActive,
           };
 
-
-
-          // const expiresAt = typeof authData.expiresAt === 'string'
-          //   ? new Date(authData.expiresAt)
-          //   : authData.expiresAt; // Removido: não utilizado
-
+          setSession(authData.token);
           set({
             user,
             token: authData.token,
-            refreshToken: authData.refreshToken,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          clearSession();
           const errorMessage =
             error.response?.data?.message ||
             error.response?.data?.error ||
@@ -83,7 +73,6 @@ export const useAuthStore = create<AuthStore>()(
             error: errorMessage,
             user: null,
             token: null,
-            refreshToken: null,
             isAuthenticated: false,
           });
 
@@ -92,22 +81,17 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: async () => {
-        const { token } = get();
-
         try {
-          if (token) {
-            // Fazer logout na API para invalidar o token
+          if (get().token) {
             await apiClient.post('/auth/logout');
           }
-        } catch (error) {
-          console.warn('Erro ao fazer logout na API:', error);
-          // Mesmo com erro na API, limpar dados locais
+        } catch {
+          // Local session cleanup must not depend on API availability.
         } finally {
-          // Sempre limpar dados locais
+          clearSession();
           set({
             user: null,
             token: null,
-            refreshToken: null,
             isAuthenticated: false,
             error: null,
           });
@@ -115,61 +99,47 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       refreshAuth: async () => {
-        const { refreshToken } = get();
-
-        if (!refreshToken) {
-          throw new Error('Token de atualização não disponível');
-        }
-
         set({ isLoading: true });
 
         try {
-          const response = await apiClient.post('/auth/refresh', {
-            refreshToken,
-          });
+          const response = await apiClient.post('/auth/refresh', {});
+          const authData: AuthResponse = response.data;
 
-          const authData = response.data;
-
+          setSession(authData.token);
           set({
             token: authData.token,
-            refreshToken: authData.refreshToken || refreshToken, // Manter o mesmo se não retornar um novo
+            isAuthenticated: true,
             isLoading: false,
             error: null,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          clearSession();
           const errorMessage =
             error.response?.data?.message || 'Falha ao renovar sessão';
 
           set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
             isLoading: false,
             error: errorMessage,
           });
-
-          // Se falhar o refresh, fazer logout
-          get().logout();
           throw new Error(errorMessage);
         }
       },
 
       setUser: (user: Usuario) => set({ user }),
-
-      setTokens: (token: string, refreshToken: string) =>
-        set({ token, refreshToken }),
-
+      setTokens: (token: string) => {
+        setSession(token);
+        set({ token, isAuthenticated: true });
+      },
       setLoading: (loading: boolean) => set({ isLoading: loading }),
-
       setError: (error: string | null) => set({ error }),
-
       clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-store',
-      partialize: state => ({
-        user: state.user,
-        token: state.token,
-        refreshToken: state.refreshToken,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      partialize: state => ({ user: state.user }),
     }
   )
 );

@@ -4,13 +4,13 @@
   "values": [
     {
       "key": "base_url",
-      "value": "http://192.168.15.119:5000",
+      "value": "http://localhost:5000",
       "type": "default",
       "enabled": true
     },
     {
       "key": "baseUrl",
-      "value": "http://192.168.15.119:5000",
+      "value": "http://localhost:5000",
       "type": "default",
       "enabled": true
     },
@@ -34,7 +34,7 @@
     },
     {
       "key": "adminPassword",
-      "value": "AdminPassword123!",
+      "value": "",
       "type": "secret",
       "enabled": true
     },
@@ -46,7 +46,7 @@
     },
     {
       "key": "medicoPassword",
-      "value": "MedicoPassword123!",
+      "value": "",
       "type": "secret",
       "enabled": true
     },
