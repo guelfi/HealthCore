@@ -104,43 +104,51 @@ fi
 
 # Keep IP-based access compatible with the API's production AllowedHosts.
 # Scope these edits to HealthCore locations only; shared project routes remain untouched.
-# Normalize the public Swagger prefix before forwarding. The explicit rewrite
-# avoids the double slash produced by a proxy_pass URI with a trailing slash.
-sudo perl -0pi -e 's!location /healthcore/swagger [{].*?^[ ]{4}[}]!location /healthcore/swagger {
-      rewrite ^/healthcore/swagger/?(.*)$ /swagger/\$1 break;
-      proxy_pass http://healthcore-api:5000;
-      proxy_set_header Host healthcore.batuara.net;
-      proxy_set_header X-Real-IP \$remote_addr;
-      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto \$scheme;
-    }!ms' "$NGINX_CONF"
-sudo perl -0pi -e 's!location /healthcore/api/ [{].*?^[ ]{4}[}]!location /healthcore/api/ {
-      rewrite ^/healthcore/api/(.*)$ /api/\$1 break;
-      proxy_pass http://healthcore-api:5000;
-      proxy_set_header Host healthcore.batuara.net;
-      proxy_set_header X-Real-IP \$remote_addr;
-      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto \$scheme;
-    }!ms' "$NGINX_CONF"
-# Normalize the public Swagger prefix before forwarding. The explicit rewrite
-# avoids the double slash produced by a proxy_pass URI with a trailing slash.
-sudo perl -0pi -e 's![ \t]*location /healthcore/swagger \{.*?\n[ \t]*\}!location /healthcore/swagger {
-      rewrite ^/healthcore/swagger/?(.*)$ /swagger/\$1 break;
-      proxy_pass http://healthcore-api:5000;
-      proxy_set_header Host healthcore.batuara.net;
-      proxy_set_header X-Real-IP \$remote_addr;
-      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto \$scheme;
-    }!ms' "$NGINX_CONF"
-sudo perl -0pi -e 's![ \t]*location /healthcore/api/ \{.*?\n[ \t]*\}!location /healthcore/api/ {
-      rewrite ^/healthcore/api/(.*)$ /api/\$1 break;
-      proxy_pass http://healthcore-api:5000;
-      proxy_set_header Host healthcore.batuara.net;
-      proxy_set_header X-Real-IP \$remote_addr;
-      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto \$scheme;
-    }!ms' "$NGINX_CONF"
-for expected in   'rewrite ^/healthcore/swagger/?(.*)$ /swagger/$1 break;'   'proxy_pass http://healthcore-api:5000;'   'proxy_set_header Host healthcore.batuara.net;'; do
+# Rewrite the public prefixes before forwarding so the API receives its native paths.
+replace_healthcore_nginx_locations() {
+  local nginx_tmp="${NGINX_CONF}.tmp"
+
+  sudo awk '
+    /^[[:space:]]*location \/healthcore\/swagger \{$/ {
+      print "    location /healthcore/swagger {"
+      print "      rewrite ^/healthcore/swagger/?(.*)$ /swagger/\\$1 break;"
+      print "      proxy_pass http://healthcore-api:5000;"
+      print "      proxy_set_header Host healthcore.batuara.net;"
+      print "      proxy_set_header X-Real-IP \\$remote_addr;"
+      print "      proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;"
+      print "      proxy_set_header X-Forwarded-Proto \\$scheme;"
+      print "    }"
+      skipping=1
+      next
+    }
+    /^[[:space:]]*location \/healthcore\/api\/ \{$/ {
+      print "    location /healthcore/api/ {"
+      print "      rewrite ^/healthcore/api/(.*)$ /api/\\$1 break;"
+      print "      proxy_pass http://healthcore-api:5000;"
+      print "      proxy_set_header Host healthcore.batuara.net;"
+      print "      proxy_set_header X-Real-IP \\$remote_addr;"
+      print "      proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;"
+      print "      proxy_set_header X-Forwarded-Proto \\$scheme;"
+      print "    }"
+      skipping=1
+      next
+    }
+    skipping && /^[[:space:]]*}$/ {
+      skipping=0
+      next
+    }
+    !skipping { print }
+  ' "$NGINX_CONF" | sudo tee "$nginx_tmp" >/dev/null
+  sudo chmod --reference="$NGINX_CONF" "$nginx_tmp"
+  sudo mv "$nginx_tmp" "$NGINX_CONF"
+}
+
+replace_healthcore_nginx_locations
+
+for expected in \
+  'rewrite ^/healthcore/swagger/?(.*)$ /swagger/\$1 break;' \
+  'proxy_pass http://healthcore-api:5000;' \
+  'proxy_set_header Host healthcore.batuara.net;'; do
   grep -Fq "$expected" "$NGINX_CONF" || {
     echo "HealthCore Swagger Nginx directive is missing: $expected" >&2
     sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
