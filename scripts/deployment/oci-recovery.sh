@@ -59,10 +59,16 @@ validate_backup() {
 make_backup() {
   local target="$BACKUP_DIR/recovery/$STAMP/current.db"
   sudo install -d -m 700 "$BACKUP_DIR/recovery/$STAMP"
-  docker cp healthcore-api:/app/database/healthcore.db /tmp/healthcore-recovery.db
+  local api_container
+  api_container="$(docker compose --env-file "$HEALTHCORE_ENV_FILE" ps -q healthcore-api | head -n 1)"
+  [[ -n "$api_container" ]] && docker inspect "$api_container" >/dev/null 2>&1 || {
+    echo "HealthCore API service container is missing; current database backup was not created" >&2
+    return 1
+  }
+  docker cp "$api_container:/app/database/healthcore.db" /tmp/healthcore-recovery.db
   sudo install -m 600 /tmp/healthcore-recovery.db "$target"
   rm -f /tmp/healthcore-recovery.db
-  [[ -s "$target" ]] || { echo "Current database backup was not created" >&2; return 1; }
+  sudo test -s "$target" || { echo "Current database backup was not created" >&2; return 1; }
   echo "$target"
 }
 

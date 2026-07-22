@@ -33,6 +33,8 @@ if [[ -n "$(git status --porcelain)" ]]; then
   echo "Reconciled known OCI working-tree changes; backup: $RECONCILIATION_DIR"
 fi
 
+PREVIOUS_RELEASE_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
+
 git fetch origin main
 git checkout main
 git reset --hard "$RELEASE_SHA"
@@ -44,7 +46,6 @@ fi
 BACKUP_DIR="/var/backups/healthcore"
 RELEASE_METADATA_DIR="$BACKUP_DIR/releases"
 CURRENT_RELEASE_FILE="$RELEASE_METADATA_DIR/current-release.sha"
-PREVIOUS_RELEASE_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_PATH="$BACKUP_DIR/healthcore-${STAMP}-${RELEASE_SHA:0:12}.db"
 TEMP_BACKUP="/tmp/healthcore-${STAMP}.db"
@@ -138,5 +139,5 @@ fi
 
 echo "HealthCore release $RELEASE_SHA deployed"
 echo "SQLite backup: $BACKUP_PATH"
-echo "Previous release: \${PREVIOUS_RELEASE_SHA:-unknown}"
+echo "Previous release: ${PREVIOUS_RELEASE_SHA:-unknown}"
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep -E 'batuara-net|healthcore|nginx-proxy' || true
