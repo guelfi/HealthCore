@@ -136,19 +136,7 @@ app.UseCors("AllowProxy");
 
 app.UseAuthentication(); // Use Authentication middleware
 app.UseMiddleware<TokenBlacklistMiddleware>(); // Use Token Blacklist middleware
-
-// Swagger is intentionally public only when it is explicitly enabled. All
-// application endpoints continue to use the global authenticated fallback policy.
-if (openApiEnabled)
-{
-    app.UseWhen(
-        context => !context.Request.Path.StartsWithSegments("/swagger"),
-        branch => branch.UseAuthorization());
-}
-else
-{
-    app.UseAuthorization();
-}
+app.UseAuthorization();   // Use Authorization middleware
 
 // Health Check Endpoints
 app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
