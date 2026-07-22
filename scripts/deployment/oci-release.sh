@@ -104,8 +104,10 @@ fi
 
 # Keep IP-based access compatible with the API's production AllowedHosts.
 # Scope these edits to HealthCore locations only; shared project routes remain untouched.
-sudo sed -i '/location \/healthcore\/swagger {/,/^    }/ { s#proxy_pass http://healthcore-api:5000/swagger/;#proxy_pass http://healthcore-api:5000/healthcore-api/swagger/;#; s#proxy_set_header Host .*;#proxy_set_header Host healthcore.batuara.net;#; }' "$NGINX_CONF"
-sudo sed -i '/location \/healthcore\/api\/ {/,/^    }/ s#proxy_set_header Host .*;#proxy_set_header Host healthcore.batuara.net;#' "$NGINX_CONF"
+# Normalize the public Swagger prefix before forwarding. The explicit rewrite
+# avoids the double slash produced by a proxy_pass URI with a trailing slash.
+sudo perl -0pi -e 's#location /healthcore/swagger \\{.*?^    \\}#location /healthcore/swagger {\n      rewrite ^/healthcore/swagger/?(.*)$ /swagger/$1 break;\n      proxy_pass http://healthcore-api:5000;\n      proxy_set_header Host healthcore.batuara.net;\n      proxy_set_header X-Real-IP $remote_addr;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n      proxy_set_header X-Forwarded-Proto $scheme;\n    }#ms' "$NGINX_CONF"
+sudo perl -0pi -e 's#location /healthcore/api/ \\{.*?^    \\}#location /healthcore/api/ {\n      rewrite ^/healthcore/api/(.*)$ /api/$1 break;\n      proxy_pass http://healthcore-api:5000;\n      proxy_set_header Host healthcore.batuara.net;\n      proxy_set_header X-Real-IP $remote_addr;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n      proxy_set_header X-Forwarded-Proto $scheme;\n    }#ms' "$NGINX_CONF"
 
 grep -Fq 'location /healthcore/swagger' "$NGINX_CONF" || {
   echo 'HealthCore Swagger Nginx route is missing' >&2
