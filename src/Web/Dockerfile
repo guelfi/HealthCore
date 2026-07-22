@@ -19,7 +19,7 @@ COPY src/Web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
 RUN adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx nginx || true
-RUN sed -i -E -e 's#pid[[:space:]]+/var/run/nginx.pid;#pid /var/cache/nginx/nginx.pid;#' -e 's#pid[[:space:]]+/run/nginx.pid;#pid /var/cache/nginx/nginx.pid;#' -e 's#pid[[:space:]]+/tmp/nginx.pid;#pid /var/cache/nginx/nginx.pid;#' /etc/nginx/nginx.conf && chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
+RUN sed -i -E -e 's#pid[[:space:]]+/var/run/nginx.pid;#pid /tmp/nginx.pid;#' -e 's#pid[[:space:]]+/run/nginx.pid;#pid /tmp/nginx.pid;#' -e 's#pid[[:space:]]+/var/cache/nginx/nginx.pid;#pid /tmp/nginx.pid;#' /etc/nginx/nginx.conf && chmod 1777 /tmp && chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
 RUN nginx -t
 
 USER nginx
