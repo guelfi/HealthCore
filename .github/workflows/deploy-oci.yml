@@ -83,7 +83,7 @@ jobs:
           test -n "$OCI_HOST"; test -n "$OCI_USER"; test -n "$HEALTHCORE_JWT_KEY"
           umask 077
           env_file="$RUNNER_TEMP/healthcore-production.env"
-          printf 'HEALTHCORE_ENVIRONMENT=Production\nHEALTHCORE_JWT_KEY=%s\nHEALTHCORE_SECURE_COOKIES=true\nHEALTHCORE_BASE_PATH=/healthcore/\nHEALTHCORE_API_URL=/healthcore/api/v1\n' "$HEALTHCORE_JWT_KEY" > "$env_file"
+          printf 'HEALTHCORE_ENVIRONMENT=Production\nHEALTHCORE_JWT_KEY=%s\nHEALTHCORE_SECURE_COOKIES=true\nHEALTHCORE_OPENAPI_ENABLED=true\nHEALTHCORE_BASE_PATH=/healthcore/\nHEALTHCORE_API_URL=/healthcore/api/v1\n' "$HEALTHCORE_JWT_KEY" > "$env_file"
           scp scripts/deployment/oci-release.sh "$OCI_USER@$OCI_HOST:/tmp/healthcore-oci-release.sh"
           scp "$env_file" "$OCI_USER@$OCI_HOST:/tmp/healthcore-production.env"
 

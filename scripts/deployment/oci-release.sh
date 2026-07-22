@@ -72,19 +72,36 @@ docker compose --env-file "$HEALTHCORE_ENV_FILE" build healthcore-api healthcore
 
 NGINX_CONF="/var/www/nginx/nginx.conf"
 NGINX_BACKUP="${NGINX_CONF}.healthcore-${STAMP}.bak"
+sudo cp -p "$NGINX_CONF" "$NGINX_BACKUP"
+
 if grep -Fq 'set $upstream_healthcore_front http://healthcore-frontend:80;' "$NGINX_CONF"; then
-  sudo cp -p "$NGINX_CONF" "$NGINX_BACKUP"
   sudo sed -i 's#http://healthcore-frontend:80;#http://healthcore-frontend:8080;#' "$NGINX_CONF"
 fi
 
 if ! grep -Fq 'set $upstream_healthcore_front http://healthcore-frontend:8080;' "$NGINX_CONF"; then
   echo 'HealthCore Nginx upstream is not configured for port 8080' >&2
-  if [[ -f "$NGINX_BACKUP" ]]; then sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"; fi
+  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
   exit 1
 fi
 
+# Keep IP-based access compatible with the API's production AllowedHosts.
+# Scope these edits to HealthCore locations only; shared project routes remain untouched.
+sudo sed -i '/location \/healthcore\/swagger {/,/^    }/ { s#proxy_pass http://healthcore-api:5000/swagger/;#proxy_pass http://healthcore-api:5000/healthcore-api/swagger/;#; s/proxy_set_header Host \\$host;/proxy_set_header Host healthcore.batuara.net;/; }' "$NGINX_CONF"
+sudo sed -i '/location \/healthcore\/api\/ {/,/^    }/ s/proxy_set_header Host \\$host;/proxy_set_header Host healthcore.batuara.net;/' "$NGINX_CONF"
+
+grep -Fq 'location /healthcore/swagger' "$NGINX_CONF" || {
+  echo 'HealthCore Swagger Nginx route is missing' >&2
+  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
+  exit 1
+}
+grep -Fq 'location /healthcore/api/' "$NGINX_CONF" || {
+  echo 'HealthCore API Nginx route is missing' >&2
+  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
+  exit 1
+}
+
 if ! docker exec nginx-proxy nginx -t; then
-  if [[ -f "$NGINX_BACKUP" ]]; then sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"; fi
+  sudo cp -p "$NGINX_BACKUP" "$NGINX_CONF"
   exit 1
 fi
 
@@ -129,6 +146,12 @@ batuara_status="$(curl --fail --silent --show-error --output /dev/null --write-o
 
 healthcore_status="$(curl --fail --silent --show-error --insecure --output /dev/null --write-out '%{http_code}' --max-time 15 https://127.0.0.1/healthcore/)"
 [[ "$healthcore_status" == "200" ]] || { echo "HealthCore Nginx route failed: $healthcore_status" >&2; exit 1; }
+
+healthcore_ip_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/)"
+[[ "$healthcore_ip_status" == "200" ]] || { echo "HealthCore IP route failed: $healthcore_ip_status" >&2; exit 1; }
+
+healthcore_swagger_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/swagger/)"
+[[ "$healthcore_swagger_status" == "200" ]] || { echo "HealthCore Swagger route failed: $healthcore_swagger_status" >&2; exit 1; }
 
 sudo install -d -m 700 "$RELEASE_METADATA_DIR"
 printf '%s\n' "$RELEASE_SHA" | sudo tee "$CURRENT_RELEASE_FILE" >/dev/null

@@ -10,6 +10,7 @@ services:
       Jwt__Issuer: ${HEALTHCORE_JWT_ISSUER:-HealthCore.Api}
       Jwt__Audience: ${HEALTHCORE_JWT_AUDIENCE:-HealthCore.Client}
       Security__RefreshCookieSecure: ${HEALTHCORE_SECURE_COOKIES:-true}
+      OpenApi__Enabled: ${HEALTHCORE_OPENAPI_ENABLED:-false}
       HEALTHCORE_E2E_USERNAME: ${HEALTHCORE_E2E_USERNAME:-}
       HEALTHCORE_E2E_PASSWORD: ${HEALTHCORE_E2E_PASSWORD:-}
     ports:
