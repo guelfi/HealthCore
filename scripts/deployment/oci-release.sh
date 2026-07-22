@@ -49,12 +49,18 @@ STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_PATH="$BACKUP_DIR/healthcore-${STAMP}-${RELEASE_SHA:0:12}.db"
 TEMP_BACKUP="/tmp/healthcore-${STAMP}.db"
 sudo install -d -m 700 "$BACKUP_DIR"
-if docker inspect healthcore-api >/dev/null 2>&1; then
-  docker cp healthcore-api:/app/database/healthcore.db "$TEMP_BACKUP"
+API_CONTAINER="$(docker compose --env-file "$HEALTHCORE_ENV_FILE" ps -q healthcore-api | head -n 1)"
+if [[ -n "$API_CONTAINER" ]] && docker inspect "$API_CONTAINER" >/dev/null 2>&1; then
+  docker cp "$API_CONTAINER:/app/database/healthcore.db" "$TEMP_BACKUP"
+  [[ -s "$TEMP_BACKUP" ]] || {
+    rm -f "$TEMP_BACKUP"
+    echo "HealthCore SQLite source is missing or empty; refusing deployment without a valid backup" >&2
+    exit 1
+  }
   sudo install -m 600 "$TEMP_BACKUP" "$BACKUP_PATH"
   rm -f "$TEMP_BACKUP"
 else
-  echo "HealthCore API container is missing; refusing deployment without a database backup" >&2
+  echo "HealthCore API service container is missing; refusing deployment without a database backup" >&2
   exit 1
 fi
 [[ -s "$BACKUP_PATH" ]] || { echo "SQLite backup was not created" >&2; exit 1; }
