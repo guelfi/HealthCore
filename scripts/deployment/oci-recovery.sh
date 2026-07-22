@@ -35,7 +35,7 @@ assert_batuara() {
 }
 
 latest_backup() {
-  find "$BACKUP_DIR" -maxdepth 1 -type f -name 'healthcore-*.db' -printf '%T@ %p\n' |
+  sudo find "$BACKUP_DIR" -maxdepth 1 -type f -name 'healthcore-*.db' -printf '%T@ %p\n' |
     sort -nr |
     awk 'NR == 1 { sub(/^[^ ]+ /, ""); print }'
 }
@@ -43,7 +43,7 @@ latest_backup() {
 validate_backup() {
   local source="$1"
   [[ -s "$source" ]] || { echo "SQLite backup is missing or empty: $source" >&2; return 1; }
-  [[ "$(stat -c '%a' "$source")" == "600" ]] || { echo "SQLite backup permissions are not 600: $source" >&2; return 1; }
+  [[ "$(sudo stat -c '%a' "$source")" == "600" ]] || { echo "SQLite backup permissions are not 600: $source" >&2; return 1; }
 
   local restore_dir="$BACKUP_DIR/recovery/$STAMP"
   local restored="$restore_dir/restored.db"
