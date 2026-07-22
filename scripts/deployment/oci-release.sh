@@ -86,7 +86,7 @@ fi
 
 # Keep IP-based access compatible with the API's production AllowedHosts.
 # Scope these edits to HealthCore locations only; shared project routes remain untouched.
-sudo sed -i '/location \/healthcore\/swagger {/,/^    }/ s/proxy_set_header Host \\$host;/proxy_set_header Host healthcore.batuara.net;/' "$NGINX_CONF"
+sudo sed -i '/location \/healthcore\/swagger {/,/^    }/ { s#proxy_pass http://healthcore-api:5000/swagger/;#proxy_pass http://healthcore-api:5000/healthcore-api/swagger/;#; s/proxy_set_header Host \\$host;/proxy_set_header Host healthcore.batuara.net;/; }' "$NGINX_CONF"
 sudo sed -i '/location \/healthcore\/api\/ {/,/^    }/ s/proxy_set_header Host \\$host;/proxy_set_header Host healthcore.batuara.net;/' "$NGINX_CONF"
 
 grep -Fq 'location /healthcore/swagger' "$NGINX_CONF" || {
