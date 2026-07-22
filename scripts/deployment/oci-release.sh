@@ -74,6 +74,21 @@ NGINX_CONF="/var/www/nginx/nginx.conf"
 NGINX_BACKUP="${NGINX_CONF}.healthcore-${STAMP}.bak"
 sudo cp -p "$NGINX_CONF" "$NGINX_BACKUP"
 
+restore_nginx_source() {
+  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
+}
+
+NGINX_ROLLBACK_REQUIRED=true
+rollback_nginx_config() {
+  if [[ "$NGINX_ROLLBACK_REQUIRED" == "true" ]]; then
+    restore_nginx_source || true
+    if docker inspect nginx-proxy >/dev/null 2>&1 && docker exec nginx-proxy nginx -t >/dev/null 2>&1; then
+      docker exec nginx-proxy nginx -s reload >/dev/null 2>&1 || true
+    fi
+  fi
+}
+trap rollback_nginx_config EXIT
+
 # A single-file bind mount keeps the old inode when the host file is replaced.
 # Edit the mounted file in place and recreate only the shared Nginx proxy so the
 # new configuration is actually loaded without touching any application project.
@@ -103,15 +118,6 @@ grep -Fq 'location /healthcore/api/' "$NGINX_CONF" || {
   exit 1
 }
 
-if ! docker run --rm --network healthcore_default \
-  -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
-  -v /etc/letsencrypt:/etc/letsencrypt:ro \
-  -v /etc/ssl/hako:/etc/ssl/hako:ro \
-  nginx:stable-alpine nginx -t; then
-  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
-  exit 1
-fi
-
 recreate_nginx_proxy() {
   local previous_name="nginx-proxy-healthcore-previous"
   local network
@@ -130,6 +136,7 @@ recreate_nginx_proxy() {
   docker rename nginx-proxy "$previous_name"
 
   restore_previous_nginx() {
+    restore_nginx_source
     docker rm -f nginx-proxy >/dev/null 2>&1 || true
     docker rename "$previous_name" nginx-proxy
     docker start nginx-proxy >/dev/null
@@ -213,6 +220,7 @@ healthcore_swagger_status="$(curl --silent --show-error --output /dev/null --wri
 sudo install -d -m 700 "$RELEASE_METADATA_DIR"
 printf '%s\n' "$RELEASE_SHA" | sudo tee "$CURRENT_RELEASE_FILE" >/dev/null
 printf '%s\n' "$RELEASE_SHA" | sudo tee "$RELEASE_METADATA_DIR/$STAMP.sha" >/dev/null
+NGINX_ROLLBACK_REQUIRED=false
 if [[ -n "$PREVIOUS_RELEASE_SHA" && "$PREVIOUS_RELEASE_SHA" != "$RELEASE_SHA" ]]; then
   printf '%s\n' "$PREVIOUS_RELEASE_SHA" | sudo tee "$RELEASE_METADATA_DIR/previous-release.sha" >/dev/null
 fi
