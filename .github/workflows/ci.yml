@@ -108,6 +108,7 @@ jobs:
           HEALTHCORE_ENVIRONMENT: E2E
           HEALTHCORE_E2E_USERNAME: e2e-admin
           HEALTHCORE_E2E_PASSWORD: ci-only-e2e-password-012345678901
+          HEALTHCORE_SECURE_COOKIES: false
         run: docker compose up -d --build
 
       - name: Run Playwright smoke suite
@@ -126,4 +127,5 @@ jobs:
           HEALTHCORE_ENVIRONMENT: E2E
           HEALTHCORE_E2E_USERNAME: e2e-admin
           HEALTHCORE_E2E_PASSWORD: ci-only-e2e-password-012345678901
+          HEALTHCORE_SECURE_COOKIES: false
         run: docker compose down -v
