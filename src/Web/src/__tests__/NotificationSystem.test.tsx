@@ -1,9 +1,9 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material/styles';
 import NotificationSystem from '../presentation/components/common/NotificationSystem';
 import { useUIStore } from '../application/stores/uiStore';
-import { ThemeProvider } from '@mui/material/styles';
 import { healthCoreTheme } from '../styles/healthcore-theme';
 
 describe('NotificationSystem', () => {
@@ -11,40 +11,48 @@ describe('NotificationSystem', () => {
     <ThemeProvider theme={healthCoreTheme}>{children}</ThemeProvider>
   );
 
-  it('exibe toast de sucesso com auto-fechamento customizado', async () => {
+  afterEach(() => {
+    act(() => {
+      useUIStore.getState().clearNotifications();
+    });
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('renders and automatically closes a notification', async () => {
     render(
       <Wrapper>
         <NotificationSystem />
       </Wrapper>
     );
 
-    useUIStore.getState().addNotification('Sucesso!', 'success', { duration: 1000 });
-
-    // Deve renderizar
-    expect(await screen.findByRole('alert')).toBeInTheDocument();
-
-    // Aguarda auto-fechamento
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 1100));
+    act(() => {
+      useUIStore.getState().addNotification('Success', 'success', { duration: 1000 });
     });
 
-    // Deve remover após duração
-    expect(screen.queryByRole('alert')).toBeNull();
+    expect(await screen.findByText('Success')).toBeInTheDocument();
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 1100));
+    });
+
+    expect(screen.queryByText('Success')).not.toBeInTheDocument();
   });
 
-  it('posiciona no top-center em mobile (mock de breakpoint)', async () => {
-    // Mock de matchMedia para mobile
-    const originalMatch = window.matchMedia;
-    window.matchMedia = vi.fn().mockImplementation(query => ({
-      matches: query.includes('max-width'),
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }));
+  it('renders notifications in a mobile viewport', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: query.includes('max-width'),
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }))
+    );
 
     render(
       <Wrapper>
@@ -52,16 +60,14 @@ describe('NotificationSystem', () => {
       </Wrapper>
     );
 
-    useUIStore.getState().addNotification('Mobile toast', 'info');
+    act(() => {
+      useUIStore.getState().addNotification('Mobile notification', 'info');
+    });
 
-    const alert = await screen.findByRole('alert');
-    expect(alert).toBeInTheDocument();
-
-    // Restaurar
-    window.matchMedia = originalMatch;
+    expect(await screen.findByText('Mobile notification')).toBeInTheDocument();
   });
 
-  it('renderiza ação opcional e executa callback', async () => {
+  it('renders an optional action and invokes its callback', async () => {
     render(
       <Wrapper>
         <NotificationSystem />
@@ -69,14 +75,14 @@ describe('NotificationSystem', () => {
     );
 
     const onClick = vi.fn();
-    useUIStore.getState().addNotification('Erro com ação', 'error', {
-      action: { label: 'Tentar novamente', onClick },
-      duration: 2000,
+    act(() => {
+      useUIStore.getState().addNotification('Action error', 'error', {
+        action: { label: 'Retry', onClick },
+        duration: 2000,
+      });
     });
 
-    const button = await screen.findByRole('button', { name: /tentar novamente/i });
-    expect(button).toBeInTheDocument();
-
+    const button = await screen.findByRole('button', { name: 'Retry' });
     await act(async () => {
       button.click();
     });
@@ -84,16 +90,20 @@ describe('NotificationSystem', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('define aria-live adequadamente para acessibilidade', async () => {
+  it('applies the requested aria-live mode to the matching alert', async () => {
     render(
       <Wrapper>
         <NotificationSystem />
       </Wrapper>
     );
 
-    useUIStore.getState().addNotification('Aviso', 'warning', { ariaLive: 'assertive' });
+    act(() => {
+      useUIStore.getState().addNotification('Accessible warning', 'warning', {
+        ariaLive: 'assertive',
+      });
+    });
 
-    const alert = await screen.findByRole('alert');
-    expect(alert).toHaveAttribute('aria-live', 'assertive');
+    const message = await screen.findByText('Accessible warning');
+    expect(message.closest('[role="alert"]')).toHaveAttribute('aria-live', 'assertive');
   });
 });

@@ -8,19 +8,16 @@ import {
   TableRow,
   Paper,
   Box,
-  IconButton,
   Chip,
   useTheme,
   alpha,
 } from '@mui/material';
 import {
-  KeyboardArrowLeft,
-  KeyboardArrowRight,
   TouchApp,
 } from '@mui/icons-material';
 import { useResponsive } from '../../../presentation/hooks/useResponsive';
 
-export interface Column {
+export interface Column<T = unknown> {
   id: string;
   label: string;
   minWidth?: number;
@@ -29,22 +26,21 @@ export interface Column {
   mobileVisible?: boolean;
   tabletVisible?: boolean;
   desktopVisible?: boolean;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
 }
 
-interface MobileOptimizedTableProps {
-  columns: Column[];
-  data: any[];
-  onRowClick?: (row: any) => void;
+interface MobileOptimizedTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
+  onRowClick?: (row: T) => void;
   loading?: boolean;
   emptyMessage?: string;
   rowHeight?: number;
   stickyHeader?: boolean;
-  showScrollIndicators?: boolean;
   touchOptimized?: boolean;
 }
 
-const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
+const MobileOptimizedTable = <T,>({
   columns,
   data,
   onRowClick,
@@ -52,9 +48,8 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
   emptyMessage = 'Nenhum item encontrado',
   rowHeight = 48,
   stickyHeader = true,
-  showScrollIndicators = true,
   touchOptimized = true,
-}) => {
+}: MobileOptimizedTableProps<T>) => {
   const theme = useTheme();
   const { isMobile, isTablet, isTouchDevice } = useResponsive();
   const tableRef = useRef<HTMLDivElement>(null);
@@ -92,19 +87,6 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
     });
   }, []);
 
-  const scrollHorizontal = (direction: 'left' | 'right') => {
-    if (!tableRef.current) return;
-
-    const scrollAmount = 200;
-    const targetScroll = direction === 'left'
-      ? tableRef.current.scrollLeft - scrollAmount
-      : tableRef.current.scrollLeft + scrollAmount;
-
-    tableRef.current.scrollTo({
-      left: targetScroll,
-      behavior: 'smooth',
-    });
-  };
 
   useEffect(() => {
     const tableElement = tableRef.current;
@@ -243,9 +225,11 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
           </TableHead>
 
           <TableBody>
-            {data.map((row, index) => (
+            {data.map((row, index) => {
+              const rowData = row as Record<string, unknown> & { id?: React.Key };
+              return (
               <TableRow
-                key={row.id || index}
+                key={rowData.id || index}
                 onClick={() => onRowClick?.(row)}
                 sx={{
                   cursor: onRowClick ? 'pointer' : 'default',
@@ -290,13 +274,14 @@ const MobileOptimizedTable: React.FC<MobileOptimizedTableProps> = ({
                     }}
                   >
                     {column.render
-                      ? column.render(row[column.id], row)
-                      : row[column.id]
+                      ? column.render(rowData[column.id], row)
+                      : String(rowData[column.id] ?? '')
                     }
                   </TableCell>
                 ))}
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

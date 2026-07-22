@@ -84,12 +84,12 @@ namespace HealthCore.Api.Tests
         [InlineData("")]
         [InlineData("   ")]
         [InlineData(null)]
-        public async Task CreatePacienteAsync_ShouldThrowException_WhenNomeIsInvalid(string nomeInvalido)
+        public async Task CreatePacienteAsync_ShouldThrowException_WhenNomeIsInvalid(string? nomeInvalido)
         {
             // Arrange
             var createPacienteDto = new CreatePacienteDto
             {
-                Nome = nomeInvalido,
+                Nome = nomeInvalido ?? string.Empty,
                 Documento = "12345678901",
                 DataNascimento = DateTime.Now.AddYears(-30)
             };

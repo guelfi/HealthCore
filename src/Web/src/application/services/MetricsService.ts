@@ -74,7 +74,7 @@ class MetricsService {
       // Tratamento específico para diferentes tipos de erro
       if (error && typeof error === 'object') {
         if ('name' in error) {
-          switch ((error as any).name) {
+          switch ('name' in error && typeof error.name === 'string' ? error.name : undefined) {
             case 'NetworkError':
               throw new Error('Erro de conectividade: Não foi possível conectar à API. Verifique sua conexão.');
             case 'AuthenticationError':
@@ -115,7 +115,7 @@ class MetricsService {
       // Tratamento específico para diferentes tipos de erro
       if (error && typeof error === 'object') {
         if ('name' in error) {
-          switch ((error as any).name) {
+          switch ('name' in error && typeof error.name === 'string' ? error.name : undefined) {
             case 'NetworkError':
               throw new Error('Erro de conectividade: Não foi possível conectar à API. Verifique sua conexão.');
             case 'AuthenticationError':

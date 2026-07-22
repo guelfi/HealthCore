@@ -1,5 +1,7 @@
 #!/bin/bash
 
+API_BASE_URL="${HEALTHCORE_API_URL:-http://localhost:5000}"
+
 echo "🔍 MONITORANDO CHAMADAS DA API"
 echo "================================"
 echo "Este script monitora as chamadas para /pacientes"
@@ -15,15 +17,15 @@ echo "📊 TESTANDO CHAMADAS MANUAIS:"
 echo ""
 
 echo "1️⃣ Página 1:"
-curl -s "http://192.168.15.119:5000/pacientes?page=1&pageSize=10" | jq -r '"Data: \(.data | length) pacientes, Total: \(.total), Página: \(.page)/\(.totalPages)"'
+curl -s "${API_BASE_URL}/pacientes?page=1&pageSize=10" | jq -r '"Data: \(.data | length) pacientes, Total: \(.total), Página: \(.page)/\(.totalPages)"'
 
 echo ""
 echo "2️⃣ Página 2:"
-curl -s "http://192.168.15.119:5000/pacientes?page=2&pageSize=10" | jq -r '"Data: \(.data | length) pacientes, Total: \(.total), Página: \(.page)/\(.totalPages)"'
+curl -s "${API_BASE_URL}/pacientes?page=2&pageSize=10" | jq -r '"Data: \(.data | length) pacientes, Total: \(.total), Página: \(.page)/\(.totalPages)"'
 
 echo ""
 echo "3️⃣ Página 3:"
-curl -s "http://192.168.15.119:5000/pacientes?page=3&pageSize=10" | jq -r '"Data: \(.data | length) pacientes, Total: \(.total), Página: \(.page)/\(.totalPages)"'
+curl -s "${API_BASE_URL}/pacientes?page=3&pageSize=10" | jq -r '"Data: \(.data | length) pacientes, Total: \(.total), Página: \(.page)/\(.totalPages)"'
 
 echo ""
 echo "✅ API está funcionando corretamente!"

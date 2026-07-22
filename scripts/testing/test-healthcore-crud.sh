@@ -4,8 +4,9 @@
 # Uso: ./test-healthcore-crud.sh [BASE_URL]
 
 BASE_URL="${1:-http://localhost:5005/healthcore-api}"
-USERNAME="guelfi"
-PASSWORD="@246!588"
+USERNAME="${HEALTHCORE_ADMIN_USERNAME:?HEALTHCORE_ADMIN_USERNAME must be set}"
+PASSWORD="${HEALTHCORE_ADMIN_PASSWORD:?HEALTHCORE_ADMIN_PASSWORD must be set}"
+TEST_USER_PASSWORD="${HEALTHCORE_TEST_USER_PASSWORD:?HEALTHCORE_TEST_USER_PASSWORD must be set}"
 
 # Cores
 GREEN='\033[0;32m'
@@ -129,7 +130,7 @@ echo -e "${YELLOW}3. Testando CRUD Usuários (Admin)...${NC}"
 # 3.1 Criar Usuário Médico
 echo -e "   Criando usuário médico..."
 USER_NAME="medico_teste_$(date +%s)"
-CREATE_USER_BODY="{\"username\": \"$USER_NAME\", \"password\": \"Senha123!\", \"role\": 2}" # Role 2 = Medico
+CREATE_USER_BODY="{\"username\": \"$USER_NAME\", \"password\": \"$TEST_USER_PASSWORD\", \"role\": 2}" # Role 2 = Medico
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/admin/usuarios" \
   -H "Content-Type: application/json" \

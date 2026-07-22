@@ -18,12 +18,8 @@ interface ErrorResponse {
   message?: string;
 }
 
-// Debug discreto para serviços - só console.log
-const debug = {
-  log: (message: string, data?: unknown) => {
-    console.log(`🔗 [UsuarioService] ${message}`, data);
-  },
-};
+// Diagnostic calls are intentionally no-op in production code.
+const debug = { log: (..._args: unknown[]) => undefined };
 
 export interface UsuarioQueryParams {
   page?: number;

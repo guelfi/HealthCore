@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { useUIStore } from '../../../application/stores/uiStore';
 
 function SlideTransitionFactory(direction: 'up' | 'down') {
-  return function SlideTransition(props: any) {
+  return function SlideTransition(props: React.ComponentProps<typeof Slide>) {
     return <Slide {...props} direction={direction} />;
   };
 }

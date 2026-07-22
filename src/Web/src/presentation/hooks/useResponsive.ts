@@ -1,4 +1,4 @@
-import { useTheme } from '@mui/material/styles';
+import { useTheme, type Breakpoint, type Theme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useState, useEffect } from 'react';
 
@@ -19,7 +19,7 @@ interface DeviceInfo {
     height: number;
   };
   deviceType: 'mobile' | 'tablet' | 'desktop';
-  breakpoints: any;
+  breakpoints: Theme['breakpoints'];
 }
 
 export function useResponsive(): DeviceInfo {
@@ -47,7 +47,7 @@ export function useResponsive(): DeviceInfo {
       const isTouchDevice = 
         'ontouchstart' in window || 
         navigator.maxTouchPoints > 0 || 
-        (navigator as any).msMaxTouchPoints > 0;
+        ((navigator as Navigator & { msMaxTouchPoints?: number }).msMaxTouchPoints ?? 0) > 0;
       
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -96,7 +96,7 @@ export function useResponsive(): DeviceInfo {
 }
 
 export function useBreakpoint(
-  breakpoint: any,
+  breakpoint: Breakpoint,
   direction: 'up' | 'down' | 'only' = 'up'
 ) {
   const theme = useTheme();

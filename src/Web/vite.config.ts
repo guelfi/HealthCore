@@ -3,13 +3,12 @@ import react from '@vitejs/plugin-react';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/healthcore-frontend/',
+  base: process.env.VITE_BASE_PATH || '/healthcore/',
   plugins: [react()],
   resolve: {
     alias: {
       '@': '/src',
       '@/components': '/src/presentation/components',
-      '@/pages': '/src/presentation/pages',
       '@/layouts': '/src/presentation/layouts',
       '@/hooks': '/src/presentation/hooks',
       '@/services': '/src/application/services',
@@ -19,7 +18,6 @@ export default defineConfig({
       '@/storage': '/src/infrastructure/storage',
       '@/utils': '/src/infrastructure/utils',
       '@/entities': '/src/domain/entities',
-      '@/interfaces': '/src/domain/interfaces',
       '@/enums': '/src/domain/enums',
     },
   },
@@ -51,37 +49,19 @@ export default defineConfig({
   },
   server: {
     port: 5000,
-    host: '0.0.0.0', // Permite acesso de qualquer IP da rede
-    strictPort: true, // Força o uso da porta especificada
+    host: '0.0.0.0',
+    strictPort: true,
     hmr: {
       port: 5000,
-      host: '0.0.0.0', // Permite HMR via qualquer IP da rede
+      host: '0.0.0.0',
     },
-    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app', '.ngrok.com', '192.168.15.120', '172.17.158.1', 'localhost'],
-    // Configurações otimizadas para mobile
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-    // Configuração de proxy para redirecionar chamadas /api para a API local
+    allowedHosts: ['localhost'],
     proxy: {
       '/api': {
-        target: 'http://localhost:5005',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/healthcore-api'),
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('🔴 Proxy error:', err);
-          });
-          proxy.on('proxyReq', (_, req, _res) => {
-            console.log('🚀 Sending Request to Local API:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('✅ Received Response from Local API:', proxyRes.statusCode, req.url);
-          });
-        },
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

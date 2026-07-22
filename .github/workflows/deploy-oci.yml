@@ -1,0 +1,88 @@
+name: HealthCore CD - Deploy to OCI
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: Type YES to authorize the HealthCore OCI deployment
+        required: true
+        default: ''
+  workflow_run:
+    workflows: ["HealthCore CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: healthcore-oci-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate deployment gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch and trigger
+        shell: bash
+        env:
+          CONFIRM_DEPLOY: ${{ github.event.inputs.confirm_deploy }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            [[ "${GITHUB_REF}" == "refs/heads/main" ]] || { echo "Deployment is allowed only from main" >&2; exit 1; }
+            confirmation="$(printf '%s' "$CONFIRM_DEPLOY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')"
+            [[ "$confirmation" == "YES" ]] || { echo "confirm_deploy must be YES" >&2; exit 1; }
+          else
+            [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]] || { echo "CI is not green" >&2; exit 1; }
+            [[ "${{ github.event.workflow_run.head_branch }}" == "main" ]] || { echo "Automatic deployment is allowed only from main" >&2; exit 1; }
+          fi
+
+  deploy:
+    name: Deploy HealthCore only
+    runs-on: ubuntu-latest
+    needs: validate
+    environment: production
+    env:
+      OCI_HOST: ${{ secrets.OCI_HOST }}
+      OCI_USER: ${{ secrets.OCI_USER }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Checkout approved release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+
+      - name: Add OCI host to known hosts
+        run: ssh-keyscan -H "$OCI_HOST" >> "$HOME/.ssh/known_hosts"
+
+      - name: Validate OCI and Batuara before deployment
+        run: |
+          set -euo pipefail
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" 'set -e; test -d /var/www/HealthCore; test -z "$(git -C /var/www/HealthCore status --porcelain)"; docker exec nginx-proxy nginx -t; test "$(curl -fsS -o /dev/null -w "%{http_code}" https://batuara.org.br/)" = "200"; docker ps --filter name=batuara-net-api --filter health=healthy --format "{{.Names}}" | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format "{{.Names}}" | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format "{{.Names}}" | grep -qx batuara-net-db'
+
+      - name: Upload release script and production environment
+        env:
+          HEALTHCORE_JWT_KEY: ${{ secrets.HEALTHCORE_JWT_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$OCI_HOST"; test -n "$OCI_USER"; test -n "$HEALTHCORE_JWT_KEY"
+          umask 077
+          env_file="$RUNNER_TEMP/healthcore-production.env"
+          printf 'HEALTHCORE_ENVIRONMENT=Production\nHEALTHCORE_JWT_KEY=%s\nHEALTHCORE_SECURE_COOKIES=true\nHEALTHCORE_BASE_PATH=/healthcore/\nHEALTHCORE_API_URL=/healthcore/api/v1\n' "$HEALTHCORE_JWT_KEY" > "$env_file"
+          scp scripts/deployment/oci-release.sh "$OCI_USER@$OCI_HOST:/tmp/healthcore-oci-release.sh"
+          scp "$env_file" "$OCI_USER@$OCI_HOST:/tmp/healthcore-production.env"
+
+      - name: Execute HealthCore-only release
+        run: |
+          set -euo pipefail
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "chmod 700 /tmp/healthcore-oci-release.sh /tmp/healthcore-production.env && HEALTHCORE_DIR=/var/www/HealthCore RELEASE_SHA=$RELEASE_SHA HEALTHCORE_ENV_FILE=/tmp/healthcore-production.env /tmp/healthcore-oci-release.sh"
+
+      - name: Remove temporary release files
+        if: always()
+        run: ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" 'rm -f /tmp/healthcore-oci-release.sh /tmp/healthcore-production.env'

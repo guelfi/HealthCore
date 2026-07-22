@@ -25,7 +25,7 @@ else
         API_URL=$(grep VITE_API_BASE_URL .env | cut -d '=' -f2 | tr -d '"' | tr -d "'")
         echo -e "${BLUE}📋 URL do .env: $API_URL${NC}"
     else
-        API_URL="http://192.168.15.119:5000"
+        API_URL="http://localhost:5000"
         echo -e "${YELLOW}⚠️  Usando URL padrão: $API_URL${NC}"
     fi
 fi

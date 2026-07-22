@@ -13,6 +13,7 @@ import type {
 // Re-export Exame type for hook consumers
 export type { Exame } from '../../domain/entities/Exame';
 import { ModalidadeDicom } from '../../domain/enums/ModalidadeDicom';
+import { getErrorMessage } from '../../infrastructure/utils/errorMessage';
 
 interface UseExamesState {
   exames: ExameEntity[];
@@ -81,8 +82,6 @@ export const useExames = (): UseExamesState & UseExamesActions => {
       totalPages: response.totalPages || 0,
       loading: false,
     }));
-    
-    console.log("🎣 [useExames] Estado final - exames:", examesArray.length, "isArray:", Array.isArray(examesArray));
   }, []);
 
   const fetchExames = useCallback(
@@ -93,12 +92,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
       try {
         const response = await ExameService.list(params);
         updateExamesState(response);
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao carregar exames';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -123,12 +118,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         }));
 
         return newExame;
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao criar exame';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -153,12 +144,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         }));
 
         return updatedExame;
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao atualizar exame';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -182,12 +169,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
           total: prev.total - 1,
           loading: false,
         }));
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao deletar exame';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -206,12 +189,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
         const exame = await ExameService.getById(id);
         setLoading(false);
         return exame;
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao buscar exame';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -232,12 +211,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
       try {
         const response = await ExameService.getByPacienteId(pacienteId, params);
         updateExamesState(response);
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao carregar exames do paciente';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -257,12 +232,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
       try {
         const response = await ExameService.getByModalidade(modalidade, params);
         updateExamesState(response);
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao carregar exames por modalidade';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -287,12 +258,8 @@ export const useExames = (): UseExamesState & UseExamesActions => {
           params
         );
         updateExamesState(response);
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao carregar exames por período';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -305,7 +272,7 @@ export const useExames = (): UseExamesState & UseExamesActions => {
     async (idempotencyKey: string): Promise<boolean> => {
       try {
         return await ExameService.checkIdempotency(idempotencyKey);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.warn('Erro ao verificar idempotência:', error);
         return false;
       }

@@ -9,13 +9,14 @@ import type {
   CreateUsuarioDto,
   UpdateUsuarioDto,
 } from '../../domain/entities/Usuario';
+import { getApiErrorResponse, getErrorMessage } from '../../infrastructure/utils/errorMessage';
 import { UserProfile } from '../../domain/enums/UserProfile';
 
 // Debug discreto para hooks - só console.log
 const debug = {
-  log: (message: string, data?: unknown) => {
-    console.log(`🎣 [useUsuarios] ${message}`, data);
-  },
+  log: (..._args: unknown[]) => undefined,
+  info: (..._args: unknown[]) => undefined,
+  error: (..._args: unknown[]) => undefined,
 };
 
 interface UseUsuariosState {
@@ -88,8 +89,8 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
 
         debug.log('Estado atualizado - usuários:', response.data.length);
       } catch (error: unknown) {
-        const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
-        const errorMessage = error && typeof error === 'object' && 'message' in error ? (error as any).message : 'Erro desconhecido';
+        const errorResponse = getApiErrorResponse(error);
+        const errorMessage = getErrorMessage(error, 'Erro desconhecido');
         debug.log('Erro ao buscar usuários:', {
           message: errorMessage,
           status: errorResponse?.status,
@@ -97,14 +98,12 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
           data: errorResponse?.data,
         });
         setError(
-          errorResponse?.data?.message ||
-            errorMessage ||
-            'Erro ao carregar usuários'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const createUsuario = useCallback(
@@ -127,19 +126,15 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
 
         return usuario;
       } catch (error: unknown) {
-        const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
-        const errorMessage = error && typeof error === 'object' && 'message' in error ? (error as any).message : 'Erro desconhecido';
         debug.log('Erro ao criar usuário:', error);
         setError(
-          errorResponse?.data?.message ||
-            errorMessage ||
-            'Erro ao criar usuário'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const updateUsuario = useCallback(
@@ -161,19 +156,15 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
 
         return usuario;
       } catch (error: unknown) {
-        const errorResponse = error && typeof error === 'object' && 'response' in error ? (error as any).response : undefined;
-        const errorMessage = error && typeof error === 'object' && 'message' in error ? (error as any).message : 'Erro desconhecido';
         debug.log('Erro ao atualizar usuário:', error);
         setError(
-          errorResponse?.data?.message ||
-            errorMessage ||
-            'Erro ao atualizar usuário'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const deleteUsuario = useCallback(
@@ -193,18 +184,16 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
           total: prev.total - 1,
           loading: false,
         }));
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.log('Erro ao remover usuário:', error);
         setError(
-          error.response?.data?.message ||
-            error.message ||
-            'Erro ao remover usuário'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const activateUsuario = useCallback(
@@ -225,18 +214,16 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
         }));
 
         return usuario;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.log('Erro ao ativar usuário:', error);
         setError(
-          error.response?.data?.message ||
-            error.message ||
-            'Erro ao ativar usuário'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const deactivateUsuario = useCallback(
@@ -257,18 +244,16 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
         }));
 
         return usuario;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.log('Erro ao desativar usuário:', error);
         setError(
-          error.response?.data?.message ||
-            error.message ||
-            'Erro ao desativar usuário'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const getUsuarioById = useCallback(
@@ -282,18 +267,16 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
         debug.log('Usuário encontrado:', usuario);
         setState(prev => ({ ...prev, loading: false }));
         return usuario;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.log('Erro ao buscar usuário:', error);
         setError(
-          error.response?.data?.message ||
-            error.message ||
-            'Erro ao buscar usuário'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const searchUsuarios = useCallback(
@@ -307,18 +290,16 @@ export const useUsuarios = (): UseUsuariosState & UseUsuariosActions => {
         debug.log('Usuários encontrados:', usuarios);
         setState(prev => ({ ...prev, loading: false }));
         return usuarios;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.log('Erro ao buscar usuários:', error);
         setError(
-          error.response?.data?.message ||
-            error.message ||
-            'Erro ao buscar usuários'
+          getErrorMessage(error, 'Erro ao processar usuario')
         );
         setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, setLoading]
   );
 
   const getUsuariosByRole = useCallback(

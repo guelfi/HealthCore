@@ -25,7 +25,6 @@ import {
   AdminPanelSettings,
   LocalHospital,
   Logout,
-  Menu as MenuIcon,
   MedicalServices,
 } from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';

@@ -6,7 +6,6 @@ import {
   Box,
   Typography,
   TextField,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -18,7 +17,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
 } from '@mui/material';
 import { Visibility } from '@mui/icons-material';
 import {
@@ -216,13 +214,9 @@ const ExameForm: React.FC<ExameFormProps> = ({
       } else {
         navigate('/exames');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar exame:', error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        'Erro ao salvar exame';
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar exame';
       setFormError(errorMessage);
       addNotification(errorMessage, 'error');
     } finally {
@@ -230,7 +224,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
     }
   };
 
-  const handlePacienteChange = (_event: any, newValue: Paciente | null) => {
+  const handlePacienteChange = (_event: React.SyntheticEvent, newValue: Paciente | null) => {
     setSelectedPaciente(newValue);
     setValue('pacienteId', newValue?.id || '');
   };
