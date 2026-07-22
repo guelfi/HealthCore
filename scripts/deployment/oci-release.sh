@@ -25,8 +25,8 @@ if [[ -n "$(git status --porcelain)" ]]; then
 
   RECONCILIATION_DIR="/var/backups/healthcore/reconciliation/$(date -u +%Y%m%dT%H%M%SZ)"
   sudo install -d -m 700 "$RECONCILIATION_DIR"
-  git diff --binary > "$RECONCILIATION_DIR/working-tree.diff"
-  git status --short > "$RECONCILIATION_DIR/status.txt"
+  git diff --binary | sudo tee "$RECONCILIATION_DIR/working-tree.diff" >/dev/null
+  git status --short | sudo tee "$RECONCILIATION_DIR/status.txt" >/dev/null
   sudo cp -p src/Api/Dockerfile src/Api/Program.cs "$RECONCILIATION_DIR/"
   sudo chmod 600 "$RECONCILIATION_DIR"/*
   git restore --source=HEAD --staged --worktree -- src/Api/Dockerfile src/Api/Program.cs
