@@ -44,10 +44,12 @@ fi
 BACKUP_DIR="/var/backups/healthcore"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_PATH="$BACKUP_DIR/healthcore-${STAMP}-${RELEASE_SHA:0:12}.db"
-mkdir -p "$BACKUP_DIR"
+TEMP_BACKUP="/tmp/healthcore-${STAMP}.db"
+sudo install -d -m 700 "$BACKUP_DIR"
 if docker inspect healthcore-api >/dev/null 2>&1; then
-  docker cp healthcore-api:/app/database/healthcore.db "$BACKUP_PATH"
-  chmod 600 "$BACKUP_PATH"
+  docker cp healthcore-api:/app/database/healthcore.db "$TEMP_BACKUP"
+  sudo install -m 600 "$TEMP_BACKUP" "$BACKUP_PATH"
+  rm -f "$TEMP_BACKUP"
 fi
 
 # Build before changing the running containers. The Nginx edit is restricted to
