@@ -142,7 +142,7 @@ recreate_nginx_proxy() {
     docker start nginx-proxy >/dev/null
   }
 
-  if ! docker create --name nginx-proxy --restart unless-stopped --network none \
+  if ! docker create --name nginx-proxy --restart unless-stopped --network bridge \
       -p 80:80 -p 443:443 \
       -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
       -v /etc/letsencrypt:/etc/letsencrypt:ro \
