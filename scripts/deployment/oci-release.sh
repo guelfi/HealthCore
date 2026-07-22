@@ -109,6 +109,10 @@ replace_healthcore_nginx_locations() {
   local nginx_tmp="${NGINX_CONF}.tmp"
 
   sudo awk '
+    /^[[:space:]]*location = \/healthcore\/swagger \{$/ {
+      skipping=1
+      next
+    }
     /^[[:space:]]*location \/healthcore\/swagger \{$/ {
       print "    location = /healthcore/swagger {"
       print "      return 301 /healthcore/swagger/;"
