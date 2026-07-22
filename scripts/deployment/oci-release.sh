@@ -100,6 +100,11 @@ for attempt in $(seq 1 30); do
   if [[ "$attempt" == 30 ]]; then
     echo "HealthCore did not become healthy" >&2
     docker compose --env-file "$HEALTHCORE_ENV_FILE" ps
+    frontend_container="$(docker compose --env-file "$HEALTHCORE_ENV_FILE" ps -q healthcore-frontend || true)"
+    if [[ -n "$frontend_container" ]]; then
+      docker logs --tail 100 "$frontend_container" >&2 || true
+      docker exec "$frontend_container" nginx -t >&2 || true
+    fi
     exit 1
   fi
   sleep 2
