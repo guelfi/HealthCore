@@ -108,7 +108,7 @@ if (isDevelopment || builder.Configuration.GetValue<bool>("OpenApi:Enabled", fal
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/healthcore-api/swagger/v1/swagger.json", "HealthCore API V1");
+        c.SwaggerEndpoint("/healthcore/swagger/v1/swagger.json", "HealthCore API V1");
         c.RoutePrefix = "swagger";
     });
 }
