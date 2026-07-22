@@ -103,15 +103,6 @@ grep -Fq 'location /healthcore/api/' "$NGINX_CONF" || {
   exit 1
 }
 
-if ! docker run --rm --network healthcore_default \
-  -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
-  -v /etc/letsencrypt:/etc/letsencrypt:ro \
-  -v /etc/ssl/hako:/etc/ssl/hako:ro \
-  nginx:stable-alpine nginx -t; then
-  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
-  exit 1
-fi
-
 recreate_nginx_proxy() {
   local previous_name="nginx-proxy-healthcore-previous"
   local network
