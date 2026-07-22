@@ -9,12 +9,13 @@ import type {
   CreatePacienteDto,
   UpdatePacienteDto,
 } from '../../domain/entities/Paciente';
+import { getApiErrorResponse, getErrorMessage } from '../../infrastructure/utils/errorMessage';
 
 // Debug discreto para hooks
 const debug = {
-  log: (message: string, data?: any) => {
-    console.log(`🎣 [usePacientes] ${message}`, data);
-  },
+  log: (..._args: unknown[]) => undefined,
+  info: (..._args: unknown[]) => undefined,
+  error: (..._args: unknown[]) => undefined,
 };
 
 interface UsePacientesState {
@@ -90,17 +91,13 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         });
 
         debug.log('Estado atualizado - pacientes:', response.data.length);
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.log('Erro ao buscar pacientes:', {
-          message: error.message,
-          status: error.response?.status,
-          data: error.response?.data,
+          message: getErrorMessage(error, 'Erro desconhecido'),
+          status: getApiErrorResponse(error)?.status,
+          data: getApiErrorResponse(error)?.data,
         });
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao carregar pacientes';
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -125,12 +122,8 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         }));
 
         return newPaciente;
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao criar paciente';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -157,12 +150,8 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         }));
 
         return updatedPaciente;
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao atualizar paciente';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -186,12 +175,8 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
           total: prev.total - 1,
           loading: false,
         }));
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao deletar paciente';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -210,12 +195,8 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
         const paciente = await PacienteService.getById(id);
         setLoading(false);
         return paciente;
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro ao buscar paciente';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         setLoading(false);
@@ -229,12 +210,8 @@ export const usePacientes = (): UsePacientesState & UsePacientesActions => {
     async (nome: string): Promise<Paciente[]> => {
       try {
         return await PacienteService.searchByName(nome);
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message ||
-          'Erro na pesquisa de pacientes';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error, '');
 
         setError(errorMessage);
         throw new Error(errorMessage);

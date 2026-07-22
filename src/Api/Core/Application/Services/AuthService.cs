@@ -28,14 +28,14 @@ namespace HealthCore.Api.Core.Application.Services
         {
             try
             {
-                _logger.LogInformation("Tentativa de login para usuário: {Username}", username);
+                _logger.LogInformation("Tentativa de login para usuÃ¡rio: {Username}", username);
 
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.Username == username && u.IsActive);
 
                 if (user == null || !user.VerifyPassword(password))
                 {
-                    _logger.LogWarning("Falha na autenticação para usuário: {Username}", username);
+                    _logger.LogWarning("Falha na autenticaÃ§Ã£o para usuÃ¡rio: {Username}", username);
                     return null;
                 }
 
@@ -46,7 +46,7 @@ namespace HealthCore.Api.Core.Application.Services
                 var jwtToken = GenerateJwtToken(user);
                 var refreshToken = await GenerateRefreshTokenAsync(user.Id);
 
-                _logger.LogInformation("Login bem-sucedido para usuário: {Username}", username);
+                _logger.LogInformation("Login bem-sucedido para usuÃ¡rio: {Username}", username);
 
                 return new LoginResponseDto
                 {
@@ -64,7 +64,7 @@ namespace HealthCore.Api.Core.Application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro durante login para usuário: {Username}", username);
+                _logger.LogError(ex, "Erro durante login para usuÃ¡rio: {Username}", username);
                 throw;
             }
         }
@@ -81,7 +81,7 @@ namespace HealthCore.Api.Core.Application.Services
 
                 if (refreshToken == null || !refreshToken.IsActive)
                 {
-                    _logger.LogWarning("Refresh token inválido ou expirado");
+                    _logger.LogWarning("Refresh token invÃ¡lido ou expirado");
                     return null;
                 }
 
@@ -95,7 +95,7 @@ namespace HealthCore.Api.Core.Application.Services
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Refresh token bem-sucedido para usuário: {Username}", refreshToken.User.Username);
+                _logger.LogInformation("Refresh token bem-sucedido para usuÃ¡rio: {Username}", refreshToken.User.Username);
 
                 return new LoginResponseDto
                 {
@@ -124,7 +124,7 @@ namespace HealthCore.Api.Core.Application.Services
             {
                 _logger.LogInformation("Logout iniciado para token: {TokenId}", tokenId);
 
-                // Adicionar token à blacklist
+                // Adicionar token Ã  blacklist
                 var blacklistedToken = new BlacklistedToken
                 {
                     Id = Guid.NewGuid(),
@@ -136,7 +136,7 @@ namespace HealthCore.Api.Core.Application.Services
                 _context.BlacklistedTokens.Add(blacklistedToken);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Token adicionado à blacklist: {TokenId}", tokenId);
+                _logger.LogInformation("Token adicionado Ã  blacklist: {TokenId}", tokenId);
                 return true;
             }
             catch (Exception ex)
@@ -146,6 +146,26 @@ namespace HealthCore.Api.Core.Application.Services
             }
         }
 
+        public async Task<bool> RevokeRefreshTokenAsync(string refreshTokenValue)
+        {
+            if (string.IsNullOrWhiteSpace(refreshTokenValue))
+            {
+                return false;
+            }
+
+            var refreshToken = await _context.RefreshTokens
+                .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue && !rt.IsRevoked);
+
+            if (refreshToken == null)
+            {
+                return false;
+            }
+
+            refreshToken.IsRevoked = true;
+            refreshToken.RevokedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return true;
+        }
         public async Task<bool> IsTokenBlacklistedAsync(string tokenId)
         {
             return await _context.BlacklistedTokens
@@ -154,9 +174,17 @@ namespace HealthCore.Api.Core.Application.Services
 
         private (string Token, DateTime ExpiresAt) GenerateJwtToken(User user)
         {
-            var jwtSecret = _configuration["Jwt:Key"] ?? "thisIsAVeryStrongAndSecureSecretKeyForJWTAuthentication";
-            var key = Encoding.ASCII.GetBytes(jwtSecret);
-            var expiresAt = DateTime.UtcNow.AddHours(1); // Token expira em 1 hora
+            var jwtSecret = _configuration["Jwt:Key"];
+            if (string.IsNullOrWhiteSpace(jwtSecret) || Encoding.UTF8.GetByteCount(jwtSecret) < 32)
+            {
+                throw new InvalidOperationException("Jwt:Key must be configured and contain at least 32 UTF-8 bytes.");
+            }
+
+            var key = Encoding.UTF8.GetBytes(jwtSecret);
+            var issuer = _configuration["Jwt:Issuer"] ?? "HealthCore.Api";
+            var audience = _configuration["Jwt:Audience"] ?? "HealthCore.Client";
+            var expiryMinutes = _configuration.GetValue<int>("Jwt:ExpiryMinutes", 15);
+            var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -172,6 +200,8 @@ namespace HealthCore.Api.Core.Application.Services
                         ClaimValueTypes.Integer64)
                 }),
                 Expires = expiresAt,
+                Issuer = issuer,
+                Audience = audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -188,7 +218,7 @@ namespace HealthCore.Api.Core.Application.Services
                 Id = Guid.NewGuid(),
                 Token = GenerateRandomToken(),
                 UserId = userId,
-                ExpiresAt = DateTime.UtcNow.AddDays(7) // Refresh token expira em 7 dias
+                ExpiresAt = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpiryDays", 7))
             };
 
             _context.RefreshTokens.Add(refreshToken);
@@ -223,7 +253,7 @@ namespace HealthCore.Api.Core.Application.Services
             return Convert.ToBase64String(bytes);
         }
 
-        // Método para limpeza de tokens expirados (pode ser chamado por um job)
+        // MÃ©todo para limpeza de tokens expirados (pode ser chamado por um job)
         public async Task CleanupExpiredTokensAsync()
         {
             try
@@ -246,7 +276,7 @@ namespace HealthCore.Api.Core.Application.Services
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Limpeza de tokens expirados concluída. Refresh tokens removidos: {RefreshCount}, Blacklisted tokens removidos: {BlacklistCount}",
+                _logger.LogInformation("Limpeza de tokens expirados concluÃ­da. Refresh tokens removidos: {RefreshCount}, Blacklisted tokens removidos: {BlacklistCount}",
                     expiredRefreshTokens.Count, expiredBlacklistedTokens.Count);
             }
             catch (Exception ex)

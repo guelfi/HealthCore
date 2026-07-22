@@ -1,7 +1,7 @@
 // 📱 Breakpoints Responsivos - HealthCore
 // Sistema de breakpoints mobile-first
 
-@import './tokens.scss';
+@use './tokens' as *;
 
 // Mixins para media queries
 @mixin mobile-only {

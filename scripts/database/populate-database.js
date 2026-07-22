@@ -1,7 +1,7 @@
 /**
  * 🚀 Script para Popular Banco de Dados com Dados Reais
  * 
- * Execução: node scripts/populate-database.js
+ * Execução: node scripts/database/populate-database.js
  * 
  * Este script adiciona dados de teste reais no banco via API,
  * permitindo testar a integração frontend-backend com dados reais
@@ -12,17 +12,16 @@ const https = require('https');
 const http = require('http');
 
 // Configuração da API - testa múltiplos endpoints
-const API_ENDPOINTS = [
-  'http://192.168.15.119:5000',  // Backend no macOS
-  'http://localhost:5000',       // Backend local
-  'http://127.0.0.1:5000'        // Backend local alternativo
-];
+const API_ENDPOINTS = [process.env.HEALTHCORE_API_URL || 'http://localhost:5000'];
 
 let API_BASE_URL = null; // Será definido após teste de conectividade
 const ADMIN_CREDENTIALS = {
-  username: 'guelfi',
-  password: '@246!588'
+  username: process.env.HEALTHCORE_ADMIN_USERNAME || '',
+  password: process.env.HEALTHCORE_ADMIN_PASSWORD || ''
 };
+if (!ADMIN_CREDENTIALS.username || !ADMIN_CREDENTIALS.password) {
+  throw new Error('Defina HEALTHCORE_ADMIN_USERNAME e HEALTHCORE_ADMIN_PASSWORD antes de executar.');
+}
 
 // Endpoint correto descoberto no teste
 const LOGIN_ENDPOINT = '/auth/login';
@@ -78,7 +77,6 @@ const EXAMES_TESTE = [
     descricao: 'Tomografia computadorizada do tórax',
     dataExame: '2025-08-25',
     observacoes: 'Exame realizado com contraste',
-    idempotencyKey: 'exam-001-ct-torax'
   },
   {
     pacienteId: null,
@@ -86,7 +84,6 @@ const EXAMES_TESTE = [
     descricao: 'Ressonância magnética do crânio',
     dataExame: '2025-08-26',
     observacoes: 'Investigação de cefaleia',
-    idempotencyKey: 'exam-002-mr-cranio'
   },
   {
     pacienteId: null,
@@ -94,7 +91,6 @@ const EXAMES_TESTE = [
     descricao: 'Ultrassom abdominal total',
     dataExame: '2025-08-27',
     observacoes: 'Avaliação de dor abdominal',
-    idempotencyKey: 'exam-003-us-abdomen'
   },
   {
     pacienteId: null,
@@ -102,7 +98,6 @@ const EXAMES_TESTE = [
     descricao: 'Radiografia de tórax PA e perfil',
     dataExame: '2025-08-24',
     observacoes: 'Controle pós-pneumonia',
-    idempotencyKey: 'exam-004-dx-torax'
   },
   {
     pacienteId: null,
@@ -110,7 +105,6 @@ const EXAMES_TESTE = [
     descricao: 'Mamografia bilateral',
     dataExame: '2025-08-23',
     observacoes: 'Rastreamento anual',
-    idempotencyKey: 'exam-005-mg-bilateral'
   }
 ];
 
@@ -240,8 +234,7 @@ async function testConnectivity() {
   colorLog('🔧 SOLUÇÕES:', 'blue');
   colorLog('1. Iniciar backend no macOS: ./scripts/api.sh', 'white');
   colorLog('2. Ou executar: dotnet run --project src/Api', 'white');
-  colorLog('3. Verificar se o IP 192.168.15.119 está correto', 'white');
-  colorLog('4. Testar conectividade: ping 192.168.15.119', 'white');
+  colorLog('3. Verificar HEALTHCORE_API_URL e a disponibilidade da API.', 'white');
   return false;
 }
 
@@ -265,7 +258,7 @@ async function populateDatabase() {
     
     if (!loginResponse.success || !loginResponse.data.token) {
       colorLog('❌ Falha no login!', 'red');
-      console.log('Resposta:', loginResponse);
+      colorLog('   Login failed; inspect the HTTP status without printing response data.', 'red');
       return;
     }
     
@@ -273,7 +266,6 @@ async function populateDatabase() {
     const user = loginResponse.data.user;
     colorLog(`✅ Login realizado com sucesso!`, 'green');
     colorLog(`👤 Usuário: ${user.username} (${user.role === 1 ? 'Administrador' : 'Usuário'})`, 'cyan');
-    colorLog(`🎫 Token: ${token.substring(0, 30)}...`, 'gray');
 
     // 3. Popular pacientes
     colorLog('\n👥 Criando pacientes de teste...', 'cyan');
@@ -302,6 +294,7 @@ async function populateDatabase() {
           ...EXAMES_TESTE[i],
           pacienteId: pacientesIds[i]
         };
+        exame.idempotencyKey = `seed-exam-${i + 1}`;
         
         colorLog(`   Criando: ${exame.modalidade} - ${exame.descricao}...`, 'yellow');
         

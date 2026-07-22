@@ -36,18 +36,18 @@ goto menu
 :populate
 echo.
 echo 🔬 Populando banco com dados de teste...
-node scripts/populate-database.js
+node scripts/database/populate-database.js
 pause
 goto menu
 
 :connectivity
 echo.
 echo 🌐 Testando conectividade com API...
-echo Testando ping para 192.168.15.119...
-ping -n 4 192.168.15.119
+if not defined HEALTHCORE_API_URL set "HEALTHCORE_API_URL=http://localhost:5000"
+echo Testando a API em %HEALTHCORE_API_URL%...
 echo.
 echo Testando endpoint da API...
-curl -s http://192.168.15.119:5000/health
+curl -s %HEALTHCORE_API_URL%/health
 echo.
 pause
 goto menu
@@ -73,7 +73,7 @@ echo 4. Atualizar componentes para usar API
 echo 5. Remover dados mockados
 echo.
 echo Para começar, execute:
-echo   node scripts/populate-database.js
+echo   node scripts/database/populate-database.js
 echo   cd src\Web && npm run dev
 echo.
 pause

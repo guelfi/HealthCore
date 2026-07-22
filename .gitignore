@@ -180,3 +180,16 @@ logs/
 .env.test.local
 .env.local.*
 .cursor/
+
+# Credenciais e chaves locais
+*.pem
+*.key
+*.p12
+*.pfx
+.grok/
+# OCI SSH key: local-only, never commit
+ssh-key-2025-08-28.pem
+
+# Playwright generated output
+tests/e2e/test-results/
+tests/e2e/playwright-report/

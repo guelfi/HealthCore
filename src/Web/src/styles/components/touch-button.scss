@@ -1,5 +1,5 @@
-@import '../design-system/tokens';
-@import '../design-system/breakpoints';
+@use '../design-system/tokens' as *;
+@use '../design-system/breakpoints' as *;
 
 .touch-button {
   // Área mínima de toque de 44px conforme diretrizes de acessibilidade

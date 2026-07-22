@@ -43,6 +43,10 @@ coverage/
 # nyc test coverage
 .nyc_output
 
+# Dependency directories (all workspace levels)
+**/node_modules
+**/node_modules/**
+**/dist
 # Dependency directories
 node_modules/
 jspm_packages/
@@ -123,3 +127,9 @@ tasks/
 Dockerfile*
 docker-compose*
 .dockerignore
+# Credentials and private keys must never enter the build context
+*.pem
+*.key
+*.p12
+*.pfx
+.grok/

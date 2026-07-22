@@ -15,18 +15,14 @@ import { UserProfile } from './domain/enums/UserProfile';
 import LoginForm from './presentation/components/auth/LoginForm';
 import AppLayout from './presentation/components/layout/AppLayout';
 import NetworkErrorBoundary from './presentation/components/common/NetworkErrorBoundary';
-import AdminOrMedicoRoute from './presentation/components/common/AdminOrMedicoRoute';
 
 // Pages
-import DashboardPage from './presentation/pages/DashboardPage';
-import PacientesPageTable from './presentation/pages/PacientesPageTable';
-import ExamesPageTable from './presentation/pages/ExamesPageTable';
-import ExameAddPage from './presentation/pages/ExameAddPage';
-import ExameEditPage from './presentation/pages/ExameEditPage';
-import MedicosPageTable from './presentation/pages/MedicosPageTable';
-import UsuariosPageTable from './presentation/pages/UsuariosPageTable';
-import EspecialidadesPageTable from './presentation/pages/EspecialidadesPageTable';
-import DiagnosticPage from './presentation/pages/DiagnosticPage';
+import { DashboardPage } from './presentation/features/dashboard';
+import { PacientesPageTable } from './presentation/features/patients';
+import { ExamesPageTable, ExameAddPage, ExameEditPage } from './presentation/features/exams';
+import { MedicosPageTable } from './presentation/features/medical';
+import { UsuariosPageTable } from './presentation/features/users';
+import { EspecialidadesPageTable } from './presentation/features/specialties';
 
 // Debug components (only in development)
 import MobileDebugger from './components/dev/MobileDebugger';
@@ -171,7 +167,6 @@ const App: React.FC = () => {
               }
             />
 
-            <Route path="/diagnostic" element={<DiagnosticPage />} />
 
             <Route
               path="/"
