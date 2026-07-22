@@ -212,7 +212,21 @@ recreate_nginx_proxy() {
     fi
   done
 
-  if ! docker start nginx-proxy >/dev/null || ! docker exec nginx-proxy nginx -t; then
+  if ! docker start nginx-proxy >/dev/null; then
+    restore_previous_nginx
+    return 1
+  fi
+
+  local nginx_ready=false
+  for attempt in $(seq 1 15); do
+    if docker exec nginx-proxy nginx -t; then
+      nginx_ready=true
+      break
+    fi
+    sleep 1
+  done
+
+  if [[ "$nginx_ready" != "true" ]]; then
     restore_previous_nginx
     return 1
   fi
