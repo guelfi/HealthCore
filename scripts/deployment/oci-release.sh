@@ -35,7 +35,7 @@ fi
 
 git fetch origin main
 git checkout main
-git pull --ff-only origin main
+git reset --hard "$RELEASE_SHA"
 if [[ "$(git rev-parse HEAD)" != "$RELEASE_SHA" ]]; then
   echo "Remote commit does not match the approved release SHA" >&2
   exit 1
