@@ -7,8 +7,10 @@ RUN npm ci --no-audit --no-fund
 
 COPY src/Web/ ./
 ARG VITE_API_URL
+ARG VITE_API_BASE_URL
 ARG VITE_BASE_PATH=/healthcore/
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build -- --mode production

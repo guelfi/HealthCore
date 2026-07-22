@@ -110,6 +110,10 @@ replace_healthcore_nginx_locations() {
 
   sudo awk '
     /^[[:space:]]*location \/healthcore\/swagger \{$/ {
+      print "    location = /healthcore/swagger {"
+      print "      return 301 /healthcore/swagger/;"
+      print "    }"
+      print ""
       print "    location /healthcore/swagger {"
       print "      rewrite ^/healthcore/swagger/?(.*)$ /healthcore-api/swagger/" "$" "1 break;"
       print "      proxy_pass http://healthcore-api:5000;"
@@ -263,7 +267,7 @@ healthcore_status="$(curl --fail --silent --show-error --insecure --output /dev/
 healthcore_ip_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/)"
 [[ "$healthcore_ip_status" == "200" ]] || { echo "HealthCore IP route failed: $healthcore_ip_status" >&2; exit 1; }
 
-healthcore_swagger_status="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/swagger/)"
+healthcore_swagger_status="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/swagger)"
 [[ "$healthcore_swagger_status" == "200" ]] || { echo "HealthCore Swagger route failed: $healthcore_swagger_status" >&2; exit 1; }
 
 sudo install -d -m 700 "$RELEASE_METADATA_DIR"
