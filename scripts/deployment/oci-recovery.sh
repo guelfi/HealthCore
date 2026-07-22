@@ -42,7 +42,7 @@ latest_backup() {
 
 validate_backup() {
   local source="$1"
-  [[ -s "$source" ]] || { echo "SQLite backup is missing or empty: $source" >&2; return 1; }
+  sudo test -s "$source" || { echo "SQLite backup is missing or empty: $source" >&2; return 1; }
   [[ "$(sudo stat -c '%a' "$source")" == "600" ]] || { echo "SQLite backup permissions are not 600: $source" >&2; return 1; }
 
   local restore_dir="$BACKUP_DIR/recovery/$STAMP"
