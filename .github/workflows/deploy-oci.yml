@@ -7,6 +7,10 @@ on:
         description: Type YES to authorize the HealthCore OCI deployment
         required: true
         default: ''
+      confirm_reconcile_dirty:
+        description: Type YES to back up and reconcile the known dirty HealthCore tree on OCI
+        required: true
+        default: 'NO'
   workflow_run:
     workflows: ["HealthCore CI"]
     types: [completed]
@@ -27,12 +31,15 @@ jobs:
         shell: bash
         env:
           CONFIRM_DEPLOY: ${{ github.event.inputs.confirm_deploy }}
+          CONFIRM_RECONCILE_DIRTY: ${{ github.event.inputs.confirm_reconcile_dirty }}
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             [[ "${GITHUB_REF}" == "refs/heads/main" ]] || { echo "Deployment is allowed only from main" >&2; exit 1; }
             confirmation="$(printf '%s' "$CONFIRM_DEPLOY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')"
             [[ "$confirmation" == "YES" ]] || { echo "confirm_deploy must be YES" >&2; exit 1; }
+            reconciliation="$(printf '%s' "$CONFIRM_RECONCILE_DIRTY" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')"
+            [[ "$reconciliation" == "YES" || "$reconciliation" == "NO" ]] || { echo "confirm_reconcile_dirty must be YES or NO" >&2; exit 1; }
           else
             [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]] || { echo "CI is not green" >&2; exit 1; }
             [[ "${{ github.event.workflow_run.head_branch }}" == "main" ]] || { echo "Automatic deployment is allowed only from main" >&2; exit 1; }
@@ -47,6 +54,7 @@ jobs:
       OCI_HOST: ${{ secrets.OCI_HOST }}
       OCI_USER: ${{ secrets.OCI_USER }}
       RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      RECONCILE_REMOTE_DIRTY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_reconcile_dirty == 'YES' && 'true' || 'false' }}
     steps:
       - name: Checkout approved release
         uses: actions/checkout@v4
@@ -64,7 +72,7 @@ jobs:
       - name: Validate OCI and Batuara before deployment
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" 'set -e; test -d /var/www/HealthCore; test -z "$(git -C /var/www/HealthCore status --porcelain)"; docker exec nginx-proxy nginx -t; test "$(curl -fsS -o /dev/null -w "%{http_code}" https://batuara.org.br/)" = "200"; docker ps --filter name=batuara-net-api --filter health=healthy --format "{{.Names}}" | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format "{{.Names}}" | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format "{{.Names}}" | grep -qx batuara-net-db'
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "set -e; test -d /var/www/HealthCore; dirty=\$(git -C /var/www/HealthCore status --porcelain); if [[ -n \"\$dirty\" && \"$RECONCILE_REMOTE_DIRTY\" != true ]]; then echo 'HealthCore remote working tree is dirty' >&2; printf '%s\\n' \"\$dirty\" >&2; exit 1; fi; docker exec nginx-proxy nginx -t; test \"\$(curl -fsS -o /dev/null -w '%{http_code}' https://batuara.org.br/)\" = 200; docker ps --filter name=batuara-net-api --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-db"
 
       - name: Upload release script and production environment
         env:
@@ -81,7 +89,7 @@ jobs:
       - name: Execute HealthCore-only release
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "chmod 700 /tmp/healthcore-oci-release.sh /tmp/healthcore-production.env && HEALTHCORE_DIR=/var/www/HealthCore RELEASE_SHA=$RELEASE_SHA HEALTHCORE_ENV_FILE=/tmp/healthcore-production.env /tmp/healthcore-oci-release.sh"
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "chmod 700 /tmp/healthcore-oci-release.sh /tmp/healthcore-production.env && HEALTHCORE_DIR=/var/www/HealthCore RELEASE_SHA=$RELEASE_SHA HEALTHCORE_ENV_FILE=/tmp/healthcore-production.env RECONCILE_REMOTE_DIRTY=$RECONCILE_REMOTE_DIRTY /tmp/healthcore-oci-release.sh"
 
       - name: Remove temporary release files
         if: always()

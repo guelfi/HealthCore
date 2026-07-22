@@ -4,13 +4,33 @@ set -Eeuo pipefail
 : "${HEALTHCORE_DIR:?HEALTHCORE_DIR is required}"
 : "${RELEASE_SHA:?RELEASE_SHA is required}"
 : "${HEALTHCORE_ENV_FILE:?HEALTHCORE_ENV_FILE is required}"
+RECONCILE_REMOTE_DIRTY="${RECONCILE_REMOTE_DIRTY:-false}"
 
 cd "$HEALTHCORE_DIR"
 
+
 if [[ -n "$(git status --porcelain)" ]]; then
-  echo "HealthCore remote working tree is dirty; refusing deployment" >&2
-  git status --short >&2
-  exit 1
+  if [[ "$RECONCILE_REMOTE_DIRTY" != "true" ]]; then
+    echo "HealthCore remote working tree is dirty; refusing deployment" >&2
+    git status --short >&2
+    exit 1
+  fi
+
+  dirty_paths="$(git status --porcelain | sed 's/^...//')"
+  [[ "$dirty_paths" == $'src/Api/Dockerfile\nsrc/Api/Program.cs' ]] || {
+    echo "Unexpected dirty paths; reconciliation refused" >&2
+    printf '%s\n' "$dirty_paths" >&2
+    exit 1
+  }
+
+  RECONCILIATION_DIR="/var/backups/healthcore/reconciliation/$(date -u +%Y%m%dT%H%M%SZ)"
+  sudo install -d -m 700 "$RECONCILIATION_DIR"
+  git diff --binary > "$RECONCILIATION_DIR/working-tree.diff"
+  git status --short > "$RECONCILIATION_DIR/status.txt"
+  sudo cp -p src/Api/Dockerfile src/Api/Program.cs "$RECONCILIATION_DIR/"
+  sudo chmod 600 "$RECONCILIATION_DIR"/*
+  git restore --source=HEAD --staged --worktree -- src/Api/Dockerfile src/Api/Program.cs
+  echo "Reconciled known OCI working-tree changes; backup: $RECONCILIATION_DIR"
 fi
 
 git fetch origin main
