@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   Box,
   Fab,
@@ -6,10 +6,8 @@ import {
   alpha,
   Zoom,
 } from '@mui/material';
-import {
-  TouchApp,
-} from '@mui/icons-material';
-import { SvgIcon } from '@mui/material';
+
+
 import { useResponsive } from '../../../presentation/hooks/useResponsive';
 
 interface DashboardScrollIndicatorsProps {
@@ -18,14 +16,14 @@ interface DashboardScrollIndicatorsProps {
   showDownButton?: boolean;
 }
 
-// Ícone de dedo apontando para cima 👆
+// Ãcone de dedo apontando para cima ðŸ‘†
 const FingerUpIcon: React.FC = () => (
-  <Box sx={{ fontSize: '1.5rem', lineHeight: 1 }}>👆</Box>
+  <Box sx={{ fontSize: '1.5rem', lineHeight: 1 }}>ðŸ‘†</Box>
 );
 
-// Ícone de dedo apontando para baixo 👇
+// Ãcone de dedo apontando para baixo ðŸ‘‡
 const FingerDownIcon: React.FC = () => (
-  <Box sx={{ fontSize: '1.5rem', lineHeight: 1 }}>👇</Box>
+  <Box sx={{ fontSize: '1.5rem', lineHeight: 1 }}>ðŸ‘‡</Box>
 );
 
 const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
@@ -41,12 +39,10 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
     showIndicators: false,
   });
 
-  // Só renderiza em mobile e se habilitado
-  if (!isMobile || !enabled) {
-    return null;
-  }
-
   useEffect(() => {
+    if (!isMobile || !enabled) {
+      return;
+    }
     const checkScrollState = () => {
       const scrollContainer = document.querySelector('[data-scroll-container]') ||
                              document.documentElement;
@@ -79,7 +75,12 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
       scrollContainer.removeEventListener('scroll', checkScrollState);
       window.removeEventListener('resize', checkScrollState);
     };
-  }, []);
+  }, [enabled, isMobile]);
+
+  // SÃ³ renderiza em mobile e se habilitado
+  if (!isMobile || !enabled) {
+    return null;
+  }
 
   const handleScrollUp = () => {
     const scrollContainer = document.querySelector('[data-scroll-container]');
@@ -126,7 +127,7 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
     boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.3)}`,
     color: theme.palette.primary.contrastText,
     
-    // Animações e interações
+    // AnimaÃ§Ãµes e interaÃ§Ãµes
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     
     '&:hover': {
@@ -143,7 +144,7 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
 
   return (
     <Box>
-      {/* Botão Scroll Up */}
+      {/* BotÃ£o Scroll Up */}
       {showUpButton && scrollState.canScrollUp && (
         <Zoom in={scrollState.canScrollUp} timeout={300}>
           <Fab
@@ -151,7 +152,7 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
             size="medium"
             sx={{
               ...fabBaseStyles,
-              bottom: 120, // Posição do botão superior
+              bottom: 120, // PosiÃ§Ã£o do botÃ£o superior
             }}
             aria-label="Scroll para cima"
           >
@@ -160,7 +161,7 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
         </Zoom>
       )}
 
-      {/* Botão Scroll Down */}
+      {/* BotÃ£o Scroll Down */}
       {showDownButton && scrollState.canScrollDown && (
         <Zoom in={scrollState.canScrollDown} timeout={300}>
           <Fab
@@ -168,7 +169,7 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
             size="medium"
             sx={{
               ...fabBaseStyles,
-              bottom: 64, // Posição do botão inferior
+              bottom: 64, // PosiÃ§Ã£o do botÃ£o inferior
             }}
             aria-label="Scroll para baixo"
           >

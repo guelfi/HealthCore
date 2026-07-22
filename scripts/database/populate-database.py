@@ -2,7 +2,7 @@
 """
 🚀 Script para Popular Banco de Dados com Dados Reais
 
-Execução: python scripts/populate-database.py
+Execução: python scripts/database/populate-database.py
 
 Este script adiciona dados de teste reais no banco via API,
 permitindo testar a integração frontend-backend com dados reais
@@ -15,19 +15,16 @@ import urllib.parse
 import json
 import socket
 import sys
+import os
 
 # Configuração da API - testa múltiplos endpoints
-API_ENDPOINTS = [
-    'http://192.168.15.119:5000',  # Backend no macOS
-    'http://localhost:5000',       # Backend local
-    'http://127.0.0.1:5000'        # Backend local alternativo
-]
+API_ENDPOINTS = [os.getenv('HEALTHCORE_API_URL', 'http://localhost:5000')]
 
 API_BASE_URL = None  # Será definido após teste de conectividade
 
 ADMIN_CREDENTIALS = {
-    'username': 'guelfi',
-    'password': '@246!588'
+    'username': os.getenv('HEALTHCORE_ADMIN_USERNAME', ''),
+    'password': os.getenv('HEALTHCORE_ADMIN_PASSWORD', '')
 }
 
 # Endpoint correto descoberto no teste
@@ -84,7 +81,6 @@ EXAMES_TESTE = [
         'descricao': 'Tomografia computadorizada do tórax',
         'dataExame': '2025-08-25',
         'observacoes': 'Exame realizado com contraste',
-        'idempotencyKey': 'exam-001-ct-torax'
     },
     {
         'pacienteId': None,
@@ -92,7 +88,6 @@ EXAMES_TESTE = [
         'descricao': 'Ressonância magnética do crânio',
         'dataExame': '2025-08-26',
         'observacoes': 'Investigação de cefaleia',
-        'idempotencyKey': 'exam-002-mr-cranio'
     },
     {
         'pacienteId': None,
@@ -100,7 +95,6 @@ EXAMES_TESTE = [
         'descricao': 'Ultrassom abdominal total',
         'dataExame': '2025-08-27',
         'observacoes': 'Avaliação de dor abdominal',
-        'idempotencyKey': 'exam-003-us-abdomen'
     },
     {
         'pacienteId': None,
@@ -108,7 +102,6 @@ EXAMES_TESTE = [
         'descricao': 'Radiografia de tórax PA e perfil',
         'dataExame': '2025-08-24',
         'observacoes': 'Controle pós-pneumonia',
-        'idempotencyKey': 'exam-004-dx-torax'
     },
     {
         'pacienteId': None,
@@ -116,7 +109,6 @@ EXAMES_TESTE = [
         'descricao': 'Mamografia bilateral',
         'dataExame': '2025-08-23',
         'observacoes': 'Rastreamento anual',
-        'idempotencyKey': 'exam-005-mg-bilateral'
     }
 ]
 
@@ -225,8 +217,7 @@ def test_connectivity():
     color_log('🔧 SOLUÇÕES:', Colors.BLUE)
     color_log('1. Iniciar backend no macOS: ./scripts/api.sh', Colors.WHITE)
     color_log('2. Ou executar: dotnet run --project src/Api', Colors.WHITE)
-    color_log('3. Verificar se o IP 192.168.15.119 está correto', Colors.WHITE)
-    color_log('4. Testar conectividade: ping 192.168.15.119', Colors.WHITE)
+    color_log('3. Verificar HEALTHCORE_API_URL e a disponibilidade da API.', Colors.WHITE)
     return False
 
 def populate_database():
@@ -234,6 +225,10 @@ def populate_database():
     print('\n🚀 INICIANDO POPULAÇÃO DO BANCO DE DADOS\n')
     
     try:
+        if not ADMIN_CREDENTIALS['username'] or not ADMIN_CREDENTIALS['password']:
+            color_log('Defina HEALTHCORE_ADMIN_USERNAME e HEALTHCORE_ADMIN_PASSWORD antes de executar.', Colors.RED)
+            return
+
         # 1. Testar conectividade
         is_connected = test_connectivity()
         
@@ -248,14 +243,13 @@ def populate_database():
         
         if not login_response['success'] or not login_response['data'].get('token'):
             color_log('❌ Falha no login!', Colors.RED)
-            print('Resposta:', login_response)
+            color_log('   Login falhou; consulte apenas o status HTTP sem imprimir dados da resposta.', Colors.RED)
             return
         
         token = login_response['data']['token']
         user = login_response['data']['user']
         color_log('✅ Login realizado com sucesso!', Colors.GREEN)
         color_log(f"👤 Usuário: {user['username']} ({'Administrador' if user['role'] == 1 else 'Usuário'})", Colors.CYAN)
-        color_log(f"🎫 Token: {token[:30]}...", Colors.GRAY)
 
         # 3. Popular pacientes
         color_log('\n👥 Criando pacientes de teste...', Colors.CYAN)
@@ -279,6 +273,7 @@ def populate_database():
             for i, exame in enumerate(EXAMES_TESTE[:len(pacientes_ids)]):
                 exame_atual = exame.copy()
                 exame_atual['pacienteId'] = pacientes_ids[i]
+                exame_atual['idempotencyKey'] = f'seed-exam-{i + 1}'
                 
                 color_log(f"   Criando: {exame_atual['modalidade']} - {exame_atual['descricao']}...", Colors.YELLOW)
                 

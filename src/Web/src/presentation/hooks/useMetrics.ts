@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DashboardMetrics } from '../../domain/entities/Metrics';
 import { metricsService } from '../../application/services/MetricsService';
+import { getErrorMessage } from '../../infrastructure/utils/errorMessage';
 import { useAuthStore } from '../../application/stores/authStore';
 import { UserProfile } from '../../domain/enums/UserProfile';
 
@@ -135,9 +136,9 @@ export const useMetrics = (
       setMetrics(metricsData);
       setLastUpdated(new Date());
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao carregar métricas:', err);
-      setError(err.message || 'Erro ao carregar métricas do dashboard');
+      setError(getErrorMessage(err, 'Erro ao carregar m?tricas do dashboard'));
 
       // Em caso de erro, manter dados anteriores se existirem
       if (!metrics) {
@@ -180,18 +181,12 @@ export const useMetrics = (
   /**
    * Effect para refrescar dados quando usuário muda
    */
+  // Effect para limpar dados quando a identidade ou autenticacao muda
   useEffect(() => {
-    if (isAuthenticated && user?.role) {
-      // Reset quando usuário muda
-      if (metrics && lastUpdated) {
-        reset();
-        fetchMetrics();
-      }
-    } else {
-      // Limpar dados quando usuário desloga
+    if (!isAuthenticated || !user?.role) {
       reset();
     }
-  }, [user?.id, user?.role]); // Dependências específicas para detectar mudança de usuário
+  }, [isAuthenticated, user?.role, reset]); // Dependências específicas para detectar mudança de usuário
 
   /**
    * Effect para refetch on window focus (se habilitado)

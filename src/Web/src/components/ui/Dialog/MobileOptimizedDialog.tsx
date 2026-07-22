@@ -53,7 +53,7 @@ const MobileOptimizedDialog: React.FC<MobileOptimizedDialogProps> = ({
   ...props
 }) => {
   const theme = useTheme();
-  const { isMobile, isTablet, isTouchDevice } = useResponsive();
+  const { isMobile, isTouchDevice } = useResponsive();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   // Determinar se deve usar bottom sheet

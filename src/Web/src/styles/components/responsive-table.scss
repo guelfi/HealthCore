@@ -1,5 +1,5 @@
-@import '../design-system/tokens';
-@import '../design-system/breakpoints';
+@use '../design-system/tokens' as *;
+@use '../design-system/breakpoints' as *;
 
 .responsive-table-container {
   position: relative;

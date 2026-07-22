@@ -7,9 +7,13 @@ using HealthCore.Api.Core.Domain.Entities;
 using HealthCore.Api.Core.Domain.Enums;
 using HealthCore.Api.Infrastructure.Data;
 using HealthCore.Api.Infrastructure.Middleware;
+using HealthCore.Api.Infrastructure.Security;
+using HealthCore.Api.Infrastructure.Extensions;
 using Serilog;
 using Serilog.Formatting.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text;
@@ -20,8 +24,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.OpenApi.Models;
 
 // Configurar o Serilog
-var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
-
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", "HealthCore.Api")
     .Enrich.WithProperty("Environment", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production")
@@ -34,181 +36,52 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+var isDevelopment = builder.Environment.IsDevelopment();
 
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-
-// Add Memory Cache
-builder.Services.AddMemoryCache();
-
-// Register Health Check services
-builder.Services.AddScoped<HealthCore.Api.Infrastructure.HealthChecks.DatabasePerformanceHealthCheck>();
-
-// Rate limiting removed - package not available
-//builder.Services.AddSwaggerGen();
-builder.Services.AddSwaggerGen(c =>
-{
-    // Adicione esta linha:
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "HealthCore API", Version = "v1" });
-    // ... outras configurações ...
-});
-
-// Add model validation
-builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
-{
-    options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-});
-
-// Add Health Checks
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<HealthCoreDbContext>(
-        "database",
-        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
-        tags: new[] { "db", "sql", "ready" })
-    .AddCheck("filesystem", () =>
-    {
-        try
-        {
-            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "log");
-            if (!Directory.Exists(logPath))
-            {
-                Directory.CreateDirectory(logPath);
-            }
-            
-            var testFile = Path.Combine(logPath, "health-check.tmp");
-            File.WriteAllText(testFile, DateTime.UtcNow.ToString());
-            File.Delete(testFile);
-            
-            // Verificar espaço em disco
-            var drive = new DriveInfo(Path.GetPathRoot(Directory.GetCurrentDirectory())!);
-            var freeSpaceGB = drive.AvailableFreeSpace / (1024.0 * 1024 * 1024);
-            var minDiskSpaceGB = builder.Configuration.GetValue<double>("HealthChecks:MinDiskSpaceGB", 1.0);
-            
-            if (freeSpaceGB < minDiskSpaceGB)
-            {
-                return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
-                    $"Low disk space: {freeSpaceGB:F2} GB available");
-            }
-            
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
-                $"Filesystem accessible. Free space: {freeSpaceGB:F2} GB");
-        }
-        catch (Exception ex)
-        {
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy("Filesystem check failed", ex);
-        }
-    }, tags: new[] { "filesystem", "ready" })
-    .AddCheck("memory", () =>
-    {
-        var gc = GC.GetTotalMemory(false);
-        var workingSet = Environment.WorkingSet;
-        var maxMemoryMB = builder.Configuration.GetValue<long>("HealthChecks:MaxMemoryUsageMB", 512);
-        var maxMemoryBytes = maxMemoryMB * 1024 * 1024;
-        
-        var workingSetMB = workingSet / 1024 / 1024;
-        var gcMB = gc / 1024 / 1024;
-        
-        if (workingSet > maxMemoryBytes)
-        {
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
-                $"High memory usage: Working Set {workingSetMB} MB, GC {gcMB} MB");
-        }
-        
-        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
-            $"Memory usage normal: Working Set {workingSetMB} MB, GC {gcMB} MB");
-    }, tags: new[] { "memory", "live" })
-    .AddCheck<HealthCore.Api.Infrastructure.HealthChecks.DatabasePerformanceHealthCheck>(
-        "database-performance", 
-        tags: new[] { "db", "performance", "ready" })
-    .AddCheck("application-startup", () =>
-    {
-        var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
-        
-        if (uptime.TotalSeconds < 30)
-        {
-            return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded(
-                $"Application still warming up: {uptime.TotalSeconds:F0}s");
-        }
-        
-        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(
-            $"Application running: {uptime.TotalMinutes:F1} minutes");
-    }, tags: new[] { "startup", "live" });
-
-var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=database/healthcore.db";
-var dataSourcePrefix = "Data Source=";
-var dbFilePath = defaultConnection.StartsWith(dataSourcePrefix) ? defaultConnection.Substring(dataSourcePrefix.Length) : defaultConnection;
-if (!Path.IsPathRooted(dbFilePath))
-{
-    var absolutePath = Path.Combine(builder.Environment.ContentRootPath, dbFilePath);
-    defaultConnection = $"{dataSourcePrefix}{absolutePath}";
-}
-
-builder.Services.AddDbContext<HealthCoreDbContext>(options =>
-    options.UseSqlite(defaultConnection));
-
-// Register application services
-builder.Services.AddScoped<PacienteService>();
-builder.Services.AddScoped<ExameService>();
-builder.Services.AddScoped<MedicoService>();
-builder.Services.AddScoped<EspecialidadeService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<AdminService>();
-
+builder.Services.AddHealthCorePlatform(builder.Configuration);
+builder.Services.AddHealthCorePersistence(builder.Configuration, builder.Environment);
+builder.Services.AddHealthCoreSecurity(builder.Configuration, builder.Environment);
 // Add Serilog
 builder.Host.UseSerilog();
 
-// Configure JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Key"] ?? "thisIsAVeryStrongAndSecureSecretKeyForJWTAuthentication"; // Use a strong, secure key in production
-var key = Encoding.ASCII.GetBytes(jwtSecret);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false
-    };
-});
-
-builder.Services.AddAuthorization(); // Add Authorization services
-
-// Configure CORS for Nginx Proxy
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowProxy", policy =>
-    {
-        policy.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
-});
+// The web host listens on the internal container port.
 
 builder.WebHost.UseUrls("http://0.0.0.0:5000"); // Configure Kestrel to listen on all interfaces
 
 var app = builder.Build();
+const string RefreshCookieName = "healthcore_refresh";
 
-using (var scope = app.Services.CreateScope())
+void SetRefreshCookie(HttpContext context, string refreshToken)
 {
-    var db = scope.ServiceProvider.GetRequiredService<HealthCoreDbContext>();
-    try
+    var expiryDays = builder.Configuration.GetValue<int>("Jwt:RefreshTokenExpiryDays", 7);
+    var secureCookies = builder.Configuration.GetValue("Security:RefreshCookieSecure", !isDevelopment);
+
+    context.Response.Cookies.Append(RefreshCookieName, refreshToken, new Microsoft.AspNetCore.Http.CookieOptions
     {
-        db.Database.Migrate();
-    }
-    catch (Exception ex)
+        HttpOnly = true,
+        Secure = secureCookies,
+        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
+        Path = "/",
+        Expires = DateTimeOffset.UtcNow.AddDays(expiryDays)
+    });
+}
+
+void ClearRefreshCookie(HttpContext context)
+{
+    context.Response.Cookies.Delete(RefreshCookieName, new Microsoft.AspNetCore.Http.CookieOptions
     {
-        Log.Error(ex, "Falha ao aplicar migrations do banco SQLite");
-        throw;
-    }
+        HttpOnly = true,
+        Secure = builder.Configuration.GetValue("Security:RefreshCookieSecure", !isDevelopment),
+        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
+        Path = "/"
+    });
+}
+
+app.ApplyHealthCoreMigrations();
+
+if (app.Environment.IsEnvironment("E2E"))
+{
+    await app.SeedHealthCoreE2eUserAsync();
 }
 
 // Helper method for model validation
@@ -220,7 +93,7 @@ static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : 
     if (!Validator.TryValidateObject(model, context, results, true))
     {
         var errors = results.Select(r => r.ErrorMessage).ToList();
-        return (false, Results.BadRequest(new { Message = "Dados inválidos", Errors = errors }));
+        return (false, Results.BadRequest(new { Message = "Dados invÃ¡lidos", Errors = errors }));
     }
     
     return (true, null);
@@ -229,16 +102,21 @@ static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : 
 // Configure PathBase for Nginx Proxy
 app.UsePathBase("/healthcore-api");
 
-// Configure the HTTP request pipeline.
-// Habilitar Swagger em produção para facilitar testes e documentação
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+// Keep API documentation disabled in production unless explicitly enabled.
+if (isDevelopment || builder.Configuration.GetValue<bool>("OpenApi:Enabled", false))
 {
-    c.SwaggerEndpoint("/healthcore-api/swagger/v1/swagger.json", "HealthCore API V1");
-    c.RoutePrefix = "swagger"; // Swagger disponível em /swagger
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/healthcore-api/swagger/v1/swagger.json", "HealthCore API V1");
+        c.RoutePrefix = "swagger";
+    });
+}
 
-app.UseHttpsRedirection();
+if (builder.Configuration.GetValue<bool>("Security:RequireHttps", false))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseSerilogRequestLogging();
 
@@ -249,7 +127,7 @@ if (enableSecurityHeaders)
     app.UseSecurityHeaders();
 }
 
-// Rate limiting removed - package not available
+app.UseRateLimiter();
 
 // Use CORS
 app.UseCors("AllowProxy");
@@ -264,39 +142,20 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     ResponseWriter = async (context, report) =>
     {
         context.Response.ContentType = "application/json";
-        
         var response = new
         {
-            status = report.Status.ToString(),
+            status = report.Status.ToString().ToLowerInvariant(),
             timestamp = DateTime.UtcNow,
-            duration = report.TotalDuration,
             checks = report.Entries.Select(entry => new
             {
                 name = entry.Key,
-                status = entry.Value.Status.ToString(),
-                duration = entry.Value.Duration,
-                description = entry.Value.Description,
-                exception = entry.Value.Exception?.Message
-            }),
-            system = new
-            {
-                environment = app.Environment.EnvironmentName,
-                machineName = Environment.MachineName,
-                osVersion = Environment.OSVersion.ToString(),
-                processId = Environment.ProcessId,
-                workingSet = $"{Environment.WorkingSet / 1024 / 1024} MB",
-                gcMemory = $"{GC.GetTotalMemory(false) / 1024 / 1024} MB",
-                uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()
-            }
+                status = entry.Value.Status.ToString().ToLowerInvariant()
+            })
         };
-        
-        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response, new System.Text.Json.JsonSerializerOptions
-        {
-            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        }));
+
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
     }
-});
+}).AllowAnonymous();
 
 // Readiness probe endpoint (with database and filesystem checks)
 app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
@@ -309,18 +168,16 @@ app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.Health
         {
             status = report.Status.ToString().ToLowerInvariant(),
             timestamp = DateTime.UtcNow,
-            duration = report.TotalDuration,
             checks = report.Entries.Select(entry => new
             {
                 name = entry.Key,
-                status = entry.Value.Status.ToString().ToLowerInvariant(),
-                duration = entry.Value.Duration,
-                description = entry.Value.Description
+                status = entry.Value.Status.ToString().ToLowerInvariant()
             })
         };
+
         await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
     }
-});
+}).AllowAnonymous();
 
 // Liveness probe endpoint (minimal checks, always responsive)
 app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
@@ -336,7 +193,7 @@ app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthC
         };
         await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
     }
-});
+}).AllowAnonymous();
 
 // Detailed system info endpoint (for monitoring tools)
 app.MapGet("/health/info", () =>
@@ -376,7 +233,7 @@ app.MapGet("/health/info", () =>
 });
 
 // Endpoints para Pacientes
-app.MapPost("/pacientes", async (CreatePacienteDto createPacienteDto, PacienteService pacienteService, ILogger<Program> logger) =>
+app.MapPost("/pacientes", async (CreatePacienteDto createPacienteDto, PacienteService pacienteService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
     // Validar modelo
     var (isValid, errorResult) = ValidateModel(createPacienteDto);
@@ -385,34 +242,38 @@ app.MapPost("/pacientes", async (CreatePacienteDto createPacienteDto, PacienteSe
 
     try
     {
-        logger.LogInformation("Iniciando criação de paciente: {Nome}, Documento: {Documento}", createPacienteDto.Nome, createPacienteDto.Documento);
-        var paciente = await pacienteService.CreatePacienteAsync(createPacienteDto);
+        logger.LogInformation("Iniciando criaÃ§Ã£o de paciente: {Nome}, Documento: {Documento}", createPacienteDto.Nome, createPacienteDto.Documento);
+        var medicoId = await resourceAuthorization.GetCurrentMedicoIdAsync(context.User);
+        if (!resourceAuthorization.IsAdministrator(context.User) && !medicoId.HasValue)
+            return Results.Forbid();
+
+        var paciente = await pacienteService.CreatePacienteAsync(createPacienteDto, medicoId);
         logger.LogInformation("Paciente criado com sucesso: {Id}", paciente.Id);
         return Results.Created($"/pacientes/{paciente.Id}", paciente);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Tentativa de criação de paciente com documento duplicado: {Documento}. Erro: {Message}", createPacienteDto.Documento, ex.Message);
+        logger.LogWarning("Tentativa de criaÃ§Ã£o de paciente com documento duplicado: {Documento}. Erro: {Message}", createPacienteDto.Documento, ex.Message);
         return Results.Conflict(new { Message = ex.Message });
     }
 });
 
-app.MapGet("/pacientes", async (PacienteService pacienteService, HttpContext context, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
+app.MapGet("/pacientes", async (PacienteService pacienteService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
 {
     try
     {
-        logger.LogInformation("Listando pacientes - Página: {Page}, Tamanho da página: {PageSize}", page, pageSize);
+        logger.LogInformation("Listando pacientes - PÃ¡gina: {Page}, Tamanho da pÃ¡gina: {PageSize}", page, pageSize);
         
-        // Verificar o role do usuário logado
+        // Verificar o role do usuÃ¡rio logado
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         Guid? medicoId = null;
         
-        // Se for médico, filtrar apenas seus pacientes
+        // Se for mÃ©dico, filtrar apenas seus pacientes
         if (userRole == UserRole.Medico.ToString() && !string.IsNullOrEmpty(userId))
         {
-            // Buscar o ID do médico baseado no UserId
+            // Buscar o ID do mÃ©dico baseado no UserId
             using var scope = context.RequestServices.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<HealthCoreDbContext>();
             
@@ -422,12 +283,15 @@ app.MapGet("/pacientes", async (PacienteService pacienteService, HttpContext con
             if (medico != null)
             {
                 medicoId = medico.Id;
-                logger.LogInformation("Filtrando pacientes para o médico: {MedicoId}", medicoId);
+                logger.LogInformation("Filtrando pacientes para o mÃ©dico: {MedicoId}", medicoId);
             }
         }
         
+        if (userRole == UserRole.Medico.ToString() && !medicoId.HasValue)
+            return Results.Forbid();
+
         var pacientes = await pacienteService.GetPacientesAsync(page, pageSize, medicoId);
-        logger.LogInformation("Listagem de pacientes concluída. Número de pacientes retornados: {Count}", pacientes.Data.Count);
+        logger.LogInformation("Listagem de pacientes concluÃ­da. NÃºmero de pacientes retornados: {Count}", pacientes.Data.Count);
         return Results.Ok(pacientes);
     }
     catch (Exception ex)
@@ -437,16 +301,19 @@ app.MapGet("/pacientes", async (PacienteService pacienteService, HttpContext con
     }
 }).RequireAuthorization();
 
-app.MapPut("/pacientes/{id:guid}", async (Guid id, UpdatePacienteDto updatePacienteDto, PacienteService pacienteService, ILogger<Program> logger) =>
+app.MapPut("/pacientes/{id:guid}", async (Guid id, UpdatePacienteDto updatePacienteDto, PacienteService pacienteService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
     try
     {
-        logger.LogInformation("Iniciando atualização de paciente com ID: {Id}", id);
+        logger.LogInformation("Iniciando atualizaÃ§Ã£o de paciente com ID: {Id}", id);
+        if (!await resourceAuthorization.CanAccessPatientAsync(id, context.User))
+            return Results.NotFound(new { Message = $"Paciente com ID {id} não encontrado." });
+
         var paciente = await pacienteService.UpdatePacienteAsync(id, updatePacienteDto);
         if (paciente == null)
         {
-            logger.LogWarning("Paciente com ID: {Id} não encontrado para atualização.", id);
-            return Results.NotFound(new { Message = $"Paciente com ID {id} não encontrado." });
+            logger.LogWarning("Paciente com ID: {Id} nÃ£o encontrado para atualizaÃ§Ã£o.", id);
+            return Results.NotFound(new { Message = $"Paciente com ID {id} nÃ£o encontrado." });
         }
         logger.LogInformation("Paciente com ID: {Id} atualizado com sucesso.", id);
         return Results.Ok(paciente);
@@ -458,45 +325,51 @@ app.MapPut("/pacientes/{id:guid}", async (Guid id, UpdatePacienteDto updatePacie
     }
 });
 
-app.MapDelete("/pacientes/{id:guid}", async (Guid id, PacienteService pacienteService, ILogger<Program> logger) =>
+app.MapDelete("/pacientes/{id:guid}", async (Guid id, PacienteService pacienteService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
-    logger.LogInformation("Iniciando exclusão de paciente com ID: {Id}", id);
+    logger.LogInformation("Iniciando exclusÃ£o de paciente com ID: {Id}", id);
+    if (!await resourceAuthorization.CanAccessPatientAsync(id, context.User))
+        return Results.NotFound(new { Message = $"Paciente com ID {id} não encontrado." });
+
     var result = await pacienteService.DeletePacienteAsync(id);
     if (!result)
     {
-        logger.LogWarning("Paciente com ID: {Id} não encontrado para exclusão.", id);
-        return Results.NotFound(new { Message = $"Paciente com ID {id} não encontrado." });
+        logger.LogWarning("Paciente com ID: {Id} nÃ£o encontrado para exclusÃ£o.", id);
+        return Results.NotFound(new { Message = $"Paciente com ID {id} nÃ£o encontrado." });
     }
-    logger.LogInformation("Paciente com ID: {Id} excluído com sucesso.", id);
+    logger.LogInformation("Paciente com ID: {Id} excluÃ­do com sucesso.", id);
     return Results.NoContent();
 });
 
-app.MapGet("/pacientes/{id:guid}", async (Guid id, PacienteService pacienteService, ILogger<Program> logger) =>
+app.MapGet("/pacientes/{id:guid}", async (Guid id, PacienteService pacienteService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
     logger.LogInformation("Buscando paciente com ID: {Id}", id);
+    if (!await resourceAuthorization.CanAccessPatientAsync(id, context.User))
+        return Results.NotFound(new { Message = $"Paciente com ID {id} não encontrado." });
+
     var paciente = await pacienteService.GetPacienteByIdAsync(id);
     if (paciente == null)
     {
-        logger.LogWarning("Paciente com ID: {Id} não encontrado.", id);
-        return Results.NotFound(new { Message = $"Paciente com ID {id} não encontrado." });
+        logger.LogWarning("Paciente com ID: {Id} nÃ£o encontrado.", id);
+        return Results.NotFound(new { Message = $"Paciente com ID {id} nÃ£o encontrado." });
     }
     logger.LogInformation("Paciente encontrado: {Id}", id);
     return Results.Ok(paciente);
 }).RequireAuthorization();
 
-app.MapGet("/pacientes/search", async (PacienteService pacienteService, HttpContext context, ILogger<Program> logger, string? nome = null, int page = 1, int pageSize = 10) =>
+app.MapGet("/pacientes/search", async (PacienteService pacienteService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger, string? nome = null, int page = 1, int pageSize = 10) =>
 {
     try
     {
-        logger.LogInformation("Buscando pacientes por nome: {Nome} - Página: {Page}, Tamanho: {PageSize}", nome, page, pageSize);
+        logger.LogInformation("Buscando pacientes por nome: {Nome} - PÃ¡gina: {Page}, Tamanho: {PageSize}", nome, page, pageSize);
         
-        // Verificar o role do usuário logado
+        // Verificar o role do usuÃ¡rio logado
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         Guid? medicoId = null;
         
-        // Se for médico, filtrar apenas seus pacientes
+        // Se for mÃ©dico, filtrar apenas seus pacientes
         if (userRole == UserRole.Medico.ToString() && !string.IsNullOrEmpty(userId))
         {
             using var scope = context.RequestServices.CreateScope();
@@ -508,12 +381,15 @@ app.MapGet("/pacientes/search", async (PacienteService pacienteService, HttpCont
             if (medico != null)
             {
                 medicoId = medico.Id;
-                logger.LogInformation("Filtrando pacientes para o médico: {MedicoId}", medicoId);
+                logger.LogInformation("Filtrando pacientes para o mÃ©dico: {MedicoId}", medicoId);
             }
         }
         
+        if (userRole == UserRole.Medico.ToString() && !medicoId.HasValue)
+            return Results.Forbid();
+
         var pacientes = await pacienteService.SearchPacientesByNomeAsync(nome, page, pageSize, medicoId);
-        logger.LogInformation("Busca de pacientes concluída. Número de pacientes retornados: {Count}", pacientes.Data.Count);
+        logger.LogInformation("Busca de pacientes concluÃ­da. NÃºmero de pacientes retornados: {Count}", pacientes.Data.Count);
         return Results.Ok(pacientes);
     }
     catch (Exception ex)
@@ -524,7 +400,7 @@ app.MapGet("/pacientes/search", async (PacienteService pacienteService, HttpCont
 }).RequireAuthorization();
 
 // Endpoints para Exames
-app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameService, ILogger<Program> logger) =>
+app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
     // Validar modelo
     var (isValid, errorResult) = ValidateModel(createExameDto);
@@ -533,7 +409,10 @@ app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameS
 
     try
     {
-        logger.LogInformation("Iniciando criação de exame para paciente: {PacienteId}, IdempotencyKey: {IdempotencyKey}", createExameDto.PacienteId, createExameDto.IdempotencyKey);
+        logger.LogInformation("Iniciando criaÃ§Ã£o de exame para paciente: {PacienteId}, IdempotencyKey: {IdempotencyKey}", createExameDto.PacienteId, createExameDto.IdempotencyKey);
+        if (!await resourceAuthorization.CanAccessPatientAsync(createExameDto.PacienteId, context.User))
+            return Results.NotFound(new { Message = "Paciente não encontrado." });
+
         var exame = await exameService.CreateExameAsync(createExameDto);
         logger.LogInformation("Exame criado com sucesso: {Id}", exame.Id);
         return Results.Created($"/exames/{exame.Id}", exame);
@@ -545,7 +424,7 @@ app.MapPost("/exames", async (CreateExameDto createExameDto, ExameService exameS
     }
     catch (ArgumentException ex)
     {
-        logger.LogWarning("Modalidade inválida no exame. Erro: {Message}", ex.Message);
+        logger.LogWarning("Modalidade invÃ¡lida no exame. Erro: {Message}", ex.Message);
         return Results.BadRequest(new { Message = ex.Message });
     }
 });
@@ -554,15 +433,15 @@ app.MapGet("/exames", async (HttpContext context, ExameService exameService, Hea
 {
     try
     {
-        logger.LogInformation("Listando exames - Página: {Page}, Tamanho da página: {PageSize}, Modalidade: {Modalidade}, PacienteId: {PacienteId}", page, pageSize, modalidade, pacienteId);
+        logger.LogInformation("Listando exames - PÃ¡gina: {Page}, Tamanho da pÃ¡gina: {PageSize}, Modalidade: {Modalidade}, PacienteId: {PacienteId}", page, pageSize, modalidade, pacienteId);
         
-        // Obter informações do usuário logado
+        // Obter informaÃ§Ãµes do usuÃ¡rio logado
         var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userRoleClaim = context.User.FindFirst(ClaimTypes.Role)?.Value;
         
         if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(userRoleClaim))
         {
-            logger.LogWarning("Usuário não autenticado tentando acessar exames");
+            logger.LogWarning("UsuÃ¡rio nÃ£o autenticado tentando acessar exames");
             return Results.Unauthorized();
         }
         
@@ -571,25 +450,25 @@ app.MapGet("/exames", async (HttpContext context, ExameService exameService, Hea
         
         Guid? medicoId = null;
         
-        // Se for médico, filtrar apenas exames dos seus pacientes
+        // Se for mÃ©dico, filtrar apenas exames dos seus pacientes
         if (userRole == UserRole.Medico)
         {
             var medico = await dbContext.Medicos.FirstOrDefaultAsync(m => m.UserId == userId);
             if (medico == null)
             {
-                logger.LogWarning("Médico não encontrado para o usuário {UserId}", userId);
-                return Results.NotFound(new { Message = "Médico não encontrado" });
+                logger.LogWarning("MÃ©dico nÃ£o encontrado para o usuÃ¡rio {UserId}", userId);
+                return Results.NotFound(new { Message = "MÃ©dico nÃ£o encontrado" });
             }
             medicoId = medico.Id;
-            logger.LogInformation("Filtrando exames dos pacientes do médico {MedicoId}", medicoId);
+            logger.LogInformation("Filtrando exames dos pacientes do mÃ©dico {MedicoId}", medicoId);
         }
         else
         {
-            logger.LogInformation("Usuário administrador - listando todos os exames");
+            logger.LogInformation("UsuÃ¡rio administrador - listando todos os exames");
         }
         
         var exames = await exameService.GetExamesAsync(page, pageSize, modalidade, pacienteId, dataInicio, dataFim, medicoId);
-        logger.LogInformation("Listagem de exames concluída. Número de exames retornados: {Count}", exames.Data.Count);
+        logger.LogInformation("Listagem de exames concluÃ­da. NÃºmero de exames retornados: {Count}", exames.Data.Count);
         return Results.Ok(exames);
     }
     catch (Exception ex)
@@ -599,29 +478,35 @@ app.MapGet("/exames", async (HttpContext context, ExameService exameService, Hea
     }
 }).RequireAuthorization();
 
-app.MapGet("/exames/{id:guid}", async (Guid id, ExameService exameService, ILogger<Program> logger) =>
+app.MapGet("/exames/{id:guid}", async (Guid id, ExameService exameService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
     logger.LogInformation("Buscando exame com ID: {Id}", id);
+    if (!await resourceAuthorization.CanAccessExamAsync(id, context.User))
+        return Results.NotFound(new { Message = $"Exame com ID {id} não encontrado." });
+
     var exame = await exameService.GetExameByIdAsync(id);
     if (exame == null)
     {
-        logger.LogWarning("Exame com ID: {Id} não encontrado.", id);
-        return Results.NotFound(new { Message = $"Exame com ID {id} não encontrado." });
+        logger.LogWarning("Exame com ID: {Id} nÃ£o encontrado.", id);
+        return Results.NotFound(new { Message = $"Exame com ID {id} nÃ£o encontrado." });
     }
     logger.LogInformation("Exame encontrado: {Id}", id);
     return Results.Ok(exame);
 });
 
-app.MapPut("/exames/{id:guid}", async (Guid id, UpdateExameDto updateExameDto, ExameService exameService, ILogger<Program> logger) =>
+app.MapPut("/exames/{id:guid}", async (Guid id, UpdateExameDto updateExameDto, ExameService exameService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
     try
     {
-        logger.LogInformation("Iniciando atualização de exame com ID: {Id}", id);
+        logger.LogInformation("Iniciando atualizaÃ§Ã£o de exame com ID: {Id}", id);
+        if (!await resourceAuthorization.CanAccessExamAsync(id, context.User) || !await resourceAuthorization.CanAccessPatientAsync(updateExameDto.PacienteId, context.User))
+            return Results.NotFound(new { Message = $"Exame com ID {id} não encontrado." });
+
         var exame = await exameService.UpdateExameAsync(id, updateExameDto);
         if (exame == null)
         {
-            logger.LogWarning("Exame com ID: {Id} não encontrado para atualização.", id);
-            return Results.NotFound(new { Message = $"Exame com ID {id} não encontrado." });
+            logger.LogWarning("Exame com ID: {Id} nÃ£o encontrado para atualizaÃ§Ã£o.", id);
+            return Results.NotFound(new { Message = $"Exame com ID {id} nÃ£o encontrado." });
         }
         logger.LogInformation("Exame com ID: {Id} atualizado com sucesso.", id);
         return Results.Ok(exame);
@@ -633,20 +518,23 @@ app.MapPut("/exames/{id:guid}", async (Guid id, UpdateExameDto updateExameDto, E
     }
 });
 
-app.MapDelete("/exames/{id:guid}", async (Guid id, ExameService exameService, ILogger<Program> logger) =>
+app.MapDelete("/exames/{id:guid}", async (Guid id, ExameService exameService, ResourceAuthorizationService resourceAuthorization, HttpContext context, ILogger<Program> logger) =>
 {
-    logger.LogInformation("Iniciando exclusão de exame com ID: {Id}", id);
+    logger.LogInformation("Iniciando exclusÃ£o de exame com ID: {Id}", id);
+    if (!await resourceAuthorization.CanAccessExamAsync(id, context.User))
+        return Results.NotFound(new { Message = $"Exame com ID {id} não encontrado." });
+
     var result = await exameService.DeleteExameAsync(id);
     if (!result)
     {
-        logger.LogWarning("Exame com ID: {Id} não encontrado para exclusão.", id);
-        return Results.NotFound(new { Message = $"Exame com ID {id} não encontrado." });
+        logger.LogWarning("Exame com ID: {Id} nÃ£o encontrado para exclusÃ£o.", id);
+        return Results.NotFound(new { Message = $"Exame com ID {id} nÃ£o encontrado." });
     }
-    logger.LogInformation("Exame com ID: {Id} excluído com sucesso.", id);
+    logger.LogInformation("Exame com ID: {Id} excluÃ­do com sucesso.", id);
     return Results.NoContent();
 });
 
-// Endpoint para listar modalidades disponíveis
+// Endpoint para listar modalidades disponÃ­veis
 app.MapGet("/exames/modalidades", (ILogger<Program> logger, IMemoryCache cache) =>
 {
     const string cacheKey = "modalidades-dicom";
@@ -657,7 +545,7 @@ app.MapGet("/exames/modalidades", (ILogger<Program> logger, IMemoryCache cache) 
         return Results.Ok(cachedModalidades);
     }
     
-    logger.LogInformation("Listando modalidades de exames disponíveis");
+    logger.LogInformation("Listando modalidades de exames disponÃ­veis");
     var modalidades = Enum.GetValues<HealthCore.Api.Core.Domain.Enums.ModalidadeExame>()
         .Select(m => new { 
             Value = m.ToString(), 
@@ -665,7 +553,7 @@ app.MapGet("/exames/modalidades", (ILogger<Program> logger, IMemoryCache cache) 
         })
         .ToList();
     
-    // Cache por 24 horas (dados estáticos)
+    // Cache por 24 horas (dados estÃ¡ticos)
     var cacheOptions = new MemoryCacheEntryOptions
     {
         AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24),
@@ -676,51 +564,51 @@ app.MapGet("/exames/modalidades", (ILogger<Program> logger, IMemoryCache cache) 
     return Results.Ok(modalidades);
 });
 
-// Endpoint para verificar idempotência
+// Endpoint para verificar idempotÃªncia
 app.MapGet("/exames/check-idempotency/{idempotencyKey}", async (string idempotencyKey, ExameService exameService, ILogger<Program> logger) =>
 {
     try
     {
-        logger.LogInformation("Verificando idempotência para chave: {IdempotencyKey}", idempotencyKey);
+        logger.LogInformation("Verificando idempotÃªncia para chave: {IdempotencyKey}", idempotencyKey);
         var exists = await exameService.CheckIdempotencyAsync(idempotencyKey);
         return Results.Ok(new { exists });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro ao verificar idempotência para chave: {IdempotencyKey}", idempotencyKey);
-        return Results.Problem("Erro inesperado ao verificar idempotência.");
+        logger.LogError(ex, "Erro ao verificar idempotÃªncia para chave: {IdempotencyKey}", idempotencyKey);
+        return Results.Problem("Erro inesperado ao verificar idempotÃªncia.");
     }
 }).RequireAuthorization();
 
-// Endpoint para estatísticas por modalidade
+// Endpoint para estatÃ­sticas por modalidade
 app.MapGet("/exames/statistics/modalidade", async (ExameService exameService, ILogger<Program> logger) =>
 {
     try
     {
-        logger.LogInformation("Obtendo estatísticas de exames por modalidade");
+        logger.LogInformation("Obtendo estatÃ­sticas de exames por modalidade");
         var statistics = await exameService.GetStatisticsByModalidadeAsync();
         return Results.Ok(statistics);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro ao obter estatísticas por modalidade");
-        return Results.Problem("Erro inesperado ao obter estatísticas.");
+        logger.LogError(ex, "Erro ao obter estatÃ­sticas por modalidade");
+        return Results.Problem("Erro inesperado ao obter estatÃ­sticas.");
     }
 }).RequireAuthorization();
 
-// Endpoint para estatísticas por período
+// Endpoint para estatÃ­sticas por perÃ­odo
 app.MapGet("/exames/statistics/periodo", async (ExameService exameService, ILogger<Program> logger, DateTime? dataInicio = null, DateTime? dataFim = null) =>
 {
     try
     {
-        logger.LogInformation("Obtendo estatísticas de exames por período - Início: {DataInicio}, Fim: {DataFim}", dataInicio, dataFim);
+        logger.LogInformation("Obtendo estatÃ­sticas de exames por perÃ­odo - InÃ­cio: {DataInicio}, Fim: {DataFim}", dataInicio, dataFim);
         var statistics = await exameService.GetStatisticsByPeriodoAsync(dataInicio, dataFim);
         return Results.Ok(statistics);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro ao obter estatísticas por período");
-        return Results.Problem("Erro inesperado ao obter estatísticas.");
+        logger.LogError(ex, "Erro ao obter estatÃ­sticas por perÃ­odo");
+        return Results.Problem("Erro inesperado ao obter estatÃ­sticas.");
     }
 }).RequireAuthorization();
 
@@ -750,8 +638,8 @@ app.MapPost("/auth/register", async (LoginRequestDto registerDto, UserService us
     {
         logger.LogInformation("Attempting to register user: {Username}", registerDto.Username);
         var user = await userService.CreateUser(registerDto.Username, registerDto.Password);
-        logger.LogInformation("Usuário {Username} registrado com sucesso.", user.Username);
-        return Results.Created($"/auth/register/{user.Id}", new { Message = "Usuário registrado com sucesso." });
+        logger.LogInformation("UsuÃ¡rio {Username} registrado com sucesso.", user.Username);
+        return Results.Created($"/auth/register/{user.Id}", new { Message = "UsuÃ¡rio registrado com sucesso." });
     }
     catch (InvalidOperationException ex)
     {
@@ -763,89 +651,106 @@ app.MapPost("/auth/register", async (LoginRequestDto registerDto, UserService us
         logger.LogError(ex, "An unexpected error occurred during user registration for {Username}.", registerDto.Username);
         return Results.Problem("An unexpected error occurred during registration.");
     }
-});
+}).RequireAuthorization(policy => policy.RequireRole(UserRole.Administrador.ToString())).RequireRateLimiting("auth");
 
-app.MapPost("/auth/login", async (LoginRequestDto loginDto, AuthService authService, ILogger<Program> logger) =>
+app.MapPost("/auth/login", async (LoginRequestDto loginDto, HttpContext context, AuthService authService, ILogger<Program> logger) =>
 {
     try
     {
-        logger.LogInformation("Tentativa de login para usuário: {Username}", loginDto.Username);
-        
+        logger.LogInformation("Tentativa de login para usuÃ¡rio: {Username}", loginDto.Username);
         var result = await authService.LoginAsync(loginDto.Username, loginDto.Password);
-        
+
         if (result == null)
         {
-            logger.LogWarning("Falha na autenticação para usuário: {Username}", loginDto.Username);
+            logger.LogWarning("Falha na autenticaÃ§Ã£o para usuÃ¡rio: {Username}", loginDto.Username);
             return Results.Unauthorized();
         }
 
-        logger.LogInformation("Usuário {Username} logado com sucesso", loginDto.Username);
-        return Results.Ok(result);
+        SetRefreshCookie(context, result.RefreshToken);
+        logger.LogInformation("UsuÃ¡rio {Username} logado com sucesso", loginDto.Username);
+        return Results.Ok(new
+        {
+            Token = result.Token,
+            ExpiresAt = result.ExpiresAt,
+            User = result.User
+        });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado durante login para usuário: {Username}", loginDto.Username);
+        logger.LogError(ex, "Erro inesperado durante login para usuÃ¡rio: {Username}", loginDto.Username);
         return Results.Problem("Erro inesperado durante o login.");
     }
-});
+}).AllowAnonymous().RequireRateLimiting("auth");
 
-app.MapPost("/auth/refresh", async (RefreshTokenRequestDto refreshDto, AuthService authService, ILogger<Program> logger) =>
+app.MapPost("/auth/refresh", async (HttpContext context, AuthService authService, ILogger<Program> logger) =>
 {
     try
     {
-        logger.LogInformation("Tentativa de refresh token");
-        
-        var result = await authService.RefreshTokenAsync(refreshDto.RefreshToken);
-        
-        if (result == null)
+        var refreshToken = context.Request.Cookies[RefreshCookieName];
+        if (string.IsNullOrWhiteSpace(refreshToken))
         {
-            logger.LogWarning("Refresh token inválido ou expirado");
             return Results.Unauthorized();
         }
 
-        logger.LogInformation("Refresh token bem-sucedido");
-        return Results.Ok(result);
+        var result = await authService.RefreshTokenAsync(refreshToken);
+        if (result == null)
+        {
+            logger.LogWarning("Refresh token invÃ¡lido ou expirado");
+            ClearRefreshCookie(context);
+            return Results.Unauthorized();
+        }
+
+        SetRefreshCookie(context, result.RefreshToken);
+        return Results.Ok(new
+        {
+            Token = result.Token,
+            ExpiresAt = result.ExpiresAt,
+            User = result.User
+        });
     }
     catch (Exception ex)
     {
         logger.LogError(ex, "Erro inesperado durante refresh token");
         return Results.Problem("Erro inesperado durante refresh do token.");
     }
-});
+}).AllowAnonymous().RequireRateLimiting("auth");
 
 app.MapPost("/auth/logout", async (HttpContext context, AuthService authService, ILogger<Program> logger) =>
 {
     try
     {
         var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
-        
         if (string.IsNullOrEmpty(token))
         {
-            return Results.BadRequest("Token não fornecido");
+            ClearRefreshCookie(context);
+            return Results.Unauthorized();
         }
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var jsonToken = tokenHandler.ReadJwtToken(token);
         var tokenId = jsonToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-
         if (string.IsNullOrEmpty(tokenId))
         {
-            return Results.BadRequest("Token inválido");
+            ClearRefreshCookie(context);
+            return Results.BadRequest("Token invÃ¡lido");
         }
 
         var result = await authService.LogoutAsync(tokenId);
-        
-        if (result)
+        var refreshToken = context.Request.Cookies[RefreshCookieName];
+        if (!string.IsNullOrWhiteSpace(refreshToken))
         {
-            logger.LogInformation("Logout realizado com sucesso para token: {TokenId}", tokenId);
-            return Results.Ok(new { Message = "Logout realizado com sucesso" });
+            await authService.RevokeRefreshTokenAsync(refreshToken);
         }
-        
-        return Results.Problem("Erro durante logout");
+
+        ClearRefreshCookie(context);
+        return result
+            ? Results.Ok(new { Message = "Logout realizado com sucesso" })
+            : Results.Problem("Erro durante logout");
     }
     catch (Exception ex)
     {
         logger.LogError(ex, "Erro inesperado durante logout");
+        ClearRefreshCookie(context);
         return Results.Problem("Erro inesperado durante logout.");
     }
 }).RequireAuthorization();
@@ -855,28 +760,28 @@ app.MapPost("/admin/usuarios", async (CreateUserDto createUserDto, AdminService 
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado ao endpoint administrativo");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado ao endpoint administrativo");
             return Results.Forbid();
         }
 
-        logger.LogInformation("Criando usuário via admin: {Username}", createUserDto.Username);
+        logger.LogInformation("Criando usuÃ¡rio via admin: {Username}", createUserDto.Username);
         var user = await adminService.CreateUserAsync(createUserDto);
-        logger.LogInformation("Usuário criado com sucesso via admin: {Id}", user.Id);
+        logger.LogInformation("UsuÃ¡rio criado com sucesso via admin: {Id}", user.Id);
         return Results.Created($"/admin/usuarios/{user.Id}", user);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Erro de validação ao criar usuário: {Message}", ex.Message);
+        logger.LogWarning("Erro de validaÃ§Ã£o ao criar usuÃ¡rio: {Message}", ex.Message);
         return Results.Conflict(new { Message = ex.Message });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao criar usuário");
-        return Results.Problem("Erro inesperado ao criar usuário.");
+        logger.LogError(ex, "Erro inesperado ao criar usuÃ¡rio");
+        return Results.Problem("Erro inesperado ao criar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -884,23 +789,23 @@ app.MapGet("/admin/usuarios", async (AdminService adminService, HttpContext cont
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado ao endpoint administrativo");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado ao endpoint administrativo");
             return Results.Forbid();
         }
 
-        logger.LogInformation("Listando usuários via admin - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+        logger.LogInformation("Listando usuÃ¡rios via admin - PÃ¡gina: {Page}, Tamanho: {PageSize}", page, pageSize);
         var users = await adminService.GetUsersAsync(page, pageSize);
-        logger.LogInformation("Listagem de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
+        logger.LogInformation("Listagem de usuÃ¡rios concluÃ­da. UsuÃ¡rios retornados: {Count}", users.Data.Count);
         return Results.Ok(users);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao listar usuários");
-        return Results.Problem("Erro inesperado ao listar usuários.");
+        logger.LogError(ex, "Erro inesperado ao listar usuÃ¡rios");
+        return Results.Problem("Erro inesperado ao listar usuÃ¡rios.");
     }
 }).RequireAuthorization();
 
@@ -908,27 +813,27 @@ app.MapGet("/admin/usuarios/{id:guid}", async (Guid id, AdminService adminServic
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado ao endpoint administrativo");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado ao endpoint administrativo");
             return Results.Forbid();
         }
 
         var user = await adminService.GetUserByIdAsync(id);
         if (user == null)
         {
-            logger.LogWarning("Usuário não encontrado: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+            logger.LogWarning("UsuÃ¡rio nÃ£o encontrado: {Id}", id);
+            return Results.NotFound(new { Message = $"UsuÃ¡rio com ID {id} nÃ£o encontrado." });
         }
 
         return Results.Ok(user);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao buscar usuário: {Id}", id);
-        return Results.Problem("Erro inesperado ao buscar usuário.");
+        logger.LogError(ex, "Erro inesperado ao buscar usuÃ¡rio: {Id}", id);
+        return Results.Problem("Erro inesperado ao buscar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -936,34 +841,34 @@ app.MapPut("/admin/usuarios/{id:guid}", async (Guid id, UpdateUserDto updateUser
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado ao endpoint administrativo");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado ao endpoint administrativo");
             return Results.Forbid();
         }
 
-        logger.LogInformation("Atualizando usuário via admin: {Id}", id);
+        logger.LogInformation("Atualizando usuÃ¡rio via admin: {Id}", id);
         var user = await adminService.UpdateUserAsync(id, updateUserDto);
         if (user == null)
         {
-            logger.LogWarning("Usuário não encontrado para atualização: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+            logger.LogWarning("UsuÃ¡rio nÃ£o encontrado para atualizaÃ§Ã£o: {Id}", id);
+            return Results.NotFound(new { Message = $"UsuÃ¡rio com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Usuário atualizado com sucesso via admin: {Id}", id);
+        logger.LogInformation("UsuÃ¡rio atualizado com sucesso via admin: {Id}", id);
         return Results.Ok(user);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Erro de validação ao atualizar usuário: {Message}", ex.Message);
+        logger.LogWarning("Erro de validaÃ§Ã£o ao atualizar usuÃ¡rio: {Message}", ex.Message);
         return Results.Conflict(new { Message = ex.Message });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao atualizar usuário: {Id}", id);
-        return Results.Problem("Erro inesperado ao atualizar usuário.");
+        logger.LogError(ex, "Erro inesperado ao atualizar usuÃ¡rio: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -971,29 +876,29 @@ app.MapDelete("/admin/usuarios/{id:guid}", async (Guid id, AdminService adminSer
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado ao endpoint administrativo");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado ao endpoint administrativo");
             return Results.Forbid();
         }
 
-        logger.LogInformation("Desativando usuário via admin: {Id}", id);
+        logger.LogInformation("Desativando usuÃ¡rio via admin: {Id}", id);
         var result = await adminService.DeactivateUserAsync(id);
         if (!result)
         {
-            logger.LogWarning("Usuário não encontrado para desativação: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+            logger.LogWarning("UsuÃ¡rio nÃ£o encontrado para desativaÃ§Ã£o: {Id}", id);
+            return Results.NotFound(new { Message = $"UsuÃ¡rio com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Usuário desativado com sucesso via admin: {Id}", id);
-        return Results.Ok(new { Message = "Usuário desativado com sucesso." });
+        logger.LogInformation("UsuÃ¡rio desativado com sucesso via admin: {Id}", id);
+        return Results.Ok(new { Message = "UsuÃ¡rio desativado com sucesso." });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao desativar usuário: {Id}", id);
-        return Results.Problem("Erro inesperado ao desativar usuário.");
+        logger.LogError(ex, "Erro inesperado ao desativar usuÃ¡rio: {Id}", id);
+        return Results.Problem("Erro inesperado ao desativar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -1001,46 +906,46 @@ app.MapPatch("/admin/usuarios/{id:guid}/ativar", async (Guid id, AdminService ad
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado ao endpoint administrativo");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado ao endpoint administrativo");
             return Results.Forbid();
         }
 
-        logger.LogInformation("Ativando usuário via admin: {Id}", id);
+        logger.LogInformation("Ativando usuÃ¡rio via admin: {Id}", id);
         var result = await adminService.ActivateUserAsync(id);
         if (!result)
         {
-            logger.LogWarning("Usuário não encontrado para ativação: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+            logger.LogWarning("UsuÃ¡rio nÃ£o encontrado para ativaÃ§Ã£o: {Id}", id);
+            return Results.NotFound(new { Message = $"UsuÃ¡rio com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Usuário ativado com sucesso via admin: {Id}", id);
-        return Results.Ok(new { Message = "Usuário ativado com sucesso." });
+        logger.LogInformation("UsuÃ¡rio ativado com sucesso via admin: {Id}", id);
+        return Results.Ok(new { Message = "UsuÃ¡rio ativado com sucesso." });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao ativar usuário: {Id}", id);
-        return Results.Problem("Erro inesperado ao ativar usuário.");
+        logger.LogError(ex, "Erro inesperado ao ativar usuÃ¡rio: {Id}", id);
+        return Results.Problem("Erro inesperado ao ativar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
-// Endpoints de Usuários (públicos para o frontend)
+// Endpoints de UsuÃ¡rios (pÃºblicos para o frontend)
 app.MapGet("/users", async (AdminService adminService, HttpContext context, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
 {
     try
     {
-        logger.LogInformation("Listando usuários - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+        logger.LogInformation("Listando usuÃ¡rios - PÃ¡gina: {Page}, Tamanho: {PageSize}", page, pageSize);
         var users = await adminService.GetUsersAsync(page, pageSize);
-        logger.LogInformation("Listagem de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
+        logger.LogInformation("Listagem de usuÃ¡rios concluÃ­da. UsuÃ¡rios retornados: {Count}", users.Data.Count);
         return Results.Ok(users);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao listar usuários");
-        return Results.Problem("Erro inesperado ao listar usuários.");
+        logger.LogError(ex, "Erro inesperado ao listar usuÃ¡rios");
+        return Results.Problem("Erro inesperado ao listar usuÃ¡rios.");
     }
 }).RequireAuthorization();
 
@@ -1051,16 +956,16 @@ app.MapGet("/users/{id:guid}", async (Guid id, AdminService adminService, HttpCo
         var user = await adminService.GetUserByIdAsync(id);
         if (user == null)
         {
-            logger.LogWarning("Usuário não encontrado: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+            logger.LogWarning("UsuÃ¡rio nÃ£o encontrado: {Id}", id);
+            return Results.NotFound(new { Message = $"UsuÃ¡rio com ID {id} nÃ£o encontrado." });
         }
 
         return Results.Ok(user);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao buscar usuário: {Id}", id);
-        return Results.Problem("Erro inesperado ao buscar usuário.");
+        logger.LogError(ex, "Erro inesperado ao buscar usuÃ¡rio: {Id}", id);
+        return Results.Problem("Erro inesperado ao buscar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -1068,20 +973,20 @@ app.MapPost("/users", async (CreateUserDto createUserDto, AdminService adminServ
 {
     try
     {
-        logger.LogInformation("Criando usuário: {Username}", createUserDto.Username);
+        logger.LogInformation("Criando usuÃ¡rio: {Username}", createUserDto.Username);
         var user = await adminService.CreateUserAsync(createUserDto);
-        logger.LogInformation("Usuário criado com sucesso: {Id}", user.Id);
+        logger.LogInformation("UsuÃ¡rio criado com sucesso: {Id}", user.Id);
         return Results.Created($"/users/{user.Id}", user);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Erro de validação ao criar usuário: {Message}", ex.Message);
+        logger.LogWarning("Erro de validaÃ§Ã£o ao criar usuÃ¡rio: {Message}", ex.Message);
         return Results.Conflict(new { Message = ex.Message });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao criar usuário");
-        return Results.Problem("Erro inesperado ao criar usuário.");
+        logger.LogError(ex, "Erro inesperado ao criar usuÃ¡rio");
+        return Results.Problem("Erro inesperado ao criar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -1089,26 +994,26 @@ app.MapPut("/users/{id:guid}", async (Guid id, UpdateUserDto updateUserDto, Admi
 {
     try
     {
-        logger.LogInformation("Atualizando usuário: {Id}", id);
+        logger.LogInformation("Atualizando usuÃ¡rio: {Id}", id);
         var user = await adminService.UpdateUserAsync(id, updateUserDto);
         if (user == null)
         {
-            logger.LogWarning("Usuário não encontrado para atualização: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+            logger.LogWarning("UsuÃ¡rio nÃ£o encontrado para atualizaÃ§Ã£o: {Id}", id);
+            return Results.NotFound(new { Message = $"UsuÃ¡rio com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Usuário atualizado com sucesso: {Id}", id);
+        logger.LogInformation("UsuÃ¡rio atualizado com sucesso: {Id}", id);
         return Results.Ok(user);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Erro de validação ao atualizar usuário: {Message}", ex.Message);
+        logger.LogWarning("Erro de validaÃ§Ã£o ao atualizar usuÃ¡rio: {Message}", ex.Message);
         return Results.Conflict(new { Message = ex.Message });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao atualizar usuário: {Id}", id);
-        return Results.Problem("Erro inesperado ao atualizar usuário.");
+        logger.LogError(ex, "Erro inesperado ao atualizar usuÃ¡rio: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -1116,21 +1021,21 @@ app.MapDelete("/users/{id:guid}", async (Guid id, AdminService adminService, Htt
 {
     try
     {
-        logger.LogInformation("Desativando usuário: {Id}", id);
+        logger.LogInformation("Desativando usuÃ¡rio: {Id}", id);
         var result = await adminService.DeactivateUserAsync(id);
         if (!result)
         {
-            logger.LogWarning("Usuário não encontrado para desativação: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
+            logger.LogWarning("UsuÃ¡rio nÃ£o encontrado para desativaÃ§Ã£o: {Id}", id);
+            return Results.NotFound(new { Message = $"UsuÃ¡rio com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Usuário desativado com sucesso: {Id}", id);
-        return Results.Ok(new { Message = "Usuário desativado com sucesso." });
+        logger.LogInformation("UsuÃ¡rio desativado com sucesso: {Id}", id);
+        return Results.Ok(new { Message = "UsuÃ¡rio desativado com sucesso." });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao desativar usuário: {Id}", id);
-        return Results.Problem("Erro inesperado ao desativar usuário.");
+        logger.LogError(ex, "Erro inesperado ao desativar usuÃ¡rio: {Id}", id);
+        return Results.Problem("Erro inesperado ao desativar usuÃ¡rio.");
     }
 }).RequireAuthorization();
 
@@ -1138,162 +1043,55 @@ app.MapGet("/users/search", async (AdminService adminService, HttpContext contex
 {
     try
     {
-        logger.LogInformation("Buscando usuários por username: {Username} - Página: {Page}, Tamanho: {PageSize}", username, page, pageSize);
+        logger.LogInformation("Buscando usuÃ¡rios por username: {Username} - PÃ¡gina: {Page}, Tamanho: {PageSize}", username, page, pageSize);
         var users = await adminService.SearchUsersByUsernameAsync(username, page, pageSize);
-        logger.LogInformation("Busca de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
+        logger.LogInformation("Busca de usuÃ¡rios concluÃ­da. UsuÃ¡rios retornados: {Count}", users.Data.Count);
         return Results.Ok(users);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao buscar usuários por username");
-        return Results.Problem("Erro inesperado ao buscar usuários.");
+        logger.LogError(ex, "Erro inesperado ao buscar usuÃ¡rios por username");
+        return Results.Problem("Erro inesperado ao buscar usuÃ¡rios.");
     }
 }).RequireAuthorization();
 
-// Endpoints de Usuários com prefixo /api (para compatibilidade com frontend)
-app.MapGet("/api/usuarios", async (AdminService adminService, HttpContext context, ILogger<Program> logger, int page = 1, int pageSize = 10) =>
-{
-    try
-    {
-        logger.LogInformation("Listando usuários via /api/usuarios - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
-        var users = await adminService.GetUsersAsync(page, pageSize);
-        logger.LogInformation("Listagem de usuários concluída. Usuários retornados: {Count}", users.Data.Count);
-        return Results.Ok(users);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao listar usuários via /api/usuarios");
-        return Results.Problem("Erro inesperado ao listar usuários.");
-    }
-}).RequireAuthorization();
-
-app.MapGet("/api/usuarios/{id:guid}", async (Guid id, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
-{
-    try
-    {
-        var user = await adminService.GetUserByIdAsync(id);
-        if (user == null)
-        {
-            logger.LogWarning("Usuário não encontrado via /api/usuarios: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
-        }
-
-        return Results.Ok(user);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao buscar usuário via /api/usuarios: {Id}", id);
-        return Results.Problem("Erro inesperado ao buscar usuário.");
-    }
-}).RequireAuthorization();
-
-app.MapPost("/api/usuarios", async (CreateUserDto createUserDto, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
-{
-    try
-    {
-        logger.LogInformation("Criando usuário via /api/usuarios: {Username}", createUserDto.Username);
-        var user = await adminService.CreateUserAsync(createUserDto);
-        logger.LogInformation("Usuário criado com sucesso via /api/usuarios: {Id}", user.Id);
-        return Results.Created($"/api/usuarios/{user.Id}", user);
-    }
-    catch (InvalidOperationException ex)
-    {
-        logger.LogWarning("Erro de validação ao criar usuário via /api/usuarios: {Message}", ex.Message);
-        return Results.Conflict(new { Message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao criar usuário via /api/usuarios");
-        return Results.Problem("Erro inesperado ao criar usuário.");
-    }
-}).RequireAuthorization();
-
-app.MapPut("/api/usuarios/{id:guid}", async (Guid id, UpdateUserDto updateUserDto, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
-{
-    try
-    {
-        logger.LogInformation("Atualizando usuário via /api/usuarios: {Id}", id);
-        var user = await adminService.UpdateUserAsync(id, updateUserDto);
-        if (user == null)
-        {
-            logger.LogWarning("Usuário não encontrado para atualização via /api/usuarios: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
-        }
-
-        logger.LogInformation("Usuário atualizado com sucesso via /api/usuarios: {Id}", id);
-        return Results.Ok(user);
-    }
-    catch (InvalidOperationException ex)
-    {
-        logger.LogWarning("Erro de validação ao atualizar usuário via /api/usuarios: {Message}", ex.Message);
-        return Results.Conflict(new { Message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao atualizar usuário via /api/usuarios: {Id}", id);
-        return Results.Problem("Erro inesperado ao atualizar usuário.");
-    }
-}).RequireAuthorization();
-
-app.MapDelete("/api/usuarios/{id:guid}", async (Guid id, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
-{
-    try
-    {
-        logger.LogInformation("Desativando usuário via /api/usuarios: {Id}", id);
-        var result = await adminService.DeactivateUserAsync(id);
-        if (!result)
-        {
-            logger.LogWarning("Usuário não encontrado para desativação via /api/usuarios: {Id}", id);
-            return Results.NotFound(new { Message = $"Usuário com ID {id} não encontrado." });
-        }
-
-        logger.LogInformation("Usuário desativado com sucesso via /api/usuarios: {Id}", id);
-        return Results.Ok(new { Message = "Usuário desativado com sucesso." });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao desativar usuário via /api/usuarios: {Id}", id);
-        return Results.Problem("Erro inesperado ao desativar usuário.");
-    }
-}).RequireAuthorization();
-
-// Endpoints de Médicos
+// Endpoints de MÃ©dicos
 app.MapPost("/medicos", async (CreateMedicoDto createMedicoDto, MedicoService medicoService, ILogger<Program> logger) =>
 {
-    // Validação será feita pelas Data Annotations
+    // ValidaÃ§Ã£o serÃ¡ feita pelas Data Annotations
 
     try
     {
-        logger.LogInformation("Criando médico: {Nome}", createMedicoDto.Nome);
+        logger.LogInformation("Criando mÃ©dico: {Nome}", createMedicoDto.Nome);
         var medico = await medicoService.CreateMedicoAsync(createMedicoDto);
-        logger.LogInformation("Médico criado com sucesso: {Id}", medico.Id);
+        logger.LogInformation("MÃ©dico criado com sucesso: {Id}", medico.Id);
         return Results.Created($"/medicos/{medico.Id}", medico);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Erro de validação ao criar médico: {Message}", ex.Message);
+        logger.LogWarning("Erro de validaÃ§Ã£o ao criar mÃ©dico: {Message}", ex.Message);
         return Results.Conflict(new { Message = ex.Message });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao criar médico");
-        return Results.Problem("Erro inesperado ao criar médico.");
+        logger.LogError(ex, "Erro inesperado ao criar mÃ©dico");
+        return Results.Problem("Erro inesperado ao criar mÃ©dico.");
     }
-}).RequireAuthorization();
+}).RequireAuthorization(policy => policy.RequireRole(UserRole.Administrador.ToString()));
 
 app.MapGet("/medicos", async (MedicoService medicoService, ILogger<Program> logger, int page = 1, int pageSize = 7) =>
 {
     try
     {
-        logger.LogInformation("Listando médicos - Página: {Page}, Tamanho: {PageSize}", page, pageSize);
+        logger.LogInformation("Listando mÃ©dicos - PÃ¡gina: {Page}, Tamanho: {PageSize}", page, pageSize);
         var medicos = await medicoService.GetMedicosAsync(page, pageSize);
-        logger.LogInformation("Listagem de médicos concluída. Médicos retornados: {Count}", medicos.Data.Count);
+        logger.LogInformation("Listagem de mÃ©dicos concluÃ­da. MÃ©dicos retornados: {Count}", medicos.Data.Count);
         return Results.Ok(medicos);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao listar médicos");
-        return Results.Problem("Erro inesperado ao listar médicos.");
+        logger.LogError(ex, "Erro inesperado ao listar mÃ©dicos");
+        return Results.Problem("Erro inesperado ao listar mÃ©dicos.");
     }
 }).RequireAuthorization();
 
@@ -1304,80 +1102,80 @@ app.MapGet("/medicos/{id:guid}", async (Guid id, MedicoService medicoService, IL
         var medico = await medicoService.GetMedicoByIdAsync(id);
         if (medico == null)
         {
-            logger.LogWarning("Médico não encontrado: {Id}", id);
-            return Results.NotFound(new { Message = $"Médico com ID {id} não encontrado." });
+            logger.LogWarning("MÃ©dico nÃ£o encontrado: {Id}", id);
+            return Results.NotFound(new { Message = $"MÃ©dico com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Médico encontrado: {Id}", id);
+        logger.LogInformation("MÃ©dico encontrado: {Id}", id);
         return Results.Ok(medico);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao buscar médico: {Id}", id);
-        return Results.Problem("Erro inesperado ao buscar médico.");
+        logger.LogError(ex, "Erro inesperado ao buscar mÃ©dico: {Id}", id);
+        return Results.Problem("Erro inesperado ao buscar mÃ©dico.");
     }
 }).RequireAuthorization();
 
 app.MapPut("/medicos/{id:guid}", async (Guid id, UpdateMedicoDto updateMedicoDto, MedicoService medicoService, ILogger<Program> logger) =>
 {
-    // Validação será feita pelas Data Annotations
+    // ValidaÃ§Ã£o serÃ¡ feita pelas Data Annotations
 
     try
     {
-        logger.LogInformation("Atualizando médico: {Id}", id);
+        logger.LogInformation("Atualizando mÃ©dico: {Id}", id);
         var medico = await medicoService.UpdateMedicoAsync(id, updateMedicoDto);
         if (medico == null)
         {
-            logger.LogWarning("Médico não encontrado para atualização: {Id}", id);
-            return Results.NotFound(new { Message = $"Médico com ID {id} não encontrado." });
+            logger.LogWarning("MÃ©dico nÃ£o encontrado para atualizaÃ§Ã£o: {Id}", id);
+            return Results.NotFound(new { Message = $"MÃ©dico com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Médico atualizado com sucesso: {Id}", id);
+        logger.LogInformation("MÃ©dico atualizado com sucesso: {Id}", id);
         return Results.Ok(medico);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Erro de validação ao atualizar médico {Id}: {Message}", id, ex.Message);
+        logger.LogWarning("Erro de validaÃ§Ã£o ao atualizar mÃ©dico {Id}: {Message}", id, ex.Message);
         return Results.Conflict(new { Message = ex.Message });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao atualizar médico: {Id}", id);
-        return Results.Problem("Erro inesperado ao atualizar médico.");
+        logger.LogError(ex, "Erro inesperado ao atualizar mÃ©dico: {Id}", id);
+        return Results.Problem("Erro inesperado ao atualizar mÃ©dico.");
     }
-}).RequireAuthorization();
+}).RequireAuthorization(policy => policy.RequireRole(UserRole.Administrador.ToString()));
 
 app.MapDelete("/medicos/{id:guid}", async (Guid id, MedicoService medicoService, ILogger<Program> logger) =>
 {
     try
     {
-        logger.LogInformation("Excluindo médico: {Id}", id);
+        logger.LogInformation("Excluindo mÃ©dico: {Id}", id);
         var success = await medicoService.DeleteMedicoAsync(id);
         if (!success)
         {
-            logger.LogWarning("Médico não encontrado para exclusão: {Id}", id);
-            return Results.NotFound(new { Message = $"Médico com ID {id} não encontrado." });
+            logger.LogWarning("MÃ©dico nÃ£o encontrado para exclusÃ£o: {Id}", id);
+            return Results.NotFound(new { Message = $"MÃ©dico com ID {id} nÃ£o encontrado." });
         }
 
-        logger.LogInformation("Médico excluído com sucesso: {Id}", id);
+        logger.LogInformation("MÃ©dico excluÃ­do com sucesso: {Id}", id);
         return Results.NoContent();
     }
     catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
     {
-        // Quando há restrição de FK (pacientes/exames vinculados), o EF lança DbUpdateException
-        logger.LogWarning(ex, "Exclusão de médico bloqueada por relacionamentos: {Id}", id);
-        return Results.Conflict(new { Message = "Não é possível excluir este médico pois existem registros vinculados (pacientes ou exames)" });
+        // Quando hÃ¡ restriÃ§Ã£o de FK (pacientes/exames vinculados), o EF lanÃ§a DbUpdateException
+        logger.LogWarning(ex, "ExclusÃ£o de mÃ©dico bloqueada por relacionamentos: {Id}", id);
+        return Results.Conflict(new { Message = "NÃ£o Ã© possÃ­vel excluir este mÃ©dico pois existem registros vinculados (pacientes ou exames)" });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao excluir médico: {Id}", id);
-        return Results.Problem("Erro inesperado ao excluir médico.");
+        logger.LogError(ex, "Erro inesperado ao excluir mÃ©dico: {Id}", id);
+        return Results.Problem("Erro inesperado ao excluir mÃ©dico.");
     }
-}).RequireAuthorization();
+}).RequireAuthorization(policy => policy.RequireRole(UserRole.Administrador.ToString()));
 
 // ==================== ENDPOINTS DE ESPECIALIDADES ====================
 
-// GET /especialidades - Listar especialidades com paginação e filtros
+// GET /especialidades - Listar especialidades com paginaÃ§Ã£o e filtros
 app.MapGet("/especialidades", async (
     EspecialidadeService especialidadeService,
     ILogger<Program> logger,
@@ -1415,8 +1213,8 @@ app.MapGet("/especialidades/{id:guid}", async (
 
         if (especialidade == null)
         {
-            logger.LogWarning("Especialidade não encontrada: {Id}", id);
-            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
+            logger.LogWarning("Especialidade nÃ£o encontrada: {Id}", id);
+            return Results.NotFound(new { Message = $"Especialidade com ID {id} nÃ£o encontrada." });
         }
 
         return Results.Ok(especialidade);
@@ -1437,11 +1235,11 @@ app.MapPost("/especialidades", async (
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de criar especialidade sem permissão de administrador");
+            logger.LogWarning("Tentativa de criar especialidade sem permissÃ£o de administrador");
             return Results.Forbid();
         }
 
@@ -1452,7 +1250,7 @@ app.MapPost("/especialidades", async (
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning(ex, "Erro de validação ao criar especialidade");
+        logger.LogWarning(ex, "Erro de validaÃ§Ã£o ao criar especialidade");
         return Results.BadRequest(new { Message = ex.Message });
     }
     catch (Exception ex)
@@ -1472,11 +1270,11 @@ app.MapPut("/especialidades/{id:guid}", async (
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de atualizar especialidade sem permissão de administrador");
+            logger.LogWarning("Tentativa de atualizar especialidade sem permissÃ£o de administrador");
             return Results.Forbid();
         }
 
@@ -1487,7 +1285,7 @@ app.MapPut("/especialidades/{id:guid}", async (
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning(ex, "Erro de validação ao atualizar especialidade: {Id}", id);
+        logger.LogWarning(ex, "Erro de validaÃ§Ã£o ao atualizar especialidade: {Id}", id);
         return Results.BadRequest(new { Message = ex.Message });
     }
     catch (Exception ex)
@@ -1506,11 +1304,11 @@ app.MapDelete("/especialidades/{id:guid}", async (
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de excluir especialidade sem permissão de administrador");
+            logger.LogWarning("Tentativa de excluir especialidade sem permissÃ£o de administrador");
             return Results.Forbid();
         }
 
@@ -1520,16 +1318,16 @@ app.MapDelete("/especialidades/{id:guid}", async (
 
         if (!deleted)
         {
-            logger.LogWarning("Especialidade não encontrada para exclusão: {Id}", id);
-            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
+            logger.LogWarning("Especialidade nÃ£o encontrada para exclusÃ£o: {Id}", id);
+            return Results.NotFound(new { Message = $"Especialidade com ID {id} nÃ£o encontrada." });
         }
 
-        logger.LogInformation("Especialidade excluída com sucesso: {Id}", id);
+        logger.LogInformation("Especialidade excluÃ­da com sucesso: {Id}", id);
         return Results.NoContent();
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning(ex, "Erro de validação ao excluir especialidade: {Id}", id);
+        logger.LogWarning(ex, "Erro de validaÃ§Ã£o ao excluir especialidade: {Id}", id);
         return Results.BadRequest(new { Message = ex.Message });
     }
     catch (Exception ex)
@@ -1541,214 +1339,27 @@ app.MapDelete("/especialidades/{id:guid}", async (
 
 // ==================== FIM ENDPOINTS DE ESPECIALIDADES ====================
 
-// ==================== ENDPOINTS DE ESPECIALIDADES COM PREFIXO /API ====================
-
-// GET /api/especialidades - Listar especialidades com paginação e filtros
-app.MapGet("/api/especialidades", async (
-    EspecialidadeService especialidadeService,
-    ILogger<Program> logger,
-    int page = 1,
-    int pageSize = 10,
-    bool? ativa = null,
-    string? search = null) =>
-{
-    try
-    {
-        logger.LogInformation("Listando especialidades via /api/especialidades - Page: {Page}, PageSize: {PageSize}, Ativa: {Ativa}, Search: {Search}",
-            page, pageSize, ativa, search);
-
-        var result = await especialidadeService.GetAllAsync(page, pageSize, ativa, search);
-        return Results.Ok(result);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro ao listar especialidades via /api/especialidades");
-        return Results.Problem("Erro ao listar especialidades.");
-    }
-}).RequireAuthorization();
-
-// GET /api/especialidades/{id} - Buscar especialidade por ID
-app.MapGet("/api/especialidades/{id:guid}", async (
-    Guid id,
-    EspecialidadeService especialidadeService,
-    ILogger<Program> logger) =>
-{
-    try
-    {
-        logger.LogInformation("Buscando especialidade por ID via /api/especialidades: {Id}", id);
-
-        var especialidade = await especialidadeService.GetByIdAsync(id);
-
-        if (especialidade == null)
-        {
-            logger.LogWarning("Especialidade não encontrada via /api/especialidades: {Id}", id);
-            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
-        }
-
-        return Results.Ok(especialidade);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro ao buscar especialidade por ID via /api/especialidades: {Id}", id);
-        return Results.Problem("Erro ao buscar especialidade.");
-    }
-}).RequireAuthorization();
-
-// POST /api/especialidades - Criar nova especialidade (apenas administradores)
-app.MapPost("/api/especialidades", async (
-    CreateEspecialidadeDto createEspecialidadeDto,
-    EspecialidadeService especialidadeService,
-    HttpContext context,
-    ILogger<Program> logger) =>
-{
-    try
-    {
-        // Verificar se o usuário é administrador
-        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
-        if (userRole != UserRole.Administrador.ToString())
-        {
-            logger.LogWarning("Tentativa de criar especialidade sem permissão de administrador via /api/especialidades");
-            return Results.Forbid();
-        }
-
-        // Validar modelo
-        var (isValid, errorResult) = ValidateModel(createEspecialidadeDto);
-        if (!isValid)
-            return errorResult!;
-
-        logger.LogInformation("Criando especialidade via /api/especialidades: {Nome}", createEspecialidadeDto.Nome);
-
-        var especialidade = await especialidadeService.CreateAsync(createEspecialidadeDto);
-
-        logger.LogInformation("Especialidade criada com sucesso via /api/especialidades: {Id}", especialidade.Id);
-        return Results.Created($"/api/especialidades/{especialidade.Id}", especialidade);
-    }
-    catch (InvalidOperationException ex)
-    {
-        logger.LogWarning(ex, "Erro de validação ao criar especialidade via /api/especialidades");
-        return Results.BadRequest(new { Message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao criar especialidade via /api/especialidades");
-        return Results.Problem("Erro inesperado ao criar especialidade.");
-    }
-}).RequireAuthorization();
-
-// PUT /api/especialidades/{id} - Atualizar especialidade (apenas administradores)
-app.MapPut("/api/especialidades/{id:guid}", async (
-    Guid id,
-    UpdateEspecialidadeDto updateEspecialidadeDto,
-    EspecialidadeService especialidadeService,
-    HttpContext context,
-    ILogger<Program> logger) =>
-{
-    try
-    {
-        // Verificar se o usuário é administrador
-        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
-        if (userRole != UserRole.Administrador.ToString())
-        {
-            logger.LogWarning("Tentativa de atualizar especialidade sem permissão de administrador via /api/especialidades");
-            return Results.Forbid();
-        }
-
-        // Validar modelo
-        var (isValid, errorResult) = ValidateModel(updateEspecialidadeDto);
-        if (!isValid)
-            return errorResult!;
-
-        logger.LogInformation("Atualizando especialidade via /api/especialidades: {Id}", id);
-
-        var especialidade = await especialidadeService.UpdateAsync(id, updateEspecialidadeDto);
-
-        if (especialidade == null)
-        {
-            logger.LogWarning("Especialidade não encontrada para atualização via /api/especialidades: {Id}", id);
-            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
-        }
-
-        logger.LogInformation("Especialidade atualizada com sucesso via /api/especialidades: {Id}", id);
-        return Results.Ok(especialidade);
-    }
-    catch (InvalidOperationException ex)
-    {
-        logger.LogWarning(ex, "Erro de validação ao atualizar especialidade via /api/especialidades: {Id}", id);
-        return Results.BadRequest(new { Message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao atualizar especialidade via /api/especialidades: {Id}", id);
-        return Results.Problem("Erro inesperado ao atualizar especialidade.");
-    }
-}).RequireAuthorization();
-
-// DELETE /api/especialidades/{id} - Excluir especialidade (apenas administradores)
-app.MapDelete("/api/especialidades/{id:guid}", async (
-    Guid id,
-    EspecialidadeService especialidadeService,
-    HttpContext context,
-    ILogger<Program> logger) =>
-{
-    try
-    {
-        // Verificar se o usuário é administrador
-        var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
-        if (userRole != UserRole.Administrador.ToString())
-        {
-            logger.LogWarning("Tentativa de excluir especialidade sem permissão de administrador via /api/especialidades");
-            return Results.Forbid();
-        }
-
-        logger.LogInformation("Excluindo especialidade via /api/especialidades: {Id}", id);
-
-        var deleted = await especialidadeService.DeleteAsync(id);
-
-        if (!deleted)
-        {
-            logger.LogWarning("Especialidade não encontrada para exclusão via /api/especialidades: {Id}", id);
-            return Results.NotFound(new { Message = $"Especialidade com ID {id} não encontrada." });
-        }
-
-        logger.LogInformation("Especialidade excluída com sucesso via /api/especialidades: {Id}", id);
-        return Results.NoContent();
-    }
-    catch (InvalidOperationException ex)
-    {
-        logger.LogWarning(ex, "Erro de validação ao excluir especialidade via /api/especialidades: {Id}", id);
-        return Results.BadRequest(new { Message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Erro inesperado ao excluir especialidade via /api/especialidades: {Id}", id);
-        return Results.Problem("Erro inesperado ao excluir especialidade.");
-    }
-}).RequireAuthorization();
-
-// ==================== FIM ENDPOINTS DE ESPECIALIDADES COM PREFIXO /API ====================
-
-
-// Endpoints de Métricas
+// Endpoints de MÃ©tricas
 app.MapGet("/admin/metrics", async (AdminService adminService, HttpContext context, ILogger<Program> logger) =>
 {
     try
     {
-        // Verificar se o usuário é administrador
+        // Verificar se o usuÃ¡rio Ã© administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         if (userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado às métricas administrativas");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado Ã s mÃ©tricas administrativas");
             return Results.Forbid();
         }
 
-        logger.LogInformation("Gerando métricas administrativas");
+        logger.LogInformation("Gerando mÃ©tricas administrativas");
         var metrics = await adminService.GetAdminMetricsAsync();
         return Results.Ok(metrics);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao gerar métricas administrativas");
-        return Results.Problem("Erro inesperado ao gerar métricas.");
+        logger.LogError(ex, "Erro inesperado ao gerar mÃ©tricas administrativas");
+        return Results.Problem("Erro inesperado ao gerar mÃ©tricas.");
     }
 }).RequireAuthorization();
 
@@ -1756,36 +1367,39 @@ app.MapGet("/medico/metrics", async (AdminService adminService, HttpContext cont
 {
     try
     {
-        // Verificar se o usuário é médico ou administrador
+        // Verificar se o usuÃ¡rio Ã© mÃ©dico ou administrador
         var userRole = context.User.FindFirst(ClaimTypes.Role)?.Value;
         var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
         {
-            return Results.BadRequest("ID do usuário inválido");
+            return Results.BadRequest("ID do usuÃ¡rio invÃ¡lido");
         }
 
         if (userRole != UserRole.Medico.ToString() && userRole != UserRole.Administrador.ToString())
         {
-            logger.LogWarning("Tentativa de acesso não autorizado às métricas de médico");
+            logger.LogWarning("Tentativa de acesso nÃ£o autorizado Ã s mÃ©tricas de mÃ©dico");
             return Results.Forbid();
         }
 
-        logger.LogInformation("Gerando métricas para médico: {UserId}", userGuid);
+        logger.LogInformation("Gerando mÃ©tricas para mÃ©dico: {UserId}", userGuid);
         var metrics = await adminService.GetMedicoMetricsAsync(userGuid);
         return Results.Ok(metrics);
     }
     catch (InvalidOperationException ex)
     {
-        logger.LogWarning("Erro de validação ao gerar métricas de médico: {Message}", ex.Message);
+        logger.LogWarning("Erro de validaÃ§Ã£o ao gerar mÃ©tricas de mÃ©dico: {Message}", ex.Message);
         return Results.BadRequest(new { Message = ex.Message });
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Erro inesperado ao gerar métricas de médico");
-        return Results.Problem("Erro inesperado ao gerar métricas.");
+        logger.LogError(ex, "Erro inesperado ao gerar mÃ©tricas de mÃ©dico");
+        return Results.Problem("Erro inesperado ao gerar mÃ©tricas.");
     }
 }).RequireAuthorization();
 
 
 app.Run();
+
+
+public partial class Program { }

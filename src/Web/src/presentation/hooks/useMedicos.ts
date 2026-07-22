@@ -9,18 +9,13 @@ import type {
   CreateMedicoDto,
   UpdateMedicoDto,
 } from '../../domain/entities/Medico';
+import { getErrorMessage } from '../../infrastructure/utils/errorMessage';
 
 // Debug discreto para hooks
 const debug = {
-  log: (message: string, data?: any) => {
-    console.log(`🎣 [useMedicos] ${message}`, data);
-  },
-  info: (message: string, data?: any) => {
-    console.log(`ℹ️ [useMedicos] ${message}`, data);
-  },
-  error: (message: string, data?: any) => {
-    console.error(`❌ [useMedicos] ${message}`, data);
-  },
+  log: (..._args: unknown[]) => undefined,
+  info: (..._args: unknown[]) => undefined,
+  error: (..._args: unknown[]) => undefined,
 };
 
 interface UseMedicosState {
@@ -95,9 +90,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
         debug.log("Estado final - médicos:", medicosArray.length, "isArray:", Array.isArray(medicosArray));
 
         debug.log('Estado atualizado com sucesso');
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao buscar médicos:', error);
-        setError(error.message || 'Erro ao carregar médicos');
+        setError(getErrorMessage(error, ''));
         setLoading(false);
       }
     },
@@ -124,9 +119,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
 
         debug.log('Estado atualizado após criação');
         return novoMedico;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao criar médico:', error);
-        setError(error.message || 'Erro ao criar médico');
+        setError(getErrorMessage(error, ''));
         setLoading(false);
         throw error;
       }
@@ -155,9 +150,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
 
         debug.log('Estado atualizado após edição');
         return medicoAtualizado;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao atualizar médico:', error);
-        setError(error.message || 'Erro ao atualizar médico');
+        setError(getErrorMessage(error, ''));
         setLoading(false);
         throw error;
       }
@@ -184,9 +179,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
         }));
 
         debug.log('Estado atualizado após remoção');
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao remover médico:', error);
-        setError(error.message || 'Erro ao remover médico');
+        setError(getErrorMessage(error, ''));
         setLoading(false);
         throw error;
       }
@@ -215,9 +210,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
 
         debug.log('Estado atualizado após ativação');
         return medicoAtivado;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao ativar médico:', error);
-        setError(error.message || 'Erro ao ativar médico');
+        setError(getErrorMessage(error, ''));
         setLoading(false);
         throw error;
       }
@@ -236,9 +231,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
         debug.log('Médico encontrado:', medico);
         setLoading(false);
         return medico;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao buscar médico:', error);
-        setError(error.message || 'Erro ao buscar médico');
+        setError(getErrorMessage(error, ''));
         setLoading(false);
         throw error;
       }
@@ -253,9 +248,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
         const medicos = await MedicoService.searchByName(nome);
         debug.log('Médicos encontrados:', medicos);
         return medicos;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao buscar médicos por nome:', error);
-        setError(error.message || 'Erro ao buscar médicos');
+        setError(getErrorMessage(error, ''));
         throw error;
       }
     },
@@ -269,9 +264,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
         const medicos = await MedicoService.searchByCRM(crm);
         debug.log('Médicos encontrados por CRM:', medicos);
         return medicos;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao buscar médicos por CRM:', error);
-        setError(error.message || 'Erro ao buscar médicos');
+        setError(getErrorMessage(error, ''));
         throw error;
       }
     },
@@ -285,9 +280,9 @@ export const useMedicos = (): UseMedicosState & UseMedicosActions => {
         const medicos = await MedicoService.searchByEspecialidade(especialidade);
         debug.log('Médicos encontrados por especialidade:', medicos);
         return medicos;
-      } catch (error: any) {
+      } catch (error: unknown) {
         debug.error('Erro ao buscar médicos por especialidade:', error);
-        setError(error.message || 'Erro ao buscar médicos');
+        setError(getErrorMessage(error, ''));
         throw error;
       }
     },

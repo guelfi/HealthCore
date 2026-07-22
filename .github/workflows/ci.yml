@@ -1,0 +1,131 @@
+name: HealthCore CI
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: healthcore-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build --pull -f src/Api/Dockerfile -t healthcore-api:ci .
+
+      - name: Run API tests in .NET SDK container
+        run: >
+          docker run --rm
+          -v "${{ github.workspace }}:/workspace"
+          -w /workspace
+          mcr.microsoft.com/dotnet/sdk:8.0.422
+          dotnet test HealthCore.sln -c Release
+          --logger "console;verbosity=minimal"
+
+  frontend:
+    name: Frontend checks and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install, type-check, lint, and test in Node container
+        run: >
+          docker run --rm
+          -v "${{ github.workspace }}/src/Web:/workspace"
+          -w /workspace
+          node:22-alpine
+          sh -c "npm ci --no-audit --no-fund &&
+          npm run type-check &&
+          npm run lint &&
+          npm run test:run"
+
+      - name: Build frontend image
+        run: docker build --pull -f src/Web/Dockerfile -t healthcore-frontend:ci .
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Audit NuGet dependencies
+        run: >
+          docker run --rm
+          -v "${{ github.workspace }}:/workspace"
+          -w /workspace
+          mcr.microsoft.com/dotnet/sdk:8.0.422
+          sh -c "dotnet restore HealthCore.sln &&
+          dotnet list HealthCore.sln package
+          --vulnerable --include-transitive"
+
+      - name: Audit npm dependencies
+        run: >
+          docker run --rm
+          -v "${{ github.workspace }}/src/Web:/workspace"
+          -w /workspace
+          node:22-alpine
+          sh -c "npm ci --ignore-scripts --no-fund &&
+          npm audit --audit-level=high"
+
+  compose-validation:
+    name: Compose validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Compose definition
+        env:
+          HEALTHCORE_JWT_KEY: ci-only-validation-key-012345678901234567890
+        run: docker compose config --quiet
+  e2e:
+    name: Browser E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start HealthCore stack
+        env:
+          HEALTHCORE_JWT_KEY: ci-only-e2e-key-012345678901234567890
+          HEALTHCORE_ENVIRONMENT: E2E
+          HEALTHCORE_E2E_USERNAME: e2e-admin
+          HEALTHCORE_E2E_PASSWORD: ci-only-e2e-password-012345678901
+          HEALTHCORE_SECURE_COOKIES: false
+        run: docker compose up -d --build
+
+      - name: Run Playwright smoke suite
+        run: >
+          docker run --rm --network host
+          -v "${{ github.workspace }}/tests/e2e:/workspace"
+          -w /workspace
+          -e BASE_URL=http://127.0.0.1:5005
+          mcr.microsoft.com/playwright:v1.61.1-noble
+          sh -c "npm ci --ignore-scripts --no-fund && npx playwright test"
+
+      - name: Stop HealthCore stack
+        if: always()
+        env:
+          HEALTHCORE_JWT_KEY: ci-only-e2e-key-012345678901234567890
+          HEALTHCORE_ENVIRONMENT: E2E
+          HEALTHCORE_E2E_USERNAME: e2e-admin
+          HEALTHCORE_E2E_PASSWORD: ci-only-e2e-password-012345678901
+          HEALTHCORE_SECURE_COOKIES: false
+        run: docker compose down -v

@@ -30,7 +30,6 @@ export interface LoginDto {
 // Interface compatível com LoginResponseDto do backend
 export interface AuthResponse {
   token: string;
-  refreshToken: string;
   expiresAt: string | Date; // Backend envia como string ISO
   user: {
     id: string;

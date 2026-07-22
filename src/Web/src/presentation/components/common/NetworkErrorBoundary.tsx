@@ -80,9 +80,6 @@ class NetworkErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  handleDiagnostic = () => {
-    window.open('/diagnostic', '_blank');
-  };
 
   toggleDetails = () => {
     this.setState(prev => ({ showDetails: !prev.showDetails }));
@@ -134,7 +131,6 @@ class NetworkErrorBoundary extends Component<Props, State> {
               <Box component="ul" sx={{ mt: 1, mb: 2, pl: 2 }}>
                 <li>A API não está rodando</li>
                 <li>Há problemas de rede ou CORS</li>
-                <li>Você está acessando via ngrok sem configuração adequada</li>
               </Box>
             )}
 
@@ -156,16 +152,7 @@ class NetworkErrorBoundary extends Component<Props, State> {
                 Recarregar Página
               </Button>
 
-              {isNetworkError && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<NetworkCheck />}
-                  onClick={this.handleDiagnostic}
-                >
-                  Diagnóstico
-                </Button>
-              )}
+
 
               <Button
                 variant="text"

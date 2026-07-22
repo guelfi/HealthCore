@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Typography,
-  useTheme,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useResponsive } from '../../../presentation/hooks/useResponsive';
@@ -30,7 +29,6 @@ interface ResponsiveTableHeaderProps {
   
   // FAB positioning
   fabRelativeToTable?: boolean;
-  tableContainerRef?: React.RefObject<HTMLElement>;
 }
 
 const ResponsiveTableHeader: React.FC<ResponsiveTableHeaderProps> = ({
@@ -45,9 +43,7 @@ const ResponsiveTableHeader: React.FC<ResponsiveTableHeaderProps> = ({
   showTotalOnMobile = false,
   fabTooltip,
   fabRelativeToTable = false,
-  tableContainerRef,
 }) => {
-  const theme = useTheme();
   const { isMobile, isTablet } = useResponsive();
   
   // Determinar se deve usar FAB
