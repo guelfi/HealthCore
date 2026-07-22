@@ -102,8 +102,10 @@ static (bool IsValid, IResult? ErrorResult) ValidateModel<T>(T model) where T : 
 // Configure PathBase for Nginx Proxy
 app.UsePathBase("/healthcore-api");
 
+var openApiEnabled = isDevelopment || builder.Configuration.GetValue<bool>("OpenApi:Enabled", false);
+
 // Keep API documentation disabled in production unless explicitly enabled.
-if (isDevelopment || builder.Configuration.GetValue<bool>("OpenApi:Enabled", false))
+if (openApiEnabled)
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -134,7 +136,19 @@ app.UseCors("AllowProxy");
 
 app.UseAuthentication(); // Use Authentication middleware
 app.UseMiddleware<TokenBlacklistMiddleware>(); // Use Token Blacklist middleware
-app.UseAuthorization();   // Use Authorization middleware
+
+// Swagger is intentionally public only when it is explicitly enabled. All
+// application endpoints continue to use the global authenticated fallback policy.
+if (openApiEnabled)
+{
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/swagger"),
+        branch => branch.UseAuthorization());
+}
+else
+{
+    app.UseAuthorization();
+}
 
 // Health Check Endpoints
 app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
