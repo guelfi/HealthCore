@@ -28,7 +28,7 @@ if [[ -n "$(git status --porcelain)" ]]; then
   git diff --binary | sudo tee "$RECONCILIATION_DIR/working-tree.diff" >/dev/null
   git status --short | sudo tee "$RECONCILIATION_DIR/status.txt" >/dev/null
   sudo cp -p src/Api/Dockerfile src/Api/Program.cs "$RECONCILIATION_DIR/"
-  sudo chmod 600 "$RECONCILIATION_DIR"/*
+  sudo chmod 600 "$RECONCILIATION_DIR/working-tree.diff" "$RECONCILIATION_DIR/status.txt" "$RECONCILIATION_DIR/Dockerfile" "$RECONCILIATION_DIR/Program.cs"
   git restore --source=HEAD --staged --worktree -- src/Api/Dockerfile src/Api/Program.cs
   echo "Reconciled known OCI working-tree changes; backup: $RECONCILIATION_DIR"
 fi
