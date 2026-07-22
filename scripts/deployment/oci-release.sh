@@ -81,7 +81,7 @@ while IFS= read -r container_id; do
   [[ -n "$container_id" ]] || continue
   container_name="$(docker inspect --format '{{.Name}}' "$container_id" | sed 's#^/##')"
   compose_service="$(docker inspect --format '{{index .Config.Labels "com.docker.compose.service"}}' "$container_id")"
-  if [[ "$compose_service" == "healthcore-frontend" || "$container_name" == healthcore-frontend-* || "$container_name" == healthcore-healthcore-frontend-* ]]; then
+  if [[ "$compose_service" == "healthcore-frontend" || "$container_name" == "healthcore-frontend" || "$container_name" == healthcore-frontend-* || "$container_name" == healthcore-healthcore-frontend-* ]]; then
     docker rm -f "$container_id"
   else
     echo "Port 5005 is occupied by an unrelated container: $container_name" >&2
