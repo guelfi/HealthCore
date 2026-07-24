@@ -30,6 +30,50 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
+type AuthUserPayload = AuthResponse['user'] & {
+  Id?: string;
+  Username?: string;
+  DisplayName?: string;
+  Role?: number;
+  IsActive?: boolean;
+};
+
+type AuthPayload = AuthResponse & {
+  Token?: string;
+  User?: AuthUserPayload;
+};
+
+const buildAuthenticatedUser = (authData: AuthPayload): Usuario => {
+  const responseUser = (authData.user ?? authData.User) as AuthUserPayload | undefined;
+  const id = responseUser?.id ?? responseUser?.Id;
+  const username = responseUser?.username ?? responseUser?.Username;
+  const displayName = responseUser?.displayName ?? responseUser?.DisplayName ?? username;
+  const role = responseUser?.role ?? responseUser?.Role;
+  const isActive = responseUser?.isActive ?? responseUser?.IsActive ?? false;
+
+  if (!id || !username || role === undefined) {
+    throw new Error('Resposta de autenticacao invalida. Tente novamente.');
+  }
+
+  return {
+    id,
+    username,
+    displayName,
+    role: role as UserProfile,
+    isActive,
+  };
+};
+
+const getAuthToken = (authData: AuthPayload): string => {
+  const token = authData.token ?? authData.Token;
+
+  if (!token) {
+    throw new Error('Token de autenticacao nao recebido. Tente novamente.');
+  }
+
+  return token;
+};
+
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
@@ -44,18 +88,14 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
           const response = await apiClient.post('/auth/login', credentials);
-          const authData: AuthResponse = response.data;
-          const user: Usuario = {
-            id: authData.user.id,
-            username: authData.user.username,
-            role: authData.user.role as UserProfile,
-            isActive: authData.user.isActive,
-          };
+          const authData: AuthPayload = response.data;
+          const user = buildAuthenticatedUser(authData);
+          const token = getAuthToken(authData);
 
-          setSession(authData.token);
+          setSession(token);
           set({
             user,
-            token: authData.token,
+            token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -66,7 +106,7 @@ export const useAuthStore = create<AuthStore>()(
             error.response?.data?.message ||
             error.response?.data?.error ||
             error.message ||
-            'Erro de autenticação';
+            'Erro de autenticacao';
 
           set({
             isLoading: false,
@@ -103,11 +143,14 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
           const response = await apiClient.post('/auth/refresh', {});
-          const authData: AuthResponse = response.data;
+          const authData: AuthPayload = response.data;
+          const user = buildAuthenticatedUser(authData);
+          const token = getAuthToken(authData);
 
-          setSession(authData.token);
+          setSession(token);
           set({
-            token: authData.token,
+            user,
+            token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -115,7 +158,7 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error: unknown) {
           clearSession();
           const errorMessage =
-            error.response?.data?.message || 'Falha ao renovar sessão';
+            error.response?.data?.message || 'Falha ao renovar sessao';
 
           set({
             user: null,

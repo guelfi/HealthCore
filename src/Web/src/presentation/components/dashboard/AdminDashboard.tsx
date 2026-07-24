@@ -85,8 +85,8 @@ const AdminDashboard: React.FC = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
+              display: 'grid',
+              gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(5, minmax(0, 1fr))' },
               gap: 1.5,
               width: '95%',
             }}
@@ -227,14 +227,14 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: 100,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              boxShadow: '0 3px 12px rgba(102, 126, 234, 0.3)',
+              background: 'linear-gradient(135deg, #bbf7d0 0%, #dcfce7 100%)',
+              color: '#1f2937',
+              boxShadow: '0 3px 12px rgba(34, 197, 94, 0.24)',
               borderRadius: 2,
               transition: 'all 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-3px)',
-                boxShadow: '0 6px 18px rgba(102, 126, 234, 0.4)',
+                boxShadow: '0 6px 18px rgba(34, 197, 94, 0.34)',
               },
             }}
           >
@@ -254,7 +254,7 @@ const AdminDashboard: React.FC = () => {
               >
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
-                    color="rgba(255,255,255,0.8)"
+                    color="rgba(31,41,55,0.72)"
                     variant="caption"
                     fontWeight={500}
                     sx={{ 
@@ -281,7 +281,7 @@ const AdminDashboard: React.FC = () => {
                   </Typography>
                   <Typography
                     variant="caption"
-                    color="rgba(255,255,255,0.9)"
+                    color="rgba(31,41,55,0.78)"
                     sx={{ fontSize: '0.7rem', display: 'block' }}
                   >
                     {Math.max(
@@ -294,15 +294,15 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Avatar
                   sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
+                    bgcolor: 'rgba(255,255,255,0.65)',
                     width: 40,
                     height: 40,
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(255,255,255,0.8)',
                     ml: 1,
                   }}
                 >
-                  <LocalHospital sx={{ fontSize: 20, color: 'white' }} />
+                  <LocalHospital sx={{ fontSize: 20, color: '#334155' }} />
                 </Avatar>
               </Box>
             </CardContent>
@@ -313,14 +313,14 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: 100,
-              background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
-              color: 'white',
-              boxShadow: '0 3px 12px rgba(142, 45, 226, 0.3)',
+              background: 'linear-gradient(135deg, #bfdbfe 0%, #dbeafe 100%)',
+              color: '#1f2937',
+              boxShadow: '0 3px 12px rgba(37, 99, 235, 0.22)',
               borderRadius: 2,
               transition: 'all 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-3px)',
-                boxShadow: '0 6px 18px rgba(142, 45, 226, 0.4)',
+                boxShadow: '0 6px 18px rgba(37, 99, 235, 0.32)',
               },
             }}
           >
@@ -340,7 +340,7 @@ const AdminDashboard: React.FC = () => {
               >
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
-                    color="rgba(255,255,255,0.8)"
+                    color="rgba(31,41,55,0.72)"
                     variant="caption"
                     fontWeight={500}
                     sx={{ 
@@ -367,7 +367,7 @@ const AdminDashboard: React.FC = () => {
                   </Typography>
                   <Typography
                     variant="caption"
-                    color="rgba(255,255,255,0.9)"
+                    color="rgba(31,41,55,0.78)"
                     sx={{ fontSize: '0.7rem', display: 'block' }}
                   >
                     médicas
@@ -375,15 +375,15 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Avatar
                   sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
+                    bgcolor: 'rgba(255,255,255,0.65)',
                     width: 40,
                     height: 40,
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(255,255,255,0.8)',
                     ml: 1,
                   }}
                 >
-                  <MedicalServices sx={{ fontSize: 20, color: 'white' }} />
+                  <MedicalServices sx={{ fontSize: 20, color: '#334155' }} />
                 </Avatar>
               </Box>
             </CardContent>
@@ -393,14 +393,14 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: 100,
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-              color: 'white',
-              boxShadow: '0 3px 12px rgba(240, 147, 251, 0.3)',
+              background: 'linear-gradient(135deg, #a7f3d0 0%, #d1fae5 100%)',
+              color: '#1f2937',
+              boxShadow: '0 3px 12px rgba(16, 185, 129, 0.22)',
               borderRadius: 2,
               transition: 'all 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-3px)',
-                boxShadow: '0 6px 18px rgba(240, 147, 251, 0.4)',
+                boxShadow: '0 6px 18px rgba(16, 185, 129, 0.32)',
               },
             }}
           >
@@ -420,7 +420,7 @@ const AdminDashboard: React.FC = () => {
               >
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
-                    color="rgba(255,255,255,0.8)"
+                    color="rgba(31,41,55,0.72)"
                     variant="caption"
                     fontWeight={500}
                     sx={{ 
@@ -447,7 +447,7 @@ const AdminDashboard: React.FC = () => {
                   </Typography>
                   <Typography
                     variant="caption"
-                    color="rgba(255,255,255,0.9)"
+                    color="rgba(31,41,55,0.78)"
                     sx={{ fontSize: '0.7rem', display: 'block' }}
                   >
                     {metrics.pacientes.novosUltimos30Dias} novos (30 dias)
@@ -455,15 +455,15 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Avatar
                   sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
+                    bgcolor: 'rgba(255,255,255,0.65)',
                     width: 40,
                     height: 40,
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(255,255,255,0.8)',
                     ml: 1,
                   }}
                 >
-                  <People sx={{ fontSize: 20, color: 'white' }} />
+                  <People sx={{ fontSize: 20, color: '#334155' }} />
                 </Avatar>
               </Box>
             </CardContent>
@@ -473,14 +473,14 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: 100,
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              color: 'white',
-              boxShadow: '0 3px 12px rgba(79, 172, 254, 0.3)',
+              background: 'linear-gradient(135deg, #bae6fd 0%, #e0f2fe 100%)',
+              color: '#1f2937',
+              boxShadow: '0 3px 12px rgba(14, 165, 233, 0.24)',
               borderRadius: 2,
               transition: 'all 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-3px)',
-                boxShadow: '0 6px 18px rgba(79, 172, 254, 0.4)',
+                boxShadow: '0 6px 18px rgba(14, 165, 233, 0.34)',
               },
             }}
           >
@@ -500,7 +500,7 @@ const AdminDashboard: React.FC = () => {
               >
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
-                    color="rgba(255,255,255,0.8)"
+                    color="rgba(31,41,55,0.72)"
                     variant="caption"
                     fontWeight={500}
                     sx={{ 
@@ -527,7 +527,7 @@ const AdminDashboard: React.FC = () => {
                   </Typography>
                   <Typography
                     variant="caption"
-                    color="rgba(255,255,255,0.9)"
+                    color="rgba(31,41,55,0.78)"
                     sx={{ fontSize: '0.7rem', display: 'block' }}
                   >
                     {metrics.exames.examesUltimos30Dias} últimos 30 dias
@@ -535,15 +535,15 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Avatar
                   sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
+                    bgcolor: 'rgba(255,255,255,0.65)',
                     width: 40,
                     height: 40,
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(255,255,255,0.8)',
                     ml: 1,
                   }}
                 >
-                  <Assignment sx={{ fontSize: 20, color: 'white' }} />
+                  <Assignment sx={{ fontSize: 20, color: '#334155' }} />
                 </Avatar>
               </Box>
             </CardContent>
@@ -553,14 +553,14 @@ const AdminDashboard: React.FC = () => {
             sx={{
               flex: 1,
               height: 100,
-              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-              color: 'white',
-              boxShadow: '0 3px 12px rgba(250, 112, 154, 0.3)',
+              background: 'linear-gradient(135deg, #fde68a 0%, #fef3c7 100%)',
+              color: '#1f2937',
+              boxShadow: '0 3px 12px rgba(245, 158, 11, 0.24)',
               borderRadius: 2,
               transition: 'all 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-3px)',
-                boxShadow: '0 6px 18px rgba(250, 112, 154, 0.4)',
+                boxShadow: '0 6px 18px rgba(245, 158, 11, 0.34)',
               },
             }}
           >
@@ -580,7 +580,7 @@ const AdminDashboard: React.FC = () => {
               >
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
-                    color="rgba(255,255,255,0.8)"
+                    color="rgba(31,41,55,0.72)"
                     variant="caption"
                     fontWeight={500}
                     sx={{ 
@@ -625,7 +625,7 @@ const AdminDashboard: React.FC = () => {
                   </Typography>
                   <Typography
                     variant="caption"
-                    color="rgba(255,255,255,0.9)"
+                    color="rgba(31,41,55,0.78)"
                     sx={{ fontSize: '0.7rem', display: 'block' }}
                   >
                     novos pacientes
@@ -633,15 +633,15 @@ const AdminDashboard: React.FC = () => {
                 </Box>
                 <Avatar
                   sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
+                    bgcolor: 'rgba(255,255,255,0.65)',
                     width: 40,
                     height: 40,
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(255,255,255,0.8)',
                     ml: 1,
                   }}
                 >
-                  <TrendingUp sx={{ fontSize: 20, color: 'white' }} />
+                  <TrendingUp sx={{ fontSize: 20, color: '#334155' }} />
                 </Avatar>
               </Box>
             </CardContent>
@@ -664,10 +664,10 @@ const AdminDashboard: React.FC = () => {
               flex: 1,
               minHeight: { xs: 320, sm: 280 }, // minHeight em vez de height fixa
               height: 'auto', // Altura auto para expandir conforme conteúdo
-              boxShadow: '0 4px 20px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 4px 20px rgba(34, 197, 94, 0.10), 0 1px 3px rgba(0, 0, 0, 0.08)',
               borderRadius: 4,
-              background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
-              border: '1px solid rgba(226, 232, 240, 0.6)',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #dcfce7 100%)',
+              border: '1px solid rgba(34, 197, 94, 0.18)',
               position: 'relative',
               overflow: 'hidden',
               transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -678,7 +678,7 @@ const AdminDashboard: React.FC = () => {
                 left: 0,
                 width: '4px',
                 height: '100%',
-                background: 'linear-gradient(180deg, #2563eb 0%, #3b82f6 100%)',
+                background: 'linear-gradient(180deg, #16a34a 0%, #22c55e 100%)',
                 opacity: 0,
                 transition: 'opacity 0.3s ease',
               },
@@ -689,13 +689,13 @@ const AdminDashboard: React.FC = () => {
                 right: -30,
                 width: '80px',
                 height: '80px',
-                background: 'radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%)',
                 borderRadius: '50%',
                 transition: 'all 0.4s ease',
               },
               '&:hover': {
-                transform: 'translateY(-6px) scale(1.02)',
-                boxShadow: '0 12px 40px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 34px rgba(34, 197, 94, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08)',
                 '&::before': {
                   opacity: 1,
                 },
@@ -718,7 +718,7 @@ const AdminDashboard: React.FC = () => {
                 variant="h6"
                 gutterBottom
                 fontWeight="bold"
-                color="primary.main"
+                color="success.main"
                 sx={{ fontSize: '1rem', mb: 2 }}
               >
                 Médicos
@@ -802,9 +802,9 @@ const AdminDashboard: React.FC = () => {
                         mb: 0.2,
                         p: 0.6,
                         borderRadius: 2,
-                        bgcolor: 'primary.50',
+                        bgcolor: 'rgba(34, 197, 94, 0.10)',
                         transition: 'all 0.2s ease',
-                        '&:hover': { bgcolor: 'primary.100' },
+                        '&:hover': { bgcolor: 'rgba(34, 197, 94, 0.16)' },
                       }}
                     >
                       <Box
@@ -824,7 +824,7 @@ const AdminDashboard: React.FC = () => {
                           <Typography
                             variant="body2"
                             fontWeight="bold"
-                            color="primary.main"
+                            color="success.main"
                             sx={{ fontSize: '0.85rem', fontFamily: 'monospace', minWidth: '30px', textAlign: 'right' }}
                           >
                             {formatNumber(Number(item.total))}
@@ -857,10 +857,10 @@ const AdminDashboard: React.FC = () => {
               flex: 1,
               minHeight: { xs: 320, sm: 280 },
               height: 'auto',
-              boxShadow: '0 4px 20px rgba(5, 150, 105, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 4px 20px rgba(37, 99, 235, 0.10), 0 1px 3px rgba(0, 0, 0, 0.08)',
               borderRadius: 4,
-              background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #ecfdf5 100%)',
-              border: '1px solid rgba(34, 197, 94, 0.2)',
+              background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #dbeafe 100%)',
+              border: '1px solid rgba(37, 99, 235, 0.18)',
               position: 'relative',
               overflow: 'hidden',
               transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -871,7 +871,7 @@ const AdminDashboard: React.FC = () => {
                 left: 0,
                 width: '4px',
                 height: '100%',
-                background: 'linear-gradient(180deg, #059669 0%, #22c55e 100%)',
+                background: 'linear-gradient(180deg, #2563eb 0%, #38bdf8 100%)',
                 opacity: 0,
                 transition: 'opacity 0.3s ease',
               },
@@ -882,13 +882,13 @@ const AdminDashboard: React.FC = () => {
                 right: -30,
                 width: '80px',
                 height: '80px',
-                background: 'radial-gradient(circle, rgba(5, 150, 105, 0.05) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)',
                 borderRadius: '50%',
                 transition: 'all 0.4s ease',
               },
               '&:hover': {
-                transform: 'translateY(-6px) scale(1.02)',
-                boxShadow: '0 12px 40px rgba(5, 150, 105, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 34px rgba(37, 99, 235, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08)',
                 '&::before': {
                   opacity: 1,
                 },
@@ -911,7 +911,7 @@ const AdminDashboard: React.FC = () => {
                 variant="h6"
                 gutterBottom
                 fontWeight="bold"
-                color="secondary.main"
+                color="primary.main"
                 sx={{ fontSize: '1rem', mb: 2 }}
               >
                 Pacientes e Exames
@@ -927,9 +927,9 @@ const AdminDashboard: React.FC = () => {
                       mb: 0.2,
                       p: 0.6,
                       borderRadius: 2,
-                      bgcolor: 'secondary.50',
+                      bgcolor: 'rgba(37, 99, 235, 0.09)',
                       transition: 'all 0.2s ease',
-                      '&:hover': { bgcolor: 'secondary.100' },
+                      '&:hover': { bgcolor: 'rgba(37, 99, 235, 0.15)' },
                     }}
                   >
                     <Typography
@@ -1020,8 +1020,8 @@ const AdminDashboard: React.FC = () => {
                 transition: 'all 0.4s ease',
               },
               '&:hover': {
-                transform: 'translateY(-6px) scale(1.02)',
-                boxShadow: '0 12px 40px rgba(245, 158, 11, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 34px rgba(245, 158, 11, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08)',
                 '&::before': {
                   opacity: 1,
                 },
@@ -1058,9 +1058,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'warning.50',
+                    bgcolor: 'rgba(245, 158, 11, 0.11)',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.100' },
+                    '&:hover': { bgcolor: 'rgba(245, 158, 11, 0.17)' },
                   }}
                 >
                   <Typography
@@ -1087,9 +1087,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'warning.50',
+                    bgcolor: 'rgba(245, 158, 11, 0.11)',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.100' },
+                    '&:hover': { bgcolor: 'rgba(245, 158, 11, 0.17)' },
                   }}
                 >
                   <Typography
@@ -1116,9 +1116,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'warning.50',
+                    bgcolor: 'rgba(245, 158, 11, 0.11)',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.100' },
+                    '&:hover': { bgcolor: 'rgba(245, 158, 11, 0.17)' },
                   }}
                 >
                   <Typography
@@ -1130,7 +1130,7 @@ const AdminDashboard: React.FC = () => {
                   </Typography>
                   <Typography
                     variant="caption"
-                    color="primary.main"
+                    color="success.main"
                     fontWeight={500}
                     sx={{ fontSize: '0.75rem' }}
                   >
@@ -1145,9 +1145,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'warning.50',
+                    bgcolor: 'rgba(245, 158, 11, 0.11)',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.100' },
+                    '&:hover': { bgcolor: 'rgba(245, 158, 11, 0.17)' },
                   }}
                 >
                   <Typography
@@ -1174,9 +1174,9 @@ const AdminDashboard: React.FC = () => {
                     mb: 0.2,
                     p: 0.6,
                     borderRadius: 2,
-                    bgcolor: 'warning.50',
+                    bgcolor: 'rgba(245, 158, 11, 0.11)',
                     transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'warning.100' },
+                    '&:hover': { bgcolor: 'rgba(245, 158, 11, 0.17)' },
                   }}
                 >
                   <Typography

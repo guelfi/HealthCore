@@ -15,6 +15,8 @@ import {
   standardCardStyles,
   standardCardContentStyles,
   standardDialogTitleStyles,
+  standardDialogPaperStyles,
+  standardDialogContentStyles,
 } from '../../styles/cardStyles';
 import type { Paciente } from '../../../domain/entities/Paciente';
 import { usePacientes } from '../../hooks/usePacientes';
@@ -44,7 +46,8 @@ const getTableColumns = () => [
   {
     id: 'actions',
     label: '',
-    minWidth: 60,
+    minWidth: 44,
+    width: 44,
     align: 'center' as const,
     sticky: false,
     mobileVisible: true,
@@ -52,7 +55,7 @@ const getTableColumns = () => [
       <Visibility
         color="action"
         sx={{
-          fontSize: '1.5rem', // Maior para touch
+          fontSize: '1.3rem',
           cursor: 'pointer',
           '&:hover': { color: 'primary.main' },
         }}
@@ -63,6 +66,7 @@ const getTableColumns = () => [
     id: 'nome',
     label: 'Nome',
     minWidth: 150,
+    width: 170,
     mobileVisible: true,
     tabletVisible: true,
     desktopVisible: true,
@@ -70,15 +74,17 @@ const getTableColumns = () => [
   {
     id: 'documento',
     label: 'Documento',
-    minWidth: 120,
+    minWidth: 125,
+    width: 135,
     mobileVisible: true,
     render: (value: unknown) => formatCPF(String(value ?? '')),
   },
   {
     id: 'dataNascimento',
     label: 'Data de Nascimento',
-    minWidth: 130,
-    mobileVisible: false, // Oculta em mobile para economizar espaço
+    minWidth: 145,
+    width: 150,
+    mobileVisible: false,
     tabletVisible: true,
     render: (value: unknown) => formatDateBR(String(value ?? '')),
   },
@@ -86,6 +92,7 @@ const getTableColumns = () => [
     id: 'telefone',
     label: 'Telefone',
     minWidth: 120,
+    width: 130,
     mobileVisible: false,
     tabletVisible: true,
     render: (value: unknown) => formatPhone(String(value ?? '')),
@@ -94,6 +101,7 @@ const getTableColumns = () => [
     id: 'email',
     label: 'E-mail',
     minWidth: 150,
+    width: 180,
     mobileVisible: false,
     tabletVisible: false,
     desktopVisible: true,
@@ -120,7 +128,7 @@ const PacientesPageTable: React.FC = () => {
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(7);
+  const [pageSize] = useState(10);
   const [saving, setSaving] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
@@ -311,7 +319,7 @@ const PacientesPageTable: React.FC = () => {
               onRowClick={handleRowClick}
               loading={loading}
               emptyMessage="Nenhum paciente encontrado"
-              rowHeight={48} // Altura otimizada para touch
+              rowHeight={36} // Altura otimizada para touch
               stickyHeader
               touchOptimized
             />
@@ -328,13 +336,14 @@ const PacientesPageTable: React.FC = () => {
         enableBottomSheet
         touchOptimized
         mobileFullScreen={false}
+        PaperProps={{ sx: standardDialogPaperStyles }}
       >
         <DialogTitle sx={standardDialogTitleStyles}>
           <PersonIcon />
           {dialogMode === 'add' ? 'Adicionar Paciente' : 'Editar Paciente'}
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 1.625, px: 1.5, pb: 1 }}>
+        <DialogContent sx={standardDialogContentStyles}>
           <Box
             sx={{
               display: 'flex',
@@ -360,7 +369,7 @@ const PacientesPageTable: React.FC = () => {
               }}
             />
 
-            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
               <TextField
                 fullWidth
                 label="Documento (CPF) *"
@@ -401,7 +410,7 @@ const PacientesPageTable: React.FC = () => {
               />
             </Box>
 
-            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
               <TextField
                 fullWidth
                 label="Telefone"

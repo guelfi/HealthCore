@@ -21,6 +21,10 @@ import {
 import { Visibility } from '@mui/icons-material';
 import {
   standardDialogTitleStyles,
+  standardDialogPaperStyles,
+  standardDialogContentStyles,
+  standardFormGridStyles,
+  standardReadOnlyFieldStyles,
 } from '../../styles/cardStyles';
 import StandardDialogButtons from '../common/StandardDialogButtons';
 import { useNavigate } from 'react-router-dom';
@@ -245,14 +249,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
           mx: 'auto',
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: { xs: 1, sm: 1.2 },
-            mt: 2,
-          }}
-        >
+        <Box sx={standardFormGridStyles}>
           {isEditing ? (
             <Box>
               <Typography
@@ -263,15 +260,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
                 Paciente
               </Typography>
               <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  p: 1.5,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  bgcolor: 'grey.50',
-                }}
+                sx={standardReadOnlyFieldStyles}
               >
                 {selectedPaciente && (
                   <IconButton
@@ -356,13 +345,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
                 Modalidade DICOM
               </Typography>
               <Box
-                sx={{
-                  p: 1.5,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  bgcolor: 'grey.50',
-                }}
+                sx={standardReadOnlyFieldStyles}
               >
                 <Typography variant="body2">
                   {watch('modalidade')
@@ -441,6 +424,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
             multiline
             rows={4}
             sx={{
+              gridColumn: '1 / -1',
               '& .MuiInputBase-root': {
                 padding: '4px 6px',
               },
@@ -451,7 +435,7 @@ const ExameForm: React.FC<ExameFormProps> = ({
             size="small"
           />
 
-          <Box display="flex" gap={2} justifyContent="flex-end" mt={1}>
+          <Box display="flex" gap={2} justifyContent="flex-end" mt={1} sx={{ gridColumn: '1 / -1' }}>
             <StandardDialogButtons
               onSave={handleSubmit(onSubmit)}
               onClose={onCancel || (() => navigate('/exames'))}
@@ -471,17 +455,13 @@ const ExameForm: React.FC<ExameFormProps> = ({
         maxWidth="sm"
         fullWidth
         sx={{
-          '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '600px' },
-            maxWidth: '600px',
-            margin: { xs: 1, sm: 3 },
-          },
+          '& .MuiDialog-paper': standardDialogPaperStyles,
         }}
       >
         <DialogTitle sx={standardDialogTitleStyles}>
           Informações do Paciente
         </DialogTitle>
-        <DialogContent sx={{ pt: 1.625, px: 1.5, pb: 1 }}>
+        <DialogContent sx={standardDialogContentStyles}>
           {selectedPaciente && (
             <Box
               sx={{

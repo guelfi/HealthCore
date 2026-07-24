@@ -16,12 +16,14 @@ namespace HealthCore.Api.Core.Application.Services
         private readonly HealthCoreDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
+        private readonly BillingService _billingService;
 
-        public AuthService(HealthCoreDbContext context, IConfiguration configuration, ILogger<AuthService> logger)
+        public AuthService(HealthCoreDbContext context, IConfiguration configuration, ILogger<AuthService> logger, BillingService billingService)
         {
             _context = context;
             _configuration = configuration;
             _logger = logger;
+            _billingService = billingService;
         }
 
         public async Task<LoginResponseDto?> LoginAsync(string username, string password)
@@ -39,8 +41,16 @@ namespace HealthCore.Api.Core.Application.Services
                     return null;
                 }
 
+                if (!await _billingService.EnsureUserCanAccessAsync(user))
+                {
+                    _logger.LogWarning("Assinatura bloqueada para usuario: {Username}", username);
+                    return null;
+                }
+
                 // Revogar tokens de refresh existentes
                 await RevokeUserRefreshTokensAsync(user.Id);
+
+                var displayName = await GetDisplayNameAsync(user);
 
                 // Gerar novos tokens
                 var jwtToken = GenerateJwtToken(user);
@@ -57,6 +67,7 @@ namespace HealthCore.Api.Core.Application.Services
                     {
                         Id = user.Id,
                         Username = user.Username,
+                        DisplayName = displayName,
                         Role = user.Role,
                         IsActive = user.IsActive
                     }
@@ -85,9 +96,17 @@ namespace HealthCore.Api.Core.Application.Services
                     return null;
                 }
 
+                if (!refreshToken.User.IsActive || !await _billingService.EnsureUserCanAccessAsync(refreshToken.User))
+                {
+                    _logger.LogWarning("Refresh token bloqueado por assinatura ou usuario inativo");
+                    return null;
+                }
+
                 // Revogar o refresh token usado
                 refreshToken.IsRevoked = true;
                 refreshToken.RevokedAt = DateTime.UtcNow;
+
+                var displayName = await GetDisplayNameAsync(refreshToken.User);
 
                 // Gerar novos tokens
                 var jwtToken = GenerateJwtToken(refreshToken.User);
@@ -106,6 +125,7 @@ namespace HealthCore.Api.Core.Application.Services
                     {
                         Id = refreshToken.User.Id,
                         Username = refreshToken.User.Username,
+                        DisplayName = displayName,
                         Role = refreshToken.User.Role,
                         IsActive = refreshToken.User.IsActive
                     }
@@ -172,6 +192,16 @@ namespace HealthCore.Api.Core.Application.Services
                 .AnyAsync(bt => bt.TokenId == tokenId && bt.ExpiresAt > DateTime.UtcNow);
         }
 
+
+        private async Task<string> GetDisplayNameAsync(User user)
+        {
+            var medicoNome = await _context.Medicos
+                .Where(m => m.UserId == user.Id)
+                .Select(m => m.Nome)
+                .FirstOrDefaultAsync();
+
+            return string.IsNullOrWhiteSpace(medicoNome) ? user.Username : medicoNome;
+        }
         private (string Token, DateTime ExpiresAt) GenerateJwtToken(User user)
         {
             var jwtSecret = _configuration["Jwt:Key"];

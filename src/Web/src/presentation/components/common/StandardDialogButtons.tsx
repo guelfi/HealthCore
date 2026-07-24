@@ -55,7 +55,8 @@ const StandardDialogButtons: React.FC<StandardDialogButtonsProps> = ({
         display: 'flex',
         gap,
         justifyContent,
-        p: 1.5,
+        flexWrap: 'wrap',
+        p: { xs: 1.5, sm: 1.5 },
         borderTop: '1px solid',
         borderColor: 'divider',
         backgroundColor: 'grey.50',
@@ -70,9 +71,9 @@ const StandardDialogButtons: React.FC<StandardDialogButtonsProps> = ({
           color="error"
           startIcon={deleteLoading ? <CircularProgress size={18} /> : <DeleteIcon sx={{ fontSize: 18 }} />}
           sx={{
-            height: '40px',
+            height: '42px',
             padding: '6px 20px',
-            minWidth: '120px',
+            minWidth: { xs: '100%', sm: '120px' },
             borderRadius: '4px',
             fontWeight: 500,
             fontSize: '14px',

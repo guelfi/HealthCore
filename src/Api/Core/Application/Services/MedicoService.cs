@@ -70,6 +70,7 @@ namespace HealthCore.Api.Core.Application.Services
                 // Criar o médico
                 var medico = new Medico
                 {
+                    Id = Guid.NewGuid(),
                     UserId = user.Id,
                     Nome = createMedicoDto.Nome,
                     Documento = createMedicoDto.Documento,
@@ -83,6 +84,22 @@ namespace HealthCore.Api.Core.Application.Services
                 };
 
                 _context.Medicos.Add(medico);
+                var trialStart = DateTime.UtcNow;
+                _context.MedicoSubscriptions.Add(new MedicoSubscription
+                {
+                    Id = Guid.NewGuid(),
+                    MedicoId = medico.Id,
+                    BillingCycle = createMedicoDto.BillingCycle,
+                    PaymentMethod = PaymentMethod.Pix,
+                    Status = SubscriptionStatus.Trial,
+                    MonthlyAmount = 49m,
+                    AnnualAmount = 490m,
+                    TrialStartedAt = trialStart,
+                    TrialEndsAt = trialStart.AddDays(30),
+                    CreatedAt = trialStart,
+                    UpdatedAt = trialStart,
+                    Notes = "Teste gratuito iniciado no cadastro."
+                });
                 await _context.SaveChangesAsync();
                 
                 await transaction.CommitAsync();

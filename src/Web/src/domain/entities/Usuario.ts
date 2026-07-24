@@ -3,6 +3,7 @@ import { UserProfile } from '../enums/UserProfile';
 export interface Usuario {
   id: string;
   username: string;
+  displayName?: string;
   role: UserProfile;
   isActive: boolean;
   createdAt?: Date; // Opcional pois pode vir como string do backend
@@ -34,6 +35,7 @@ export interface AuthResponse {
   user: {
     id: string;
     username: string;
+    displayName?: string;
     role: number; // Backend envia como número
     isActive: boolean;
   };

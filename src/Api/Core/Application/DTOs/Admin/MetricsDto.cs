@@ -37,6 +37,7 @@ namespace HealthCore.Api.Core.Application.DTOs.Admin
     {
         public int NumeroPacientes { get; set; }
         public int TotalExames { get; set; }
+        public int TotalEspecialidades { get; set; }
         public List<ExamesPorPacienteDto> ExamesPorPaciente { get; set; } = new();
         public List<ModalidadeDto> ModalidadesMaisUtilizadas { get; set; } = new();
     }

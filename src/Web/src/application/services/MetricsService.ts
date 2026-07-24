@@ -29,6 +29,7 @@ interface AdminMetricsDto {
 interface MedicoMetricsDto {
   numeroPacientes: number;
   totalExames: number;
+  totalEspecialidades: number;
   examesPorPaciente: ExamesPorPacienteDto[];
   modalidadesMaisUtilizadas: ModalidadeDto[];
 }
@@ -255,7 +256,7 @@ class MetricsService {
         ),
         exames: this.gerarCrescimentoBasico('exames', data.totalExames),
       },
-      totalEspecialidades: 0, // Médicos não precisam desta informação
+      totalEspecialidades: data.totalEspecialidades
     };
   }
 

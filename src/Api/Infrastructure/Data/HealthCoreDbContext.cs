@@ -12,6 +12,7 @@ namespace HealthCore.Api.Infrastructure.Data
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public virtual DbSet<BlacklistedToken> BlacklistedTokens { get; set; } = null!;
+        public virtual DbSet<MedicoSubscription> MedicoSubscriptions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -120,6 +121,28 @@ namespace HealthCore.Api.Infrastructure.Data
                 entity.Property(bt => bt.Reason).HasMaxLength(200);
             });
 
+
+            // Configuracao da entidade MedicoSubscription
+            modelBuilder.Entity<MedicoSubscription>(entity =>
+            {
+                entity.HasKey(s => s.Id);
+                entity.HasIndex(s => s.MedicoId).IsUnique();
+                entity.Property(s => s.BillingCycle).IsRequired();
+                entity.Property(s => s.PaymentMethod).IsRequired();
+                entity.Property(s => s.Status).IsRequired();
+                entity.Property(s => s.MonthlyAmount).HasPrecision(10, 2).HasDefaultValue(49m);
+                entity.Property(s => s.AnnualAmount).HasPrecision(10, 2).HasDefaultValue(490m);
+                entity.Property(s => s.TrialStartedAt).IsRequired();
+                entity.Property(s => s.TrialEndsAt).IsRequired();
+                entity.Property(s => s.Notes).HasMaxLength(1000);
+                entity.Property(s => s.CreatedAt).IsRequired();
+                entity.Property(s => s.UpdatedAt).IsRequired();
+
+                entity.HasOne(s => s.Medico)
+                    .WithOne(m => m.Subscription)
+                    .HasForeignKey<MedicoSubscription>(s => s.MedicoId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
             // Configuração da entidade Medico
             modelBuilder.Entity<Medico>(entity =>
             {

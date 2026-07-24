@@ -11,12 +11,12 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  IconButton,
   useTheme,
   useMediaQuery,
   Menu,
   MenuItem,
   Avatar,
+  Button,
 } from '@mui/material';
 import {
   Dashboard,
@@ -26,6 +26,8 @@ import {
   LocalHospital,
   Logout,
   MedicalServices,
+  AccountCircle,
+  ReceiptLong,
 } from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useUIStore } from '../../../application/stores/uiStore';
@@ -68,10 +70,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     setAnchorEl(null);
   };
 
+  const handleProfile = () => {
+    handleUserMenuClose();
+    navigate('/perfil');
+  };
+
   const handleLogout = async () => {
     handleUserMenuClose();
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   // Menu items para desktop sidebar
@@ -85,6 +92,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       { text: 'Especialidades', icon: <MedicalServices />, path: '/especialidades' },
       { text: 'Pacientes', icon: <People />, path: '/pacientes' },
       { text: 'Exames', icon: <Assignment />, path: '/exames' },
+      { text: 'Cobrança', icon: <ReceiptLong />, path: '/admin/cobranca' },
       {
         text: 'Usuários',
         icon: <AdminPanelSettings />,
@@ -126,6 +134,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   // Verificar se estamos no Dashboard ou em uma Page
   const isDashboard = location.pathname === '/dashboard';
+  const userDisplayName = user?.displayName || user?.username || 'Usuário';
+  const userInitial = userDisplayName.charAt(0).toUpperCase();
+  const userRoleLabel = user?.role === UserProfile.ADMINISTRADOR ? 'Administrador' : 'Médico';
 
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -169,8 +180,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             menuItems={hamburgerMenuItems}
             theme={theme.palette.mode}
             userInfo={{
-              name: user?.username || 'Usuário',
-              role: user?.role === UserProfile.ADMINISTRADOR ? 'Administrador' : 'Médico',
+              name: userDisplayName,
+              role: userRoleLabel,
             }}
           />
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
@@ -178,36 +189,58 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton onClick={handleUserMenuClick} color="inherit">
-              <Avatar
+            <Button
+              onClick={handleUserMenuClick}
+              color="inherit"
+              startIcon={
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: 'rgba(255, 255, 255, 0.22)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {userInitial}
+                </Avatar>
+              }
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                maxWidth: { xs: 210, sm: 320 },
+                '& .MuiButton-startIcon': { mr: 1 },
+              }}
+            >
+              <Typography
+                variant="body2"
                 sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontWeight: 'bold',
+                  display: { xs: 'none', sm: 'block' },
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {user?.username?.charAt(0).toUpperCase()}
-              </Avatar>
-            </IconButton>
+                {userDisplayName}
+              </Typography>
+            </Button>
             <Menu
               anchorEl={anchorEl}
               open={userMenuOpen}
               onClose={handleUserMenuClose}
             >
-              <MenuItem
-                disabled
-                sx={{
-                  fontWeight: 600,
-                  color: 'primary.main',
-                  '&.Mui-disabled': {
-                    color: 'primary.main',
-                    opacity: 1,
-                  },
-                }}
-              >
-                {user?.username}
+              <MenuItem onClick={handleProfile} sx={{ alignItems: 'flex-start', py: 1.25 }}>
+                <ListItemIcon>
+                  <AccountCircle fontSize="small" />
+                </ListItemIcon>
+                <Box>
+                  <Typography variant="body2" fontWeight={700} color="primary.main">
+                    {userDisplayName}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Meu perfil
+                  </Typography>
+                </Box>
               </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>
@@ -287,7 +320,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             {/* Container de conteúdo das páginas */}
             <Box
               sx={{
-                p: 3,
+                p: { xs: 2, md: 2.5 },
                 pb: isDashboard && !isMobile ? 3 : 3,
                 minHeight: 'calc(100vh - 64px)', // Altura mínima considerando header
                 // Dashboards: permitir scroll completo dos cards

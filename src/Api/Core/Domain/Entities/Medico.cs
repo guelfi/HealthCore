@@ -28,6 +28,7 @@ namespace HealthCore.Api.Core.Domain.Entities
         // Relacionamentos
         public User User { get; set; } = null!;
         public Especialidade? EspecialidadeNavigation { get; set; }
+        public MedicoSubscription? Subscription { get; set; }
         public ICollection<Paciente> Pacientes { get; set; } = new List<Paciente>();
         public ICollection<Exame> ExamesRealizados { get; set; } = new List<Exame>();
     }
