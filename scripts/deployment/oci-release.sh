@@ -255,7 +255,7 @@ while IFS= read -r container_id; do
   fi
 done < <(docker ps -aq --filter publish=5005)
 
-sudo chown -R 1001:1001 /var/lib/docker/volumes/healthcore_healthcore_data/_data 2>/dev/null || true
+sudo chmod -R 777 /var/lib/docker/volumes/healthcore_healthcore_data/_data 2>/dev/null || true
 docker compose --env-file "$HEALTHCORE_ENV_FILE" up -d --remove-orphans
 docker exec nginx-proxy nginx -s reload
 
