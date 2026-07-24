@@ -78,7 +78,7 @@ public static class HealthCorePersistenceExtensions
         var demoPassword = app.Configuration["Seed:DemoPassword"];
         if (string.IsNullOrWhiteSpace(demoPassword))
         {
-            demoPassword = "admin123";
+            demoPassword = "#246588";
         }
 
         var normalizePasswords = app.Configuration.GetValue<bool>("Seed:NormalizeDemoPasswords", true);
