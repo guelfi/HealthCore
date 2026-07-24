@@ -62,7 +62,7 @@ const LoginForm: React.FC = () => {
       sx={{
         px: 2,
         backgroundImage:
-          'linear-gradient(90deg, rgba(10, 37, 64, 0.84), rgba(15, 118, 183, 0.46)), url("https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1800&q=80")',
+          `linear-gradient(90deg, rgba(10, 37, 64, 0.84), rgba(15, 118, 183, 0.46)), url("${import.meta.env.BASE_URL}images/login-bg.jpg")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -119,7 +119,7 @@ const LoginForm: React.FC = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      onClick={() => setShowPassword(prev => !prev)}
+                      onClick={() => setShowPassword((prev: boolean) => !prev)}
                       edge="end"
                       disabled={isLoading}
                     >

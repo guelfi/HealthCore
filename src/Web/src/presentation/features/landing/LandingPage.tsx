@@ -66,7 +66,7 @@ const LandingPage: React.FC = () => {
     field: K,
     value: PublicRegistrationForm[K]
   ) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev: PublicRegistrationForm) => ({ ...prev, [field]: value }));
     setSuccess('');
     setError('');
   };
@@ -111,7 +111,7 @@ const LandingPage: React.FC = () => {
           alignItems: 'center',
           color: 'white',
           backgroundImage:
-            'linear-gradient(90deg, rgba(4, 18, 34, 0.96) 0%, rgba(7, 32, 57, 0.86) 42%, rgba(7, 32, 57, 0.42) 100%), url("https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1800&q=80")',
+            `linear-gradient(90deg, rgba(4, 18, 34, 0.96) 0%, rgba(7, 32, 57, 0.86) 42%, rgba(7, 32, 57, 0.42) 100%), url("${import.meta.env.BASE_URL}images/hero-bg.jpg")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -140,7 +140,7 @@ const LandingPage: React.FC = () => {
                 textShadow: '0 2px 12px rgba(0, 0, 0, 0.48)',
               }}
             >
-              Gestão simples para médicos acompanharem pacientes, exames e histórico clínico em uma plataforma SaaS pronta para evoluir com análise assistida por IA.
+              Gestão simples para médicos acompanharem pacientes, exames e histórico clínico em uma plataforma SaaS com análise assistida por IA.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <Button
@@ -215,7 +215,7 @@ const LandingPage: React.FC = () => {
               <TextField
                 label="Nome completo"
                 value={form.nome}
-                onChange={event => updateField('nome', event.target.value)}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('nome', event.target.value)}
                 required
                 fullWidth
               />
@@ -224,7 +224,7 @@ const LandingPage: React.FC = () => {
                 <TextField
                   label="CPF"
                   value={form.documento}
-                  onChange={event => updateField('documento', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('documento', event.target.value)}
                   required
                   fullWidth
                 />
@@ -232,7 +232,7 @@ const LandingPage: React.FC = () => {
                   label="Data de nascimento"
                   type="date"
                   value={form.dataNascimento}
-                  onChange={event => updateField('dataNascimento', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('dataNascimento', event.target.value)}
                   required
                   fullWidth
                   InputLabelProps={{ shrink: true }}
@@ -243,14 +243,14 @@ const LandingPage: React.FC = () => {
                 <TextField
                   label="CRM"
                   value={form.crm}
-                  onChange={event => updateField('crm', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('crm', event.target.value)}
                   required
                   fullWidth
                 />
                 <TextField
                   label="Especialidade principal"
                   value={form.especialidade}
-                  onChange={event => updateField('especialidade', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('especialidade', event.target.value)}
                   fullWidth
                 />
               </Box>
@@ -260,14 +260,14 @@ const LandingPage: React.FC = () => {
                   label="E-mail"
                   type="email"
                   value={form.email}
-                  onChange={event => updateField('email', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('email', event.target.value)}
                   required
                   fullWidth
                 />
                 <TextField
                   label="WhatsApp"
                   value={form.telefone}
-                  onChange={event => updateField('telefone', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('telefone', event.target.value)}
                   required
                   fullWidth
                 />
@@ -279,18 +279,18 @@ const LandingPage: React.FC = () => {
                   labelId="billing-cycle-label"
                   label="Plano desejado"
                   value={form.billingCycle}
-                  onChange={event => updateField('billingCycle', Number(event.target.value) as BillingCycle)}
+                  onChange={(event: any) => updateField('billingCycle', Number(event.target.value) as BillingCycle)}
                 >
-                  <MenuItem value={1}>Mensal - R$49,00 por mes</MenuItem>
-                  <MenuItem value={2}>Anual - R$490,00 em cobranca unica</MenuItem>
+                  <MenuItem value={1}>Mensal - R$49,00 por mês</MenuItem>
+                  <MenuItem value={2}>Anual - R$490,00 em cobrança única</MenuItem>
                 </Select>
               </FormControl>
 
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                 <TextField
-                  label="Usuario de acesso"
+                  label="Usuário de acesso"
                   value={form.username}
-                  onChange={event => updateField('username', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('username', event.target.value)}
                   required
                   fullWidth
                 />
@@ -298,7 +298,7 @@ const LandingPage: React.FC = () => {
                   label="Senha"
                   type="password"
                   value={form.password}
-                  onChange={event => updateField('password', event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => updateField('password', event.target.value)}
                   required
                   fullWidth
                   inputProps={{ minLength: 6 }}
