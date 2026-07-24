@@ -1,12 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Fab,
-  useTheme,
-  alpha,
-  Zoom,
-} from '@mui/material';
-
+import React, { useState, useEffect } from 'react';
+import { Box, Fab, useTheme, alpha, Zoom } from '@mui/material';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 
 import { useResponsive } from '../../../presentation/hooks/useResponsive';
 
@@ -14,104 +8,71 @@ interface DashboardScrollIndicatorsProps {
   enabled?: boolean;
   showUpButton?: boolean;
   showDownButton?: boolean;
+  mobileOnly?: boolean;
 }
-
-// Ãcone de dedo apontando para cima ðŸ‘†
-const FingerUpIcon: React.FC = () => (
-  <Box sx={{ fontSize: '1.5rem', lineHeight: 1 }}>ðŸ‘†</Box>
-);
-
-// Ãcone de dedo apontando para baixo ðŸ‘‡
-const FingerDownIcon: React.FC = () => (
-  <Box sx={{ fontSize: '1.5rem', lineHeight: 1 }}>ðŸ‘‡</Box>
-);
 
 const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
   enabled = true,
   showUpButton = true,
   showDownButton = true,
+  mobileOnly = true,
 }) => {
   const theme = useTheme();
   const { isMobile } = useResponsive();
   const [scrollState, setScrollState] = useState({
     canScrollUp: false,
     canScrollDown: false,
-    showIndicators: false,
   });
 
   useEffect(() => {
-    if (!isMobile || !enabled) {
+    if ((mobileOnly && !isMobile) || !enabled) {
       return;
     }
-    const checkScrollState = () => {
-      const scrollContainer = document.querySelector('[data-scroll-container]') ||
-                             document.documentElement;
-      
-      if (!scrollContainer) return;
 
+    const getScrollContainer = () =>
+      document.querySelector('[data-scroll-container]') || document.documentElement;
+
+    const checkScrollState = () => {
+      const scrollContainer = getScrollContainer();
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const canScrollUp = scrollTop > 20; // Threshold reduzido para melhor UX
-      const canScrollDown = scrollTop < scrollHeight - clientHeight - 20;
-      
+
       setScrollState({
-        canScrollUp,
-        canScrollDown,
-        showIndicators: canScrollUp || canScrollDown,
+        canScrollUp: scrollTop > 20,
+        canScrollDown: scrollTop < scrollHeight - clientHeight - 20,
       });
     };
 
-    // Verificar estado inicial
     checkScrollState();
 
-    // Adicionar listeners
-    const scrollContainer = document.querySelector('[data-scroll-container]') ||
-                           window;
-    
+    const scrollContainer = document.querySelector('[data-scroll-container]') || window;
     scrollContainer.addEventListener('scroll', checkScrollState);
     window.addEventListener('resize', checkScrollState);
 
-    // Cleanup
     return () => {
       scrollContainer.removeEventListener('scroll', checkScrollState);
       window.removeEventListener('resize', checkScrollState);
     };
-  }, [enabled, isMobile]);
+  }, [enabled, isMobile, mobileOnly]);
 
-  // SÃ³ renderiza em mobile e se habilitado
-  if (!isMobile || !enabled) {
+  if ((mobileOnly && !isMobile) || !enabled) {
     return null;
   }
 
-  const handleScrollUp = () => {
+  const scrollBy = (distance: number) => {
     const scrollContainer = document.querySelector('[data-scroll-container]');
-    
-    if (scrollContainer) {
-      scrollContainer.scrollTo({
-        top: Math.max(0, scrollContainer.scrollTop - 300),
-        behavior: 'smooth'
-      });
-    } else {
-      window.scrollTo({
-        top: Math.max(0, window.pageYOffset - 300),
-        behavior: 'smooth'
-      });
-    }
-  };
 
-  const handleScrollDown = () => {
-    const scrollContainer = document.querySelector('[data-scroll-container]');
-    
     if (scrollContainer) {
       scrollContainer.scrollTo({
-        top: scrollContainer.scrollTop + 300,
-        behavior: 'smooth'
+        top: Math.max(0, scrollContainer.scrollTop + distance),
+        behavior: 'smooth',
       });
-    } else {
-      window.scrollTo({
-        top: window.pageYOffset + 300,
-        behavior: 'smooth'
-      });
+      return;
     }
+
+    window.scrollTo({
+      top: Math.max(0, window.pageYOffset + distance),
+      behavior: 'smooth',
+    });
   };
 
   const fabBaseStyles = {
@@ -121,21 +82,17 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
     width: 48,
     height: 48,
     minHeight: 48,
-    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.9)} 0%, ${alpha(theme.palette.primary.dark, 0.9)} 100%)`,
+    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.92)} 0%, ${alpha(theme.palette.primary.dark, 0.92)} 100%)`,
     backdropFilter: 'blur(10px)',
     border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
     boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.3)}`,
     color: theme.palette.primary.contrastText,
-    
-    // AnimaÃ§Ãµes e interaÃ§Ãµes
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    
     '&:hover': {
       background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-      transform: 'scale(1.1)',
+      transform: 'scale(1.08)',
       boxShadow: `0 12px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
     },
-    
     '&:active': {
       transform: 'scale(0.95)',
       transition: 'transform 0.1s ease',
@@ -144,41 +101,31 @@ const DashboardScrollIndicators: React.FC<DashboardScrollIndicatorsProps> = ({
 
   return (
     <Box>
-      {/* BotÃ£o Scroll Up */}
       {showUpButton && scrollState.canScrollUp && (
         <Zoom in={scrollState.canScrollUp} timeout={300}>
           <Fab
-            onClick={handleScrollUp}
+            onClick={() => scrollBy(-300)}
             size="medium"
-            sx={{
-              ...fabBaseStyles,
-              bottom: 120, // PosiÃ§Ã£o do botÃ£o superior
-            }}
-            aria-label="Scroll para cima"
+            sx={{ ...fabBaseStyles, bottom: 120 }}
+            aria-label="Rolar para cima"
           >
-            <FingerUpIcon />
+            <KeyboardArrowUp />
           </Fab>
         </Zoom>
       )}
 
-      {/* BotÃ£o Scroll Down */}
       {showDownButton && scrollState.canScrollDown && (
         <Zoom in={scrollState.canScrollDown} timeout={300}>
           <Fab
-            onClick={handleScrollDown}
+            onClick={() => scrollBy(300)}
             size="medium"
-            sx={{
-              ...fabBaseStyles,
-              bottom: 64, // PosiÃ§Ã£o do botÃ£o inferior
-            }}
-            aria-label="Scroll para baixo"
+            sx={{ ...fabBaseStyles, bottom: 64 }}
+            aria-label="Rolar para baixo"
           >
-            <FingerDownIcon />
+            <KeyboardArrowDown />
           </Fab>
         </Zoom>
       )}
-
-
     </Box>
   );
 };

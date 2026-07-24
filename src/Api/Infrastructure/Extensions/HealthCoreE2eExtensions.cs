@@ -37,4 +37,44 @@ public static class HealthCoreE2eExtensions
         }
         await database.SaveChangesAsync();
     }
+
+    private static readonly string[] DemoSeedUsernames =
+    [
+        "admin",
+        "healthcore.admin",
+        "healthcore.medico",
+        "medico",
+        "dr.ana",
+        "dr.bruno",
+        "dra.carla",
+        "dr.diego",
+        "dra.elisa"
+    ];
+
+    public static async Task NormalizeHealthCoreDemoPasswordsAsync(this WebApplication app)
+    {
+        if (!app.Configuration.GetValue<bool>("Seed:NormalizeDemoPasswords"))
+        {
+            return;
+        }
+
+        var password = app.Configuration["Seed:DemoPassword"];
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            throw new InvalidOperationException("Seed:DemoPassword must be configured when Seed:NormalizeDemoPasswords is enabled.");
+        }
+
+        using var scope = app.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<HealthCoreDbContext>();
+        var users = await database.Users
+            .Where(candidate => DemoSeedUsernames.Contains(candidate.Username))
+            .ToListAsync();
+
+        foreach (var user in users)
+        {
+            user.SetPassword(password);
+        }
+
+        await database.SaveChangesAsync();
+    }
 }

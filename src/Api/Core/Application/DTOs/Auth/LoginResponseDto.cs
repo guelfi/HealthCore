@@ -14,6 +14,7 @@ namespace HealthCore.Api.Core.Application.DTOs.Auth
     {
         public Guid Id { get; set; }
         public string Username { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         public UserRole Role { get; set; }
         public bool IsActive { get; set; }
     }

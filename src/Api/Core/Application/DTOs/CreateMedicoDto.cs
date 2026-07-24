@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using HealthCore.Api.Core.Domain.Enums;
 
 namespace HealthCore.Api.Core.Application.DTOs
 {
@@ -42,5 +43,7 @@ namespace HealthCore.Api.Core.Application.DTOs
         public string Password { get; set; } = string.Empty;
         
         public bool IsActive { get; set; } = true;
+
+        public BillingCycle BillingCycle { get; set; } = BillingCycle.Monthly;
     }
 }

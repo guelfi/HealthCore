@@ -7,13 +7,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   CircularProgress,
   Alert,
 } from '@mui/material';
@@ -21,6 +14,8 @@ import {
   standardCardStyles,
   standardCardContentStyles,
   standardDialogTitleStyles,
+  standardDialogPaperStyles,
+  standardDialogContentStyles,
 } from '../../styles/cardStyles';
 import { formatDateBR } from '../../utils/dateUtils';
 import {
@@ -34,6 +29,7 @@ import { ModalidadeDicomLabels } from '../../../domain/enums/ModalidadeDicom';
 import ExameForm from '../../components/common/ExameForm';
 import CustomPagination from '../../components/common/CustomPagination';
 import ResponsiveTableHeader from '../../../components/ui/Layout/ResponsiveTableHeader';
+import MobileOptimizedTable from '../../../components/ui/Table/MobileOptimizedTable';
 import {
   DeleteConfirmationDialog,
   SuccessDialog,
@@ -67,7 +63,7 @@ const ExamesPageTable: React.FC = () => {
     message: '',
   });
   const [saving, setSaving] = useState(false);
-  const [pageSize] = useState(7);
+  const [pageSize] = useState(10);
 
   // Carregar exames e pacientes ao montar o componente
   useEffect(() => {
@@ -148,6 +144,81 @@ const ExamesPageTable: React.FC = () => {
     return paciente ? paciente.nome : 'N/A';
   };
 
+  const tableData = paginatedData.map(exame => ({
+    ...exame,
+    pacienteNome: getPacienteName(exame.pacienteId),
+    modalidadeLabel: ModalidadeDicomLabels[exame.modalidade] || exame.modalidade,
+    dataExameFormatada: formatDateBR(exame.dataExame),
+    createdAtFormatada: formatDateBR(exame.createdAt),
+  }));
+
+  const tableColumns = [
+    {
+      id: 'actions',
+      label: '',
+      minWidth: 44,
+      width: 44,
+      align: 'center' as const,
+      mobileVisible: true,
+      render: () => (
+        <Visibility
+          color="action"
+          sx={{
+            fontSize: '1.3rem',
+            cursor: 'pointer',
+            '&:hover': { color: 'primary.main' },
+          }}
+        />
+      ),
+    },
+    {
+      id: 'pacienteNome',
+      label: 'Paciente',
+      minWidth: 155,
+      width: 165,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'modalidadeLabel',
+      label: 'Modalidade',
+      minWidth: 240,
+      width: 255,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'descricao',
+      label: 'Descrição',
+      minWidth: 90,
+      width: 100,
+      mobileVisible: false,
+      tabletVisible: false,
+      desktopVisible: true,
+      render: (value: unknown) => String(value || '-'),
+    },
+    {
+      id: 'dataExameFormatada',
+      label: 'Data do Exame',
+      minWidth: 130,
+      width: 135,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'createdAtFormatada',
+      label: 'Cadastrado em',
+      minWidth: 125,
+      width: 130,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+  ];
+
   return (
     <>
       {/* Título e Descrição */}
@@ -204,114 +275,17 @@ const ExamesPageTable: React.FC = () => {
 
           {/* Tabela de Dados */}
           {!loading && (
-            <TableContainer
-              component={Paper}
-              sx={{
-                boxShadow: 'none',
-                border: '1px solid',
-                borderColor: 'divider',
-                maxHeight: 450,
-              }}
-            >
-              <Table size="small">
-                <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
-                  <TableRow>
-                    <TableCell align="center" sx={{ width: 50 }}></TableCell>
-                    <TableCell>
-                      <strong>Paciente</strong>
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' } }}
-                    >
-                      <strong>Modalidade</strong>
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', lg: 'table-cell' } }}
-                    >
-                      <strong>Descrição</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>Data do Exame</strong>
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: 1 }}
-                    >
-                      <strong>Cadastrado em</strong>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedData.map(exame => (
-                    <TableRow
-                      key={exame.id}
-                      onClick={() => handleRowClick(exame)}
-                      sx={{
-                        cursor: 'pointer',
-                        height: 31,
-                        '&:hover': {
-                          backgroundColor: 'rgba(102, 126, 234, 0.04)',
-                        },
-                      }}
-                    >
-                      <TableCell align="center" sx={{ py: '1px' }}>
-                        <Visibility
-                          color="action"
-                          sx={{
-                            fontSize: '1.1rem',
-                            cursor: 'pointer',
-                            '&:hover': { color: 'primary.main' },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell sx={{ py: '1px' }}>
-                        {getPacienteName(exame.pacienteId)}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          display: { xs: 'none', md: 'table-cell' },
-                          py: '1px',
-                        }}
-                      >
-                        {ModalidadeDicomLabels[exame.modalidade] ||
-                          exame.modalidade}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          display: { xs: 'none', lg: 'table-cell' },
-                          py: '1px',
-                        }}
-                      >
-                        {exame.descricao || '-'}
-                      </TableCell>
-                      <TableCell sx={{ py: '1px' }}>
-                        {formatDateBR(exame.dataExame)}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          display: { xs: 'none', md: 'table-cell' },
-                          py: '1px',
-                        }}
-                      >
-                        {formatDateBR(exame.createdAt)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {paginatedData.length === 0 && !loading && (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center">
-                        <Typography
-                          variant="body1"
-                          color="text.secondary"
-                          sx={{ py: 4 }}
-                        >
-                          Nenhum exame encontrado
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <MobileOptimizedTable
+              columns={tableColumns}
+              data={tableData}
+              onRowClick={handleRowClick}
+              loading={loading}
+              emptyMessage="Nenhum exame encontrado"
+              rowHeight={36}
+              minRows={10}
+              stickyHeader
+              touchOptimized
+            />
           )}
         </CardContent>
       </Card>
@@ -323,12 +297,7 @@ const ExamesPageTable: React.FC = () => {
         maxWidth={false}
         fullWidth
         sx={{
-          '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '550px' },
-            maxWidth: '550px',
-            margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' },
-          },
+          '& .MuiDialog-paper': standardDialogPaperStyles,
         }}
       >
         <DialogTitle sx={standardDialogTitleStyles}>
@@ -336,14 +305,7 @@ const ExamesPageTable: React.FC = () => {
           {dialogMode === 'add' ? 'Adicionar Exame' : 'Editar Exame'}
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            pt: 4.625,
-            px: 3,
-            pb: 2,
-            position: 'relative',
-          }}
-        >
+        <DialogContent sx={[standardDialogContentStyles, { position: 'relative' }]}>
           {saving && (
             <Box
               sx={{

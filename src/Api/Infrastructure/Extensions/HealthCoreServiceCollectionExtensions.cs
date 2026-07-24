@@ -114,6 +114,7 @@ public static class HealthCoreServiceCollectionExtensions
         services.AddScoped<MedicoService>();
         services.AddScoped<EspecialidadeService>();
         services.AddScoped<UserService>();
+        services.AddScoped<BillingService>();
         services.AddScoped<AuthService>();
         services.AddScoped<AdminService>();
         services.AddScoped<ResourceAuthorizationService>();

@@ -11,16 +11,8 @@ import {
   InputAdornment,
   IconButton,
   Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   CircularProgress,
   Alert,
-  Pagination,
 } from '@mui/material';
 import {
   Visibility,
@@ -36,11 +28,14 @@ import {
   standardCardStyles,
   standardCardContentStyles,
   standardDialogTitleStyles,
+  standardDialogPaperStyles,
+  standardDialogContentStyles,
 } from '../../styles/cardStyles';
 import { useMedicos } from '../../hooks/useMedicos';
 import { useEspecialidadesForDropdown } from '../../hooks/useEspecialidadesForDropdown';
 import type { Medico, CreateMedicoDto, UpdateMedicoDto } from '../../../domain/entities/Medico';
 import NotificationService from '@/application/services/NotificationService';
+import { useUIStore } from '../../../application/stores/uiStore';
 import {
   formatCPF,
   applyCPFMask,
@@ -55,9 +50,12 @@ import {
 } from '../../components/common/ConfirmationDialogs';
 import StandardDialogButtons from '../../components/common/StandardDialogButtons';
 import ResponsiveTableHeader from '../../../components/ui/Layout/ResponsiveTableHeader';
+import CustomPagination from '../../components/common/CustomPagination';
+import MobileOptimizedTable from '../../../components/ui/Table/MobileOptimizedTable';
 import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
 
 const MedicosPageTable: React.FC = () => {
+  const { addNotification } = useUIStore();
 
   const {
     medicos,
@@ -82,7 +80,7 @@ const MedicosPageTable: React.FC = () => {
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [selectedMedico, setSelectedMedico] = useState<Medico | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(7);
+  const [pageSize] = useState(10);
   const [formData, setFormData] = useState({
     nome: '',
     documento: '',
@@ -260,6 +258,84 @@ const MedicosPageTable: React.FC = () => {
 
   // Os dados já vêm paginados da API
   const paginatedData = medicos;
+  const tableData = paginatedData.map(medico => ({
+    ...medico,
+    documentoFormatado: formatCPF(medico.documento),
+  }));
+
+  const tableColumns = [
+    {
+      id: 'actions',
+      label: '',
+      minWidth: 44,
+      width: 44,
+      align: 'center' as const,
+      mobileVisible: true,
+      render: () => (
+        <Visibility
+          color="action"
+          sx={{
+            fontSize: '1.3rem',
+            cursor: 'pointer',
+            '&:hover': { color: 'primary.main' },
+          }}
+        />
+      ),
+    },
+    {
+      id: 'nome',
+      label: 'Nome Médico',
+      minWidth: 170,
+      width: 185,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'crm',
+      label: 'CRM',
+      minWidth: 120,
+      width: 130,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'especialidade',
+      label: 'Especialidade',
+      minWidth: 145,
+      width: 155,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'documentoFormatado',
+      label: 'Documento',
+      minWidth: 130,
+      width: 140,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'isActive',
+      label: 'Status',
+      minWidth: 82,
+      width: 90,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+      render: (value: unknown) => (
+        <Chip
+          label={value ? 'Ativo' : 'Inativo'}
+          color={value ? 'success' : 'error'}
+          size="small"
+          variant="outlined"
+        />
+      ),
+    },
+  ];
 
   return (
     <Box>
@@ -286,12 +362,13 @@ const MedicosPageTable: React.FC = () => {
             addButtonText="Adicionar Médico"
             addButtonDisabled={loading || saving}
             paginationComponent={
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={(_, newPage) => handlePageChange(newPage)}
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={total}
+                itemsPerPage={pageSize}
+                onPageChange={handlePageChange}
                 size="small"
-                color="primary"
               />
             }
             totalItems={total}
@@ -316,86 +393,17 @@ const MedicosPageTable: React.FC = () => {
 
           {/* Tabela de Dados */}
           {!loading && (
-            <TableContainer
-              component={Paper}
-              sx={{
-                boxShadow: 'none',
-                border: '1px solid',
-                borderColor: 'divider',
-                maxHeight: 450,
-              }}
-            >
-            <Table size="small">
-              <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
-                <TableRow>
-                  <TableCell align="center" sx={{ width: 50 }}></TableCell>
-                  <TableCell>
-                    <strong>Nome Médico</strong>
-                  </TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    <strong>CRM</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Especialidade</strong>
-                  </TableCell>
-                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                    <strong>Documento</strong>
-                  </TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    <strong>Status</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedData.map(medico => (
-                  <TableRow
-                    key={medico.id}
-                    onClick={() => handleRowClick(medico)}
-                    sx={{
-                      cursor: 'pointer',
-                      height: 31,
-                      '&:hover': {
-                        backgroundColor: 'rgba(102, 126, 234, 0.04)',
-                      },
-                    }}
-                  >
-                    <TableCell align="center" sx={{ py: '1px' }}>
-                      <Visibility
-                        color="action"
-                        sx={{
-                          fontSize: '1.1rem',
-                          cursor: 'pointer',
-                          '&:hover': { color: 'primary.main' },
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ py: '1px' }}>{medico.nome}</TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
-                    >
-                      {medico.crm}
-                    </TableCell>
-                    <TableCell sx={{ py: '1px' }}>{medico.especialidade}</TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', sm: 'table-cell' }, py: '1px' }}
-                    >
-                      {formatCPF(medico.documento)}
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
-                    >
-                      <Chip
-                        label={medico.isActive ? 'Ativo' : 'Inativo'}
-                        color={medico.isActive ? 'success' : 'error'}
-                        size="small"
-                        variant="outlined"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            <MobileOptimizedTable
+              columns={tableColumns}
+              data={tableData}
+              onRowClick={handleRowClick}
+              loading={loading}
+              emptyMessage="Nenhum médico encontrado"
+              rowHeight={36}
+              minRows={10}
+              stickyHeader
+              touchOptimized
+            />
           )}
         </CardContent>
       </Card>
@@ -406,13 +414,7 @@ const MedicosPageTable: React.FC = () => {
         onClose={handleCloseDialog}
         maxWidth={false}
         sx={{
-          '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '550px' },
-            maxWidth: '550px',
-            margin: { xs: 1, sm: 3 },
-            maxHeight: { xs: '95vh', sm: '90vh' },
-            minHeight: { xs: 'auto', sm: 'auto' },
-          },
+          '& .MuiDialog-paper': standardDialogPaperStyles,
         }}
       >
         <DialogTitle sx={standardDialogTitleStyles}>
@@ -420,7 +422,7 @@ const MedicosPageTable: React.FC = () => {
           {dialogMode === 'add' ? 'Adicionar Médico' : 'Editar Médico'}
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 4.625, px: 3, pb: 2, overflow: 'auto' }}>
+        <DialogContent sx={standardDialogContentStyles}>
           <Box
             sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}
           >
@@ -441,7 +443,7 @@ const MedicosPageTable: React.FC = () => {
                 },
               }}
             />
-            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
               <TextField
                 fullWidth
                 label="Documento (CPF)"
@@ -507,7 +509,7 @@ const MedicosPageTable: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
-            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 } }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
               <TextField
                 fullWidth
                 label="Telefone"

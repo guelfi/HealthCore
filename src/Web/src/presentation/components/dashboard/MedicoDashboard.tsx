@@ -1,36 +1,157 @@
 import React from 'react';
 import {
-  Typography,
+  Alert,
+  Avatar,
+  Box,
   Card,
   CardContent,
-  Box,
-  Avatar,
   CircularProgress,
-  Alert,
   Skeleton,
+  Typography,
 } from '@mui/material';
-import { People, Assignment, TrendingUp, Refresh, MedicalServices } from '@mui/icons-material';
+import {
+  Assignment,
+  MedicalServices,
+  People,
+  Refresh,
+  TrendingDown,
+  TrendingFlat,
+  TrendingUp,
+} from '@mui/icons-material';
 import { useAuthStore } from '../../../application/stores/authStore';
 import { useMetrics } from '../../hooks/useMetrics';
 import DashboardScrollIndicators from '../../../components/ui/Navigation/DashboardScrollIndicators';
 
+type TrendKind = 'up' | 'down' | 'flat';
+
+interface MetricCardProps {
+  title: string;
+  value: number | string;
+  subtitle: string;
+  icon: React.ReactNode;
+  gradient: string;
+  shadowColor: string;
+}
+
+const toNumber = (value: number | string | undefined): number => {
+  if (typeof value === 'number') return value;
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const getTrend = (current: number, previous: number): TrendKind => {
+  if (current > previous) return 'up';
+  if (current < previous) return 'down';
+  return 'flat';
+};
+
+const MetricCardSkeleton = () => (
+  <Card sx={{ minHeight: { xs: 118, md: 112 }, borderRadius: 3 }}>
+    <CardContent sx={{ p: { xs: 1.5, md: 2 }, height: '100%' }}>
+      <Skeleton variant="text" width="65%" height={16} />
+      <Skeleton variant="text" width="35%" height={40} sx={{ my: 0.5 }} />
+      <Skeleton variant="text" width="75%" height={14} />
+    </CardContent>
+  </Card>
+);
+
+const MetricCard: React.FC<MetricCardProps> = ({
+  title,
+  value,
+  subtitle,
+  icon,
+  gradient,
+  shadowColor,
+}) => (
+  <Card
+    sx={{
+      minHeight: { xs: 118, md: 112 },
+      background: gradient,
+      color: '#1f2937',
+      boxShadow: `0 4px 18px ${shadowColor}`,
+      borderRadius: 3,
+      transition: 'all 0.25s ease-in-out',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: `0 8px 26px ${shadowColor}`,
+      },
+    }}
+  >
+    <CardContent
+      sx={{
+        p: { xs: 1.5, sm: 2 },
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) auto',
+          alignItems: 'center',
+          gap: { xs: 1, md: 1.5 },
+          width: '100%',
+        }}
+      >
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            color="rgba(31,41,55,0.72)"
+            variant="caption"
+            fontWeight={600}
+            sx={{
+              display: 'block',
+              fontSize: { xs: '0.74rem', sm: '0.78rem' },
+              lineHeight: 1.2,
+            }}
+          >
+            {title}
+          </Typography>
+          <Typography
+            variant="h3"
+            component="div"
+            fontWeight="bold"
+            sx={{
+              lineHeight: 1,
+              my: 0.4,
+              fontSize: { xs: '1.8rem', sm: '2.1rem', lg: '2.25rem' },
+            }}
+          >
+            {value}
+          </Typography>
+          <Typography
+            variant="caption"
+            color="rgba(31,41,55,0.78)"
+            sx={{
+              display: 'block',
+              fontSize: { xs: '0.72rem', sm: '0.74rem' },
+              lineHeight: 1.25,
+            }}
+          >
+            {subtitle}
+          </Typography>
+        </Box>
+        <Avatar
+          sx={{
+            bgcolor: 'rgba(255,255,255,0.68)',
+            width: { xs: 44, sm: 48 },
+            height: { xs: 44, sm: 48 },
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.82)',
+            '& svg': { fontSize: { xs: 23, sm: 25 }, color: '#334155' },
+          }}
+        >
+          {icon}
+        </Avatar>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
 const MedicoDashboard: React.FC = () => {
   const { user } = useAuthStore();
-  const { metrics, isLoading, isInitialLoading, error, refreshMetrics } =
-    useMetrics();
+  const { metrics, isLoading, isInitialLoading, error, refreshMetrics } = useMetrics();
 
-  // Component para renderizar skeleton dos cards
-  const MetricCardSkeleton = () => (
-    <Card sx={{ flex: 1, height: 110, borderRadius: 3 }}>
-      <CardContent sx={{ p: 2, height: '100%' }}>
-        <Skeleton variant="text" width="60%" height={16} />
-        <Skeleton variant="text" width="40%" height={40} sx={{ my: 0.5 }} />
-        <Skeleton variant="text" width="70%" height={14} />
-      </CardContent>
-    </Card>
-  );
-
-  // Calcular exames do mês atual
   const calcularExamesEsteMes = (): number => {
     if (!metrics) return 0;
     const agora = new Date();
@@ -38,20 +159,14 @@ const MedicoDashboard: React.FC = () => {
     const examesMes = metrics.crescimento.exames.find(
       item => item.mes.toLowerCase() === mesAtual.toLowerCase()
     );
-    return typeof examesMes?.total === 'number' 
-      ? examesMes.total 
-      : Math.floor(metrics.exames.totalExames * 0.4);
+    return examesMes ? toNumber(examesMes.total) : Math.floor(metrics.exames.totalExames * 0.4);
   };
 
-  // Obter nome do mês atual
-  const getMesAtual = (): string => {
-    return new Date().toLocaleDateString('pt-BR', {
-      month: 'long',
-      year: 'numeric',
-    });
-  };
+  const getMesAtual = (): string =>
+    new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
-  // Se há erro e não há dados em cache
+  const displayName = user?.displayName || user?.username || 'médico';
+
   if (error && !metrics) {
     return (
       <Box>
@@ -60,19 +175,13 @@ const MedicoDashboard: React.FC = () => {
             Dashboard Médico
           </Typography>
         </Box>
-        <Alert
-          severity="error"
-          action={
-            <Refresh sx={{ cursor: 'pointer' }} onClick={refreshMetrics} />
-          }
-        >
+        <Alert severity="error" action={<Refresh sx={{ cursor: 'pointer' }} onClick={refreshMetrics} />}>
           {error} - Clique no ícone para tentar novamente
         </Alert>
       </Box>
     );
   }
 
-  // Loading inicial
   if (isInitialLoading) {
     return (
       <Box>
@@ -80,565 +189,180 @@ const MedicoDashboard: React.FC = () => {
           <Typography variant="h4" component="h1">
             Dashboard Médico
           </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ display: { xs: 'none', md: 'block' } }}
-          >
+          <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
             Carregando suas métricas...
           </Typography>
         </Box>
 
-        {/* Skeleton dos cards superiores */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
           <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            gap: 2,
-            width: '90%',
-          }}
-        >
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </Box>
-        </Box>
-
-        {/* Skeleton dos cards inferiores */}
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Box
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              gap: 2,
-              width: '90%',
+              display: 'grid',
+              gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' },
+              gap: { xs: 1.5, md: 2 },
+              width: '100%',
+              maxWidth: 1040,
             }}
           >
-            <Card sx={{ flex: 1, height: 230, borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5 }}>
-                <Skeleton
-                  variant="text"
-                  width="50%"
-                  height={24}
-                  sx={{ mb: 2 }}
-                />
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    variant="rectangular"
-                    height={60}
-                    sx={{ mb: 1.5, borderRadius: 2 }}
-                  />
-                ))}
-              </CardContent>
-            </Card>
-            <Card sx={{ flex: 1, height: 230, borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5 }}>
-                <Skeleton
-                  variant="text"
-                  width="50%"
-                  height={24}
-                  sx={{ mb: 2 }}
-                />
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    variant="rectangular"
-                    height={40}
-                    sx={{ mb: 1.5, borderRadius: 2 }}
-                  />
-                ))}
-              </CardContent>
-            </Card>
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
           </Box>
         </Box>
       </Box>
     );
   }
 
-  // Se não há métricas ainda
   if (!metrics) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '50vh',
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
         <CircularProgress size={60} />
       </Box>
     );
   }
 
+  const growthRows = metrics.crescimento.exames.map((item, index) => {
+    const exames = toNumber(item.total);
+    const pacientes = toNumber(metrics.crescimento.pacientes[index]?.total);
+    const previous = toNumber(metrics.crescimento.exames[index - 1]?.total);
+    const trend = index > 0 ? getTrend(exames, previous) : 'flat';
+
+    return { mes: item.mes, pacientes, exames, trend };
+  });
+
+  const activities = [
+    { label: 'Exame CT realizado', time: '2h atrás', color: 'success.main' },
+    { label: 'Novo paciente cadastrado', time: 'Hoje', color: 'info.main' },
+    { label: 'Exame MR agendado', time: 'Ontem', color: 'primary.main' },
+    { label: 'Relatório enviado', time: '2 dias', color: 'text.secondary' },
+    { label: 'Consulta realizada', time: '3 dias', color: 'text.secondary' },
+  ];
+
+  const trendIcon = (trend: TrendKind) => {
+    if (trend === 'up') return <TrendingUp fontSize="small" color="success" />;
+    if (trend === 'down') return <TrendingDown fontSize="small" color="error" />;
+    return <TrendingFlat fontSize="small" color="warning" />;
+  };
+
   return (
-    <Box sx={{ pb: 4 }}> {/* Adicionar padding bottom para scroll completo */}
-      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
+    <Box sx={{ pb: 4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3, flexWrap: 'wrap' }}>
         <Typography variant="h4" component="h1">
           Dashboard Médico
         </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ display: { xs: 'none', md: 'block' } }}
-        >
-          Bem-vindo, Dr. {user?.username}! Aqui está um resumo da sua atividade.
+        <Typography variant="body1" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+          Bem-vindo, {displayName}! Aqui está um resumo da sua atividade.
         </Typography>
         {isLoading && <CircularProgress size={20} sx={{ ml: 2 }} />}
       </Box>
 
-      {/* Alerta de erro (se há erro mas dados em cache) */}
       {error && metrics && (
-        <Alert
-          severity="warning"
-          sx={{ mb: 2 }}
-          action={
-            <Refresh sx={{ cursor: 'pointer' }} onClick={refreshMetrics} />
-          }
-        >
+        <Alert severity="warning" sx={{ mb: 2 }} action={<Refresh sx={{ cursor: 'pointer' }} onClick={refreshMetrics} />}>
           Erro ao atualizar: {error} - Exibindo dados em cache
         </Alert>
       )}
 
-      {/* Cards Superiores - Totais do Médico */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            gap: 2,
-            width: '90%',
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' },
+            gap: { xs: 1.5, md: 2 },
+            width: '100%',
+            maxWidth: 1040,
           }}
         >
-          <Card
-            sx={{
-              flex: 1,
-              height: 110,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              boxShadow: '0 4px 18px rgba(102, 126, 234, 0.3)',
-              borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 28px rgba(102, 126, 234, 0.4)',
-              },
-            }}
-          >
-            <CardContent
-              sx={{
-                p: 2,
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                width="100%"
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    color="rgba(255,255,255,0.8)"
-                    variant="caption"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.8rem', display: 'block' }}
-                  >
-                    Meus Pacientes
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    component="div"
-                    fontWeight="bold"
-                    sx={{
-                      lineHeight: 1.1,
-                      my: 0.3,
-                      fontSize: { xs: '1.8rem', sm: '2.5rem' },
-                    }}
-                  >
-                    {metrics.pacientes.totalPacientes}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="rgba(255,255,255,0.9)"
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
-                  >
-                    Sob meus cuidados
-                  </Typography>
-                </Box>
-                <Avatar
-                  sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    width: 50,
-                    height: 50,
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    ml: 1,
-                  }}
-                >
-                  <People sx={{ fontSize: 26, color: 'white' }} />
-                </Avatar>
-              </Box>
-            </CardContent>
-          </Card>
-
-          <Card
-            sx={{
-              flex: 1,
-              height: 110,
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              color: 'white',
-              boxShadow: '0 4px 18px rgba(79, 172, 254, 0.3)',
-              borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 28px rgba(79, 172, 254, 0.4)',
-              },
-            }}
-          >
-            <CardContent
-              sx={{
-                p: 2,
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                width="100%"
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    color="rgba(255,255,255,0.8)"
-                    variant="caption"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.8rem', display: 'block' }}
-                  >
-                    Total de Exames
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    component="div"
-                    fontWeight="bold"
-                    sx={{
-                      lineHeight: 1.1,
-                      my: 0.3,
-                      fontSize: { xs: '1.8rem', sm: '2.5rem' },
-                    }}
-                  >
-                    {metrics.exames.totalExames}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="rgba(255,255,255,0.9)"
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
-                  >
-                    Realizados por mim
-                  </Typography>
-                </Box>
-                <Avatar
-                  sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    width: 50,
-                    height: 50,
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    ml: 1,
-                  }}
-                >
-                  <Assignment sx={{ fontSize: 26, color: 'white' }} />
-                </Avatar>
-              </Box>
-            </CardContent>
-          </Card>
-
-          <Card
-            sx={{
-              flex: 1,
-              height: 110,
-              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-              color: 'white',
-              boxShadow: '0 4px 18px rgba(250, 112, 154, 0.3)',
-              borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 28px rgba(250, 112, 154, 0.4)',
-              },
-            }}
-          >
-            <CardContent
-              sx={{
-                p: 2,
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                width="100%"
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    color="rgba(255,255,255,0.8)"
-                    variant="caption"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.8rem', display: 'block' }}
-                  >
-                    Exames Este Mês
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    component="div"
-                    fontWeight="bold"
-                    sx={{
-                      lineHeight: 1.1,
-                      my: 0.3,
-                      fontSize: { xs: '1.8rem', sm: '2.5rem' },
-                    }}
-                  >
-                    {calcularExamesEsteMes()}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="rgba(255,255,255,0.9)"
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
-                  >
-                    {getMesAtual()}
-                  </Typography>
-                </Box>
-                <Avatar
-                  sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    width: 50,
-                    height: 50,
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    ml: 1,
-                  }}
-                >
-                  <TrendingUp sx={{ fontSize: 26, color: 'white' }} />
-                </Avatar>
-              </Box>
-            </CardContent>
-          </Card>
-
-          <Card
-            sx={{
-              flex: 1,
-              height: 110,
-              background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-              color: 'white',
-              boxShadow: '0 4px 18px rgba(168, 237, 234, 0.3)',
-              borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 28px rgba(168, 237, 234, 0.4)',
-              },
-            }}
-          >
-            <CardContent
-              sx={{
-                p: 2,
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                width="100%"
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    color="rgba(255,255,255,0.8)"
-                    variant="caption"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.8rem', display: 'block' }}
-                  >
-                    Total Especialidades
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    component="div"
-                    fontWeight="bold"
-                    sx={{
-                      lineHeight: 1.1,
-                      my: 0.3,
-                      fontSize: { xs: '1.8rem', sm: '2.5rem' },
-                    }}
-                  >
-                    {metrics.totalEspecialidades}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="rgba(255,255,255,0.9)"
-                    sx={{ fontSize: '0.75rem', display: 'block' }}
-                  >
-                    Disponíveis no sistema
-                  </Typography>
-                </Box>
-                <Avatar
-                  sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    width: 50,
-                    height: 50,
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    ml: 1,
-                  }}
-                >
-                  <MedicalServices sx={{ fontSize: 26, color: 'white' }} />
-                </Avatar>
-              </Box>
-            </CardContent>
-          </Card>
+          <MetricCard
+            title="Meus Pacientes"
+            value={metrics.pacientes.totalPacientes}
+            subtitle="Sob meus cuidados"
+            icon={<People />}
+            gradient="linear-gradient(135deg, #c7d2fe 0%, #ddd6fe 100%)"
+            shadowColor="rgba(102, 126, 234, 0.28)"
+          />
+          <MetricCard
+            title="Total de Exames"
+            value={metrics.exames.totalExames}
+            subtitle="Realizados por mim"
+            icon={<Assignment />}
+            gradient="linear-gradient(135deg, #bae6fd 0%, #cffafe 100%)"
+            shadowColor="rgba(79, 172, 254, 0.28)"
+          />
+          <MetricCard
+            title="Exames Este Mês"
+            value={calcularExamesEsteMes()}
+            subtitle={getMesAtual()}
+            icon={<TrendingUp />}
+            gradient="linear-gradient(135deg, #fed7aa 0%, #fef3c7 100%)"
+            shadowColor="rgba(245, 158, 11, 0.24)"
+          />
+          <MetricCard
+            title="Total Especialidades"
+            value={metrics.totalEspecialidades}
+            subtitle="Disponíveis no sistema"
+            icon={<MedicalServices />}
+            gradient="linear-gradient(135deg, #ccfbf1 0%, #fce7f3 100%)"
+            shadowColor="rgba(20, 184, 166, 0.22)"
+          />
         </Box>
       </Box>
 
-      {/* Cards Inferiores - Estatísticas do Médico */}
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            gap: 2,
-            width: '90%',
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
+            gap: { xs: 1.5, md: 2.5 },
+            width: '100%',
+            maxWidth: 1040,
           }}
         >
           <Card
             sx={{
-              flex: 1,
-              minHeight: 230,
-              height: 'auto',
+              gridColumn: { xs: 'span 1', md: 'span 2' },
+              minHeight: { xs: 300, md: 268 },
               boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
               borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-3px)',
-                boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
-              },
             }}
           >
-            <CardContent
-              sx={{
-                p: 2.5,
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <Typography
-                variant="h6"
-                gutterBottom
-                fontWeight="bold"
-                color="primary.main"
-                sx={{ fontSize: '1rem', mb: 2 }}
-              >
+            <CardContent sx={{ p: { xs: 2, md: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main" sx={{ fontSize: '1rem', mb: 1.5 }}>
                 Exames
               </Typography>
-              <Box sx={{ flex: 1 }}>
-                {metrics.crescimento.exames.map((item, index) => (
+              <Box sx={{ display: 'grid', gap: 0.6 }}>
+                {growthRows.map(row => (
                   <Box
-                    key={item.mes}
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
+                    key={row.mes}
                     sx={{
-                      mb: 0.2,
-                      p: 0.6,
+                      display: 'grid',
+                      gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: '1fr auto auto' },
+                      alignItems: 'center',
+                      gap: { xs: 0.35, sm: 1.25 },
+                      p: { xs: 0.7, md: 0.75 },
                       borderRadius: 2,
-                      bgcolor: 'grey.50',
-                      transition: 'all 0.2s ease',
-                      '&:hover': { bgcolor: 'primary.50' },
+                      bgcolor: 'rgba(239, 246, 255, 0.9)',
                     }}
                   >
-                    <Typography
-                      variant="body2"
-                      fontWeight={600}
-                      sx={{ fontSize: '0.85rem', minWidth: '60px' }}
-                    >
-                      {item.mes}
+                    <Typography variant="body2" fontWeight={700} color="text.secondary" sx={{ fontSize: { xs: '0.82rem', md: '0.86rem' } }}>
+                      {row.mes}
                     </Typography>
-                    <Box display="flex" gap={1.5} alignItems="center">
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ fontSize: '0.75rem' }}
-                        >
-                          Pacientes:
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          fontWeight="bold"
-                          color="success.main"
-                          sx={{ fontSize: '0.8rem', fontFamily: 'monospace', minWidth: '30px', textAlign: 'right' }}
-                        >
-                          {String(metrics.crescimento.pacientes[index]?.total || 0).padStart(3, '\u00A0')}
-                        </Typography>
-                      </Box>
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ fontSize: '0.75rem' }}
-                        >
-                          Exames:
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          fontWeight="bold"
-                          color="info.main"
-                          sx={{ fontSize: '0.8rem', fontFamily: 'monospace', minWidth: '30px', textAlign: 'right' }}
-                        >
-                          {String(item.total).padStart(3, '\u00A0')}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color={
-                            index > 0 &&
-                            typeof item.total === 'number' &&
-                            typeof metrics.crescimento.exames[index - 1]?.total === 'number'
-                              ? (typeof metrics.crescimento.exames[index - 1]?.total === 'number')
-                                ? (item.total as number) > (metrics.crescimento.exames[index - 1].total as number)
-                                ? 'success.main'
-                                : (item.total as number) < (metrics.crescimento.exames[index - 1].total as number)
-                                ? 'error.main'
-                                : 'warning.main'
-                                : 'text.secondary'
-                              : 'text.secondary'
-                          }
-                          sx={{ fontSize: '1em', minWidth: '20px', textAlign: 'center' }}
-                        >
-                          {index > 0 &&
-                          typeof item.total === 'number' &&
-                          typeof metrics.crescimento.exames[index - 1]?.total === 'number'
-                            ? (typeof metrics.crescimento.exames[index - 1]?.total === 'number')
-                              ? ((item.total as number) > (metrics.crescimento.exames[index - 1].total as number)
-                                ? '↗'
-                                : (item.total as number) < (metrics.crescimento.exames[index - 1].total as number)
-                                  ? '↘'
-                                  : '→')
-                              : '→'
-                            : '→'}
-                        </Typography>
-                      </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: { md: 112 } }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                        Pacientes:
+                      </Typography>
+                      <Typography variant="body2" fontWeight="bold" color="success.main" sx={{ fontSize: '0.82rem', fontFamily: 'monospace' }}>
+                        {row.pacientes}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: { md: 96 } }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                        Exames:
+                      </Typography>
+                      <Typography variant="body2" fontWeight="bold" color="info.main" sx={{ fontSize: '0.82rem', fontFamily: 'monospace' }}>
+                        {row.exames}
+                      </Typography>
+                      {trendIcon(row.trend)}
                     </Box>
                   </Box>
                 ))}
@@ -648,188 +372,44 @@ const MedicoDashboard: React.FC = () => {
 
           <Card
             sx={{
-              flex: 1,
-              minHeight: 230,
-              height: 'auto',
+              gridColumn: { xs: 'span 1', md: 'span 2' },
+              minHeight: { xs: 300, md: 268 },
               boxShadow: '0 3px 15px rgba(0,0,0,0.1)',
               borderRadius: 3,
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-3px)',
-                boxShadow: '0 6px 25px rgba(0,0,0,0.15)',
-              },
             }}
           >
-            <CardContent
-              sx={{
-                p: 2.5,
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <Typography
-                variant="h6"
-                gutterBottom
-                fontWeight="bold"
-                color="secondary.main"
-                sx={{ fontSize: '1rem', mb: 2 }}
-              >
+            <CardContent sx={{ p: { xs: 2, md: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom fontWeight="bold" color="secondary.main" sx={{ fontSize: '1rem', mb: 1.5 }}>
                 Atividades
               </Typography>
-              <Box sx={{ flex: 1 }}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{
-                    mb: 0.2,
-                    p: 0.6,
-                    borderRadius: 2,
-                    bgcolor: 'grey.50',
-                    transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'secondary.50' },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.85rem' }}
+              <Box sx={{ display: 'grid', gap: 0.7 }}>
+                {activities.map(activity => (
+                  <Box
+                    key={activity.label}
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'minmax(0, 1fr) auto',
+                      alignItems: 'center',
+                      gap: 1,
+                      p: { xs: 0.7, md: 0.75 },
+                      borderRadius: 2,
+                      bgcolor: 'rgba(248, 250, 252, 0.95)',
+                    }}
                   >
-                    Exame CT realizado
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="success.main"
-                    fontWeight={600}
-                    sx={{ fontSize: '0.75rem' }}
-                  >
-                    2h atrás
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{
-                    mb: 0.2,
-                    p: 0.6,
-                    borderRadius: 2,
-                    bgcolor: 'grey.50',
-                    transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'secondary.50' },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.85rem' }}
-                  >
-                    Novo paciente cadastrado
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="info.main"
-                    fontWeight={600}
-                    sx={{ fontSize: '0.75rem' }}
-                  >
-                    Hoje
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{
-                    mb: 0.2,
-                    p: 0.6,
-                    borderRadius: 2,
-                    bgcolor: 'grey.50',
-                    transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'secondary.50' },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.85rem' }}
-                  >
-                    Exame MR agendado
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="primary.main"
-                    fontWeight={600}
-                    sx={{ fontSize: '0.75rem' }}
-                  >
-                    Ontem
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{
-                    mb: 0.2,
-                    p: 0.6,
-                    borderRadius: 2,
-                    bgcolor: 'grey.50',
-                    transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'secondary.50' },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.85rem' }}
-                  >
-                    Relatório enviado
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    fontWeight={600}
-                    sx={{ fontSize: '0.75rem' }}
-                  >
-                    2 dias
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{
-                    mb: 0.2,
-                    p: 0.6,
-                    borderRadius: 2,
-                    bgcolor: 'grey.50',
-                    transition: 'all 0.2s ease',
-                    '&:hover': { bgcolor: 'secondary.50' },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight={500}
-                    sx={{ fontSize: '0.85rem' }}
-                  >
-                    Consulta realizada
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    fontWeight={600}
-                    sx={{ fontSize: '0.75rem' }}
-                  >
-                    3 dias
-                  </Typography>
-                </Box>
+                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: { xs: '0.82rem', md: '0.86rem' }, lineHeight: 1.25 }}>
+                      {activity.label}
+                    </Typography>
+                    <Typography variant="caption" color={activity.color} fontWeight={700} sx={{ fontSize: '0.74rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {activity.time}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
             </CardContent>
           </Card>
         </Box>
       </Box>
 
-      {/* Indicadores de Scroll para Mobile */}
       <DashboardScrollIndicators />
     </Box>
   );

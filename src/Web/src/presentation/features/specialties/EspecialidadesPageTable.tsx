@@ -2,22 +2,10 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
   Chip,
   TextField,
-  useMediaQuery,
-  useTheme,
   Card,
   CardContent,
-  CardActions,
   Switch,
   FormControlLabel,
   Alert,
@@ -32,36 +20,42 @@ import {
 } from '@mui/icons-material';
 import { useEspecialidades } from '../../hooks/useEspecialidades';
 import type { Especialidade } from '../../../domain/entities';
+import { useAuthStore } from '../../../application/stores/authStore';
+import { UserProfile } from '../../../domain/enums/UserProfile';
 import EspecialidadeDeleteDialog from '../../components/especialidades/EspecialidadeDeleteDialog';
 import EspecialidadeViewDialog from '../../components/especialidades/EspecialidadeViewDialog';
 import {
   standardCardStyles,
   standardCardContentStyles,
   standardDialogTitleStyles,
+  standardDialogPaperStyles,
+  standardDialogContentStyles,
 } from '../../styles/cardStyles';
 import StandardDialogButtons from '../../components/common/StandardDialogButtons';
+import CustomPagination from '../../components/common/CustomPagination';
 import ResponsiveTableHeader from '../../../components/ui/Layout/ResponsiveTableHeader';
+import MobileOptimizedTable from '../../../components/ui/Table/MobileOptimizedTable';
 
 const EspecialidadesPageTable: React.FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+  const { user } = useAuthStore();
+  const canManageEspecialidades = user?.role === UserProfile.ADMINISTRADOR;
+
   const {
     especialidades,
     loading,
     error,
-    total,
-    page,
+    totalItems,
+    totalPages,
+    currentPage,
     pageSize,
-    setPage,
-    setPageSize,
+    filter,
+    setFilter,
     createEspecialidade,
     updateEspecialidade,
     deleteEspecialidade,
-    fetchEspecialidades,
+    refresh,
   } = useEspecialidades();
 
-  // Estados para diálogos
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openViewDialog, setOpenViewDialog] = useState(false);
@@ -69,7 +63,6 @@ const EspecialidadesPageTable: React.FC = () => {
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [saving, setSaving] = useState(false);
 
-  // Estados para formulário
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
@@ -78,6 +71,12 @@ const EspecialidadesPageTable: React.FC = () => {
 
   const handleRowClick = (especialidade: Especialidade) => {
     setSelectedEspecialidade(especialidade);
+
+    if (!canManageEspecialidades) {
+      setOpenViewDialog(true);
+      return;
+    }
+
     setFormData({
       nome: especialidade.nome,
       descricao: especialidade.descricao || '',
@@ -88,6 +87,8 @@ const EspecialidadesPageTable: React.FC = () => {
   };
 
   const handleAddNew = () => {
+    if (!canManageEspecialidades) return;
+
     setSelectedEspecialidade(null);
     setFormData({
       nome: '',
@@ -105,6 +106,8 @@ const EspecialidadesPageTable: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!canManageEspecialidades) return;
+
     setSaving(true);
     try {
       if (dialogMode === 'add') {
@@ -113,7 +116,7 @@ const EspecialidadesPageTable: React.FC = () => {
         await updateEspecialidade(selectedEspecialidade.id, formData);
       }
       handleCloseDialog();
-      await fetchEspecialidades({ page, pageSize });
+      await refresh();
     } catch (error) {
       console.error('Erro ao salvar especialidade:', error);
     } finally {
@@ -122,30 +125,26 @@ const EspecialidadesPageTable: React.FC = () => {
   };
 
   const handleDeleteClick = () => {
-    setOpenDeleteDialog(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (selectedEspecialidade) {
-      setSaving(true);
-      try {
-        await deleteEspecialidade(selectedEspecialidade.id);
-        setOpenDeleteDialog(false);
-        handleCloseDialog();
-        await fetchEspecialidades({ page, pageSize });
-      } catch (error) {
-        console.error('Erro ao deletar especialidade:', error);
-      } finally {
-        setSaving(false);
-      }
+    if (canManageEspecialidades) {
+      setOpenDeleteDialog(true);
     }
   };
 
-  const handleView = (especialidade: Especialidade) => {
-    setSelectedEspecialidade(especialidade);
-    setOpenViewDialog(true);
-  };
+  const handleDeleteConfirm = async () => {
+    if (!selectedEspecialidade || !canManageEspecialidades) return;
 
+    setSaving(true);
+    try {
+      await deleteEspecialidade(selectedEspecialidade.id);
+      setOpenDeleteDialog(false);
+      handleCloseDialog();
+      await refresh();
+    } catch (error) {
+      console.error('Erro ao deletar especialidade:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
@@ -155,104 +154,67 @@ const EspecialidadesPageTable: React.FC = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    fetchEspecialidades({ page: newPage, pageSize });
+    setFilter({ ...filter, page: newPage, pageSize: 10 });
   };
 
-  // Render mobile card
-  const renderMobileCard = (especialidade: Especialidade) => (
-    <Card key={especialidade.id} sx={{ mb: 2 }}>
-      <CardContent>
-        <Box display="flex" alignItems="center" mb={1}>
-          <Typography variant="h6" component="div">
-            {especialidade.nome}
-          </Typography>
-          <Chip
-            label={especialidade.ativa ? 'Ativa' : 'Inativa'}
-            color={especialidade.ativa ? 'success' : 'default'}
-            size="small"
-            sx={{ ml: 'auto' }}
-          />
-        </Box>
-        
-        {especialidade.descricao && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {especialidade.descricao}
-          </Typography>
-        )}
-      </CardContent>
-      
-      <CardActions>
-        <IconButton
+  const tableColumns = [
+    {
+      id: 'actions',
+      label: '',
+      minWidth: 44,
+      width: 44,
+      align: 'center' as const,
+      mobileVisible: true,
+      render: () => (
+        <Visibility
+          color="action"
+          sx={{
+            fontSize: '1.3rem',
+            cursor: 'pointer',
+            '&:hover': { color: 'primary.main' },
+          }}
+        />
+      ),
+    },
+    {
+      id: 'nome',
+      label: 'Nome',
+      minWidth: 140,
+      width: 155,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'descricao',
+      label: 'Descrição',
+      minWidth: 500,
+      width: 560,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+      render: (value: unknown) => String(value || '-'),
+    },
+    {
+      id: 'ativa',
+      label: 'Status',
+      minWidth: 80,
+      width: 86,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+      render: (value: unknown) => (
+        <Chip
+          label={value ? 'Ativa' : 'Inativa'}
+          color={value ? 'success' : 'default'}
           size="small"
-          onClick={() => handleView(especialidade)}
-          title="Visualizar"
-        >
-          <Visibility />
-        </IconButton>
-      </CardActions>
-    </Card>
-  );
-
-  // Render desktop table
-  const renderDesktopTable = () => (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
-          <TableRow>
-            <TableCell align="center" sx={{ width: 50 }}></TableCell>
-            <TableCell><strong>Nome</strong></TableCell>
-            <TableCell><strong>Descrição</strong></TableCell>
-            <TableCell><strong>Status</strong></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {especialidades.map((especialidade) => (
-            <TableRow 
-              key={especialidade.id}
-              onClick={() => handleRowClick(especialidade)}
-              sx={{
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-              }}
-            >
-              <TableCell align="center">
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRowClick(especialidade);
-                  }}
-                  title="Editar"
-                >
-                  <Visibility />
-                </IconButton>
-              </TableCell>
-              <TableCell>
-                {especialidade.nome}
-              </TableCell>
-              <TableCell>
-                {especialidade.descricao || '-'}
-              </TableCell>
-              <TableCell>
-                <Chip
-                  label={especialidade.ativa ? 'Ativa' : 'Inativa'}
-                  color={especialidade.ativa ? 'success' : 'default'}
-                  size="small"
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+        />
+      ),
+    },
+  ];
 
   return (
     <Box>
-      {/* Título e Descrição */}
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
         <Typography variant="h4" component="h1">
           Gestão de Especialidades
@@ -266,140 +228,100 @@ const EspecialidadesPageTable: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* Card Principal */}
       <Card sx={standardCardStyles}>
         <CardContent sx={standardCardContentStyles}>
-          {/* Header Responsivo */}
           <ResponsiveTableHeader
             onAddClick={handleAddNew}
             addButtonText="Adicionar Especialidade"
             addButtonDisabled={loading || saving}
-            totalItems={total}
+            showAddButton={canManageEspecialidades}
+            paginationComponent={
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={pageSize}
+                onPageChange={handlePageChange}
+                size="small"
+              />
+            }
+            totalItems={totalItems}
             itemName="especialidades"
             showTotalOnMobile={false}
             fabTooltip="Adicionar Especialidade"
           />
 
-          {/* Mensagem de Erro */}
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
 
-          {/* Loading */}
           {loading && (
             <Box display="flex" justifyContent="center" p={3}>
               <CircularProgress />
             </Box>
           )}
 
-          {/* Conteúdo */}
           {!loading && (
-            <>
-              {isMobile ? (
-                <Box>
-                  {especialidades.map(renderMobileCard)}
-                </Box>
-              ) : (
-                renderDesktopTable()
-              )}
-
-              {/* Paginação */}
-              <Box display="flex" justifyContent="center" mt={2}>
-                <TablePagination
-                  component="div"
-                  count={total}
-                  page={page - 1}
-                  onPageChange={(_, newPage) => handlePageChange(newPage + 1)}
-                  rowsPerPage={pageSize}
-                  onRowsPerPageChange={(e) => setPageSize(parseInt(e.target.value))}
-                  labelRowsPerPage="Itens por página:"
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
-                  }
-                />
-              </Box>
-            </>
+            <MobileOptimizedTable
+              columns={tableColumns}
+              data={especialidades}
+              onRowClick={handleRowClick}
+              loading={loading}
+              emptyMessage="Nenhuma especialidade encontrada"
+              rowHeight={36}
+              minRows={10}
+              stickyHeader
+              touchOptimized
+            />
           )}
         </CardContent>
       </Card>
 
-      {/* Dialog de CRUD */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            minHeight: { xs: 'auto', sm: 'auto' },
-          },
-        }}
+        maxWidth={false}
+        PaperProps={{ sx: standardDialogPaperStyles }}
       >
         <DialogTitle sx={standardDialogTitleStyles}>
           <MedicalServices />
           {dialogMode === 'add' ? 'Adicionar Especialidade' : 'Editar Especialidade'}
         </DialogTitle>
 
-        <DialogContent sx={{ pt: 4.625, px: 3, pb: 2, overflow: 'auto' }}>
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2.625 }}
-          >
+        <DialogContent sx={standardDialogContentStyles}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2 }}>
             <TextField
               fullWidth
               label="Nome da Especialidade"
               value={formData.nome}
-              onChange={(e) => handleInputChange('nome', e.target.value)}
+              onChange={e => handleInputChange('nome', e.target.value)}
               variant="outlined"
               size="small"
               required
-              sx={{
-                '& .MuiInputBase-root': {
-                  padding: '4px 6px',
-                },
-                '& .MuiInputBase-input': {
-                  padding: '4px 0',
-                },
-              }}
             />
             <TextField
               fullWidth
               label="Descrição"
               value={formData.descricao}
-              onChange={(e) => handleInputChange('descricao', e.target.value)}
+              onChange={e => handleInputChange('descricao', e.target.value)}
               variant="outlined"
               size="small"
               multiline
               rows={3}
-              sx={{
-                '& .MuiInputBase-root': {
-                  padding: '4px 6px',
-                },
-                '& .MuiInputBase-input': {
-                  padding: '4px 0',
-                },
-              }}
             />
             <FormControlLabel
               control={
                 <Switch
                   checked={formData.ativa}
-                  onChange={(e) => handleInputChange('ativa', e.target.checked)}
+                  onChange={e => handleInputChange('ativa', e.target.checked)}
                 />
               }
               label="Especialidade Ativa"
             />
             {selectedEspecialidade && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: 0.5,
-                  flexWrap: 'wrap',
-                  mt: 0.5,
-                }}
-              >
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
                 <Chip
                   label={`ID: ${selectedEspecialidade.id}`}
                   variant="outlined"
@@ -427,14 +349,12 @@ const EspecialidadesPageTable: React.FC = () => {
         />
       </Dialog>
 
-      {/* Diálogo de Visualização */}
       <EspecialidadeViewDialog
         open={openViewDialog}
         onClose={() => setOpenViewDialog(false)}
         especialidade={selectedEspecialidade}
       />
 
-      {/* Diálogo de Exclusão */}
       <EspecialidadeDeleteDialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}

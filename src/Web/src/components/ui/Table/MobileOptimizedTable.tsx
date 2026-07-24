@@ -8,11 +8,12 @@ import {
   TableRow,
   Paper,
   Box,
-  Chip,
   useTheme,
   alpha,
 } from '@mui/material';
 import {
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
   TouchApp,
 } from '@mui/icons-material';
 import { useResponsive } from '../../../presentation/hooks/useResponsive';
@@ -21,6 +22,9 @@ export interface Column<T = unknown> {
   id: string;
   label: string;
   minWidth?: number;
+  width?: number | string;
+  maxWidth?: number | string;
+  noWrap?: boolean;
   align?: 'left' | 'center' | 'right';
   sticky?: boolean;
   mobileVisible?: boolean;
@@ -36,6 +40,7 @@ interface MobileOptimizedTableProps<T> {
   loading?: boolean;
   emptyMessage?: string;
   rowHeight?: number;
+  minRows?: number;
   stickyHeader?: boolean;
   touchOptimized?: boolean;
 }
@@ -46,7 +51,8 @@ const MobileOptimizedTable = <T,>({
   onRowClick,
   loading = false,
   emptyMessage = 'Nenhum item encontrado',
-  rowHeight = 48,
+  rowHeight = 36,
+  minRows = 10,
   stickyHeader = true,
   touchOptimized = true,
 }: MobileOptimizedTableProps<T>) => {
@@ -115,13 +121,12 @@ const MobileOptimizedTable = <T,>({
     );
   }
 
-  if (data.length === 0) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
-        {emptyMessage}
-      </Box>
-    );
-  }
+  const effectiveRowHeight = touchOptimized ? Math.max(rowHeight, isMobile ? 40 : 36) : rowHeight;
+  const headerHeight = isMobile ? 40 : 42;
+  const minBodyHeight = effectiveRowHeight * minRows;
+  const tableHeight = minBodyHeight + headerHeight;
+  const renderedRows = Math.min(Math.max(data.length || 1, 1), minRows);
+  const touchHintTop = headerHeight + effectiveRowHeight * renderedRows + 10;
 
   return (
     <Box sx={{ position: 'relative', width: '100%' }}>
@@ -132,23 +137,37 @@ const MobileOptimizedTable = <T,>({
         <Box
           sx={{
             position: 'absolute',
-            top: '50%',
-            right: 16,
-            transform: 'translateY(-50%)',
+            top: touchHintTop,
+            right: { xs: 22, sm: 28 },
             zIndex: 5,
             pointerEvents: 'none',
           }}
         >
-          <Chip
-            icon={<TouchApp />}
-            label="Deslize"
-            size="small"
+          <Box
             sx={{
-              bgcolor: alpha(theme.palette.primary.main, 0.8),
-              color: 'white',
-              fontSize: '0.75rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.35,
+              height: 34,
+              px: 1,
+              borderRadius: 999,
+              bgcolor: '#bbf7d0',
+              color: '#14532d',
+              border: '2px solid rgba(22, 101, 52, 0.42)',
+              boxShadow: '0 10px 24px rgba(20, 83, 45, 0.24), 0 0 0 2px rgba(255,255,255,0.82)',
+              fontSize: '0.86rem',
+              fontWeight: 900,
+              letterSpacing: 0,
+              '& .MuiSvgIcon-root': {
+                flexShrink: 0,
+              },
             }}
-          />
+          >
+            <KeyboardArrowLeft sx={{ fontSize: 18, color: '#166534' }} />
+            <TouchApp sx={{ color: '#14532d', fontSize: 26 }} />
+            <Box component="span">Deslize</Box>
+            <KeyboardArrowRight sx={{ fontSize: 18, color: '#166534' }} />
+          </Box>
         </Box>
       )}
 
@@ -157,14 +176,16 @@ const MobileOptimizedTable = <T,>({
         component={Paper}
         ref={tableRef}
         sx={{
-          maxHeight: 450,
+          maxHeight: tableHeight,
+          minHeight: tableHeight,
           overflowX: 'auto',
-          overflowY: 'auto',
+          overflowY: 'hidden',
           WebkitOverflowScrolling: 'touch',
           scrollBehavior: 'smooth',
           // Mobile: container compacto dentro do card
           ...(isMobile && {
-            maxHeight: 'none',
+            maxHeight: tableHeight,
+            minHeight: tableHeight,
             boxShadow: 'none',
             border: 'none',
             borderRadius: 0,
@@ -185,10 +206,18 @@ const MobileOptimizedTable = <T,>({
       >
         <Table
           stickyHeader={stickyHeader}
+          size="small"
           sx={{
             // Mobile: tabela mais compacta para caber no card
             minWidth: isMobile ? 'auto' : 600,
             width: '100%',
+            tableLayout: 'fixed',
+            '& .MuiTableRow-root': {
+              height: effectiveRowHeight,
+            },
+            '& .MuiTableCell-root': {
+              boxSizing: 'border-box',
+            },
           }}
         >
           <TableHead>
@@ -198,14 +227,24 @@ const MobileOptimizedTable = <T,>({
                   key={column.id}
                   align={column.align || 'left'}
                   sx={{
-                    // Mobile: colunas mais compactas
+                    width: isMobile
+                      ? (column.id === 'actions' ? 44 : (column.width || column.minWidth || 140))
+                      : (column.width || column.minWidth || 'auto'),
                     minWidth: isMobile
-                      ? (column.id === 'actions' ? 50 : 100)
-                      : (column.minWidth || 'auto'),
+                      ? (column.id === 'actions' ? 44 : (column.minWidth || 120))
+                      : (column.minWidth || column.width || 'auto'),
                     maxWidth: isMobile
-                      ? (column.id === 'actions' ? 50 : 150)
-                      : 'none',
+                      ? (column.id === 'actions' ? 44 : (column.maxWidth || column.width || column.minWidth || 180))
+                      : (column.maxWidth || 'none'),
+                    whiteSpace: column.noWrap === false ? 'normal' : 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                     fontWeight: 600,
+                    px: { xs: 1, sm: 1.5 },
+                    py: 0.5,
+                    height: headerHeight,
+                    maxHeight: headerHeight,
+                    lineHeight: 1.2,
                     backgroundColor: alpha(theme.palette.primary.main, 0.08),
                     position: column.sticky ? 'sticky' : 'static',
                     left: column.sticky ? 0 : 'auto',
@@ -213,7 +252,7 @@ const MobileOptimizedTable = <T,>({
                     // Mobile: padding reduzido
                     ...(isMobile && {
                       px: 1,
-                      py: 1,
+                      py: 0.5,
                       fontSize: '0.875rem',
                     }),
                   }}
@@ -225,7 +264,15 @@ const MobileOptimizedTable = <T,>({
           </TableHead>
 
           <TableBody>
-            {data.map((row, index) => {
+            {data.length === 0 ? (
+              <TableRow sx={{ height: minBodyHeight }}>
+                <TableCell colSpan={visibleColumns.length} align="center">
+                  <Box sx={{ color: 'text.secondary', py: 4 }}>
+                    {emptyMessage}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : data.map((row, index) => {
               const rowData = row as Record<string, unknown> & { id?: React.Key };
               return (
               <TableRow
@@ -233,7 +280,8 @@ const MobileOptimizedTable = <T,>({
                 onClick={() => onRowClick?.(row)}
                 sx={{
                   cursor: onRowClick ? 'pointer' : 'default',
-                  height: touchOptimized ? Math.max(rowHeight, 48) : rowHeight,
+                  height: effectiveRowHeight,
+                  maxHeight: effectiveRowHeight,
                   '&:hover': onRowClick ? {
                     backgroundColor: alpha(theme.palette.primary.main, 0.04),
                   } : {},
@@ -251,13 +299,23 @@ const MobileOptimizedTable = <T,>({
                     key={column.id}
                     align={column.align || 'left'}
                     sx={{
-                      // Mobile: células mais compactas
+                      width: isMobile
+                        ? (column.id === 'actions' ? 44 : (column.width || column.minWidth || 140))
+                        : (column.width || column.minWidth || 'auto'),
                       minWidth: isMobile
-                        ? (column.id === 'actions' ? 50 : 100)
-                        : (column.minWidth || 'auto'),
+                        ? (column.id === 'actions' ? 44 : (column.minWidth || 120))
+                        : (column.minWidth || column.width || 'auto'),
                       maxWidth: isMobile
-                        ? (column.id === 'actions' ? 50 : 150)
-                        : 'none',
+                        ? (column.id === 'actions' ? 44 : (column.maxWidth || column.width || column.minWidth || 180))
+                        : (column.maxWidth || 'none'),
+                      whiteSpace: column.noWrap === false ? 'normal' : 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      px: { xs: 1, sm: 1.5 },
+                      py: 0.5,
+                      height: effectiveRowHeight,
+                      maxHeight: effectiveRowHeight,
+                      lineHeight: 1.25,
                       position: column.sticky ? 'sticky' : 'static',
                       left: column.sticky ? 0 : 'auto',
                       zIndex: column.sticky ? 5 : 'auto',
@@ -265,11 +323,9 @@ const MobileOptimizedTable = <T,>({
                       // Mobile: padding reduzido e texto menor
                       ...(isMobile && {
                         px: 1,
-                        py: 1,
+                        py: 0.5,
                         fontSize: '0.875rem',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
+
                       }),
                     }}
                   >
@@ -282,6 +338,12 @@ const MobileOptimizedTable = <T,>({
               </TableRow>
               );
             })}
+            {data.length > 0 && data.length < minRows &&
+              Array.from({ length: minRows - data.length }).map((_, index) => (
+                <TableRow key={`empty-row-${index}`} sx={{ height: effectiveRowHeight, maxHeight: effectiveRowHeight }}>
+                  <TableCell colSpan={visibleColumns.length} sx={{ height: effectiveRowHeight, py: 0 }} />
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

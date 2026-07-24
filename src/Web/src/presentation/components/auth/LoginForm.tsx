@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -29,6 +30,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginForm: React.FC = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
   const { login, isLoading, error, clearError } = useAuthStore();
   const { addNotification } = useUIStore();
@@ -47,12 +49,8 @@ const LoginForm: React.FC = () => {
       await login(data);
       addNotification('Login realizado com sucesso!', 'success');
     } catch {
-      // Error is already handled in the store
+      // Error is already handled in the store.
     }
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
 
   return (
@@ -61,10 +59,24 @@ const LoginForm: React.FC = () => {
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
-      sx={{ backgroundColor: 'grey.50' }}
+      sx={{
+        px: 2,
+        backgroundImage:
+          'linear-gradient(90deg, rgba(10, 37, 64, 0.84), rgba(15, 118, 183, 0.46)), url("https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1800&q=80")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
-      <Card sx={{ maxWidth: 400, width: '100%', mx: 2 }}>
-        <CardContent sx={{ p: 4 }}>
+      <Card
+        sx={{
+          maxWidth: 430,
+          width: '100%',
+          mx: 2,
+          borderRadius: 3,
+          boxShadow: '0 24px 80px rgba(8, 47, 73, 0.28)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
           <Box textAlign="center" mb={3}>
             <img
               src={`${import.meta.env.BASE_URL}logo.svg`}
@@ -102,14 +114,12 @@ const LoginForm: React.FC = () => {
               error={!!errors.password}
               helperText={errors.password?.message}
               disabled={isLoading}
-              inputProps={{
-                autoComplete: 'current-password'
-              }}
+              inputProps={{ autoComplete: 'current-password' }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      onClick={togglePasswordVisibility}
+                      onClick={() => setShowPassword(prev => !prev)}
                       edge="end"
                       disabled={isLoading}
                     >
@@ -127,9 +137,19 @@ const LoginForm: React.FC = () => {
               size="large"
               disabled={isLoading}
               startIcon={<LoginIcon />}
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ mt: 3, mb: 1.5, textTransform: 'none', fontWeight: 700 }}
             >
               {isLoading ? 'Entrando...' : 'Entrar'}
+            </Button>
+
+            <Button
+              type="button"
+              fullWidth
+              variant="text"
+              onClick={() => navigate('/')}
+              sx={{ textTransform: 'none' }}
+            >
+              Conhecer planos e cadastro
             </Button>
           </Box>
         </CardContent>

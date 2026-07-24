@@ -9,18 +9,10 @@ import {
   DialogContent,
   TextField,
   Chip,
-  Pagination,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   CircularProgress,
   Alert,
 } from '@mui/material';
@@ -33,6 +25,8 @@ import {
   standardCardStyles,
   standardCardContentStyles,
   standardDialogTitleStyles,
+  standardDialogPaperStyles,
+  standardDialogContentStyles,
 } from '../../styles/cardStyles';
 import { UserProfile } from '../../../domain/enums/UserProfile';
 import type { Usuario, CreateUsuarioDto, UpdateUsuarioDto } from '../../../domain/entities/Usuario';
@@ -44,6 +38,8 @@ import {
 } from '../../components/common/ConfirmationDialogs';
 import StandardDialogButtons from '../../components/common/StandardDialogButtons';
 import ResponsiveTableHeader from '../../../components/ui/Layout/ResponsiveTableHeader';
+import CustomPagination from '../../components/common/CustomPagination';
+import MobileOptimizedTable from '../../../components/ui/Table/MobileOptimizedTable';
 
 const UsuariosPageTable: React.FC = () => {
   const { addNotification } = useUIStore();
@@ -77,7 +73,7 @@ const UsuariosPageTable: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [pageSize] = useState(7);
+  const [pageSize] = useState(10);
 
   const profileLabels = {
     [UserProfile.ADMINISTRADOR]: 'Administrador',
@@ -213,6 +209,86 @@ const UsuariosPageTable: React.FC = () => {
   // };
 
   const paginatedData = usuarios;
+  const tableData = paginatedData.map(usuario => ({
+    ...usuario,
+    perfilLabel: profileLabels[usuario.role],
+    createdAtFormatado: formatDateBR(usuario.createdAt) || 'N/A',
+    updatedAtFormatado: formatDateBR(usuario.updatedAt) || 'N/A',
+  }));
+
+  const tableColumns = [
+    {
+      id: 'actions',
+      label: '',
+      minWidth: 44,
+      width: 44,
+      align: 'center' as const,
+      mobileVisible: true,
+      render: () => (
+        <Visibility
+          color="action"
+          sx={{
+            fontSize: '1.3rem',
+            cursor: 'pointer',
+            '&:hover': { color: 'primary.main' },
+          }}
+        />
+      ),
+    },
+    {
+      id: 'username',
+      label: 'Nome',
+      minWidth: 180,
+      width: 210,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'perfilLabel',
+      label: 'Perfil',
+      minWidth: 120,
+      width: 130,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'isActive',
+      label: 'Status',
+      minWidth: 82,
+      width: 90,
+      mobileVisible: true,
+      tabletVisible: true,
+      desktopVisible: true,
+      render: (value: unknown) => (
+        <Chip
+          label={value ? 'Ativo' : 'Inativo'}
+          color={value ? 'success' : 'error'}
+          size="small"
+          variant="outlined"
+        />
+      ),
+    },
+    {
+      id: 'createdAtFormatado',
+      label: 'Cadastrado',
+      minWidth: 115,
+      width: 120,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+    {
+      id: 'updatedAtFormatado',
+      label: 'Atualizado',
+      minWidth: 115,
+      width: 120,
+      mobileVisible: false,
+      tabletVisible: true,
+      desktopVisible: true,
+    },
+  ];
 
   return (
     <Box>
@@ -239,12 +315,13 @@ const UsuariosPageTable: React.FC = () => {
             addButtonText="Adicionar Usuário"
             addButtonDisabled={loading || saving}
             paginationComponent={
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={(_, newPage) => handlePageChange(newPage)}
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={total}
+                itemsPerPage={pageSize}
+                onPageChange={handlePageChange}
                 size="small"
-                color="primary"
               />
             }
             totalItems={total}
@@ -269,86 +346,17 @@ const UsuariosPageTable: React.FC = () => {
 
             {/* Tabela de Dados */}
             {!loading && (
-          <TableContainer
-            component={Paper}
-            sx={{
-              boxShadow: 'none',
-              border: '1px solid',
-              borderColor: 'divider',
-              maxHeight: 450,
-            }}
-          >
-            <Table size="small">
-              <TableHead sx={{ backgroundColor: 'rgba(102, 126, 234, 0.1)' }}>
-                <TableRow>
-                  <TableCell align="center" sx={{ width: 50 }}></TableCell>
-                  <TableCell>
-                    <strong>Nome</strong>
-                  </TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    <strong>Perfil</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Status</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Cadastrado</strong>
-                  </TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    <strong>Atualizado</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedData.map(usuario => (
-                  <TableRow
-                    key={usuario.id}
-                    onClick={() => handleRowClick(usuario)}
-                    sx={{
-                      cursor: 'pointer',
-                      height: 31,
-                      '&:hover': {
-                        backgroundColor: 'rgba(102, 126, 234, 0.04)',
-                      },
-                    }}
-                  >
-                    <TableCell align="center" sx={{ py: '1px' }}>
-                      <Visibility
-                        color="action"
-                        sx={{
-                          fontSize: '1.2rem',
-                          cursor: 'pointer',
-                          '&:hover': { color: 'primary.main' },
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ py: '1px' }}>{usuario.username}</TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
-                    >
-                      {profileLabels[usuario.role]}
-                    </TableCell>
-                    <TableCell sx={{ py: '1px' }}>
-                      <Chip
-                        label={usuario.isActive ? 'Ativo' : 'Inativo'}
-                        color={usuario.isActive ? 'success' : 'error'}
-                        size="small"
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell sx={{ py: '1px' }}>
-                      {formatDateBR(usuario.createdAt) || 'N/A'}
-                    </TableCell>
-                    <TableCell
-                      sx={{ display: { xs: 'none', md: 'table-cell' }, py: '1px' }}
-                    >
-                      {formatDateBR(usuario.updatedAt) || 'N/A'}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              <MobileOptimizedTable
+                columns={tableColumns}
+                data={tableData}
+                onRowClick={handleRowClick}
+                loading={loading}
+                emptyMessage="Nenhum usuário encontrado"
+                rowHeight={36}
+                minRows={10}
+                stickyHeader
+                touchOptimized
+              />
             )}
         </CardContent>
       </Card>
@@ -359,12 +367,7 @@ const UsuariosPageTable: React.FC = () => {
         onClose={handleCloseDialog}
         maxWidth={false}
         sx={{
-          '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '500px' },
-            maxWidth: '500px',
-            margin: { xs: 1, sm: 3 },
-            minHeight: { xs: 'auto', sm: 'auto' },
-          },
+          '& .MuiDialog-paper': standardDialogPaperStyles,
         }}
       >
         <DialogTitle sx={standardDialogTitleStyles}>
@@ -372,13 +375,7 @@ const UsuariosPageTable: React.FC = () => {
           {dialogMode === 'add' ? 'Adicionar Usuário' : 'Editar Usuário'}
         </DialogTitle>
 
-        <DialogContent
-          sx={{
-            pt: 4,
-            px: 3,
-            pb: 2,
-          }}
-        >
+        <DialogContent sx={standardDialogContentStyles}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField
               fullWidth
@@ -414,7 +411,7 @@ const UsuariosPageTable: React.FC = () => {
                 <MenuItem value="false">Inativo</MenuItem>
               </Select>
             </FormControl>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
               <TextField
                 fullWidth
                 label="Senha"

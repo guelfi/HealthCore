@@ -16,7 +16,14 @@ export class ApiConfig {
   }
 
   private detectApiUrl(): string {
-    return import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api/v1';
+    const configuredUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+
+    if (configuredUrl) {
+      return configuredUrl;
+    }
+
+    const basePath = import.meta.env.BASE_URL || '/';
+    return basePath === '/' ? '/api' : basePath.replace(/\/$/, '') + '/api';
   }
 
   public getBaseUrl(): string {

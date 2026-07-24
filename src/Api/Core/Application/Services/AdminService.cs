@@ -351,6 +351,9 @@ namespace HealthCore.Api.Core.Application.Services
                     .CountAsync();
 
                 // Exames por paciente (apenas pacientes do médico)
+                // Especialidades disponiveis no sistema para consulta do medico
+                var totalEspecialidades = await _context.Especialidades.CountAsync();
+
                 var examesPorPaciente = await _context.Pacientes
                     .Where(p => p.MedicoId == medico.Id)
                     .Select(p => new ExamesPorPacienteDto
@@ -377,6 +380,7 @@ namespace HealthCore.Api.Core.Application.Services
                 {
                     NumeroPacientes = totalPacientes,
                     TotalExames = totalExames,
+                    TotalEspecialidades = totalEspecialidades,
                     ExamesPorPaciente = examesPorPaciente,
                     ModalidadesMaisUtilizadas = modalidades
                 };

@@ -7,7 +7,7 @@ export const standardCardStyles: SxProps<Theme> = {
   borderRadius: 4,
   background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
   border: '1px solid rgba(226, 232, 240, 0.6)',
-  minHeight: '320px',
+  minHeight: 'auto',
   width: '100%',
   maxWidth: '100%',
   position: 'relative',
@@ -25,8 +25,8 @@ export const standardCardStyles: SxProps<Theme> = {
     transition: 'opacity 0.3s ease',
   },
   '&:hover': {
-    transform: 'translateY(-6px) scale(1.02)',
-    boxShadow: '0 12px 40px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 24px rgba(37, 99, 235, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
     '&::before': {
       opacity: 1,
     },
@@ -35,7 +35,7 @@ export const standardCardStyles: SxProps<Theme> = {
 
 // Estilos padronizados para o conteúdo dos cards - HealthCore Design
 export const standardCardContentStyles: SxProps<Theme> = {
-  p: { xs: 2, sm: 2.5 },
+  p: { xs: 1.5, sm: 2 },
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
@@ -46,7 +46,7 @@ export const standardCardContentStyles: SxProps<Theme> = {
   '& .MuiTypography-h6': {
     color: '#1e293b',
     fontWeight: 600,
-    marginBottom: '16px',
+    marginBottom: '10px',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
@@ -161,11 +161,61 @@ export const standardDialogTitleStyles: SxProps<Theme> = {
   display: 'flex',
   alignItems: 'center',
   gap: 1,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  background: 'linear-gradient(135deg, #6f7ee8 0%, #7f5ab6 100%)',
   color: 'white',
   fontWeight: 600,
 };
 
+export const standardDialogPaperStyles = {
+  width: { xs: 'calc(100vw - 24px)', sm: 640, md: 720 },
+  maxWidth: 'calc(100vw - 24px)',
+  margin: { xs: 1.5, sm: 3 },
+  borderRadius: 2,
+  overflow: 'hidden',
+};
+
+export const standardDialogContentStyles = {
+  pt: { xs: 3, sm: 3.5 },
+  px: { xs: 2, sm: 3 },
+  pb: { xs: 2, sm: 2.5 },
+  overflow: 'auto',
+  '& .MuiInputBase-root': {
+    minHeight: 48,
+  },
+  '& .MuiInputBase-input': {
+    py: 1.1,
+  },
+  '& .MuiInputLabel-root': {
+    lineHeight: 1.25,
+  },
+};
+
+export const standardFormGridStyles = {
+  display: 'grid',
+  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+  gap: { xs: 2, sm: 2.25 },
+  mt: 1,
+  '& .MuiFormControl-root': {
+    minWidth: 0,
+  },
+};
+
+export const standardFullWidthFieldStyles = {
+  gridColumn: '1 / -1',
+};
+
+export const standardReadOnlyFieldStyles = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1,
+  minHeight: 52,
+  px: 1.5,
+  py: 1.25,
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 1,
+  bgcolor: 'grey.50',
+};
 // Estilos padronizados para o botão "Adicionar" principal - HealthCore Design
 export const standardAddButtonStyles: SxProps<Theme> = {
   background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #1e40af 100%)',
@@ -190,8 +240,8 @@ export const standardAddButtonStyles: SxProps<Theme> = {
   '&:hover': {
     background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #1e3a8a 100%)',
     backgroundPosition: '100% 50%',
-    transform: 'translateY(-3px)',
-    boxShadow: '0 8px 25px rgba(37, 99, 235, 0.4), 0 4px 12px rgba(0, 0, 0, 0.1)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 18px rgba(37, 99, 235, 0.28), 0 2px 8px rgba(0, 0, 0, 0.08)',
     '&::before': {
       left: '100%',
     },

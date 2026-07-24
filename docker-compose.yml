@@ -13,6 +13,8 @@ services:
       OpenApi__Enabled: ${HEALTHCORE_OPENAPI_ENABLED:-false}
       HEALTHCORE_E2E_USERNAME: ${HEALTHCORE_E2E_USERNAME:-}
       HEALTHCORE_E2E_PASSWORD: ${HEALTHCORE_E2E_PASSWORD:-}
+      Seed__NormalizeDemoPasswords: ${HEALTHCORE_NORMALIZE_DEMO_PASSWORDS:-false}
+      Seed__DemoPassword: ${HEALTHCORE_DEMO_PASSWORD:-}
     ports:
       - "127.0.0.1:5000:5000"
     volumes:

@@ -23,6 +23,9 @@ import { ExamesPageTable, ExameAddPage, ExameEditPage } from './presentation/fea
 import { MedicosPageTable } from './presentation/features/medical';
 import { UsuariosPageTable } from './presentation/features/users';
 import { EspecialidadesPageTable } from './presentation/features/specialties';
+import ProfilePage from './presentation/features/profile/ProfilePage';
+import LandingPage from './presentation/features/landing/LandingPage';
+import BillingSettingsPage from './presentation/features/billing/BillingSettingsPage';
 
 // Debug components (only in development)
 import MobileDebugger from './components/dev/MobileDebugger';
@@ -137,6 +140,19 @@ const App: React.FC = () => {
               }
             />
 
+
+            <Route
+              path="/perfil"
+              element={
+                isAuthenticated ? (
+                  <AppLayout>
+                    <ProfilePage />
+                  </AppLayout>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
             <Route
               path="/admin/medicos"
               element={
@@ -152,6 +168,21 @@ const App: React.FC = () => {
               }
             />
 
+
+            <Route
+              path="/admin/cobranca"
+              element={
+                isAuthenticated ? (
+                  <AdminRoute>
+                    <AppLayout>
+                      <BillingSettingsPage />
+                    </AppLayout>
+                  </AdminRoute>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
             <Route
               path="/admin/usuarios"
               element={
@@ -174,7 +205,7 @@ const App: React.FC = () => {
                 isAuthenticated ? (
                   <Navigate to="/dashboard" replace />
                 ) : (
-                  <Navigate to="/login" replace />
+                  <LandingPage />
                 )
               }
             />
