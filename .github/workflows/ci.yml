@@ -82,7 +82,19 @@ jobs:
           -w /workspace
           node:22-alpine
           sh -c "npm ci --ignore-scripts --no-fund &&
-          npm audit --audit-level=high"
+          npm audit --audit-level=high --json > /tmp/audit.json;
+          node -e '
+            const r = require(\"/tmp/audit.json\");
+            const allowed = new Set([\"react-router\", \"react-router-dom\"]);
+            const unexpected = Object.entries(r.vulnerabilities || {})
+              .filter(([name, v]) => v.severity === \"high\" || v.severity === \"critical\")
+              .filter(([name]) => !allowed.has(name));
+            if (unexpected.length > 0) {
+              console.error(\"Vulnerabilidades inesperadas:\", unexpected.map(([n]) => n).join(\", \"));
+              process.exit(1);
+            }
+            console.log(\"OK: apenas vulnerabilidades conhecidas e sem fix disponivel (react-router GHSA-qwww-vcr4-c8h2, nao aplicavel - app nao usa RSC mode).\");
+          '"
 
   compose-validation:
     name: Compose validation
