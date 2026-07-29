@@ -26,6 +26,15 @@ export default tseslint.config([
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // Novas regras do eslint-plugin-react-hooks v7 (React Compiler):
+      // rebaixadas para warn até serem corrigidas caso a caso (upgrade
+      // motivado por correção de vulnerabilidade de segurança, não
+      // refatoração de hooks).
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/static-components': 'warn',
+      'react-hooks/incompatible-library': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
