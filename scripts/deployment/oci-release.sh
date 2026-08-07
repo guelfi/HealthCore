@@ -113,12 +113,12 @@ replace_healthcore_nginx_locations() {
       skipping=1
       next
     }
-    /^[[:space:]]*location \/healthcore\/swagger \{$/ {
+    /^[[:space:]]*location[^{]*\/healthcore\/swagger \{$/ {
       print "    location = /healthcore/swagger {"
       print "      return 301 /healthcore/swagger/;"
       print "    }"
       print ""
-      print "    location /healthcore/swagger {"
+      print "    location ^~ /healthcore/swagger {"
       print "      rewrite ^/healthcore/swagger/?(.*)$ /healthcore-api/swagger/" "$" "1 break;"
       print "      proxy_pass http://healthcore-api:5000;"
       print "      proxy_set_header Host healthcore.batuara.net;"
@@ -130,8 +130,8 @@ replace_healthcore_nginx_locations() {
       skipping=1
       next
     }
-    /^[[:space:]]*location \/healthcore\/api\/ \{$/ {
-      print "    location /healthcore/api/ {"
+    /^[[:space:]]*location[^{]*\/healthcore\/api\/ \{$/ {
+      print "    location ^~ /healthcore/api/ {"
       print "      rewrite ^/healthcore/api/(.*)$ /api/" "$" "1 break;"
       print "      proxy_pass http://healthcore-api:5000;"
       print "      proxy_set_header Host healthcore.batuara.net;"
@@ -164,12 +164,12 @@ for expected in \
     exit 1
   }
 done
-grep -Fq 'location /healthcore/swagger' "$NGINX_CONF" || {
+grep -Fq 'location ^~ /healthcore/swagger' "$NGINX_CONF" || {
   echo 'HealthCore Swagger Nginx route is missing' >&2
   sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
   exit 1
 }
-grep -Fq 'location /healthcore/api/' "$NGINX_CONF" || {
+grep -Fq 'location ^~ /healthcore/api/' "$NGINX_CONF" || {
   echo 'HealthCore API Nginx route is missing' >&2
   sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
   exit 1
