@@ -280,7 +280,7 @@ done
 batuara_status="$(curl --fail --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 https://batuara.org.br/)"
 [[ "$batuara_status" == "200" ]] || { echo "Batuara.net public check failed: $batuara_status" >&2; exit 1; }
 
-healthcore_status="$(curl --fail --silent --show-error --insecure --output /dev/null --write-out '%{http_code}' --max-time 15 https://127.0.0.1/healthcore/)"
+healthcore_status="$(curl --fail --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/)"
 [[ "$healthcore_status" == "200" ]] || { echo "HealthCore Nginx route failed: $healthcore_status" >&2; exit 1; }
 
 healthcore_ip_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/)"
