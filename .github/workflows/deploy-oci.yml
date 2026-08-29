@@ -73,7 +73,7 @@ jobs:
       - name: Validate OCI and Batuara before deployment
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "set -e; test -d /var/www/HealthCore; dirty=\$(git -C /var/www/HealthCore status --porcelain); if [[ -n \"\$dirty\" && \"$RECONCILE_REMOTE_DIRTY\" != true ]]; then echo 'HealthCore remote working tree is dirty' >&2; printf '%s\\n' \"\$dirty\" >&2; exit 1; fi; docker exec nginx-proxy nginx -t; test \"\$(curl -fsS -o /dev/null -w '%{http_code}' https://batuara.org.br/)\" = 200; docker ps --filter name=batuara-net-api --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-db"
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "set -e; test -d /var/www/HealthCore; dirty=\$(git -C /var/www/HealthCore status --porcelain); if [[ -n \"\$dirty\" && \"$RECONCILE_REMOTE_DIRTY\" != true ]]; then echo 'HealthCore remote working tree is dirty' >&2; printf '%s\\n' \"\$dirty\" >&2; exit 1; fi; docker exec nginx-proxy nginx -t; test \"\$(curl -fsSL -o /dev/null -w '%{http_code}' https://batuara.org.br/)\" = 200; docker ps --filter name=batuara-net-api --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-db"
 
       - name: Upload release script and production environment
         env:

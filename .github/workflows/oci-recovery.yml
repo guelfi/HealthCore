@@ -74,7 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$OCI_HOST"; test -n "$OCI_USER"
-          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "set -e; test -d /var/www/HealthCore; docker exec nginx-proxy nginx -t; test \"\$(curl -fsS -o /dev/null -w '%{http_code}' https://batuara.org.br/)\" = 200; docker ps --filter name=batuara-net-api --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-db"
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "set -e; test -d /var/www/HealthCore; docker exec nginx-proxy nginx -t; test \"\$(curl -fsSL -o /dev/null -w '%{http_code}' https://batuara.org.br/)\" = 200; docker ps --filter name=batuara-net-api --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-api; docker ps --filter name=batuara-net-public-website --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-public-website; docker ps --filter name=batuara-net-db --filter health=healthy --format '{{.Names}}' | grep -qx batuara-net-db"
 
       - name: Upload recovery tooling and environment
         env:
