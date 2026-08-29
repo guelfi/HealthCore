@@ -1,9 +1,9 @@
 # HealthCore - Plano de Implementacao UI/UX SaaS
 
 Data: 2026-07-23
-Status: Fases 0 a 9 aprovadas; implementacao concluida em codigo; validacao local aprovada incluindo Swagger; publicacao OCI pendente
+Status: Fases 0 a 10 concluidas; implementacao SaaS publicada na OCI em 2026-07-29 (release `17d691e`); Gate B (rotacao de credenciais) e fechamento formal permanecem
 Fonte de requisitos: docs/frontend/saas-ui-ux-requirements.md
-Escopo de validacao: primeiro ambiente local, depois OCI somente apos aprovacao local
+Escopo de validacao: validacao local aprovada; publicacao OCI executada via GitHub Actions
 
 ## Objetivo
 
@@ -255,7 +255,7 @@ Criterios de aceite:
 
 ## Fase 9 - Revisao, Aprovacao Local e Preparacao OCI
 
-Status: Aprovada localmente; preparacao para OCI pendente
+Status: Concluida
 
 Tarefas:
 
@@ -272,9 +272,14 @@ Criterios de aceite:
 - Plano de rollback esta claro antes da publicacao.
 - Nenhuma alteracao manual de producao sem necessidade.
 
+Evidencia:
+
+- Fases 0 a 9 aprovadas localmente pelo usuario em 2026-07-23 (UI desktop/mobile, RBAC e Swagger).
+- Commit de produto `85229dc` (SaaS UI/UX phases 0-9) integrado em `main` e seguido por commits de hardening de deploy ate `17d691e`.
+
 ## Fase 10 - Publicacao OCI e Validacao Pos-Deploy
 
-Status: Pendente, bloqueada ate aprovacao local
+Status: Concluida em 2026-07-29
 
 Tarefas:
 
@@ -296,6 +301,15 @@ Criterios de aceite:
 - HealthCore publicado e validado em OCI.
 - Batuara.net sem regressao.
 - Relatorio final emitido com alteracoes, testes, evidencias e pendencias.
+
+Evidencia:
+
+- CI `main` verde: run `30495036346` para `17d691e415f485fbabe30c5a91ea201cd14d93a8`.
+- OCI CD sucesso: run [`30495639633`](https://github.com/guelfi/HealthCore/actions/runs/30495639633) (`workflow_run`, 2026-07-29) no mesmo SHA, incluindo backup/smoke e preflight Batuara.
+- Deploys bem-sucedidos anteriores na mesma linha de release: [`30492393665`](https://github.com/guelfi/HealthCore/actions/runs/30492393665) e [`30455100005`](https://github.com/guelfi/HealthCore/actions/runs/30455100005) (`e016dcb...`).
+- Release de producao atual: `17d691e415f485fbabe30c5a91ea201cd14d93a8`.
+- Caminho publico padronizado permanece `/healthcore/` (Swagger em `/healthcore/swagger/index.html`).
+- Pendencia residual fora desta fase: Gate B (rotacao de credenciais / history rewrite) e auditoria de fechamento (P16), nao bloqueiam a publicacao SaaS ja realizada.
 
 ## Ordem Recomendada de Implementacao
 
@@ -335,19 +349,20 @@ Criterios de aceite:
 - Validacao local de interface desktop/mobile aprovada pelo usuario.
 - RBAC local aprovado por API para `admin`, `dr.bruno` e `dr.ana`.
 - Swagger local aprovado por endpoint e por validacao manual no navegador interno.
-- Testes automatizados via Docker permanecem opcionais/pendentes apenas se definidos como gate adicional.
-- Publicacao na OCI ainda nao executada e deve ocorrer somente apos autorizacao explicita.
+- Publicacao OCI da linha SaaS concluida em 2026-07-29 (release `17d691e`).
+- Pendencias remanescentes do plano mestre: Gate B (rotacao de credenciais / rewrite historico) e P16 (auditoria de fechamento).
+- Integracoes futuras fora do escopo desta versao: PIX real, Evolution API e provedor de e-mail.
 
 ## Gate de Aprovacao
 
-Plano aprovado pelo usuario. Implementacao em codigo concluida e validacao local aprovada. A publicacao em producao permanece bloqueada ate autorizacao explicita para deploy OCI.
+Plano aprovado pelo usuario. Implementacao em codigo, validacao local e publicacao OCI concluidas para as fases 0 a 10.
 
-A publicacao em producao na OCI deve ocorrer somente apos:
+Condicoes historicas exigidas antes do deploy (todas satisfeitas):
 
 - Implementacao concluida localmente.
 - Validacao local aprovada pelo usuario, incluindo interface desktop/mobile, RBAC e Swagger local.
 - Confirmacao de que o deploy via GitHub Actions esta pronto.
-- Confirmacao de rollback.
+- Confirmacao de rollback (run `29936316021` e gates do workflow CD).
 
 
 
@@ -387,3 +402,11 @@ A publicacao em producao na OCI deve ocorrer somente apos:
 - Usuario confirmou carregamento manual no navegador interno de http://192.168.15.157/healthcore/swagger/index.html.
 - Caminho publico padronizado para local e OCI: /healthcore/swagger/index.html, alterando apenas o host/IP.
 - Ambiente local permanece aprovado; proximo bloco de trabalho e preparar commit/push e deploy OCI quando autorizado.
+
+## Atualizacao de Publicacao OCI - 2026-08-03
+
+- Documentacao sincronizada com o deploy ja executado em 2026-07-29.
+- Release de producao: `17d691e415f485fbabe30c5a91ea201cd14d93a8`.
+- Evidencia CD: GitHub Actions run `30495639633` (sucesso) apos CI `30495036346`.
+- Fase 9 e Fase 10 marcadas como concluidas.
+- Proximos itens fora desta fase: Gate B e auditoria de fechamento (P16).

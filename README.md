@@ -123,33 +123,25 @@ docker compose logs -f
 
 ## 📚 Documentação
 
-> **Nota**: Alguns documentos podem conter referências a "HealthCore" que correspondem ao nome anterior do projeto, agora chamado **HealthCore**.
+Índice completo em [`docs/README.md`](docs/README.md).
 
-### 📖 Documentação Técnica
+### 🧭 Plano ativo (fonte da verdade)
 
-- **[Arquitetura do Sistema](docs/architecture.md)** - Clean Architecture, DDD e padrões utilizados
-- **[Estrutura do Projeto](docs/structure.md)** - Organização de diretórios e componentes
-- **[Especificações da API](docs/health-endpoint-spec.md)** - Endpoints e contratos de saúde
-- **[Plano de Testes](docs/test-plan.md)** - Estratégias de teste e validação
-- **[Requisitos do Sistema](docs/requirements.md)** - Requisitos funcionais e não funcionais
+- **[Status](docs/project-control/STATUS.md)** - Release atual e gates restantes
+- **[Backlog](docs/project-control/BACKLOG.md)** - Itens done/pending
+- **[Plano UI/UX SaaS](docs/project-control/UI_UX_SAAS_IMPLEMENTATION_PLAN_2026-07-23.md)** - Fases 0-10 (OCI publicada)
+- **[Master plan](docs/project-control/MASTER_PLAN.md)** - Fases P00-P16
+- **[Requisitos SaaS / roadmap](docs/frontend/saas-ui-ux-requirements.md)** - Inclui PIX, e-mail e WhatsApp futuros
 
-### 🔒 Conformidade e Segurança
+### 📖 Referência técnica
 
-- **[Implementação LGPD](docs/lgpd_readme.md)** - Conformidade com Lei Geral de Proteção de Dados
-
-### 🚀 Deploy e Infraestrutura
-
-- **[Deploy OCI](docs/OCI_DEPLOYMENT.md)** - Configuração para Oracle Cloud Infrastructure
-- **[Configuração de Rede](docs/network_config.md)** - Configurações de rede e portas
-- **[Configuração Ngrok](docs/ngrok-setup.md)** - Túneis para desenvolvimento
-
-### 🛠️ Desenvolvimento
-
-- **[Guia de Contribuição](docs/contributing.md)** - Como contribuir com o projeto
-- **[Integração Backend-Frontend](docs/IntegracaoBackFront.md)** - Comunicação entre camadas
-- **[Guia de Execução](docs/execute.md)** - Instruções detalhadas de execução
-- **[Guia de Scripts](docs/scrips_guide.md)** - Scripts disponíveis para automação
-- **[Lista de Tarefas](docs/tasks.md)** - Tarefas e funcionalidades implementadas
+- **[Arquitetura](docs/architecture.md)** - Clean Architecture, DDD e padrões
+- **[Estrutura](docs/structure.md)** - Organização de diretórios
+- **[Requisitos](docs/requirements.md)** - Requisitos funcionais e não funcionais
+- **[LGPD](docs/lgpd_readme.md)** - Conformidade
+- **[Deploy OCI](docs/OCI_DEPLOYMENT.md)** - Produção na Oracle Cloud
+- **[Execução](docs/execute.md)** - Como rodar localmente
+- **[Contribuição](docs/contributing.md)** - Como contribuir
 
 ## 🏗️ Arquitetura
 

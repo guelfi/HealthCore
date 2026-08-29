@@ -2,7 +2,7 @@
 
 ## Start
 
-1. Read `STATUS.md`, `BACKLOG.md`, `RISKS.md`, and the previous session.
+1. Read `STATUS.md`, `BACKLOG.md`, `RISKS.md`, and `UI_UX_SAAS_IMPLEMENTATION_PLAN_2026-07-23.md`. Historical session logs were removed; use those living docs as the baseline.
 2. Confirm the branch and workspace-only scope.
 3. Record Git status, baseline commit, objective, and planned verification.
 4. Create a session file from `sessions/TEMPLATE.md`.

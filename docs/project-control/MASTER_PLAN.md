@@ -14,7 +14,7 @@ All local file operations remain restricted to `C:\Users\MarcoGuelfi\Projetos\He
 | --- | --- | --- |
 | P00 | Governance, branches, secret protection, controls | Complete |
 | P01 | Reproducible baseline and inventory | Complete |
-| P02 | Security containment and secret/data removal | In progress: credential rotation |
+| P02 | Security containment and secret/data removal | In progress: SSH done; JWT/app + history rewrite remain |
 | P03 | Container-only build and test toolchain | Complete |
 | P04 | Security and regression test baseline | Complete |
 | P05 | Repository and documentation sanitation | Complete |
@@ -27,7 +27,7 @@ All local file operations remain restricted to `C:\Users\MarcoGuelfi\Projetos\He
 | P12 | GitHub Actions container-first CI | Complete |
 | P13 | OCI preflight, Nginx validation, and deployment gate | Complete; separate OCI staging decision open |
 | P14 | Production promotion and rollback verification | Complete |
-| P15 | Git history sanitation and final documentation | In progress: credential rotation and closure report |
+| P15 | Git history sanitation and final documentation | In progress: SSH closed; JWT/app decision and optional rewrite remain |
 | P16 | Closure audit and release evidence | Pending final credential evidence |
 
 ## Definition of Done

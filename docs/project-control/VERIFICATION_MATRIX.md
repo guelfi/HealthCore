@@ -16,13 +16,13 @@
 | V-012 | Secret scan | Gitleaks current tree and Git history | No current or historical findings | Partial: current clean; 8 historical findings require Gate B |
 | V-013 | Image scan | Trivy final API/frontend images | No high/critical findings | Pass: API and frontend report 0 HIGH/CRITICAL vulnerabilities |
 | V-014 | OCI staging | Health, authorization, persistence, rollback | All pass | Pending Gate C |
-| V-015 | Batuara isolation | Read-only VPS inspection | No change | Partial: Batuara containers/site were healthy before any HealthCore change and containerized Nginx passed validation; after-change evidence is pending because no OCI mutation was performed |
+| V-015 | Batuara isolation | OCI CD preflight/post-checks | No change | Pass: Batuara preflight retained on successful OCI CD runs through `30495639633` (`17d691e`, 2026-07-29); no Batuara config mutation by HealthCore workflows |
 | V-016 | Docker final validation | Sequential builds, smoke, proxy, non-root | Pass | Pass: rebuilt Compose services healthy; API/frontend health 200; refresh without cookie 401; protected proxy 401; E2E 5/5 |
 
 ## Current Totals
 
-- Pass: 13/16 (81.25%).
-- Partial: 1/16 (6.25%).
-- Pending: 2/16 (12.5%).
+- Pass: 14/16 (87.5%).
+- Partial: 1/16 (6.25%) — V-012 historical secrets (Gate B).
+- Pending: 1/16 (6.25%) — V-014 OCI staging decision (Gate C).
 
-A partial or pending item is not counted as production-ready.
+A partial or pending item is not counted as fully closed for Gate B/C, but production publish of the SaaS line is evidenced by OCI CD success on `17d691e`.

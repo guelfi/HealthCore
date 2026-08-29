@@ -94,20 +94,13 @@ npm install
 npm run dev
 ```
 
-3. Acesse http://localhost:3000
+3. Acesse http://localhost:5005
 
-## 📋 Próximas Etapas
+## 🧭 Plano e roadmap
 
-- [ ] Instalar Material-UI e dependências principais
-- [ ] Configurar Zustand para gerenciamento de estado
-- [ ] Implementar sistema de roteamento
-- [ ] Criar componentes base da aplicação
-- [ ] Implementar autenticação e autorização
+A implementação UI/UX SaaS (fases 0-10) está concluída e publicada. Use estes documentos como fonte da verdade:
 
-## 🎯 Funcionalidades Planejadas
-
-- Sistema de autenticação com JWT
-- Dashboard adaptativo por perfil (Admin/Médico)
-- Gestão de pacientes e exames
-- Interface responsiva e acessível
-- Gerenciamento de sessão com controle de inatividade
+- [Status](../project-control/STATUS.md)
+- [Backlog](../project-control/BACKLOG.md)
+- [Plano UI/UX SaaS](../project-control/UI_UX_SAAS_IMPLEMENTATION_PLAN_2026-07-23.md)
+- [Requisitos SaaS / evoluções futuras](saas-ui-ux-requirements.md) (PIX, e-mail, Evolution API)
