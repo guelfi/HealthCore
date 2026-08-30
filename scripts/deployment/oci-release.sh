@@ -278,7 +278,7 @@ for attempt in $(seq 1 30); do
   sleep 2
 done
 
-batuara_status="$(curl --fail --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 https://batuara.org.br/)"
+batuara_status="$(curl --fail --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 15 https://batuara.org.br/)"
 [[ "$batuara_status" == "200" ]] || { echo "Batuara.net public check failed: $batuara_status" >&2; exit 1; }
 
 healthcore_status="$(curl --fail --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/)"
