@@ -204,6 +204,7 @@ recreate_nginx_proxy() {
       -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
       -v /etc/letsencrypt:/etc/letsencrypt:ro \
       -v /etc/ssl/hako:/etc/ssl/hako:ro \
+      -v /etc/ssl/guelfiness:/etc/ssl/guelfiness:ro \
       nginx:stable-alpine nginx -g 'daemon off;'; then
     restore_previous_nginx
     return 1
