@@ -195,6 +195,10 @@ namespace HealthCore.Api.Core.Application.Services
 
         private async Task<string> GetDisplayNameAsync(User user)
         {
+            if (!string.IsNullOrWhiteSpace(user.DisplayName))
+            {
+                return user.DisplayName;
+            }
             var medicoNome = await _context.Medicos
                 .Where(m => m.UserId == user.Id)
                 .Select(m => m.Nome)

@@ -757,6 +757,32 @@ app.MapPost("/auth/logout", async (HttpContext context, AuthService authService,
     }
 }).RequireAuthorization();
 
+app.MapPut("/me", async (UpdateProfileDto profile, HttpContext context, HealthCoreDbContext database) =>
+{
+    if (!Guid.TryParse(context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+        return Results.Unauthorized();
+
+    var user = await database.Users.FirstOrDefaultAsync(u => u.Id == userId && u.IsActive);
+    if (user == null) return Results.Unauthorized();
+
+    var name = profile.DisplayName?.Trim();
+    if (name != null && (name.Length == 0 || name.Length > 120))
+        return Results.BadRequest(new { Message = "O nome exibido deve ter entre 1 e 120 caracteres." });
+    if (!string.IsNullOrEmpty(profile.Password) && (profile.Password.Length < 8 || Encoding.UTF8.GetByteCount(profile.Password) > 72))
+        return Results.BadRequest(new { Message = "A senha deve ter pelo menos 8 caracteres e no máximo 72 bytes." });
+
+    if (name != null) user.DisplayName = name;
+    if (!string.IsNullOrEmpty(profile.Password))
+    {
+        user.SetPassword(profile.Password);
+        var tokens = await database.RefreshTokens.Where(t => t.UserId == userId && !t.IsRevoked).ToListAsync();
+        foreach (var token in tokens) { token.IsRevoked = true; token.RevokedAt = DateTime.UtcNow; }
+        ClearRefreshCookie(context);
+    }
+    await database.SaveChangesAsync();
+    return Results.Ok(new { user.Id, user.Username, DisplayName = user.DisplayName ?? user.Username, user.Role, user.IsActive });
+}).RequireAuthorization();
+
 // Endpoints Administrativos (requer perfil Administrador)
 app.MapPost("/admin/usuarios", async (CreateUserDto createUserDto, AdminService adminService, HttpContext context, ILogger<Program> logger) =>
 {
