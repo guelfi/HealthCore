@@ -1,6 +1,14 @@
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net.Http.Json;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection;
+using HealthCore.Api.Infrastructure.Data;
+using HealthCore.Api.Core.Domain.Entities;
 
 namespace HealthCore.Api.Tests;
 
@@ -57,6 +65,38 @@ public sealed class ApiAuthorizationEndpointTests : IAsyncLifetime
         var response = await _client.PostAsync("/auth/refresh", content);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task ProfileRequiresAuthentication()
+    {
+        var response = await _client.PutAsJsonAsync("/me", new { displayName = "Example" });
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task ProfileUpdatesOnlyTheAuthenticatedUserAndPreservesLogin()
+    {
+        var id = Guid.NewGuid();
+        var username = "profile-test-" + id.ToString("N");
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<HealthCoreDbContext>();
+            database.Users.Add(new User { Id = id, Username = username, PasswordHash = "unchanged-test-hash", IsActive = true });
+            await database.SaveChangesAsync();
+        }
+        var jwt = new JwtSecurityToken("HealthCore.Api", "HealthCore.Client",
+            new[] { new Claim(ClaimTypes.NameIdentifier, id.ToString()) }, expires: DateTime.UtcNow.AddMinutes(5),
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+                "healthcore-integration-test-key-32-bytes-123456")), SecurityAlgorithms.HmacSha256));
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", new JwtSecurityTokenHandler().WriteToken(jwt));
+        var response = await _client.PutAsJsonAsync("/me", new { displayName = "Marco Guelfi", userId = Guid.NewGuid() });
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var verifyScope = _factory.Services.CreateScope();
+        var saved = await verifyScope.ServiceProvider.GetRequiredService<HealthCoreDbContext>().Users.FindAsync(id);
+        saved!.DisplayName.Should().Be("Marco Guelfi");
+        saved.Username.Should().Be(username);
+        saved.PasswordHash.Should().Be("unchanged-test-hash");
     }
     public Task DisposeAsync()
     {

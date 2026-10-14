@@ -7,6 +7,7 @@ namespace HealthCore.Api.Core.Domain.Entities
     {
         public Guid Id { get; set; }
         public string Username { get; set; } = string.Empty;
+        public string? DisplayName { get; set; }
         public string PasswordHash { get; set; } = string.Empty;
         public UserRole Role { get; set; } = UserRole.Medico;
         public bool IsActive { get; set; } = true;

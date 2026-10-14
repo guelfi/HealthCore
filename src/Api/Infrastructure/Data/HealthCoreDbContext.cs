@@ -87,6 +87,7 @@ namespace HealthCore.Api.Infrastructure.Data
                 entity.HasKey(u => u.Id);
                 entity.HasIndex(u => u.Username).IsUnique();
                 entity.Property(u => u.Username).IsRequired().HasMaxLength(50);
+                entity.Property(u => u.DisplayName).HasMaxLength(120);
                 entity.Property(u => u.PasswordHash).IsRequired();
                 entity.Property(u => u.Role).IsRequired();
                 entity.Property(u => u.IsActive).IsRequired().HasDefaultValue(true);
