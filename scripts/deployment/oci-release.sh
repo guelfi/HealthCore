@@ -66,180 +66,11 @@ else
 fi
 sudo test -s "$BACKUP_PATH" || { echo "SQLite backup was not created" >&2; exit 1; }
 
-# Build before changing the running containers. The Nginx edit is restricted to
-# the existing HealthCore upstream and is reverted if nginx validation fails.
+# The shared proxy belongs to infrastructure. Application releases must not edit
+# its configuration, stop it, or recreate it with an incomplete list of mounts.
+# Deploy the desired vhost through the infrastructure workflow before cutting over.
+docker exec nginx-proxy nginx -t
 docker compose --env-file "$HEALTHCORE_ENV_FILE" build healthcore-api healthcore-frontend
-
-NGINX_CONF="/var/www/nginx/nginx.conf"
-NGINX_BACKUP="${NGINX_CONF}.healthcore-${STAMP}.bak"
-sudo cp -p "$NGINX_CONF" "$NGINX_BACKUP"
-
-restore_nginx_source() {
-  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
-}
-
-NGINX_ROLLBACK_REQUIRED=true
-rollback_nginx_config() {
-  if [[ "$NGINX_ROLLBACK_REQUIRED" == "true" ]]; then
-    restore_nginx_source || true
-    if docker inspect nginx-proxy >/dev/null 2>&1 && docker exec nginx-proxy nginx -t >/dev/null 2>&1; then
-      docker exec nginx-proxy nginx -s reload >/dev/null 2>&1 || true
-    fi
-  fi
-}
-trap rollback_nginx_config EXIT
-
-# A single-file bind mount keeps the old inode when the host file is replaced.
-# Edit the mounted file in place and recreate only the shared Nginx proxy so the
-# new configuration is actually loaded without touching any application project.
-if grep -Fq 'set $upstream_healthcore_front http://healthcore-frontend:80;' "$NGINX_CONF"; then
-  sudo sed -i 's#http://healthcore-frontend:80;#http://healthcore-frontend:8080;#' "$NGINX_CONF"
-fi
-
-if ! grep -Fq 'set $upstream_healthcore_front http://healthcore-frontend:8080;' "$NGINX_CONF"; then
-  echo 'HealthCore Nginx upstream is not configured for port 8080' >&2
-  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
-  exit 1
-fi
-
-# Keep IP-based access compatible with the API's production AllowedHosts.
-# Scope these edits to HealthCore locations only; shared project routes remain untouched.
-# Rewrite the public prefixes before forwarding so the API receives its native paths.
-replace_healthcore_nginx_locations() {
-  local nginx_tmp="${NGINX_CONF}.tmp"
-
-  sudo awk '
-    /^[[:space:]]*location = \/healthcore\/swagger \{$/ {
-      skipping=1
-      next
-    }
-    /^[[:space:]]*location[^{]*\/healthcore\/swagger \{$/ {
-      print "    location = /healthcore/swagger {"
-      print "      return 301 /healthcore/swagger/;"
-      print "    }"
-      print ""
-      print "    location ^~ /healthcore/swagger {"
-      print "      rewrite ^/healthcore/swagger/?(.*)$ /healthcore-api/swagger/" "$" "1 break;"
-      print "      proxy_pass http://healthcore-api:5000;"
-      print "      proxy_set_header Host healthcore.batuara.net;"
-      print "      proxy_redirect /healthcore-api/swagger/ /healthcore/swagger/;"
-      print "      proxy_set_header X-Real-IP \\$remote_addr;"
-      print "      proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;"
-      print "      proxy_set_header X-Forwarded-Proto \\$scheme;"
-      print "    }"
-      skipping=1
-      next
-    }
-    /^[[:space:]]*location[^{]*\/healthcore\/api\/ \{$/ {
-      print "    location ^~ /healthcore/api/ {"
-      print "      rewrite ^/healthcore/api/(.*)$ /api/" "$" "1 break;"
-      print "      proxy_pass http://healthcore-api:5000;"
-      print "      proxy_set_header Host healthcore.batuara.net;"
-      print "      proxy_set_header X-Real-IP \\$remote_addr;"
-      print "      proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;"
-      print "      proxy_set_header X-Forwarded-Proto \\$scheme;"
-      print "    }"
-      skipping=1
-      next
-    }
-    skipping && /^[[:space:]]*}$/ {
-      skipping=0
-      next
-    }
-    !skipping { print }
-  ' "$NGINX_CONF" | sudo tee "$nginx_tmp" >/dev/null
-  sudo chmod --reference="$NGINX_CONF" "$nginx_tmp"
-  sudo mv "$nginx_tmp" "$NGINX_CONF"
-}
-
-replace_healthcore_nginx_locations
-
-for expected in \
-  'rewrite ^/healthcore/swagger/?(.*)$ /healthcore-api/swagger/$1 break;' \
-  'proxy_pass http://healthcore-api:5000;' \
-  'proxy_set_header Host healthcore.batuara.net;'; do
-  grep -Fq "$expected" "$NGINX_CONF" || {
-    echo "HealthCore Swagger Nginx directive is missing: $expected" >&2
-    sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
-    exit 1
-  }
-done
-grep -Fq 'location ^~ /healthcore/swagger' "$NGINX_CONF" || {
-  echo 'HealthCore Swagger Nginx route is missing' >&2
-  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
-  exit 1
-}
-grep -Fq 'location ^~ /healthcore/api/' "$NGINX_CONF" || {
-  echo 'HealthCore API Nginx route is missing' >&2
-  sudo tee "$NGINX_CONF" < "$NGINX_BACKUP" >/dev/null
-  exit 1
-}
-
-recreate_nginx_proxy() {
-  local previous_name="nginx-proxy-healthcore-previous"
-  local network
-  local networks=()
-
-  while IFS= read -r network; do
-    [[ -n "$network" ]] && networks+=("$network")
-  done < <(docker inspect nginx-proxy --format '{{range $network, $_ := .NetworkSettings.Networks}}{{$network}}{{"\n"}}{{end}}')
-
-  ((${#networks[@]} > 0)) || {
-    echo 'Nginx proxy has no Docker networks; refusing recreation' >&2
-    return 1
-  }
-
-  docker stop nginx-proxy
-  docker rename nginx-proxy "$previous_name"
-
-  restore_previous_nginx() {
-    restore_nginx_source
-    docker rm -f nginx-proxy >/dev/null 2>&1 || true
-    docker rename "$previous_name" nginx-proxy
-    docker start nginx-proxy >/dev/null
-  }
-
-  if ! docker create --name nginx-proxy --restart unless-stopped --network bridge \
-      -p 80:80 -p 443:443 \
-      -v "$NGINX_CONF:/etc/nginx/nginx.conf:ro" \
-      -v /etc/letsencrypt:/etc/letsencrypt:ro \
-      -v /etc/ssl/hako:/etc/ssl/hako:ro \
-      -v /etc/ssl/guelfiness:/etc/ssl/guelfiness:ro \
-      nginx:stable-alpine nginx -g 'daemon off;'; then
-    restore_previous_nginx
-    return 1
-  fi
-
-  for network in "${networks[@]}"; do
-    if ! docker network connect "$network" nginx-proxy; then
-      restore_previous_nginx
-      return 1
-    fi
-  done
-
-  if ! docker start nginx-proxy >/dev/null; then
-    restore_previous_nginx
-    return 1
-  fi
-
-  local nginx_ready=false
-  for attempt in $(seq 1 15); do
-    if docker exec nginx-proxy nginx -t; then
-      nginx_ready=true
-      break
-    fi
-    sleep 1
-  done
-
-  if [[ "$nginx_ready" != "true" ]]; then
-    restore_previous_nginx
-    return 1
-  fi
-
-  docker rm -f "$previous_name" >/dev/null
-}
-
-recreate_nginx_proxy
 
 # A previous HealthCore compose project may have left the published frontend
 # container behind under a different project name. Reclaim only containers that
@@ -256,7 +87,6 @@ while IFS= read -r container_id; do
   fi
 done < <(docker ps -aq --filter publish=5005)
 
-sudo chmod -R 777 /var/lib/docker/volumes/healthcore_healthcore_data/_data 2>/dev/null || true
 docker compose --env-file "$HEALTHCORE_ENV_FILE" up -d --remove-orphans
 docker exec nginx-proxy nginx -s reload
 
@@ -281,19 +111,22 @@ done
 batuara_status="$(curl --fail --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 15 https://batuara.org.br/)"
 [[ "$batuara_status" == "200" ]] || { echo "Batuara.net public check failed: $batuara_status" >&2; exit 1; }
 
-healthcore_status="$(curl --fail --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/)"
-[[ "$healthcore_status" == "200" ]] || { echo "HealthCore Nginx route failed: $healthcore_status" >&2; exit 1; }
-
-healthcore_ip_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/)"
-[[ "$healthcore_ip_status" == "200" ]] || { echo "HealthCore IP route failed: $healthcore_ip_status" >&2; exit 1; }
-
-healthcore_swagger_status="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 15 -H 'Host: 129.153.86.168' http://127.0.0.1/healthcore/swagger)"
-[[ "$healthcore_swagger_status" == "200" ]] || { echo "HealthCore Swagger route failed: $healthcore_swagger_status" >&2; exit 1; }
+# Older callers keep validating the legacy route. Domain cutover callers pass
+# HEALTHCORE_PUBLIC_URL; repository variables can select the legacy URL for rollback.
+healthcore_public_url="${HEALTHCORE_PUBLIC_URL:-http://127.0.0.1/healthcore/}"
+curl --fail --silent --show-error --location --output /dev/null --max-time 15 "$healthcore_public_url"
+if [[ -n "${HEALTHCORE_PUBLIC_URL:-}" ]]; then
+  healthcore_api_base="${healthcore_public_url%/}"
+  case "$healthcore_api_base" in
+    */api/v1) ;;
+    *) healthcore_api_base="$healthcore_api_base/api/v1" ;;
+  esac
+  curl --fail --silent --show-error --output /dev/null --max-time 15 "$healthcore_api_base/health/live"
+fi
 
 sudo install -d -m 700 "$RELEASE_METADATA_DIR"
 printf '%s\n' "$RELEASE_SHA" | sudo tee "$CURRENT_RELEASE_FILE" >/dev/null
 printf '%s\n' "$RELEASE_SHA" | sudo tee "$RELEASE_METADATA_DIR/$STAMP.sha" >/dev/null
-NGINX_ROLLBACK_REQUIRED=false
 if [[ -n "$PREVIOUS_RELEASE_SHA" && "$PREVIOUS_RELEASE_SHA" != "$RELEASE_SHA" ]]; then
   printf '%s\n' "$PREVIOUS_RELEASE_SHA" | sudo tee "$RELEASE_METADATA_DIR/previous-release.sha" >/dev/null
 fi
