@@ -98,6 +98,10 @@ rollback_healthcore() {
     docker exec nginx-proxy nginx -s reload
     wait_for_health
     result=$?
+    if [[ "$result" == 0 && -n "${HEALTHCORE_PUBLIC_URL:-}" ]]; then
+      curl --fail --silent --show-error --location --output /dev/null --max-time 15 "$HEALTHCORE_PUBLIC_URL"
+      result=$?
+    fi
   fi
   set -e
 

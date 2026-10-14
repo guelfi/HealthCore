@@ -110,7 +110,7 @@ if (openApiEnabled)
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/healthcore/swagger/v1/swagger.json", "HealthCore API V1");
+        c.SwaggerEndpoint("v1/swagger.json", "HealthCore API V1");
         c.RoutePrefix = "swagger";
     });
 }

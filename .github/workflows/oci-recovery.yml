@@ -54,6 +54,9 @@ jobs:
     needs: gate
     environment: production
     env:
+      HEALTHCORE_BASE_PATH: ${{ vars.HEALTHCORE_BASE_PATH || '/' }}
+      HEALTHCORE_API_URL: ${{ vars.HEALTHCORE_API_URL || '/api/v1' }}
+      HEALTHCORE_PUBLIC_URL: ${{ vars.HEALTHCORE_PUBLIC_URL || 'https://vivercomsaude.com.br/' }}
       OCI_HOST: ${{ secrets.OCI_HOST }}
       OCI_USER: ${{ secrets.OCI_USER || 'ubuntu' }}
       ACTION: ${{ github.event.inputs.action }}
@@ -84,14 +87,14 @@ jobs:
           test -n "$HEALTHCORE_JWT_KEY"
           umask 077
           env_file="$RUNNER_TEMP/healthcore-production.env"
-          printf 'HEALTHCORE_ENVIRONMENT=Production\nHEALTHCORE_JWT_KEY=%s\nHEALTHCORE_SECURE_COOKIES=true\nHEALTHCORE_BASE_PATH=/healthcore/\nHEALTHCORE_API_URL=/healthcore/api/v1\n' "$HEALTHCORE_JWT_KEY" > "$env_file"
+          printf 'HEALTHCORE_ENVIRONMENT=Production\nHEALTHCORE_JWT_KEY=%s\nHEALTHCORE_SECURE_COOKIES=true\nHEALTHCORE_BASE_PATH=%s\nHEALTHCORE_API_URL=%s\n' "$HEALTHCORE_JWT_KEY" "$HEALTHCORE_BASE_PATH" "$HEALTHCORE_API_URL" > "$env_file"
           scp scripts/deployment/oci-recovery.sh "$OCI_USER@$OCI_HOST:/tmp/healthcore-oci-recovery.sh"
           scp "$env_file" "$OCI_USER@$OCI_HOST:/tmp/healthcore-production.env"
 
       - name: Execute HealthCore recovery
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "chmod 700 /tmp/healthcore-oci-recovery.sh /tmp/healthcore-production.env && ACTION='$ACTION' TARGET_SHA='$TARGET_SHA' HEALTHCORE_DIR=/var/www/HealthCore HEALTHCORE_ENV_FILE=/tmp/healthcore-production.env /tmp/healthcore-oci-recovery.sh"
+          ssh -o BatchMode=yes "$OCI_USER@$OCI_HOST" "chmod 700 /tmp/healthcore-oci-recovery.sh /tmp/healthcore-production.env && ACTION='$ACTION' TARGET_SHA='$TARGET_SHA' HEALTHCORE_PUBLIC_URL='$HEALTHCORE_PUBLIC_URL' HEALTHCORE_DIR=/var/www/HealthCore HEALTHCORE_ENV_FILE=/tmp/healthcore-production.env /tmp/healthcore-oci-recovery.sh"
 
       - name: Remove temporary recovery files
         if: always()
